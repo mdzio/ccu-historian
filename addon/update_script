@@ -1,0 +1,41 @@
+#!/bin/sh
+
+ADDON_DIR=/usr/local/addons/ccu-historian
+RCD_DIR=/usr/local/etc/config/rc.d
+CONFIG_DIR=/usr/local/etc/config
+
+if [ "$1" = "" ]; then
+  echo "CCU1 not supported"
+  exit
+elif [ "$1" = "CCU2" ]; then
+  echo "CCU2"
+  if [ "`mount | grep ubi1:user | grep /usr/local | wc -l`" -eq 0 ]; then
+    mount -t ubifs ubi1:user /usr/local
+  fi
+elif [ "$1" == "HM-RASPBERRYMATIC" ]; then
+  echo "HM-RASPBERRYMATIC"
+  mount /usr/local
+fi
+
+mkdir -p $ADDON_DIR
+chmod 755 $ADDON_DIR
+mkdir -p $RCD_DIR
+chmod 755 $RCD_DIR
+
+# copy addon
+cp -af addon/* $ADDON_DIR/
+cp -af VERSION $ADDON_DIR/
+
+# copy startup script
+cp -af rc.d/* $RCD_DIR
+
+# add menu
+if [ "$1" = "CCU2" ]; then
+  ./addon/ccu2/update_addon ccu-historian ccu-historian_addon.cfg
+  ln -sf $ADDON_DIR/ccu2/update_addon $ADDON_DIR/
+elif [ "$1" == "HM-RASPBERRYMATIC" ]; then
+  ./addon/ccurm/update_addon ccu-historian ccu-historian_addon.cfg
+  ln -sf $ADDON_DIR/ccurm/update_addon $ADDON_DIR/
+fi
+
+sync

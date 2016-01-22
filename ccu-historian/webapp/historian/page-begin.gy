@@ -1,0 +1,125 @@
+import java.util.prefs.Preferences
+
+def log=request.getAttribute('log')
+
+utils.catchToLog(log) {
+
+	// Session erstellen
+	if (!session) {
+		session=request.session
+		session.maxInactiveInterval=1800
+	}
+	def ctx=session.getAttribute('ctx')
+	if (!ctx) {
+		ctx=[
+			prefs: Preferences.userRoot().node('mdz/ccuhistorian/webpages'),
+			user: [loggedIn:false, logInFailed:false]
+		]
+		session.setAttribute('ctx', ctx)
+	}
+	
+	// Anmeldung behandeln
+	if (!ctx.user.loggedIn) {
+		def password_admin=ctx.prefs.get('password_admin', '')
+		if (password_admin=='')
+			ctx.user.loggedIn=true
+		else if (params.login) {
+			if (password_admin==utils.secureHash(params.login_password)) {
+				ctx.user.loggedIn=true
+				ctx.user.logInFailed=false
+			} else {
+				ctx.user.loggedIn=false
+				ctx.user.logInFailed=true
+			}
+		}
+	} else {
+		if (params.logout) {
+			ctx.user.loggedIn=false
+			ctx.user.logInFailed=false
+		}
+	}
+	
+	// HTML-Header
+	out.println '<!doctype html>\n<html>'
+	html.head {
+		meta charset:'utf-8'
+		title request.getAttribute('page-begin-title')
+		link href:'/external/jquery-ui.structure.css', rel:'stylesheet'
+		link href:'/external/jquery-ui.theme.css', rel:'stylesheet'
+		link href:'/historian/historian.css', rel:'stylesheet'
+		script src:'/external/jquery-1.11.2.js'
+		script src:'/external/jquery-ui.js'
+		script 'var _=jQuery'
+	}
+
+	// Menü
+	out.print '\n<body class="ui-widget">'
+	html.div(id:'menu-section') {
+		h1 class:'ui-widget-header ui-corner-top', 'CCU-Historian'
+		div(class:'ui-widget-content')	{
+			if (ctx.user.loggedIn) {
+				ul(id:'main-menu') {
+					li { a href:'/historian/index.html', 'Übersicht Datenpunkte' }
+					li { a href:'/historian/dbmanage.html', 'Verwaltung Datenpunkte' }
+					li { a href:'/historian/tools.html', 'Werkzeuge' }
+// TODO: CCU-Adressen aus dem Interface Manager extrahieren!
+					// Web-Benutzerschnittstelle der Datenbank ist optional
+					def port; try { port=database.webPort } catch (e) {}
+					if (port) 
+						li { a href:"http://$webServer.historianAddress:$port", target:'_blank', 'Datenbank' }
+					li { a href:'/historian/config.html', 'Konfiguration' }
+					webServer.menuLinks.each { k, v ->
+						li { a href:v.address, v.text }
+					}
+				}
+				if (ctx.prefs.get('password_admin', '')!='') {
+					form(method:'post') {
+						h2 class:'ui-widget-header', 'Benutzer'
+							button style:'margin: 0.25em;', id:'logout-button', name:'logout', value:1, 'Abmelden'
+					} 
+					script { mkp. yieldUnescaped '_("#logout-button").button()' }
+				}
+			} else {
+				p style:'padding: 0.5em;', 'Bitte melden Sie sich an!'
+			}
+		}
+		h3 class:'ui-widget-header ui-corner-bottom', "Version: $utils.historianVersion"
+	}
+	html.script { mkp.yieldUnescaped '_("#main-menu").menu()' }
+	out.print '\n<div id="content-section">'
+	
+	// Anmeldeseite
+	if (!ctx.user.loggedIn) {
+		html.h1 class:'ui-widget-header ui-corner-top', 'Anmeldung'
+		html.div(class:'ui-widget-content')	{
+			if (ctx.user.logInFailed) {
+				div(class:'ui-widget') {
+					div(class:'ui-state-error ui-corner-all', style:'padding: 0 .7em;') {
+						p {
+							span class:'ui-icon ui-icon-alert', style:'float: left; margin-right: .3em;'
+							strong 'Achtung:'
+							mkp.yield 'Anmeldung ist fehlgeschlagen!'
+						}
+					}
+				}
+			}
+			form(method:'post') {
+				table {
+					tr {
+						td class:'ui-widget-header ui-corner-left', 'Passwort' 
+						td(class:'ui-widget-content') {
+							input name:'login_password', type:'password'
+						}
+						td(class:'ui-widget-content ui-corner-right') {
+							button id:'login-button', name:'login', value:1, 'Anmelden'
+						}
+					}
+				}	
+			}
+			script { 
+				mkp.yieldUnescaped '_("#login-button").button()'
+			}
+		}
+		html.h3(class:'ui-widget-header ui-corner-bottom') { mkp.yieldUnescaped '&nbsp;'	}
+	}
+}

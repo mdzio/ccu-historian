@@ -1,0 +1,12 @@
+.flt{
+	width:97%;
+}
+
+.sort-arrow {
+	width:11px; height:11px; margin:0 2px;
+	background-position:center center;
+	background-repeat:no-repeat;
+}
+.sort-arrow.descending{	background-image:url("TF_Themes/downsimple.png"); }
+.sort-arrow.ascending{ background-image:url("TF_Themes/upsimple.png"); }); }row.descending{	background-image:url("TF_Themes/downsimple.png"); }
+.sort-arrow.ascending{ background-image:url("TF_Themes/upsimple.png"); }

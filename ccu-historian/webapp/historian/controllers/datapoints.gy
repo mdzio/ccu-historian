@@ -1,0 +1,14 @@
+utils.catchToLog(request.getAttribute('log')) {
+	def ids
+	if (params.i) {
+		if (params.i instanceof String) ids=[params.i as Integer] else ids=params.i.collect { it as Integer }
+	} else {
+		ids=[]
+	}	
+	def dps=ids.collect { id -> 
+		def dp=database.getDataPoint(id)
+		if (!dp) throw new Exception("Data point with id $id not exists")
+		dp
+	} 	
+	request.setAttribute('dataPoints', dps)
+}

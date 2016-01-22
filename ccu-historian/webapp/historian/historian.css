@@ -1,0 +1,28 @@
+#menu-section {
+	width: 15em;
+	float:left;
+}
+#content-section {
+	margin-left: 15.7em;
+	overflow: auto;
+}
+h1.ui-widget-header {
+	font-size: 1.5em;
+}
+h2.ui-widget-header {
+	font-size: 1.0em;
+}
+h3.ui-widget-header {
+	font-size: 0.8em;
+	font-weight: normal;
+}
+h1.ui-widget-header, h2.ui-widget-header, h3.ui-widget-header {
+	margin: 0;
+	padding: 0.3em;
+}
+table {
+	margin: 1.1em 0.25em;
+}
+div.ui-state-error {
+	margin: 1.1em 0.25em;
+}

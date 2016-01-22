@@ -1,0 +1,113 @@
+<%
+import groovy.transform.Field
+import org.slf4j.LoggerFactory
+
+@Field
+private final static log = LoggerFactory.getLogger('mdz.ccuhistorian.webapp.Example1')
+
+// Standardseitenkopf einbinden
+include '/historian/skeleton-header.html'
+
+// Kontext mit weiteren Informationen, z.B. zum angemeldeten Benutzer, holen 
+def ctx=request.session.getAttribute('ctx')
+
+// Zusätzlicher Inhalt für das HEAD-Element
+// (Mit dem html-Objekt können einfach HTML-Elemente generiert werden.)
+html.title 'CCU-Historian: Beispiel 1 - Vorjahresvergleich' 
+
+// Standardmenü einbinden
+include '/historian/skeleton-menu.html'
+
+// Wechsel zum Inhaltsbereich einbinden
+include '/historian/skeleton-content.html'
+
+// Seiteninhalt (rechter Bereich)
+html.h1 'Beispielseite 1 - Vorjahresvergleich'
+
+// Fehler auffangen (in Variable ex) und auch in die Log-Datei schreiben
+def ex=utils.catchToLog(log) {
+
+	// Ist der Benutzer angemeldet?
+	if (!ctx.user.loggedIn) {
+	 
+		// Benutzer ist nicht angemeldet
+		html.h2 class:'error', 'Sie sind nicht (mehr) angemeldet oder Ihre Berechtigungen reichen nicht aus!'
+		html.p { a href: '/historian/index.html', 'Zur Anmeldung' }
+		return
+	}
+
+	// Aufrufparameter idx (Datenpunkt-Index)
+	def selIdx=(params.i!=null && params.i.integer)?params.i as Integer: null
+	
+	// Datenpunktauswahl
+	def dataPoints=database.dataPoints.findAll { 
+		!it.historyHidden && !it.historyDisabled && !it.historyString
+	}.collect { 
+		[it.idx, it.displayName] 
+	}.sort { 
+		it[1] 
+	}
+	html.form {
+		table {
+			tr {
+				th 'Datenpunkt:'
+				td {
+					select name:'i', size:1, {
+						dataPoints.each { idx, displayName ->
+							if (idx==selIdx)
+								option value:idx, displayName, selected:'selected'
+							else
+								option value:idx, displayName
+						}
+					}
+				}
+				td { input type:'submit', value:' Auswählen ' }
+			}
+		}
+	}
+
+	// Falls bisher kein Datenpunkt ausgewählt worden ist, keinen weiteren Inhalt anzeigen.
+	if (selIdx==null) return
+	
+	// Datenpunkt aus der Datenbank laden
+	def dataPoint=database.getDataPoint(selIdx)
+	
+	// Verwendbarer Datenpunkt?
+	if (!dataPoint)
+		throw new Exception("Datenpunkt mit dem Index $selIdx existiert nicht")
+ 	if (dataPoint.historyString) 
+		throw new Exception("Datenpunkt $dataPoint.displayName ist nicht numerisch")
+		
+	// Anfrageschlüssel für die API
+	def apiKey=webServer.config.apiKeys?'&k='+URLEncoder.encode(webServer.config.apiKeys[0], 'UTF-8'):''
+	
+	
+	// aktueller Zeitstempel
+	def begin1=new Date()
+	// ein Monat zurück
+	begin1['month']-=1
+	
+	def begin2=begin1.clone()
+	// ein Jahr zurück
+	begin2['year']-=1
+
+	html.h2 "Letzter Monat (Start: ${utils.format(begin1)})"
+	html.p { img alt:'Letzter Monat', src:"/query/trend.gy?i=$dataPoint.idx&b=${begin1.format('yyyyMMddHHmmss')}&d=1M$apiKey" }
+		
+	html.h2 "Letzter Monat Vorjahr (Start: ${utils.format(begin2)})"	
+	html.p { img alt:'Letzter Monat Vorjahr', src:"/query/trend.gy?i=$dataPoint.idx&b=${begin2.format('yyyyMMddHHmmss')}&d=1M$apiKey" }
+}
+
+// Eventuellen Fehler anzeigen
+if (ex) {
+	// Fehlermeldung ausgeben
+	html.h2 class:'error', 'Fehler: ' + (ex.message?:ex.class.name)
+	// Detaillierte Informationen als HTML-Kommentar einbetten
+	println '<!--'
+	ex.printStackTrace(out)
+	println '-->'
+}
+
+// Seitenende einbinden
+include '/historian/skeleton-end.html'
+%>

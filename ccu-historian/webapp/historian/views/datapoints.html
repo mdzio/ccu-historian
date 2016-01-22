@@ -1,0 +1,16 @@
+<%
+	html.table {
+		tr {
+			th 'Selektierte Datenpunkte'
+			th style:'width:3em', 'ID'
+		}		
+		request.getAttribute('dataPoints').each { dp ->
+			tr {
+				td dp.displayName
+				td(class:'number', dp.idx) {
+					html.input(type:'hidden', name:'i', value:dp.idx)
+				}
+			}
+		}
+	} 
+%>
