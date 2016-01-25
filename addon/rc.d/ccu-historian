@@ -16,6 +16,7 @@ stop() {
 start() {
     echo -n "Starting CCU-Historian... "
     logger -t homematic -p user.info "starting ccu-historian"
+    # check which java version and heap size to use.
     if [ -x "/opt/jre/bin/java" ]; then
       # we are on RaspberryMatic
       JAVA_BIN=/opt/jre/bin/java
@@ -24,6 +25,13 @@ start() {
       # we run on CCU2
       JAVA_BIN=/opt/ejre1.7.0_10/bin/java
       MAXHEAP=32m
+    fi
+    # check for cuxd and enable it in our config
+    if [ -x /usr/local/addons/cuxd/cuxd ]; then
+      grep -q "devices.device1.plugin1.type=CUXD" ${ADDON_DIR}/ccu-historian.config
+      if [ $? -eq 1 ]; then
+        echo "devices.device1.plugin1.type=CUXD" >>${ADDON_DIR}/ccu-historian.config
+      fi
     fi
     start-stop-daemon -S -q -b -m -p /var/run/ccu-historian.pid --exec ${JAVA_BIN} -- -Xmx${MAXHEAP} -jar ${ADDON_DIR}/ccu-historian/ccu-historian.jar -config ${ADDON_DIR}/ccu-historian.config -loglevel off
     echo "OK"
