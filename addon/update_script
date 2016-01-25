@@ -1,12 +1,15 @@
 #!/bin/sh
 
-ADDON_DIR=/usr/local/addons/ccu-historian
+ADDONNAME=ccu-historian
+ADDON_DIR=/usr/local/addons/${ADDONNAME}
 RCD_DIR=/usr/local/etc/config/rc.d
 CONFIG_DIR=/usr/local/etc/config
+WWW_DIR=${CONFIG_DIR}/addons/www/${ADDONNAME}
 
 if [ "$1" = "" ]; then
-  echo "CCU1 not supported"
-  exit
+  echo "CCU1"
+  lcdtool "Addon not for CCU1...    "
+  exit 1
 elif [ "$1" = "CCU2" ]; then
   echo "CCU2"
   if [ "`mount | grep ubi1:user | grep /usr/local | wc -l`" -eq 0 ]; then
@@ -17,25 +20,36 @@ elif [ "$1" == "HM-RASPBERRYMATIC" ]; then
   mount /usr/local
 fi
 
-mkdir -p $ADDON_DIR
-chmod 755 $ADDON_DIR
-mkdir -p $RCD_DIR
-chmod 755 $RCD_DIR
+# create directories
+mkdir -p ${ADDON_DIR}
+chmod 755 ${ADDON_DIR}
+mkdir -p ${RCD_DIR}
+chmod 755 ${RCD_DIR}
+mkdir -p ${WWW_DIR}
+chmod 755 ${WWW_DIR}
 
 # copy addon
-cp -af addon/* $ADDON_DIR/
-cp -af VERSION $ADDON_DIR/
+if [ ! -e ${ADDON_DIR}/ccu-historian.config ]; then
+  cp -af addon/ccu-historian.config ${ADDON_DIR}/
+fi
+cp -af ccu-historian ${ADDON_DIR}/
+cp -af VERSION ${ADDON_DIR}/
 
 # copy startup script
-cp -af rc.d/* $RCD_DIR
+cp -af addon/rc.d/* ${RCD_DIR}/
 
-# add menu
+# copy www directory
+cp -af addon/www/* ${WWW_DIR}/
+
+# add menu entry
+touch ${CONFIG_DIR}/hm_addons.cfg
 if [ "$1" = "CCU2" ]; then
-  ./addon/ccu2/update_addon ccu-historian ccu-historian_addon.cfg
-  ln -sf $ADDON_DIR/ccu2/update_addon $ADDON_DIR/
+  cp -af addon/ccu2/update_addon ${ADDON_DIR}/
 elif [ "$1" == "HM-RASPBERRYMATIC" ]; then
-  ./addon/ccurm/update_addon ccu-historian ccu-historian_addon.cfg
-  ln -sf $ADDON_DIR/ccurm/update_addon $ADDON_DIR/
+  cp -af addon/ccurm/update_addon ${ADDON_DIR}/
 fi
+${ADDON_DIR}/update_addon ccu-historian addon/ccu-historian_addon.cfg
 
 sync
+
+exit 0
