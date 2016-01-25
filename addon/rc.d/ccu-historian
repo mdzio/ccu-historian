@@ -49,7 +49,7 @@ info() {
 
 uninstall() {
     stop
-    ${ADON_DIR}/update_addon ccu-historian
+    ${ADDON_DIR}/update_addon ccu-historian
     rm -rf ${ADDON_DIR}
     rm ${RCD_DIR}/ccu-historian
     rm -rf ${WWW_DIR}
