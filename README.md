@@ -18,8 +18,8 @@ http://homematic-ccu2:8083/
 
 where you have to replace 'homematic-ccu2' with the ip address or hostname of your CCU/RaspberryMatic device. Or you go to the configuration pages on your WebUI/CCU device and click on the "CCU-Historian" link to visit the CCU-Historian configuration pages.
 
-# Warning
-Due to very limited CPU power capabilities of the CCU2 hardware, this addon might run considerably slow if used directly on a CCU2 device.
+# NOTE
+Due to very limited CPU power capabilities of the CCU2 hardware, this addon might run considerably slow if used directly on a CCU2 device. The Addon is, however, still released for the CCU2 platform to support virtualized solutions such as LXCCU (www.lxccu.com).
 
 # Authors
 Copyright (c) 2013-2016 Mathias Dzionsko, Jens Maus <mail@jens-maus.de>
