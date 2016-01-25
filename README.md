@@ -1,4 +1,4 @@
-# HomeMatic CCU Historian Addon
+# HomeMatic CCU-Historian Addon
 A HomeMatic/CCU Addon package to run CCU-Historian (http://www.ccu-historian.de/) as a long term archive for the communication history of HomeMatic CCU devices.
 
 # Supported CCU devices
@@ -16,7 +16,7 @@ After installation use the following URL to display the configuration dialog of 
 
 http://homematic-ccu2:8083/
 
-where you have to replace 'homematic-ccu2' with the ip address or hostname of your CCU/RaspberryMatic device.
+where you have to replace 'homematic-ccu2' with the ip address or hostname of your CCU/RaspberryMatic device. Or you go to the configuration pages on your WebUI/CCU device and click on the "CCU-Historian" link to visit the CCU-Historian configuration pages.
 
 # Authors
 Copyright (c) 2013-2016 Mathias Dzionsko, Jens Maus <mail@jens-maus.de>
