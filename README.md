@@ -11,15 +11,16 @@ A HomeMatic/CCU Addon package to run CCU-Historian (http://www.ccu-historian.de/
 3. Upload installation archive (don't unarchive tar.gz) to the WebUI
 4. Start installation
 
+## NOTES
+* Due to very limited CPU power capabilities of the CCU2 hardware, this addon might run considerably slow if used directly on a CCU2 device. The Addon is, however, still released for the CCU2 platform to support virtualized solutions such as LXCCU (www.lxccu.com).
+* If using this Addon with a CCU2 device, an inserted microSD card is required to actually store the amount of data that is constantly written during the use of CCU-Historian.
+
 # Configuration
 After installation use the following URL to display the configuration dialog of the email addon on your CCU:
 
 http://homematic-raspi:8083/
 
 where you have to replace 'homematic-ccu2' with the ip address or hostname of your CCU/RaspberryMatic device. Or you go to the configuration pages on your WebUI/CCU device and click on the "CCU-Historian" link to visit the CCU-Historian configuration pages.
-
-# NOTE
-Due to very limited CPU power capabilities of the CCU2 hardware, this addon might run considerably slow if used directly on a CCU2 device. The Addon is, however, still released for the CCU2 platform to support virtualized solutions such as LXCCU (www.lxccu.com).
 
 # Authors
 Copyright (c) 2013-2016 Mathias Dzionsko, Jens Maus <mail@jens-maus.de>
