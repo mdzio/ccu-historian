@@ -14,7 +14,7 @@ A HomeMatic/CCU Addon package to run CCU-Historian (http://www.ccu-historian.de/
 # Configuration
 After installation use the following URL to display the configuration dialog of the email addon on your CCU:
 
-http://homematic-ccu2:8083/
+http://homematic-raspi:8083/
 
 where you have to replace 'homematic-ccu2' with the ip address or hostname of your CCU/RaspberryMatic device. Or you go to the configuration pages on your WebUI/CCU device and click on the "CCU-Historian" link to visit the CCU-Historian configuration pages.
 
