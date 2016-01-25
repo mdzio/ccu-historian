@@ -16,6 +16,36 @@ stop() {
 start() {
     echo -n "Starting CCU-Historian... "
     logger -t homematic -p user.info "starting ccu-historian"
+
+    # lets set devices.device1.plugin1.type
+    if [ -x /usr/local/addons/cuxd/cuxd ]; then
+      grep -q "devices.device1.plugin1.type=CUXD" ${ADDON_DIR}/ccu-historian.config
+      if [ $? -eq 1 ]; then
+        echo "devices.device1.plugin1.type=CUXD" >>${ADDON_DIR}/ccu-historian.config
+      fi
+    fi
+
+    # lets set devices.historianAddress
+    ipaddress=$(ip -4 addr show eth0 | grep " inet " | sed 's/.*inet \(.*\)\/.*/\1/g')
+    if [ -n "${ipaddress}" ]; then
+      hostname=$(nslookup ${ipaddress} | grep "Address.*${ipaddress}" | tail -1 | cut -f4 -d' ')
+    fi
+    if [ -n "${hostname}" ]; then
+      sed -i '/devices\.historianAddress=.*/d' ${ADDON_DIR}/ccu-historian.config
+      echo "devices.historianAddress='${hostname}'" >>${ADDON_DIR}/ccu-historian.config
+    fi
+
+    # lets set the data directory
+    sed -i '/database\.dir=.*/d' ${ADDON_DIR}/ccu-historian.config
+    cat /proc/mounts | grep -q /media/sd-mmcblk0
+    if [ $? -eq 1 ]; then
+      # we run on RaspberryMatic
+      echo "database.dir='/usr/local/sdcard/ccu-historian/'" >>${ADDON_DIR}/ccu-historian.config
+    else
+      # we run on CCU2
+      echo "database.dir='/media/sd-mmcblk0/ccu-historian/'" >>${ADDON_DIR}/ccu-historian.config
+    fi
+
     # check which java version and heap size to use.
     if [ -x "/opt/jre/bin/java" ]; then
       # we are on RaspberryMatic
@@ -26,13 +56,8 @@ start() {
       JAVA_BIN=/opt/ejre1.7.0_10/bin/java
       MAXHEAP=32m
     fi
-    # check for cuxd and enable it in our config
-    if [ -x /usr/local/addons/cuxd/cuxd ]; then
-      grep -q "devices.device1.plugin1.type=CUXD" ${ADDON_DIR}/ccu-historian.config
-      if [ $? -eq 1 ]; then
-        echo "devices.device1.plugin1.type=CUXD" >>${ADDON_DIR}/ccu-historian.config
-      fi
-    fi
+
+    # lets start ccu-historian
     start-stop-daemon -S -q -b -m -p /var/run/ccu-historian.pid --exec ${JAVA_BIN} -- -Xmx${MAXHEAP} -jar ${ADDON_DIR}/ccu-historian/ccu-historian.jar -config ${ADDON_DIR}/ccu-historian.config -loglevel off
     echo "OK"
 }
