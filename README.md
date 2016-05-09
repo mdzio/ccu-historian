@@ -16,7 +16,7 @@ A HomeMatic/CCU Addon package to run CCU-Historian (http://www.ccu-historian.de/
 * If using this Addon with a CCU2 device, an inserted microSD card is required to actually store the amount of data that is constantly written during the use of CCU-Historian.
 
 # Configuration
-After installation use the following URL to display the configuration dialog of the email addon on your CCU:
+After installation use the following URL to display the configuration dialog of the addon on your CCU:
 
 http://homematic-raspi:8082/
 
