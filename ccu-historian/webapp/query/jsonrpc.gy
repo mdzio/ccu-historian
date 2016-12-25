@@ -10,27 +10,27 @@ private final static log = LoggerFactory.getLogger('mdz.ccuhistorian.webapp.Json
 def rpcResponse=[:]
 rpcResponse.id=null
 try {
-	// Schl�sselwort �berpr�fen
+	// check API key
 	if (webServer.config.apiKeys)
 		if (!params.k || !webServer.config.apiKeys.contains(params.k))
 			throw new Exception('Access denied')
 			
-	// Anfrage einlesen
+	// parse request
 	def rpcRequest=getRpcRequest()
 	
-	// Struktur �berpr�fen
+	// check structure
 	checkRpcRequest rpcRequest
 	rpcResponse.id=rpcRequest.id
 	
-	// Echo-Methode direkt bearbeiten
+	// handle echo method
 	if (rpcRequest.method=='echo')
 		rpcResponse.result=rpcRequest.params
 	else {
-		// RPC-Funktion suchen
+		// search method
 		def func=rpcFunctions[rpcRequest.method]
 		if (!func) 
 			throw new RpcException('Method not found', RpcException.METHOD_NOT_FOUND)
-		// und ausf�hren
+		// execute method
 		synchronized (func) {
 			func.delegate=this
 			rpcResponse.result=func(rpcRequest.params)
@@ -46,7 +46,7 @@ try {
 	log.warn 'JSON-RPC error response', e
 }
 
-// JSON-Antwort senden
+// send JSON response
 response.contentType='application/json'
 new StreamingJsonBuilder(out)(rpcResponse)
 
@@ -118,30 +118,36 @@ private static rpcFunctions=[
 		if (params.size()==0)
 			database.dataPoints
 		else if (params[0] instanceof List)
-			params[0].collect { database.getDataPoint(it as int) }
+			params[0].collect { utils.parseDataPoint(it as String, database) }
 		else
-			database.getDataPoint(params[0] as int)
+			utils.parseDataPoint(params[0] as String, database)
 	},
 	getValue:{ params ->
 		if (params[0] instanceof List)
-			params[0].collect { convertValue(database.getLast(getDataPoint(database, it as int))) }
+			params[0].collect { convertValue(database.getLast(
+				utils.parseDataPoint(it as String, database)
+			)) }
 		else
-			convertValue(database.getLast(getDataPoint(database, params[0] as int)))
+			convertValue(database.getLast(
+				utils.parseDataPoint(params[0] as String, database)
+			))
 	},
 	getTimeSeriesRaw:{ params ->
 		new CompactTimeSeries(database.getTimeSeriesRaw(
-			getDataPoint(database, params[0]), 
-			new Date(params[1] as long), new Date(params[2] as long)
+			utils.parseDataPoint(params[0] as String, database), 
+			new Date(params[1] as long), 
+			new Date(params[2] as long)
 		))
 	},
 	getTimeSeries:{ params ->
 		new CompactTimeSeries(database.getTimeSeries(
-			getDataPoint(database, params[0]), 
-			new Date(params[1] as long), new Date(params[2] as long)
+			utils.parseDataPoint(params[0] as String, database), 
+			new Date(params[1] as long), 
+			new Date(params[2] as long)
 		))
 	},
 	setValue:{ params ->
-		interfaceManager.writeValue(getDataPoint(database, params[0]), params[1])
+		interfaceManager.writeValue(utils.parseDataPoint(params[0] as String, database), params[1])
 		null
 	}
 ]

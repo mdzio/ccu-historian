@@ -14,6 +14,7 @@ import org.jfree.chart.plot.XYPlot
 import org.jfree.chart.plot.CombinedDomainXYPlot
 import org.jfree.chart.plot.PlotOrientation
 import mdz.hc.TimeSeries
+import mdz.hc.DataPoint
 import mdz.ccuhistorian.LogSystem
 import mdz.ccuhistorian.TrendDesign
 import mdz.ccuhistorian.Database
@@ -55,16 +56,16 @@ static addToXYSeries(TimeSeries timeSeries, XYSeries xySeries) {
 		xySeries.add(timestamps[idx], values[idx]);
 }
 
-// Klasse f�r die Aufnahme der URL-Parameter
+// Klasse für die Aufnahme der URL-Parameter
 
 class Parameters {
 
 	static class Group {
 		int height=1
-		List<Integer /* Datenpunkt-ID */> dataPointIds=new ArrayList<Integer>()
+		List<DataPoint> dataPoints=new ArrayList<DataPoint>()
 		@Override
 		String toString() {
-			"(height: $height, dataPointIds: $dataPointIds)"
+			"(height: $height, dataPoints: $dataPoints.displayName)"
 		}
 	}
 
@@ -72,9 +73,9 @@ class Parameters {
 	Date begin, end
 	TrendDesign trendDesign
 	Map<Integer /* Gruppen-ID */, Group> groups=new TreeMap<>().withDefault { new Group() }
-	
+
 	Parameters(params, binding) {
-		// H�he und Breite der Trend-Grafik
+		// Höhe und Breite der Trend-Grafik
 		try {
 			width=(params.w?:'640') as Integer
 			height=(params.h?:'260') as Integer
@@ -85,20 +86,12 @@ class Parameters {
 		// Datenpunkt-IDs
 		if (!params.i)
 			throw new Exception('Page parameter i (data point id/s) not set')
-		def dpIds
-		try {
-			if (params.i instanceof String)
-				dpIds=[params.i as Integer]
-			else
-				dpIds=params.i.collect { it as Integer }
-		} catch (NumberFormatException e) {
-			throw new Exception('Page parameter i (data point id/s) is invalid')
-		}
+		def dataPoints=binding.utils.parseDataPointList(params.i, binding.database)
 	
 		// Datenpunkt-Gruppen
 		def dpGroups
 		if (!params.g)
-			dpGroups=[0]*dpIds.size()
+			dpGroups=[0]*dataPoints.size()
 		else {
 			try {
 				if (params.g instanceof String)
@@ -109,16 +102,16 @@ class Parameters {
 				throw new Exception('Page parameter g (data point group/s) is invalid (not a number)')
 			}
 		}
-		if (dpIds.size()!=dpGroups.size())
+		if (dataPoints.size()!=dpGroups.size())
 			throw new Exception('Page parameter g (data point group/s) is invalid (wrong count)')
 
 		// Gruppen zusammen bauen
-		[dpIds, dpGroups].transpose().each {
+		[dataPoints, dpGroups].transpose().each {
 			def (dp, group)=it
-			groups[group].dataPointIds << dp
+			groups[group].dataPoints << dp
 		}
 
-		// Gruppenh�hen
+		// Gruppenhöhen
 		def groupHeights
 		if (!params.gh)
 			groupHeights=[1]*dpGroups.unique().size()
@@ -176,7 +169,7 @@ class PlotState {
 	int totalAxisIdx=0
 }
 
-def createPlot(parameters, dataPointIds, plotState) {
+def createPlot(parameters, dataPoints, plotState) {
 	// Plot erzeugen
 	def plot=new XYPlot()
 	plot.backgroundPaint=new ChartColor(245, 245, 245)
@@ -190,13 +183,10 @@ def createPlot(parameters, dataPointIds, plotState) {
 	def visibleRangeAxesCnt=0
 	
 	// Zeitreihen und Y-Achsen erstellen
-	dataPointIds.eachWithIndex { dpId, dpIdx ->
+	dataPoints.eachWithIndex { dataPoint, dpIdx ->
 		
-		def dataPoint=database.getDataPoint(dpId)
-		if (!dataPoint)
-			throw new Exception("Data point with id $dpId not exists")
 		if (dataPoint.historyString)
-			throw new Exception("Data point with id $dpId is not numeric")
+			throw new Exception("Data point $dataPoint.displayName is not numeric")
 		def displayName=dataPoint.id.interfaceId+'.'+(dataPoint.attributes.displayName?:dataPoint.id.address)+'.'+
 			dataPoint.id.identifier
 		def isAction=dataPoint.attributes.type=='ACTION'
@@ -270,7 +260,7 @@ def createCombinedPlot(parameters) {
 	// Subplots erzeugen
 	PlotState plotState=[]
 	parameters.groups.values().each { group ->
-		combinedPlot.add(createPlot(parameters, group.dataPointIds, plotState), group.height)
+		combinedPlot.add(createPlot(parameters, group.dataPoints, plotState), group.height)
 	}
 	combinedPlot
 }
@@ -289,7 +279,7 @@ utils.catchToLog(log) {
 	def startTime=System.currentTimeMillis()
 	log.trace 'Web server: Generating trend'
 	
-	// Schl�sselwort �berpr�fen
+	// Schlüsselwort überprüfen
 	if (webServer.config.apiKeys)
 		if (!params.k || !webServer.config.apiKeys.contains(params.k))
 			throw new Exception('Access denied')

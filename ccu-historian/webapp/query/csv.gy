@@ -9,15 +9,15 @@ private final static log = LoggerFactory.getLogger('mdz.ccuhistorian.webapp.Csv'
 
 utils.catchToLog(log) {
 
-// Schl�sselwort �berpr�fen
+// Schlüsselwort überprüfen
 if (webServer.config.apiKeys)
 	if (!params.k || !webServer.config.apiKeys.contains(params.k))
 		throw new Exception('Access denied')	
 
 // Aufrufparameter auswerten
-if (!params.i || !params.i.integer)
+if (!params.i)
 	throw new Exception('Page parameter i (data point id) not set or invalid')
-def dpId=params.i as Integer
+def dataPoint=utils.parseDataPoint(params.i, database)
 def begin=utils.parseDate(params.b)
 def duration=utils.parseDuration(params.d)
 def end=utils.parseDate(params.e)
@@ -33,9 +33,6 @@ use (TimeCategory) {
 }	}	}
 
 // Zeitreihe abfragen
-def dataPoint=database.getDataPoint(dpId)
-if (!dataPoint)
-	throw new Exception("Data point with id $dpId not exists")
 def timeSeries
 if (dataPoint.historyString)
 	timeSeries=database.getTimeSeriesRaw(dataPoint, begin, end)
