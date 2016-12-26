@@ -7,7 +7,7 @@
 This repository hosts the CCU-Addon build environment for the CCU-Historian project (http://www.ccu-historian.de/), a long term archive for the communication history directly on a CCU2 / RaspberryMatic device.
 
 # Supported CCU devices
-* [HomeMatic CCU2](http://www.eq-3.de/produkt-detail-zentralen-und-gateways/items/homematic-zentrale-ccu-2.html)
+* [HomeMatic CCU2](http://www.eq-3.de/produkt-detail-zentralen-und-gateways/items/homematic-zentrale-ccu-2.html) / [YAHM](https://github.com/leonsio/YAHM) / [LXCCU](http://www.lxccu.com/)
 * [RaspberryMatic](https://github.com/jens-maus/RaspberryMatic)
 
 # Installation
@@ -17,7 +17,7 @@ This repository hosts the CCU-Addon build environment for the CCU-Historian proj
 4. Start installation
 
 ## NOTES
-* Due to very limited CPU power capabilities of the CCU2 hardware, this addon might run considerably slower if used directly on a CCU2 device. The Addon is, however, still released for the CCU2 platform to support virtualized solutions such as LXCCU (www.lxccu.com).
+* Due to very limited CPU power capabilities of the CCU2 hardware, this addon might run considerably slower if used directly on a CCU2 device. The Addon is, however, still released for the CCU2 platform to support virtualized solutions such as LXCCU (www.lxccu.com) or YAHM.
 * If using this Addon with a CCU2 device, an inserted microSD card is required to actually store the amount of data that is constantly written during the use of CCU-Historian.
 
 # Configuration
