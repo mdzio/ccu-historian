@@ -1,5 +1,5 @@
 # HomeMatic CCU-Historian Addon
-A HomeMatic/CCU Addon package to run CCU-Historian (http://www.ccu-historian.de/) as a long term archive for the communication history directly on a CCU2 / RaspberryMatic device.
+This repository hosts the CCU-Addon build environment for the CCU-Historian project (http://www.ccu-historian.de/), a long term archive for the communication history directly on a CCU2 / RaspberryMatic device.
 
 # Supported CCU devices
 * HomeMatic CCU2 (http://www.eq-3.de/produkt-detail-zentralen-und-gateways/items/homematic-zentrale-ccu-2.html)
