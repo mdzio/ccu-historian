@@ -17,7 +17,7 @@ start() {
     echo -n "Starting CCU-Historian... "
     logger -t homematic -p user.info "starting ccu-historian"
 
-    # lets set devices.device1.plugin1.type
+    # lets set devices.device1.plugin1.type if CUxD is installed
     if [ -x /usr/local/addons/cuxd/cuxd ]; then
       grep -q "devices.device1.plugin1.type=CUXD" ${ADDON_DIR}/ccu-historian.config
       if [ $? -eq 1 ]; then
@@ -37,8 +37,7 @@ start() {
 
     # lets set the data directory
     sed -i '/database\.dir=.*/d' ${ADDON_DIR}/ccu-historian.config
-    cat /proc/mounts | grep -q /media/sd-mmcblk0
-    if [ $? -eq 1 ]; then
+    if [ -d /usr/local/sdcard  ]; then
       # we run on RaspberryMatic
       echo "database.dir='/usr/local/sdcard/ccu-historian/'" >>${ADDON_DIR}/ccu-historian.config
     else
@@ -47,11 +46,15 @@ start() {
     fi
 
     # check which java version and heap size to use.
-    if [ -x "/opt/jre/bin/java" ]; then
-      # we are on RaspberryMatic
+    if [ -x "/opt/java/bin/java" ]; then
+      # we are on RaspberryMatic beta3+
+      JAVA_BIN=/opt/java/bin/java
+      MAXHEAP=768m
+    elif [ -x "/opt/jre/bin/java" ]; then
+      # we are on RaspberryMatic beta1-2
       JAVA_BIN=/opt/jre/bin/java
       MAXHEAP=768m
-    else
+    elif [ -x "/opt/ejre1.7.0_10/bin/java" ]; then
       # we run on CCU2
       JAVA_BIN=/opt/ejre1.7.0_10/bin/java
       MAXHEAP=32m

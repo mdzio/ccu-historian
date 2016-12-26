@@ -7,7 +7,9 @@ set splitCont [split $contents "\n"]
 foreach ele $splitCont {
   if {[regexp {^webServer.port=(.*)} $ele -> port]} {
     set hostName [info hostname]
+    puts "<html>"
     puts "<meta http-equiv='refresh' content='0; url=http://$hostName:$port/' />"
+    puts "</html>"
     break
   }
 }
