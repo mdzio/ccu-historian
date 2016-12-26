@@ -1,4 +1,9 @@
-# HomeMatic CCU-Historian Addon
+&nbsp;![CCU-Historian](https://github.com/jens-maus/hm-ccu-historian/raw/master/ccu-historian-logo.png)
+
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=SF4BR9ZE2JUBS)
+[![Code Climate](https://codeclimate.com/github/jens-maus/cuxd/badges/gpa.svg)](https://codeclimate.com/github/jens-maus/hm-ccu-historian)
+[![Github Issues](http://githubbadges.herokuapp.com/jens-maus/hm-ccu-historian/issues.svg)](https://github.com/jens-maus/hm-ccu-historian/issues)
+
 This repository hosts the CCU-Addon build environment for the CCU-Historian project (http://www.ccu-historian.de/), a long term archive for the communication history directly on a CCU2 / RaspberryMatic device.
 
 # Supported CCU devices
@@ -23,4 +28,4 @@ http://homematic-raspi:8082/
 where you have to replace 'homematic-ccu2' with the ip address or hostname of your CCU/RaspberryMatic device. Or you go to the configuration pages on your WebUI/CCU device and click on the "CCU-Historian" link to visit the CCU-Historian configuration pages.
 
 # Authors
-Copyright (c) 2013-2016 Mathias Dzionsko, Jens Maus <mail@jens-maus.de>
+Copyright (c) 2013-2016 Mathias Dzionsko, Jens Maus
