@@ -1,0 +1,59 @@
+import groovy.time.TimeCategory
+import java.text.*
+import mdz.ccuhistorian.Database
+
+// Schlüsselwort überprüfen
+if (webServer.apiKeys)
+	if (!params.k || !webServer.apiKeys.contains(params.k))
+		throw new Exception('Access denied')	
+
+// Aufrufparameter auswerten
+if (!params.i || !params.i.integer)
+	throw new Exception('Page parameter i (data point id) not set or invalid')
+def dpId=params.i as Integer
+def begin=utils.parseDate(params.b)
+def duration=utils.parseDuration(params.d)
+def end=utils.parseDate(params.e)
+use (TimeCategory) {
+	if (!begin) { 
+		if (!end) end=new Date()
+		if (!duration) begin=end-1
+		else begin=end-duration
+	} else { 
+		if (!end) {
+			if (!duration) end=new Date()
+			else end=begin+duration
+}	}	}
+
+// Zeitreihe abfragen
+def dataPoint=database.getDataPoint(dpId)
+if (!dataPoint)
+	throw new Exception("Data point with id $dpId not exists")
+def timeSeries
+if (database.isOfTypeString(dataPoint))
+	timeSeries=database.getTimeSeriesRaw(dataPoint, begin, end)
+else
+	timeSeries=database.getTimeSeries(dataPoint, begin, end)
+	
+// CSV-Datei erstellen
+def dateFormat=new SimpleDateFormat('dd.MM.yyyy HH:mm:ss,SSS')
+def displayName=(dataPoint.attributes.displayName?:dataPoint.id.address)+'.'+dataPoint.id.identifier
+def sb=new StringBuilder()
+sb << displayName << ';;\n'
+sb << 'Zeitstempel;Wert;Status\n'
+def valueFormatter
+if (database.isOfTypeString(dataPoint)) {
+	valueFormatter={ '"'+it.tr('"', '""')+'"' }
+} else {
+	def numberFormat=new DecimalFormat('#,##0.###')
+	valueFormatter={ numberFormat.format(it.value) }
+}
+timeSeries.each {
+	sb << dateFormat.format(it.timestamp) << ';' << valueFormatter(it.value) << ';' << it.state << '\n'
+}
+
+// CSV-Datei verschicken
+def fileName=displayName.replaceAll(/[^a-zA-Z0-9_]/, '_')+'.csv'
+response.contentType='text/csv'
+response.setHeader 'Content-disposition', "attachment; filename=$fileName"
+out << sb

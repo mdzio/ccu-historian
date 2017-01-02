@@ -1,0 +1,33 @@
+<%
+try {
+def ctx=session.getAttribute('ctx') 
+%></head><body>
+<table id="collayout"><tr>
+	<td id="leftcol">
+		<h1>CCU-Historian</h1><% 
+if (ctx.user.loggedIn) { 
+		%><table class="menu">
+			<tr><th>Men&uuml;</th></tr>
+			<tr><td><a href="index.html">&Uuml;bersicht Datenpunkte</a></td></tr>
+			<tr><td><a href="dbmanage.html">Verwaltung Datenpunkte</a></td></tr>
+			<tr><td><a href="tools.html">Werkzeuge</a></td></tr>
+<!-- 		
+FIXME: CCU-Adressen aus dem Interface Manager extrahieren!
+			<tr><td><a href="http://ccu.address" target="_blank">CCU</a></td></tr>
+ -->	
+			<tr><td><a href="http://<%=webServer.historianAddress %>:<%=database.webPort %>" target="_blank">Datenbank</a></td></tr>
+			<tr><td><a href="config.html">Konfiguration</a></td></tr>
+		</table><%
+	if (ctx.prefs.get('password_admin', '')!='') {	
+		%><form action="index.html" method="post">
+			<table class="menu">
+				<tr><th>Benutzer</th></tr>
+				<tr><td><input name="logout" type="submit" value=" Abmelden "></td></tr>
+			</table>
+		</form><% 
+	}
+} else { 
+		%><p>Bitte melden Sie sich an!</p><% 
+} 
+} catch (Throwable t) { t.printStackTrace(out) }
+%>

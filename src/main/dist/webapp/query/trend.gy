@@ -1,0 +1,183 @@
+import java.util.logging.Logger
+import groovy.time.TimeCategory
+import groovy.transform.Field
+import org.jfree.chart.JFreeChart
+import org.jfree.chart.ChartColor
+import org.jfree.data.xy.XYSeries
+import org.jfree.data.xy.XYSeriesCollection
+import org.jfree.chart.axis.DateAxis
+import org.jfree.chart.axis.NumberAxis
+import org.jfree.chart.encoders.ImageEncoderFactory
+import org.jfree.chart.renderer.xy.XYStepRenderer
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer
+import org.jfree.chart.plot.XYPlot
+import mdz.ccuhistorian.TrendDesign
+import mdz.ccuhistorian.Database
+
+@Field
+private final Logger log=Logger.getLogger('mdz.ccuhistorian.webapp.Trend')
+
+// Hilfsfunktionen
+def applyDesign(obj, cl) {
+	if (cl) {
+		try { synchronized(cl) {
+			cl.delegate=obj
+			cl.resolveStrategy=Closure.DELEGATE_ONLY
+			cl()
+		}	} catch (Exception e) {
+			throw new Exception('Configuration option webServer.trendDesigns is invalid', e)
+} 	}	}
+
+def applyDesign(obj, cls, idx) {
+	if (cls) {
+		def cl;	try {
+			cl=cls[idx%cls.size()]
+		} catch (Exception e) {
+			throw new Exception('Configuration option webServer.trendDesigns is invalid', e)
+		}
+		applyDesign obj, cl
+}	}
+
+log.finer 'Web server: Generating trend'
+
+// Schlüsselwort überprüfen
+if (webServer.apiKeys)
+	if (!params.k || !webServer.apiKeys.contains(params.k))
+		throw new Exception('Access denied')
+		
+// Aufrufparameter auswerten
+def width, height
+try {
+	width=(params.w?:'640') as Integer
+	height=(params.h?:'260') as Integer
+} catch (NumberFormatException e) {
+	throw new Exception('Page parameter w (width) or h (height) is invalid')
+} 	
+
+if (!params.i)
+	throw new Exception('Page parameter i (data point id/s) not set')
+def dpIds
+try {
+	if (params.i instanceof String)
+		dpIds=[params.i as Integer]
+	else
+		dpIds=params.i.collect { it as Integer }
+} catch (NumberFormatException e) {
+	throw new Exception('Page parameter i (data point id/s) is invalid')
+} 	
+
+def begin=utils.parseDate(params.b)
+def duration=utils.parseDuration(params.d)
+def end=utils.parseDate(params.e)
+use (TimeCategory) {
+	if (!begin) { 
+		if (!end) end=new Date()
+		if (!duration) begin=end-1
+		else begin=end-duration
+	} else { 
+		if (!end) {
+			if (!duration) end=new Date()
+			else end=begin+duration
+}	}	}
+
+def trendDesign
+if (params.t && params.t!='default') {
+	trendDesign=webServer.trendDesigns[params.t]
+	if (!trendDesign)
+		throw new Exception("Page parameter t (trend design) is invalid")
+} else trendDesign=webServer.trendDesigns['default']?:new TrendDesign()
+
+// Plot
+def plot=new XYPlot()
+plot.backgroundPaint=new ChartColor(245, 245, 245)
+applyDesign plot, trendDesign.plot
+
+// Zeitachse
+def timeAxis = new DateAxis()
+timeAxis.lowerMargin=0.00 // keine Raender
+timeAxis.upperMargin=0.00
+timeAxis.setRange(begin, end)
+applyDesign timeAxis, trendDesign.timeAxis
+plot.setDomainAxis(timeAxis)
+
+// Y-Achsen
+// Datenpunkte mit identischem Wertebereich und identischer Einheit erhalten
+// die gleiche Y-Achse.
+def rangeAxes=[:]
+def rangeAxesDisplayIdx=[]
+def visibleRangeAxesCnt=0
+
+// Zeitreihen und Y-Achsen erstellen
+dpIds.eachWithIndex { dpId, dpIdx ->
+	
+	def dataPoint=database.getDataPoint(dpId)
+	if (!dataPoint)
+		throw new Exception("Data point with id $dpId not exists")
+	if (database.isOfTypeString(dataPoint))
+		throw new Exception("Data point with id $dpId is not numeric")
+	def displayName=dataPoint.id.interfaceId+'.'+(dataPoint.attributes.displayName?:dataPoint.id.address)+'.'+
+		dataPoint.id.identifier
+	def isAction=dataPoint.attributes.type=='ACTION'
+
+	// Y-Achse auswaehlen bzw. erstellen
+	def axisKey=[dataPoint.attributes.type, dataPoint.attributes.unit, dataPoint.attributes.minimum, dataPoint.attributes.maximum]
+	def axisIdx=rangeAxes[axisKey]
+	if (axisIdx==null) {
+		axisIdx=rangeAxes.size()
+		def numberAxis=new NumberAxis(dataPoint.attributes.unit)
+		numberAxis.autoRangeIncludesZero=false
+		numberAxis.autoRangeStickyZero=false
+		numberAxis.upperMargin=0.02
+		numberAxis.lowerMargin=0.02
+		if (isAction) {
+			numberAxis.visible=false
+			rangeAxesDisplayIdx << 0
+		} else {
+			visibleRangeAxesCnt++
+			rangeAxesDisplayIdx << visibleRangeAxesCnt
+		}
+		applyDesign numberAxis, trendDesign.rangeAxes, axisIdx
+		plot.setRangeAxis(axisIdx, numberAxis)
+		rangeAxes[axisKey]=axisIdx
+	}
+		
+	// Zeitreihe abfragen und konvertieren
+	def timeSeries
+	if (isAction) timeSeries=database.getTimeSeriesRaw(dataPoint, begin, end)
+	else timeSeries=database.getTimeSeries(dataPoint, begin, end)
+	def dispIdx=rangeAxesDisplayIdx[axisIdx]
+	XYSeries xySeries=new XYSeries(displayName+(dispIdx>0?' ('+dispIdx+')':''))
+	timeSeries.addTo(xySeries)
+	applyDesign xySeries, trendDesign.series, dpIdx
+	def xySeriesCollection=new XYSeriesCollection(xySeries)
+	plot.setDataset(dpIdx, xySeriesCollection)
+	
+	// Y-Achsenzuordnung
+	plot.mapDatasetToRangeAxis(dpIdx, axisIdx)
+
+	// Renderer anlegen
+	def renderer
+	if (isAction) {
+		renderer=new XYLineAndShapeRenderer()
+		renderer.baseShapesVisible=true
+		renderer.baseLinesVisible=false
+	} else renderer=new XYStepRenderer()
+	renderer.paint=TrendDesign.getDefaultColor(dpIdx)
+	applyDesign renderer, trendDesign.renderers, dpIdx
+	plot.setRenderer(dpIdx, renderer)
+}
+
+// Chart
+def chart=new JFreeChart(null, JFreeChart.DEFAULT_TITLE_FONT, plot, true)
+chart.backgroundPaint=ChartColor.WHITE
+applyDesign chart, trendDesign.chart 
+
+// Grafik erzeugen
+def image=chart.createBufferedImage(width, height)
+def encoder=ImageEncoderFactory.newInstance('png')
+
+// Grafik verschicken
+response.contentType='image/png'
+encoder.encode(image, sout)
+
+log.finer 'Web server: Trend generated'

@@ -1,0 +1,143 @@
+import mdz.ccuhistorian.TimeSeries.CompactTimeSeries
+import groovy.json.JsonSlurper
+import groovy.json.StreamingJsonBuilder
+import groovy.transform.Field
+
+def rpcResponse=[:]
+rpcResponse.id=null
+try {
+	// Schlüsselwort überprüfen
+	if (webServer.apiKeys)
+		if (!params.k || !webServer.apiKeys.contains(params.k))
+			throw new Exception('Access denied')
+			
+	// Anfrage einlesen
+	def rpcRequest=getRpcRequest()
+	
+	// Struktur überprüfen
+	checkRpcRequest rpcRequest
+	rpcResponse.id=rpcRequest.id
+	
+	// Echo-Methode direkt bearbeiten
+	if (rpcRequest.method=='echo')
+		rpcResponse.result=rpcRequest.params
+	else {
+		// RPC-Funktion suchen
+		def func=rpcFunctions[rpcRequest.method]
+		if (!func) 
+			throw new RpcException('Method not found', RpcException.METHOD_NOT_FOUND)
+		// und ausführen
+		synchronized (func) {
+			func.delegate=this
+			rpcResponse.result=func(rpcRequest.params)
+		}
+	}
+} catch (RpcException e) {
+	rpcResponse.remove 'result'
+	rpcResponse.error=[code: e.code, message: e.message]
+	//e.printStackTrace()
+} catch (Exception e) {
+	rpcResponse.remove 'result'
+	rpcResponse.error=[code: RpcException.SERVER_ERROR, message: e.message]
+	//e.printStackTrace()
+}
+
+// JSON-Antwort senden
+response.contentType='application/json'
+new StreamingJsonBuilder(out)(rpcResponse)
+
+class RpcException extends Exception {
+	public final static int PARSE_ERROR		 = -32700
+	public final static int INVALID_REQUEST	 = -32600
+	public final static int METHOD_NOT_FOUND = -32601
+	public final static int INVALID_PARAMS	 = -32602
+	public final static int INTERNAL_ERROR	 = -32603
+	public final static int SERVER_ERROR	 = -32000
+
+	int code
+	RpcException(String message, int code=INTERNAL_ERROR, Throwable cause=null) {
+		super(message, cause)
+		this.code=code
+	}
+}
+
+def getRpcRequest() {
+	def rpcRequest
+	if (params.m) {
+		// Aufrufart GET/POST mit Parametern m/p/i
+		rpcRequest=[method:params.m]
+		rpcRequest.params=[]
+		def idx=1, p
+		while ((p=params."p$idx")!=null) { rpcRequest.params << p; idx++ }
+		rpcRequest.id=params.i
+	} else {
+		String json
+		if (params.j) {
+			// Aufrufart GET/POST mit Parameter j
+			json=params.j
+		} else {
+			// Aufrufart POST mit Content-Type application/json
+			StringWriter writer=[]
+			writer << request.reader
+			json=writer.toString()
+		}
+		// JSON-Anfrage parsen
+		try {
+			rpcRequest=new JsonSlurper().parseText(json)
+		} catch (Exception e) {
+			throw new RpcException('JSON parse error', RpcException.PARSE_ERROR, e)
+		}
+	}
+	rpcRequest
+}
+
+def checkRpcRequest(rpcRequest) {
+	if (!(rpcRequest instanceof Map) || rpcRequest.method==null || 
+		!(rpcRequest.method instanceof String) || rpcRequest.params==null ||
+		!(rpcRequest.params instanceof List))
+		throw new RpcException('Request object invalid', RpcException.INVALID_REQUEST);
+}
+
+def getDataPoint(histDb, dpId) {
+	def dp=histDb.getDataPoint(dpId as int)
+	if (!dp) throw new RpcException('Invalid data point id', RpcException.SERVER_ERROR)
+	dp	
+}
+
+def convertValue(v) {
+	[timestamp: v.timestamp.time, value: v.value, state: v.state]	
+}
+
+@Field 
+private static rpcFunctions=[
+	getDataPoint:{ params ->
+		if (params.size()==0)
+			database.dataPoints
+		else if (params[0] instanceof List)
+			params[0].collect { database.getDataPoint(it as int) }
+		else
+			database.getDataPoint(params[0] as int)
+	},
+	getValue:{ params ->
+		if (params[0] instanceof List)
+			params[0].collect { convertValue(database.getLast(getDataPoint(database, it as int))) }
+		else
+			convertValue(database.getLast(getDataPoint(database, params[0] as int)))
+	},
+	getTimeSeriesRaw:{ params ->
+		new CompactTimeSeries(database.getTimeSeriesRaw(
+			getDataPoint(database, params[0]), 
+			new Date(params[1] as long), new Date(params[2] as long)
+		))
+	},
+	getTimeSeries:{ params ->
+		new CompactTimeSeries(database.getTimeSeries(
+			getDataPoint(database, params[0]), 
+			new Date(params[1] as long), new Date(params[2] as long)
+		))
+	},
+	setValue:{ params ->
+		interfaceManager.writeValue(getDataPoint(database, params[0]), params[1])
+		null
+	}
+]
