@@ -1,6 +1,13 @@
 <%
 import groovy.time.TimeCategory
-try {
+import groovy.transform.Field
+import org.slf4j.LoggerFactory
+
+@Field
+private final static log = LoggerFactory.getLogger('mdz.ccuhistorian.webapp.Analyze')
+
+utils.catchToLog(log) {
+
 include 'skeleton-header.html' 
 def ctx=request.session.getAttribute('ctx')
 
@@ -46,8 +53,10 @@ else {
 	}
 }
 
-// Anfrageschl�ssel
-def apiKey=webServer.apiKeys?'&k='+URLEncoder.encode(webServer.apiKeys[0], 'UTF-8'):''
+if (params.g) ctx.groups=true else ctx.groups=false
+
+// Anfrageschlüssel
+def apiKey=webServer.config.apiKeys?'&k='+URLEncoder.encode(webServer.config.apiKeys[0], 'UTF-8'):''
 
 %><title>CCU-Historian: Trend-Darstellung</title><% 
 include 'skeleton-menu.html'
@@ -63,6 +72,7 @@ if (!ctx.user.loggedIn) {
 	def trendBegin=ctx.timerange.begin.format('yyyyMMddHHmmss')
 	def trendEnd=ctx.timerange.end.format('yyyyMMddHHmmss')
 	def dur=ctx.timerange.end.time-ctx.timerange.begin.time
+	def groups=ctx.groups?( '&g='+(1..dpIds.size()).join('&g=') ):''
 	%><form action="analyze.html" method="get"><%
 	dpIds.each { %><input type="hidden" name="i" value="<%=it %>"><% }
 	%><table>
@@ -103,16 +113,22 @@ if (!ctx.user.loggedIn) {
 			<input name="trend_zoomout" type="submit" value=" - Verkleinern "/>
 			<input name="trend_forward" type="submit" value=" Zeitl. vor -> "/>
 		</td>
-	</tr></table>
-	</form><%
+	</tr></table><%
 	if (dur<1000) {
 		%><p class="bad">Ung&uuml;ltige Start- oder Stopzeit!</p><%
 	} else { 
 		%><p>
-			<img alt="Trend-Darstellung" src="/query/trend.gy?w=1000&h=600&i=<%=dpIds.join('&i=')%>&b=<%=trendBegin %>&e=<%=trendEnd %><%=apiKey%>">
+			<img alt="Trend-Darstellung" src="/query/trend.gy?w=1000&h=600&i=<%=dpIds.join('&i=')%>&b=<%=trendBegin %>&e=<%=trendEnd %><%=apiKey%><%=groups%>">
 		</p><%
-	} 
+	}
+	%><table><tr>
+		<th>Optionen</th>
+		<td>Trends übereinander anordnen</td>
+		<td><input type="checkbox" name="g" value="1"<%=ctx.groups?' checked="checked"':''%>></td>
+		<td><input name="trend_refresh" type="submit" value=" Aktualisieren "/></td>
+	</tr></table>
+	</form><% 
 }
 include 'skeleton-end.html'
-} catch (Throwable t) { t.printStackTrace(out) }
+} // catchToLog
 %>

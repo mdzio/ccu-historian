@@ -1,7 +1,13 @@
 <% 
 import mdz.hc.DataPoint
 import mdz.ccuhistorian.Database
-try {
+import groovy.transform.Field
+import org.slf4j.LoggerFactory
+
+@Field
+private final static log = LoggerFactory.getLogger('mdz.ccuhistorian.webapp.Index')
+
+utils.catchToLog(log) {
 include 'skeleton-header.html'
 def ctx=request.session.getAttribute('ctx')
 if (!ctx.user.loggedIn) { 
@@ -53,7 +59,7 @@ if (!ctx.user.loggedIn) {
 			<td><%=utils.escapeHtml(it.attributes.unit)%></td>
 			<td><%=utils.format(last?.timestamp)%></td>
 			<td><a href="dpdetails.html?i=<%=it.idx%>">Details</a></td>
-			<td><input type="checkbox" name="i" value="<%=it.idx%>"<%=database.isOfTypeString(it)?' disabled="disabled"':''%>></td>
+			<td><input type="checkbox" name="i" value="<%=it.idx%>"<%=it.historyString?' disabled="disabled"':''%>></td>
 		</tr><%
 		} 
 	%></tbody></table>
@@ -77,5 +83,5 @@ if (!ctx.user.loggedIn) {
     </script><% 
 }
 include 'skeleton-end.html' 
-} catch (Throwable t) { t.printStackTrace(out) }
+} // catchToLog
 %>
