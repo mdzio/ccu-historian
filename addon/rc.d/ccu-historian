@@ -26,13 +26,10 @@ start() {
     fi
 
     # lets set devices.historianAddress
-    ipaddress=$(ip -4 addr show eth0 | grep " inet " | sed 's/.*inet \(.*\)\/.*/\1/g')
+    ipaddress=$(ip -4 route get 1 | head -1 | cut -d' ' -f8 | tr -d '\n')
     if [ -n "${ipaddress}" ]; then
-      hostname=$(nslookup ${ipaddress} | grep "Address.*${ipaddress}" | tail -1 | cut -f4 -d' ')
-    fi
-    if [ -n "${hostname}" ]; then
-      sed -i '/devices\.historianAddress=.*/d' ${ADDON_DIR}/ccu-historian.config
-      echo "devices.historianAddress='${hostname}'" >>${ADDON_DIR}/ccu-historian.config
+      sed -i "s/webServer\.historianAddress=.*/webServer.historianAddress='${ipaddress}'/g" ${ADDON_DIR}/ccu-historian.config
+      sed -i "s/webServer\.menuLinks\.link1\.address=.*/webServer.menuLinks.link1.address='http:\/\/${ipaddress}'/g" ${ADDON_DIR}/ccu-historian.config
     fi
 
     # lets set the data directory
