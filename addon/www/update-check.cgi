@@ -1,7 +1,7 @@
 #!/bin/tclsh
 
-set checkURL    "https://raw.githubusercontent.com/jens-maus/hm-ccu-historian/master/VERSION"
-set downloadURL "https://github.com/jens-maus/hm-ccu-historian/releases"
+set checkURL    "https://raw.githubusercontent.com/mdzio/hm-ccu-historian/master/VERSION"
+set downloadURL "https://github.com/mdzio/hm-ccu-historian/releases"
 
 catch {
   set input $env(QUERY_STRING)

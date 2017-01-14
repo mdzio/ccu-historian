@@ -64,8 +64,8 @@ start() {
 
 info() {
     echo "Info: <b>CCU-Historian Addon</b><br>"
-    echo "Info: (c) 2013-2016 Mathias Dzionsko, Jens Maus<br>"
-    echo "Info: <a href="https://github.com/jens-maus/hm-ccu-historian" target="_blank">https://github.com/jens-maus/hm-ccu-historian</a>"
+    echo "Info: (c) 2011-2017 Mathias Dzionsko, Jens Maus<br>"
+    echo "Info: <a href="https://github.com/mdzio/hm-ccu-historian" target="_blank">https://github.com/mdzio/hm-ccu-historian</a>"
     echo "Name: CCU-Historian"
     echo "Version: $(cat ${ADDON_DIR}/VERSION)"
     echo "Operations: uninstall restart"
