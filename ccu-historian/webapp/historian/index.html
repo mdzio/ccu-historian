@@ -38,28 +38,32 @@ if (!ctx.user.loggedIn) {
 	<table><tr><th>Aktion f&uuml;r die ausgew&auml;hlten Datenpunkte</th><td><input name="trend_set" type="submit" value=" Trend-Darstellung "></td></tr></table>
 	<table id="datapoints">
 		<thead><tr>
+			<th style="width:3em">Ausw.</th>
 			<th>Schnittstelle</th>		
 			<th>Kanal</th>
 			<th>Parameter</th>
+			<th>Raum</th>
+			<th>Gewerk</th>
 			<th style="width:3em">ID</th>
-			<th>Aktueller Wert</th>
+			<th>Akt. Wert</th>
 			<th>Einheit</th>
 			<th>Zeitstempel</th>
 			<th>Details</th>
-			<th>Ausw.</th>
 		</tr></thead><tbody><%
 	database.dataPoints.findAll { !it.historyHidden }.each {
 		def last=database.getLast(it)
 		%><tr>
+			<td><input type="checkbox" name="i" value="<%=it.idx%>"<%=it.historyString?' disabled="disabled"':''%>></td>
 			<td><%=utils.escapeHtml(it.id.interfaceId)%></td>
 			<td><%=utils.escapeHtml(it.attributes.displayName?:it.id.address)%></td>
 			<td><%=utils.escapeHtml(it.id.identifier)%></td>
+			<td><%=utils.escapeHtml(it.attributes.room)%></td>
+			<td><%=utils.escapeHtml(it.attributes.function)%></td>
 			<td class="number"><%=it.idx%></td>
 			<td class="number"><%=utils.format(last?.value)%></td>
 			<td><%=utils.escapeHtml(it.attributes.unit)%></td>
 			<td><%=utils.format(last?.timestamp)%></td>
 			<td><a href="dpdetails.html?i=<%=it.idx%>">Details</a></td>
-			<td><input type="checkbox" name="i" value="<%=it.idx%>"<%=it.historyString?' disabled="disabled"':''%>></td>
 		</tr><%
 		} 
 	%></tbody></table>
@@ -68,16 +72,20 @@ if (!ctx.user.loggedIn) {
 		var tf_props={
 				filters_row_index: 1,
 				display_all_text: " [ Alle ]",
-				col_0: "select",
-				col_2: "select",
+				col_0: "none",
+				col_1: "select",
+				col_3: "select",
+				col_4: "select",
 				col_5: "select",
 				col_7: "none",
-				col_8: "none",
-				col_number_format: [null, null, null, "eu", "eu", null, null, null, null],
+				col_8: "select",
+				col_9: "none",
+				col_10: "none",
+				col_number_format: [null, null, null, "eu", null, null, "eu", null, null, null, null],
 				on_keyup: true,  
                 on_keyup_delay: 500,
 				sort: true,
-				sort_config: { sort_types: ["string", "string", "string", "eu", "eu", "string", "none", "none", "none"] }	
+				sort_config: { sort_types: ["none", "string", "string", "string", "string", "string", "eu", "eu", "string", "none", "none"] }	
 		}
 		setFilterGrid("datapoints", tf_props);  
     </script><% 
