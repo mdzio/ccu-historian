@@ -7,7 +7,7 @@
 This repository hosts the CCU-Addon build environment for the CCU-Historian project (http://www.ccu-historian.de/), a long term archive for the communication history directly on RaspberryMatic or virtualized CCU2 solutions like YAHM or LXCCU.
 
 # Supported CCU devices
-* [RaspberryMatic](https://github.com/jens-maus/RaspberryMatic) 2.25.15.20170114 or higher
+* [RaspberryMatic 2.25.15.20170114](https://github.com/jens-maus/RaspberryMatic) or higher
 * [YAHM](https://github.com/leonsio/YAHM)
 * [LXCCU](http://www.lxccu.com/)
 
