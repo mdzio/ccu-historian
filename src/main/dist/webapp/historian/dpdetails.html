@@ -1,15 +1,23 @@
 <%
 import mdz.hc.DataPoint
 import mdz.ccuhistorian.Database
+import groovy.transform.Field
+import org.slf4j.LoggerFactory
+
+@Field
+private final static log = LoggerFactory.getLogger('mdz.ccuhistorian.webapp.DPDetails')
 
 // Bit als Text anzeigen
 def bitToText(value, bitMask) {
 	value==null?'Unbekannt':value&bitMask?'Ja':'Nein'
 }
 
-try {
+utils.catchToLog(log) {
+
 include 'skeleton-header.html' 
 def ctx=request.session.getAttribute('ctx')
+%><meta http-equiv="refresh" content="60">
+<%
 
 // Informationen zum Datenpunkt
 if (!params.i || !params.i.integer)
@@ -26,8 +34,8 @@ def displayName=dataPoint.id.interfaceId+'.'+(dataPoint.attributes.displayName?:
 // Letzter Wert
 def last=database.getLast(dataPoint)
 
-// Anfrageschl¸ssel
-def apiKey=webServer.apiKeys?'&k='+URLEncoder.encode(webServer.apiKeys[0], 'UTF-8'):''
+// Anfrageschl√ºssel
+def apiKey=webServer.config.apiKeys?'&k='+URLEncoder.encode(webServer.config.apiKeys[0], 'UTF-8'):''
  
 %><title>CCU-Historian: Datenpunkt <%=displayName%></title><% 
 
@@ -73,9 +81,9 @@ if (!ctx.user.loggedIn) {
 			<th>Ereignis</th>
 			<th>Sichtbar</th>
 			<th>Wartungsmeldung</th>
-			<th>Man. Best‰tigung</th>
+			<th>Man. Best√§tigung</th>
 			<th>&nbsp;</th>
-			<th>&nbsp;</th>
+			<th>Tabelle</th>
 		</tr>
 		<tr>
 			<td class="number"><%=utils.format(dataPoint.attributes.defaultValue)%></td>
@@ -87,10 +95,10 @@ if (!ctx.user.loggedIn) {
 			<td><%=bitToText(dataPoint.attributes.flags, DataPoint.ATTR_FLAGS_SERVICE) %></td>
 			<td><%=bitToText(dataPoint.attributes.flags, DataPoint.ATTR_FLAGS_STICKY) %></td>
 			<td>&nbsp;</td>
-			<td>&nbsp;</td>
+			<td><%=utils.escapeHtml(dataPoint.historyTableName) %></td>
 		</tr>
 	</table><%
-	if (database.isOfTypeString(dataPoint)) {
+	if (dataPoint.historyString) {
 		%><h2>Werte der letzten Woche</h2>
 		<table>
 			<tr>
@@ -108,20 +116,27 @@ if (!ctx.user.loggedIn) {
 			</tr><%
 		}				
 		%></table>
-		<a href="/query/csv.gy?i=<%=dataPoint.idx%>&amp;d=1W<%=apiKey%>">Als CSV-Datei exportieren</a><%
+		<table>
+			<tr><th>Anzahl der Eintr&auml;ge</th><td class="number"><%=timeSeries.size %></td>
+			<th>Aktionen</th><td><a href="/query/csv.gy?i=<%=dataPoint.idx%>&amp;d=1W<%=apiKey%>">Als CSV-Datei exportieren</a></td></tr>
+		</table>
+		<%
 	} else {
+		def end=new Date()
 		%><h2>24 Stunden-Trend</h2>
-		<p>
-			<img alt="24 Stunden-Trend" src="/query/trend.gy?i=<%=dataPoint.idx%><%=apiKey%>"><br>
-			<a href="/query/csv.gy?i=<%=dataPoint.idx%><%=apiKey%>">Als CSV-Datei exportieren</a>
-		</p>
+		<p><img alt="24 Stunden-Trend" src="/query/trend.gy?i=<%=dataPoint.idx%><%=apiKey%>"></p>
+		<table>
+			<tr><th>Anzahl der Eintr&auml;ge</th><td class="number"><%=database.getCount(dataPoint, end-1, end) %></td>
+			<th>Aktionen</th><td><a href="/query/csv.gy?i=<%=dataPoint.idx%><%=apiKey%>">Als CSV-Datei exportieren</a></td></tr>
+		</table>
 		<h2>Wochen-Trend</h2>
-		<p>
-			<img alt="Wochen-Trend" src="/query/trend.gy?i=<%=dataPoint.idx%>&amp;d=1W<%=apiKey%>"><br>
-			<a href="/query/csv.gy?i=<%=dataPoint.idx%>&amp;d=1W<%=apiKey%>">Als CSV-Datei exportieren</a>
-		</p><% 
+		<p><img alt="Wochen-Trend" src="/query/trend.gy?i=<%=dataPoint.idx%>&amp;d=1W<%=apiKey%>"></p>
+		<table>
+			<tr><th>Anzahl der Eintr&auml;ge</th><td class="number"><%=database.getCount(dataPoint, end-7, end) %></td>
+			<th>Aktionen</th><td><a href="/query/csv.gy?i=<%=dataPoint.idx%>&amp;d=1W<%=apiKey%>">Als CSV-Datei exportieren</a></td></tr>
+		</table><%
 	}
 }
 include 'skeleton-end.html'
-} catch (Throwable t) { t.printStackTrace(out) }
+} // catchToLog
 %>

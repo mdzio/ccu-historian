@@ -1,16 +1,23 @@
 import groovy.time.TimeCategory
 import java.text.*
 import mdz.ccuhistorian.Database
+import groovy.transform.Field
+import org.slf4j.LoggerFactory
 
-// Schlüsselwort überprüfen
-if (webServer.apiKeys)
-	if (!params.k || !webServer.apiKeys.contains(params.k))
+@Field
+private final static log = LoggerFactory.getLogger('mdz.ccuhistorian.webapp.Csv')
+
+utils.catchToLog(log) {
+
+// SchlÃ¼sselwort Ã¼berprÃ¼fen
+if (webServer.config.apiKeys)
+	if (!params.k || !webServer.config.apiKeys.contains(params.k))
 		throw new Exception('Access denied')	
 
 // Aufrufparameter auswerten
-if (!params.i || !params.i.integer)
+if (!params.i)
 	throw new Exception('Page parameter i (data point id) not set or invalid')
-def dpId=params.i as Integer
+def dataPoint=utils.parseDataPoint(params.i, database)
 def begin=utils.parseDate(params.b)
 def duration=utils.parseDuration(params.d)
 def end=utils.parseDate(params.e)
@@ -26,11 +33,8 @@ use (TimeCategory) {
 }	}	}
 
 // Zeitreihe abfragen
-def dataPoint=database.getDataPoint(dpId)
-if (!dataPoint)
-	throw new Exception("Data point with id $dpId not exists")
 def timeSeries
-if (database.isOfTypeString(dataPoint))
+if (dataPoint.historyString)
 	timeSeries=database.getTimeSeriesRaw(dataPoint, begin, end)
 else
 	timeSeries=database.getTimeSeries(dataPoint, begin, end)
@@ -42,7 +46,7 @@ def sb=new StringBuilder()
 sb << displayName << ';;\n'
 sb << 'Zeitstempel;Wert;Status\n'
 def valueFormatter
-if (database.isOfTypeString(dataPoint)) {
+if (dataPoint.historyString) {
 	valueFormatter={ '"'+it.tr('"', '""')+'"' }
 } else {
 	def numberFormat=new DecimalFormat('#,##0.###')
@@ -57,3 +61,5 @@ def fileName=displayName.replaceAll(/[^a-zA-Z0-9_]/, '_')+'.csv'
 response.contentType='text/csv'
 response.setHeader 'Content-disposition', "attachment; filename=$fileName"
 out << sb
+
+} // catchToLog

@@ -1,5 +1,12 @@
 <% 
-try {
+import groovy.transform.Field
+import org.slf4j.LoggerFactory
+
+@Field
+private final static log = LoggerFactory.getLogger('mdz.ccuhistorian.webapp.Config')
+
+utils.catchToLog(log) {
+
 include 'skeleton-header.html' 
 def ctx=request.session.getAttribute('ctx')
 def errmsg=[]
@@ -53,5 +60,5 @@ if (!ctx.user.loggedIn) {
 	</form><% 
 }
 include 'skeleton-end.html' 
-} catch (Throwable t) { t.printStackTrace(out) }
+} // catchToLog
 %>

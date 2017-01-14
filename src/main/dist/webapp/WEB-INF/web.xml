@@ -17,7 +17,11 @@
 		<init-param>
       		<param-name>generated.by</param-name>
       		<param-value>false</param-value>
-    	</init-param>	
+    	</init-param>
+    	<init-param>
+        	<param-name>groovy.source.encoding</param-name>
+        	<param-value>UTF-8</param-value>
+        </init-param>	
     </servlet>
 	<servlet-mapping>
 		<servlet-name>Template</servlet-name>

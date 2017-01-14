@@ -1,5 +1,12 @@
 <%
-try {
+import groovy.transform.Field
+import org.slf4j.LoggerFactory
+
+@Field
+private final static log = LoggerFactory.getLogger('mdz.ccuhistorian.webapp.SkeletonMenu')
+
+utils.catchToLog(log) {
+
 def ctx=session.getAttribute('ctx') 
 %></head><body>
 <table id="collayout"><tr>
@@ -8,18 +15,32 @@ def ctx=session.getAttribute('ctx')
 if (ctx.user.loggedIn) { 
 		%><table class="menu">
 			<tr><th>Men&uuml;</th></tr>
-			<tr><td><a href="index.html">&Uuml;bersicht Datenpunkte</a></td></tr>
-			<tr><td><a href="dbmanage.html">Verwaltung Datenpunkte</a></td></tr>
-			<tr><td><a href="tools.html">Werkzeuge</a></td></tr>
+			<tr><td><a href="/historian/index.html">&Uuml;bersicht Datenpunkte</a></td></tr>
+			<tr><td><a href="/historian/dbmanage.html">Verwaltung Datenpunkte</a></td></tr>
+			<tr><td><a href="/historian/tools.html">Werkzeuge</a></td></tr>
 <!-- 		
-FIXME: CCU-Adressen aus dem Interface Manager extrahieren!
+TODO: CCU-Adressen aus dem Interface Manager extrahieren!
 			<tr><td><a href="http://ccu.address" target="_blank">CCU</a></td></tr>
- -->	
-			<tr><td><a href="http://<%=webServer.historianAddress %>:<%=database.webPort %>" target="_blank">Datenbank</a></td></tr>
-			<tr><td><a href="config.html">Konfiguration</a></td></tr>
-		</table><%
+ -->
+<% 
+	def port
+	try { port=database.config.webPort } catch (e) {}
+	if (port) {
+%>	
+			<tr><td><a href="http://<%=webServer.historianAddress %>:<%=port %>" target="_blank">Datenbank</a></td></tr>
+<% 	} %>	
+
+
+			<tr><td><a href="/historian/config.html">Konfiguration</a></td></tr>
+<%
+webServer.config.menuLinks.each { k, v ->	
+%>			<tr><td><a href="<%=v.address %>"><%=utils.escapeHtml(v.text) %></a></td></tr>
+<%
+}			
+%>		</table>
+<%
 	if (ctx.prefs.get('password_admin', '')!='') {	
-		%><form action="index.html" method="post">
+		%><form action="/historian/index.html" method="get">
 			<table class="menu">
 				<tr><th>Benutzer</th></tr>
 				<tr><td><input name="logout" type="submit" value=" Abmelden "></td></tr>
@@ -29,5 +50,5 @@ FIXME: CCU-Adressen aus dem Interface Manager extrahieren!
 } else { 
 		%><p>Bitte melden Sie sich an!</p><% 
 } 
-} catch (Throwable t) { t.printStackTrace(out) }
+} // catchToLog
 %>
