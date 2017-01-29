@@ -1,6 +1,8 @@
 <%
+   //Tipp gefunden auf http://stackoverflow.com/questions/16975404/groovy-utc-date-formatting
 import groovy.transform.Field
 import org.slf4j.LoggerFactory
+import groovy.time.TimeCategory
 
 @Field
 private final static log = LoggerFactory.getLogger('mdz.ccuhistorian.webapp.SkeletonMenu')
@@ -32,6 +34,12 @@ TODO: CCU-Adressen aus dem Interface Manager extrahieren!
 
 
 			<tr><td><a href="/historian/config.html">Konfiguration</a></td></tr>
+				<tr><td>
+	<%
+		def lastDate = new Date()
+		println lastDate.format("dd.MM.yyyy' 'HH:mm:ss")
+	%>
+</td></tr>
 <%
 webServer.config.menuLinks.each { k, v ->	
 %>			<tr><td><a href="<%=v.address %>"><%=utils.escapeHtml(v.text) %></a></td></tr>
