@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory
 private final static log = LoggerFactory.getLogger('mdz.ccuhistorian.webapp.Example1')
 
 // Standardseitenkopf einbinden
-include '/historian/skeleton-header.html'
+include '/historian/skeleton-header.gy'
 
 // Kontext mit weiteren Informationen, z.B. zum angemeldeten Benutzer, holen 
 def ctx=request.session.getAttribute('ctx')
@@ -16,10 +16,10 @@ def ctx=request.session.getAttribute('ctx')
 html.title 'CCU-Historian: Beispiel 1 - Vorjahresvergleich' 
 
 // Standardmenü einbinden
-include '/historian/skeleton-menu.html'
+include '/historian/skeleton-menu.gy'
 
 // Wechsel zum Inhaltsbereich einbinden
-include '/historian/skeleton-content.html'
+include '/historian/skeleton-content.gy'
 
 // Seiteninhalt (rechter Bereich)
 html.h1 'Beispielseite 1 - Vorjahresvergleich'
@@ -109,5 +109,5 @@ if (ex) {
 }
 
 // Seitenende einbinden
-include '/historian/skeleton-end.html'
+include '/historian/skeleton-end.gy'
 %>

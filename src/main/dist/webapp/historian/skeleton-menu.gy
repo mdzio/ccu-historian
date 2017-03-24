@@ -1,0 +1,64 @@
+import groovy.transform.Field
+import org.slf4j.LoggerFactory
+import mdz.hc.itf.hm.HmSysVarInterface
+
+@Field
+private final static log = LoggerFactory.getLogger('mdz.ccuhistorian.webapp.SkeletonMenu')
+
+utils.catchToLog(log) {
+
+	def ctx=session.getAttribute('ctx') 
+	
+	// layout
+	println '</head><body><table id="collayout"><tr><td id="leftcol">'
+	
+	// menu title
+	html.h1 'CCU-Historian' 
+	
+	if (ctx.user.loggedIn) {
+	 
+		// navigation menu
+		html.table(class:'menu') {
+			tr { th "Menü" }
+			tr { td { a href:'/historian/index.html', 'Übersicht Datenpunkte' } }
+			tr { td { a href:'/historian/dbmanage.html', 'Verwaltung Datenpunkte' } }
+			tr { td { a href:'/historian/tools.html', 'Werkzeuge' } }
+			
+			// database web access
+			def port
+			try { port=database.config.webPort } catch (e) {}
+			if (port)
+				tr { td { a href:"http://$webServer.historianAddress:$port", target:'_blank', 'Datenbank' } }
+			
+			// CCU web UI
+			def ccuNo=1
+			interfaceManager.interfaces.each { itfName, itf ->
+				// each CCU has one HmSysVarInterface 
+				if (itf instanceof HmSysVarInterface) {
+					tr { td { a href:"http://$itf.scriptClient.address", target:'_blank', 'CCU '+(ccuNo>1?ccuNo:'') } }
+					ccuNo++
+				}
+			}
+			
+			tr { td { a href:'/historian/config.html', 'Konfiguration' } }
+			tr { td { a href:'/historian/diagnosis.html', 'Diagnose' } }
+			
+			// configured menu entries
+			webServer.config.menuLinks.each { k, v ->	
+				tr { td { a href:v.address, v.text } }
+			}
+		} 
+
+		// logout button
+		if (ctx.prefs.get('password_admin', '')!='') {
+			html.form(action:"/historian/index.html", method:"get") {
+				table(class:"menu") {
+					tr { th "Benutzer" }
+					tr { td { input name:"logout", type:"submit", value:" Abmelden " }	}
+				}
+			}	
+		}
+	} else { 
+	  	html.p 'Bitte melden Sie sich an!' 
+	} 
+} // catchToLog
