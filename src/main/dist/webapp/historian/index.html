@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 private final static log = LoggerFactory.getLogger('mdz.ccuhistorian.webapp.Index')
 
 utils.catchToLog(log) {
-include 'skeleton-header.gy'
+include 'skeleton-header.html'
 def ctx=request.session.getAttribute('ctx')
 if (!ctx.user.loggedIn) { 
 	%><title>CCU-Historian: Anmeldung</title><% 
@@ -16,8 +16,8 @@ if (!ctx.user.loggedIn) {
 	%><title>CCU-Historian: &Uuml;bersicht Datenpunkte</title>
 	<script src="TableFilter/tablefilter_all_min.js" type="text/javascript"></script><% 
 }
-include 'skeleton-menu.gy'
-include 'skeleton-content.gy'
+include 'skeleton-menu.html'
+include 'skeleton-content.html'
 if (!ctx.user.loggedIn) { 
 	%><h1>Anmeldung</h1><%
 	if (ctx.user.logInFailed) {
@@ -75,6 +75,8 @@ if (!ctx.user.loggedIn) {
 				col_0: "none",
 				col_1: "select",
 				col_3: "select",
+				col_4: "select",
+				col_5: "select",
 				col_7: "none",
 				col_8: "select",
 				col_9: "none",
@@ -88,6 +90,6 @@ if (!ctx.user.loggedIn) {
 		setFilterGrid("datapoints", tf_props);  
     </script><% 
 }
-include 'skeleton-end.gy' 
+include 'skeleton-end.html' 
 } // catchToLog
 %>
