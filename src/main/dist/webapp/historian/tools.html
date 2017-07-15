@@ -18,12 +18,12 @@ def getDataPoint(id) {
 
 utils.catchToLog(log) {
 
-include 'skeleton-header.html'
+include 'skeleton-header.gy'
 def ctx=request.session.getAttribute('ctx')
 
 %><title>CCU-Historian: Werkzeuge</title><%
-include 'skeleton-menu.html'
-include 'skeleton-content.html'
+include 'skeleton-menu.gy'
+include 'skeleton-content.gy'
 %><h1>Werkzeuge</h1><%
 
 if (!ctx.user.loggedIn) { 
@@ -150,6 +150,6 @@ if (!ctx.user.loggedIn) {
 		</form><%
 	} 
 }
-include 'skeleton-end.html' 
+include 'skeleton-end.gy' 
 } // catchToLog
 %>

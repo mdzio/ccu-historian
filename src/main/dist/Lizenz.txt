@@ -1,20 +1,20 @@
-Copyright (c) 2011-2016 MDZ (info@ccu-historian.de)
+Copyright (c) 2011-2017 MDZ (info@ccu-historian.de)
 
 Hiermit wird unentgeltlich, jeder Person, die eine Kopie der Software und der
-zugehörigen Dokumentationen (die "Software") erhält, die Erlaubnis erteilt,
-uneingeschränkt zu benutzen, inklusive und ohne Ausnahme, dem Recht, sie zu
-verwenden, kopieren, ändern, fusionieren, verlegen, verbreiten, 
+zugehÃ¶rigen Dokumentationen (die "Software") erhÃ¤lt, die Erlaubnis erteilt,
+uneingeschrÃ¤nkt zu benutzen, inklusive und ohne Ausnahme, dem Recht, sie zu
+verwenden, kopieren, Ã¤ndern, fusionieren, verlegen, verbreiten, 
 unterlizenzieren und/oder zu verkaufen, und Personen, die diese Software
 erhalten, diese Rechte zu geben, unter den folgenden Bedingungen:
 
 Der obige Urheberrechtsvermerk und dieser Erlaubnisvermerk sind in allen
 Kopien oder Teilkopien der Software beizulegen.
 
-DIE SOFTWARE WIRD OHNE JEDE AUSDRÜCKLICHE ODER IMPLIZIERTE GARANTIE 
-BEREITGESTELLT, EINSCHLIESSLICH DER GARANTIE ZUR BENUTZUNG FÜR DEN 
+DIE SOFTWARE WIRD OHNE JEDE AUSDRÃœCKLICHE ODER IMPLIZIERTE GARANTIE 
+BEREITGESTELLT, EINSCHLIESSLICH DER GARANTIE ZUR BENUTZUNG FÃœR DEN 
 VORGESEHENEN ODER EINEM BESTIMMTEN ZWECK SOWIE JEGLICHER RECHTSVERLETZUNG,
-JEDOCH NICHT DARAUF BESCHRÄNKT. IN KEINEM FALL SIND DIE AUTOREN ODER
-COPYRIGHTINHABER FÜR JEGLICHEN SCHADEN ODER SONSTIGE ANSPRÜCHE HAFTBAR ZU 
-MACHEN, OB INFOLGE DER ERFÜLLUNG EINES VERTRAGES, EINES DELIKTES ODER ANDERS
+JEDOCH NICHT DARAUF BESCHRÃ„NKT. IN KEINEM FALL SIND DIE AUTOREN ODER
+COPYRIGHTINHABER FÃœR JEGLICHEN SCHADEN ODER SONSTIGE ANSPRÃœCHE HAFTBAR ZU 
+MACHEN, OB INFOLGE DER ERFÃœLLUNG EINES VERTRAGES, EINES DELIKTES ODER ANDERS
 IM ZUSAMMENHANG MIT DER SOFTWARE ODER SONSTIGER VERWENDUNG DER SOFTWARE
 ENTSTANDEN.

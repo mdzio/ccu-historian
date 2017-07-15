@@ -1,0 +1,5 @@
+// end of menu
+html.p id:'version', 'V'+utils.historianVersion
+
+// layout
+println '</td><td id="rightcol">'
