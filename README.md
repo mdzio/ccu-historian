@@ -1,7 +1,8 @@
 &nbsp;![CCU-Historian](https://github.com/mdzio/ccu-historian/raw/master/doc/ccu-historian-logo.png)
 
+[![Release](https://img.shields.io/github/release/mdzio/ccu-historian.svg)](https://github.com/mdzio/ccu-historian/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/mdzio/ccu-historian/latest/total.svg)](https://github.com/mdzio/ccu-historian/releases/latest)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=SF4BR9ZE2JUBS)
-[![Code Climate](https://codeclimate.com/github/mdzio/cuxd/badges/gpa.svg)](https://codeclimate.com/github/mdzio/ccu-historian)
 [![Github Issues](http://githubbadges.herokuapp.com/mdzio/ccu-historian/issues.svg)](https://github.com/mdzio/ccu-historian/issues)
 
 Der CCU-Historian ist ein Langzeitarchiv für die Zentrale (CCU) des [Hausautomations-Systems](http://de.wikipedia.org/wiki/Hausautomation) HomeMatic der Firma [eQ-3](http://www.eq-3.de/).
