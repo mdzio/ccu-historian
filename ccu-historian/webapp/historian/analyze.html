@@ -1,0 +1,134 @@
+<%
+import groovy.time.TimeCategory
+import groovy.transform.Field
+import org.slf4j.LoggerFactory
+
+@Field
+private final static log = LoggerFactory.getLogger('mdz.ccuhistorian.webapp.Analyze')
+
+utils.catchToLog(log) {
+
+include 'skeleton-header.html' 
+def ctx=request.session.getAttribute('ctx')
+
+def dpIds
+if (params.i)
+	try {
+		if (params.i instanceof String)
+			dpIds=[params.i as Integer]
+		else
+			dpIds=params.i.collect { it as Integer }
+	} catch (NumberFormatException e) {} 	
+
+def begin=utils.parseDate(params.b)
+def duration=utils.parseDuration(params.d)
+def end=utils.parseDate(params.e)
+use (TimeCategory) {
+	if (!begin) { 
+		if (!end) end=new Date()
+		if (!duration) begin=end-1
+		else begin=end-duration
+	} else { 
+		if (!end) {
+			if (!duration) end=new Date()
+			else end=begin+duration
+}	}	}
+
+if (params.trend_set || !ctx.timerange) 
+	ctx.timerange=[begin: begin, end:end]
+else {
+	def d=ctx.timerange.end.time-ctx.timerange.begin.time
+	if (params.trend_back) {
+		ctx.timerange.begin.time-=d/3
+		ctx.timerange.end.time-=d/3
+	} else if (params.trend_forward) {
+		ctx.timerange.begin.time+=d/3
+		ctx.timerange.end.time+=d/3
+	} else if (params.trend_zoomin) {
+		ctx.timerange.begin.time+=d/4
+		ctx.timerange.end.time-=d/4
+	} else if (params.trend_zoomout) {
+		ctx.timerange.begin.time-=d/2
+		ctx.timerange.end.time+=d/2
+	}
+}
+
+if (params.g) ctx.groups=true else ctx.groups=false
+
+// Anfrageschlüssel
+def apiKey=webServer.config.apiKeys?'&k='+URLEncoder.encode(webServer.config.apiKeys[0], 'UTF-8'):''
+
+%><title>CCU-Historian: Trend-Darstellung</title><% 
+include 'skeleton-menu.html'
+include 'skeleton-content.html'
+%><h1>Trend-Darstellung</h1><%
+
+if (!ctx.user.loggedIn) { 
+	%><p class="bad">Sie sind nicht (mehr) angemeldet oder Ihre Berechtigungen reichen nicht aus!</p>
+	<p><a href="index.html">Zur Anmeldung</a></p><% 
+} else if (!dpIds) { 
+	%><p class="bad">Es wurden keine Datenpunkte ausgew&auml;hlt!</p><% 
+} else {
+	def trendBegin=ctx.timerange.begin.format('yyyyMMddHHmmss')
+	def trendEnd=ctx.timerange.end.format('yyyyMMddHHmmss')
+	def dur=ctx.timerange.end.time-ctx.timerange.begin.time
+	def groups=ctx.groups?( '&g='+(1..dpIds.size()).join('&g=') ):''
+	%><form action="analyze.html" method="get"><%
+	dpIds.each { %><input type="hidden" name="i" value="<%=it %>"><% }
+	%><table>
+		<tr>
+			<th>Zeitbereich</th>		
+			<th>Startzeit</th>		
+			<th>L&auml;nge</th>
+			<th>Stopzeit</th>
+		</tr>
+		<tr>
+			<th>Vorgabe</th>		
+			<td><input name="b" type="text" size="30" maxlength="30" value="<%=utils.escapeHtml(params.b?:'') %>"/></td>
+			<td><input name="d" type="text" size="30" maxlength="30" value="<%=utils.escapeHtml(params.d?:'') %>"/></td>
+			<td><input name="e" type="text" size="30" maxlength="30" value="<%=utils.escapeHtml(params.e?:'') %>"/></td>
+		</tr>
+		<tr>
+			<th>Format</th>		
+			<td>YYYYMMDDhhmmss <i>oder</i><br/>DD.MM.YYYY hh:mm:ss</td>
+			<td>
+				[+/-]<i>Anzahl</i><b>Zeitraum</b>&nbsp;...<br/>
+				Zeitraum: Y, M, W, D, h, m, s
+			</td>
+			<td>YYYYMMDDhhmmss <i>oder</i><br/>DD.MM.YYYY hh:mm:ss</td>
+		</tr>
+		<tr>
+			<th>Aktuell</th>		
+			<td><%=utils.format(ctx.timerange.begin) %></td>
+			<td><%=utils.formatDuration(ctx.timerange.end.time-ctx.timerange.begin.time) %></td>
+			<td><%=utils.format(ctx.timerange.end) %></td>
+		</tr>
+	</table>
+	<table><tr>
+		<th>Aktion</th>
+		<td>
+			<input name="trend_set" type="submit" value=" Vorgabe &uuml;bernehmen "/>
+			<input name="trend_back" type="submit" value=" <- Zeitl. zur&uuml;ck "/>
+			<input name="trend_zoomin" type="submit" value=" + Vergr&ouml;&szlig;ern "<%=dur<2000?'disabled="disabled"':'' %>/>
+			<input name="trend_zoomout" type="submit" value=" - Verkleinern "/>
+			<input name="trend_forward" type="submit" value=" Zeitl. vor -> "/>
+		</td>
+	</tr></table><%
+	if (dur<1000) {
+		%><p class="bad">Ung&uuml;ltige Start- oder Stopzeit!</p><%
+	} else { 
+		%><p>
+			<img alt="Trend-Darstellung" src="/query/trend.gy?w=1000&h=600&i=<%=dpIds.join('&i=')%>&b=<%=trendBegin %>&e=<%=trendEnd %><%=apiKey%><%=groups%>">
+		</p><%
+	}
+	%><table><tr>
+		<th>Optionen</th>
+		<td>Trends übereinander anordnen</td>
+		<td><input type="checkbox" name="g" value="1"<%=ctx.groups?' checked="checked"':''%>></td>
+		<td><input name="trend_refresh" type="submit" value=" Aktualisieren "/></td>
+	</tr></table>
+	</form><% 
+}
+include 'skeleton-end.html'
+} // catchToLog
+%>

@@ -1,0 +1,95 @@
+<% 
+import mdz.hc.DataPoint
+import mdz.ccuhistorian.Database
+import groovy.transform.Field
+import org.slf4j.LoggerFactory
+
+@Field
+private final static log = LoggerFactory.getLogger('mdz.ccuhistorian.webapp.Index')
+
+utils.catchToLog(log) {
+include 'skeleton-header.html'
+def ctx=request.session.getAttribute('ctx')
+if (!ctx.user.loggedIn) { 
+	%><title>CCU-Historian: Anmeldung</title><% 
+} else { 
+	%><title>CCU-Historian: &Uuml;bersicht Datenpunkte</title>
+	<script src="TableFilter/tablefilter_all_min.js" type="text/javascript"></script><% 
+}
+include 'skeleton-menu.html'
+include 'skeleton-content.html'
+if (!ctx.user.loggedIn) { 
+	%><h1>Anmeldung</h1><%
+	if (ctx.user.logInFailed) {
+		%><p class="bad">Die Anmeldung ist fehlgeschlagen!</p><%
+	}
+	%><form method="post">
+		<table>
+			<tr>
+				<th>Passwort</th>
+				<td><input name="login_password" type="password" maxlength="30"/></td>
+				<td><input name="login" type="submit" value=" Anmelden "></td>
+			</tr>
+		</table>
+	</form><% 
+} else { 
+	%><h1>&Uuml;bersicht Datenpunkte</h1>
+	<form action="analyze.html" method="get">	
+	<table><tr><th>Aktion f&uuml;r die ausgew&auml;hlten Datenpunkte</th><td><input name="trend_set" type="submit" value=" Trend-Darstellung "></td></tr></table>
+	<table id="datapoints">
+		<thead><tr>
+			<th style="width:3em">Ausw.</th>
+			<th>Schnittstelle</th>		
+			<th>Kanal</th>
+			<th>Parameter</th>
+			<th>Raum</th>
+			<th>Gewerk</th>
+			<th style="width:3em">ID</th>
+			<th>Akt. Wert</th>
+			<th>Einheit</th>
+			<th>Zeitstempel</th>
+			<th>Details</th>
+		</tr></thead><tbody><%
+	database.dataPoints.findAll { !it.historyHidden }.each {
+		def last=database.getLast(it)
+		%><tr>
+			<td><input type="checkbox" name="i" value="<%=it.idx%>"<%=it.historyString?' disabled="disabled"':''%>></td>
+			<td><%=utils.escapeHtml(it.id.interfaceId)%></td>
+			<td><%=utils.escapeHtml(it.attributes.displayName?:it.id.address)%></td>
+			<td><%=utils.escapeHtml(it.id.identifier)%></td>
+			<td><%=utils.escapeHtml(it.attributes.room)%></td>
+			<td><%=utils.escapeHtml(it.attributes.function)%></td>
+			<td class="number"><%=it.idx%></td>
+			<td class="number"><%=utils.format(last?.value)%></td>
+			<td><%=utils.escapeHtml(it.attributes.unit)%></td>
+			<td><%=utils.format(last?.timestamp)%></td>
+			<td><a href="dpdetails.html?i=<%=it.idx%>">Details</a></td>
+		</tr><%
+		} 
+	%></tbody></table>
+	</form>
+	<script type="text/javascript">  
+		var tf_props={
+				filters_row_index: 1,
+				display_all_text: " [ Alle ]",
+				col_0: "none",
+				col_1: "select",
+				col_3: "select",
+				col_4: "select",
+				col_5: "select",
+				col_7: "none",
+				col_8: "select",
+				col_9: "none",
+				col_10: "none",
+				col_number_format: [null, null, null, "eu", null, null, "eu", null, null, null, null],
+				on_keyup: true,  
+                on_keyup_delay: 500,
+				sort: true,
+				sort_config: { sort_types: ["none", "string", "string", "string", "string", "string", "eu", "eu", "string", "none", "none"] }	
+		}
+		setFilterGrid("datapoints", tf_props);  
+    </script><% 
+}
+include 'skeleton-end.html' 
+} // catchToLog
+%>
