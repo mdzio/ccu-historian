@@ -1,0 +1,301 @@
+<!-- An ANT build file for JCommon. -->
+
+<!-- Written by David Gilbert. -->
+<!-- 24-Jan-2003 -->
+
+<!-- This script has been tested with Ant version 1.8.2. -->
+
+<!-- Several temporary directories are created while the script is -->
+<!-- running: "../build" and "../distribution".  -->
+
+<!-- A "../javadoc" directory will be created for the Javadoc -->
+<!-- HTML pages. -->
+
+<!-- The script should work for the distribution and also the CVS -->
+<!-- repository (which is shared with the JFreeChart project in a -->
+<!-- slightly messy way). -->
+
+<project name="jcommon" default="all" basedir="..">
+
+  <!-- Initialisation. -->
+  <target name="initialise" description="Initialise required settings.">
+    <tstamp/>
+
+    <property name="builddir" value="build"/>
+
+    <dirname property="antfile.dir" file="${ant.file}"/>
+    <property file="${antfile.dir}/build.properties"/>
+
+    <path id="build-xml.classpath">
+      <pathelement location="${libdir}/${jaxp-jar-file}"/>
+      <pathelement location="${jcommon-jar-file}"/>
+    </path>
+
+    <path id="junit.classpath">
+      <pathelement location="${jcommon-jar-file}"/>
+      <pathelement location="${lib}/${jaxp-jar-file}"/>
+      <pathelement location="${junit-dir}/${junit-jar-file}"/>
+    </path>
+  </target>
+
+  <!-- Compile the JCommon classes -->
+  <target name="compile" depends="initialise"
+    description="Compile the JCommon source code.">
+
+    <!-- create a temp build directory -->
+    <mkdir dir="${builddir}"/>
+
+    <!-- compile the source -->
+    <javac srcdir="src/main/java"
+      destdir="${builddir}"
+      deprecation="${build.deprecation}" debug="${build.debug}"
+      optimize="${build.optimize}" target="${build.target}" source="${build.source}">
+      <include name="org/jfree/*"/>
+      <include name="org/jfree/base/**"/>
+      <include name="org/jfree/date/*"/>
+      <include name="org/jfree/io/*"/>
+      <include name="org/jfree/layout/*"/>
+      <include name="org/jfree/resources/*"/>
+      <include name="org/jfree/text/*"/>
+      <include name="org/jfree/threads/*"/>
+      <include name="org/jfree/ui/*"/>
+      <include name="org/jfree/ui/action/*"/>
+      <include name="org/jfree/ui/tabbedui/*"/>
+      <include name="org/jfree/ui/about/*"/>
+      <include name="org/jfree/ui/about/resources/*"/>
+      <include name="org/jfree/util/*"/>
+      <include name="com/keypoint/*"/>
+    </javac>
+
+    <!-- copy across .properties files -->
+    <copy todir="${builddir}/org/jfree/ui/">
+      <fileset dir="src/main/java/org/jfree/ui">
+        <include name="*.properties"/>
+      </fileset>
+    </copy>
+
+    <copy todir="${builddir}/org/jfree/ui/about/">
+      <fileset dir="src/main/java/org/jfree/ui/about">
+        <include name="*.txt"/>
+      </fileset>
+    </copy>
+
+    <!-- copy across .properties files -->
+    <copy todir="${builddir}/org/jfree/base/">
+      <fileset dir="src/main/java/org/jfree/base">
+        <include name="*.properties"/>
+      </fileset>
+    </copy>
+
+    <copy todir="${builddir}/org/jfree/base/log">
+      <fileset dir="src/main/java/org/jfree/base/log">
+        <include name="*.properties"/>
+      </fileset>
+    </copy>
+
+    <!-- make the jar -->
+    <jar jarfile="${jcommon-jar-file}" basedir="${builddir}"/>
+
+    <!-- delete the temp directory -->
+    <delete dir="${builddir}"/>
+
+  </target>
+
+
+  <!-- Compile the JCommon classes -->
+  <target name="compile-xml" depends="compile"
+    description="Compile the JCommon source code.">
+
+    <!-- create a temp build directory -->
+    <mkdir dir="${builddir}"/>
+
+    <!-- compile the source -->
+    <javac srcdir="src/main/java"
+      destdir="${builddir}"
+      deprecation="${build.deprecation}" debug="${build.debug}"
+      optimize="${build.optimize}" target="${build.target}" source="${build.source}">
+      <classpath refid="build-xml.classpath" />
+      <include name="org/jfree/xml/**"/>
+    </javac>
+
+    <!-- copy across .properties files -->
+    <copy todir="${builddir}/org/jfree/xml/">
+      <fileset dir="src/main/java/org/jfree/xml">
+        <include name="*.properties"/>
+        <include name="*.dtd"/>
+      </fileset>
+    </copy>
+
+
+    <!-- make the jar -->
+    <jar jarfile="${jcommon-xml-jar-file}" basedir="${builddir}"/>
+
+    <!-- delete the temp directory -->
+    <delete dir="${builddir}"/>
+
+  </target>
+
+  <!-- Generate the JCommon JavaDoc HTML pages -->
+  <target name="javadoc" depends="initialise">
+    <delete dir="javadoc"/>
+    <mkdir dir="javadoc"/>
+    <javadoc destdir="javadoc"
+      windowtitle="JCommon Class Library (version ${jcommon.version})"
+      overview="src/main/java/overview.html"
+      linksource="true">
+      <classpath refid="build-xml.classpath"/>
+      <packageset dir="src/main/java" defaultexcludes="yes">
+        <include name="org/jfree"/>
+        <include name="org/jfree/base"/>
+        <include name="org/jfree/date"/>
+        <include name="org/jfree/io"/>
+        <include name="org/jfree/layout"/>
+        <include name="org/jfree/resources"/>
+        <include name="org/jfree/text"/>
+        <include name="org/jfree/threads"/>
+        <include name="org/jfree/ui"/>
+        <include name="org/jfree/ui/action"/>
+        <include name="org/jfree/ui/tabbedui"/>
+        <include name="org/jfree/ui/about"/>
+        <include name="org/jfree/ui/about/resources"/>
+        <include name="org/jfree/util"/>
+        <include name="com/keypoint"/>
+        <include name="org/jfree/xml/**"/>
+      </packageset>
+    </javadoc>
+  </target>
+
+  <target name="fill-dist-dir">
+    <!-- copy across README -->
+    <copy file="README.md"
+      tofile="distribution/README.md" failonerror="false"/>
+
+    <!-- copy across LICENCE -->
+    <copy file="LICENSE"
+      tofile="distribution/LICENSE"/>
+
+    <!-- copy across runtime jar file -->
+    <copy file="${jcommon-jar-file}"
+      tofile="distribution/${jcommon-jar-file}"/>
+
+    <!-- copy across jcommon-xml jar file -->
+    <copy file="${jcommon-xml-jar-file}"
+      tofile="distribution/${jcommon-xml-jar-file}"/>
+
+    <!-- copy across maven xml files -->
+    <copy file="pom.xml" tofile="distribution/pom.xml"/>
+
+    <!-- copy across junit jar file -->
+    <copy file="${junit-dir}/${junit-jar-file}" tofile="distribution/lib/junit.jar"/>
+
+    <!-- copy across source files -->
+    <copy todir="distribution/src">
+      <fileset dir="src"/>
+    </copy>
+
+    <!-- copy across ant build file (this file) -->
+    <copy file="ant/build.xml"
+      tofile="distribution/ant/build.xml" failonerror="false"/>
+
+    <copy file="ant/build.properties"
+      tofile="distribution/ant/build.properties"/>
+
+    <!-- copy across checkstyle property file -->
+    <copy todir="distribution/checkstyle">
+      <fileset dir="checkstyle"/>
+    </copy>
+  </target>
+
+  <!-- Make .zip distribution for JCommon -->
+  <target name="zip" depends="compile-xml">
+
+    <!-- make a temporary distribution directory -->
+    <mkdir dir="distribution"/>
+
+    <antcall target="fill-dist-dir"/>
+
+    <!-- convert end-of-line characters in text files -->
+    <fixcrlf srcdir="distribution/src"
+      eol="crlf" eof="remove"/>
+
+    <!-- make the zip file -->
+    <zip zipfile="${jcommon.name}-${jcommon.version}.zip">
+      <zipfileset dir="distribution"
+        prefix="${jcommon.name}-${jcommon.version}"/>
+    </zip>
+
+    <!-- delete the temporary distribution directory -->
+    <delete dir="distribution"/>
+
+  </target>
+
+  <!-- Make .tar.gz distribution for JCommon -->
+  <target name="targz" depends="compile-xml">
+
+    <!-- make a temporary distribution directory -->
+    <mkdir dir="distribution"/>
+
+    <antcall target="fill-dist-dir"/>
+
+    <!-- convert end-of-line characters in text files -->
+    <fixcrlf srcdir="distribution/src"
+      eol="lf" eof="remove"/>
+
+    <!-- make the tar.gz file -->
+    <tar tarfile="${jcommon.name}-${jcommon.version}.tar">
+      <tarfileset dir="distribution"
+        prefix="${jcommon.name}-${jcommon.version}"/>
+    </tar>
+    <gzip zipfile="${jcommon.name}-${jcommon.version}.tar.gz"
+      src="${jcommon.name}-${jcommon.version}.tar"/>
+    <delete file="${jcommon.name}-${jcommon.version}.tar"/>
+
+    <!-- delete the temporary distribution directory -->
+    <delete dir="distribution"/>
+
+  </target>
+
+  <target name="maven-bundle" depends="zip" >
+    <!-- make a temporary distribution directory -->
+    <mkdir dir="distribution"/>
+    <!-- copy across LICENCE -->
+    <copy file="LICENSE" tofile="distribution/LICENSE"/>
+    
+    <filterchain id="version.filters">
+       <replacetokens>
+         <token key="VERSION" value="${jcommon.version}"/>
+       </replacetokens>
+    </filterchain>
+    
+    <!-- copy across runtime jar file -->
+    <copy file="${jcommon-jar-file}" tofile="distribution/${jcommon-jar-file}"/>
+
+    <!-- make the jar -->
+    <jar jarfile="${jcommon-bundle-file}" basedir="distribution"/>
+
+    <!-- delete the temporary distribution directory -->
+    <delete dir="distribution"/>
+
+    <!-- make a temporary distribution directory -->
+    <mkdir dir="distribution"/>
+    <!-- copy across LICENCE -->
+    <copy file="LICENSE" tofile="distribution/LICENSE"/>
+
+    <!-- copy across runtime jar file -->
+    <copy file="${jcommon-xml-jar-file}" tofile="distribution/${jcommon-xml-jar-file}"/>
+
+    <!-- make the jar -->
+    <jar jarfile="${jcommon-xml-bundle-file}" basedir="distribution"/>
+
+    <!-- delete the temporary distribution directory -->
+    <delete dir="distribution"/>
+  </target>
+
+
+  <!-- ALL -->
+  <target name="all"
+    depends="compile,compile-xml,javadoc,zip,targz,maven-bundle"
+    description="Compiles JCommon, builds the jar files, generates the Javadoc HTML pages and creates distribution files (.zip and .tar.gz).">
+  </target>
+
+</project>

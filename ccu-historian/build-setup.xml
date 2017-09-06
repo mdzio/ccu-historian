@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="setup" default="build">
+	<target name="build">
+		<property file="build.properties"/>
+		<echo>Version: ${version}</echo>
+		<replaceregexp 
+			file="src/mdz/ccuhistorian/Main.groovy" 
+			match="(version\s*=\s*)'[^']+'" 
+			replace="\1'${version}'"
+		/>
+		<echo file="build/VERSION.txt">${version}</echo>
+	</target>
+</project>

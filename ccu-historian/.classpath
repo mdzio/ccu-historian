@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="GROOVY_DSL_SUPPORT"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hc-utils"/>
+	<classpathentry kind="lib" path="/external-libs/slf4j-1.7.7/slf4j-api-1.7.7.jar"/>
+	<classpathentry kind="lib" path="/external-libs/slf4j-1.7.7/slf4j-jdk14-1.7.7.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/mdz-utils"/>
+	<classpathentry kind="lib" path="/external-libs/h2-1.3.176/h2-1.3.176.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/external-libs/jetty-all-7.2.2/jetty-all-7.2.2.v20101205.jar"/>
+	<classpathentry kind="lib" path="/external-libs/javax.servlet.jsp-2.1.0/javax.servlet.jsp_2.1.0.v201004190952.jar"/>
+	<classpathentry kind="lib" path="/external-libs/javax.el-api-1.1.2/javax.el-api-1.1.2.jar"/>
+	<classpathentry kind="lib" path="/external-libs/commons-cli-1.2/commons-cli-1.2.jar"/>
+	<classpathentry kind="lib" path="/external-libs/jfreechart-1.0.19/lib/jfreechart-1.0.19.jar"/>
+	<classpathentry kind="lib" path="/external-libs/jcommon-1.0.23/jcommon-1.0.23.jar"/>
+	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="dist-generic" default="build">
+	<!-- TODO: implement clean task -->
+	<target name="build">
+		<property file="../ccu-historian/build.properties"/>
+		<property name="destfile" value="build/ccu-historian-${version}-bin.zip"/>
+		<zip destfile="${destfile}">
+			<fileset dir="src"/>
+			<fileset dir="../ccu-historian/build"/>
+			<file file="../LICENSE.txt"/>
+			<file file="../doc/CCU-Historian_Kurzanleitung.pdf"/>
+		</zip>
+	</target>
+</project>
