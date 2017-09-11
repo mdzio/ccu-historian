@@ -12,7 +12,7 @@
 			<arguments>
 				<dictionary>
 					<key>LaunchConfigHandle</key>
-					<value>&lt;project&gt;/.externalToolBuilders/Distribution Builder.launch</value>
+					<value>&lt;project&gt;/.externalToolBuilders/Generic Distribution Builder.launch</value>
 				</dictionary>
 			</arguments>
 		</buildCommand>
