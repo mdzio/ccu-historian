@@ -7,7 +7,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/mdz-utils"/>
-	<classpathentry kind="lib" path="/external-libs/slf4j-1.7.7/slf4j-api-1.7.7.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hc-utils"/>
+	<classpathentry kind="lib" path="/external-libs/slf4j-1.7.25/slf4j-api-1.7.25.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

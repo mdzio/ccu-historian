@@ -6,11 +6,11 @@
 	<classpathentry exported="true" kind="con" path="GROOVY_DSL_SUPPORT"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hc-utils"/>
-	<classpathentry kind="lib" path="/external-libs/logback-1.1.2/logback-classic-1.1.2.jar"/>
-	<classpathentry kind="lib" path="/external-libs/logback-1.1.2/logback-core-1.1.2.jar"/>
-	<classpathentry kind="lib" path="/external-libs/slf4j-1.7.7/slf4j-api-1.7.7.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/mdz-utils"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="/external-libs/groovy-xmlrpc-0.8/groovy-xmlrpc-0.8.jar"/>
+	<classpathentry kind="lib" path="/external-libs/slf4j-1.7.25/slf4j-api-1.7.25.jar"/>
+	<classpathentry kind="lib" path="/external-libs/logback-1.2.3/logback-classic-1.2.3.jar"/>
+	<classpathentry kind="lib" path="/external-libs/logback-1.2.3/logback-core-1.2.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

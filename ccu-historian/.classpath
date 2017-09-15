@@ -3,8 +3,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="GROOVY_DSL_SUPPORT"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hc-utils"/>
-	<classpathentry kind="lib" path="/external-libs/slf4j-1.7.7/slf4j-api-1.7.7.jar"/>
-	<classpathentry kind="lib" path="/external-libs/slf4j-1.7.7/slf4j-jdk14-1.7.7.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/mdz-utils"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="/external-libs/jetty-all-7.2.2/jetty-all-7.2.2.v20101205.jar"/>
@@ -15,5 +13,7 @@
 	<classpathentry kind="lib" path="/external-libs/jcommon-1.0.23/jcommon-1.0.23.jar"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
 	<classpathentry kind="lib" path="/external-libs/h2-1.4.196/h2-1.4.196.jar"/>
+	<classpathentry kind="lib" path="/external-libs/slf4j-1.7.25/slf4j-jdk14-1.7.25.jar"/>
+	<classpathentry kind="lib" path="/external-libs/slf4j-1.7.25/slf4j-api-1.7.25.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
