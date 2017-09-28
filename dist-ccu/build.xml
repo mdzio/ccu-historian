@@ -1,34 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="dist-ccu" default="build">
 	<!-- TODO: implement clean task -->
-	<!-- TODO: align the source directory structure to the addon directory structure -->
 	<target name="build">
 		<property file="../ccu-historian/build.properties"/>
 		<property name="destfile" value="build/ccu-historian-addon-${version}.tar.gz"/>
 		<!-- write version to file, use unix eol -->
-		<echo file="VERSION">${version}&#10;</echo>
+		<echo file="src/VERSION">${version}&#10;</echo>
 		<tar destfile="${destfile}" compression="gzip">
-			<!-- directory / -->
+			<!-- normal files -->
+			<tarfileset dir="src" username="root" group="root">
+				<exclude name="update_script"/>
+				<exclude name="addon/ccu2/update_addon"/>
+				<exclude name="addon/ccurm/update_addon"/>
+				<exclude name="addon/rc.d/ccu-historian"/>
+			</tarfileset>
 			<!-- executable files -->
-			<tarfileset dir="." filemode="755" username="root" group="root">
+			<tarfileset dir="src" filemode="755" username="root" group="root">
 				<include name="update_script"/>
-			</tarfileset>
-			<!-- other files -->
-			<tarfileset dir="." username="root" group="root">
-				<include name="VERSION"/>
-			</tarfileset>
-			<!-- directory /addon -->
-			<!-- executable files -->
-			<tarfileset dir="." prefix="addon" filemode="755" username="root" group="root">
-				<include name="ccu2/update_addon"/>
-				<include name="ccurm/update_addon"/>
-				<include name="rc.d/ccu-historian"/>
-			</tarfileset>
-			<!-- other files -->
-			<tarfileset dir="." prefix="addon" username="root" group="root">
-				<include name="www/**"/>
-				<include name="ccu-historian-sample.config"/>
-				<include name="ccu-historian_addon.cfg"/>
+				<include name="addon/ccu2/update_addon"/>
+				<include name="addon/ccurm/update_addon"/>
+				<include name="addon/rc.d/ccu-historian"/>
 			</tarfileset>
 			<!-- directory /ccu-historian -->
 			<tarfileset dir="../ccu-historian/build" prefix="ccu-historian" username="root" group="root">
