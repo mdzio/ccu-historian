@@ -23,9 +23,7 @@
 			</tarfileset>
 			<!-- directory /ccu-historian -->
 			<tarfileset dir="../ccu-historian/build" prefix="ccu-historian" username="root" group="root">
-				<include name="ccu-historian.jar"/>
-				<include name="ccu-historian_lib/*"/>
-				<include name="webapp/**"/>
+				<exclude name="VERSION.txt"/>
 			</tarfileset>
 			<tarfileset dir="../dist-generic/src" prefix="ccu-historian" username="root" group="root">
 				<include name="ccu-historian-sample.config"/>
