@@ -7,7 +7,7 @@ private final static log = LoggerFactory.getLogger('mdz.ccuhistorian.webapp.Conf
 
 utils.catchToLog(log) {
 
-include 'skeleton-header.gy' 
+include 'page-begin.gy' 
 def ctx=request.session.getAttribute('ctx')
 def errmsg=[]
 if (ctx.user.loggedIn && params.config_apply) {
@@ -22,8 +22,6 @@ if (ctx.user.loggedIn && params.config_apply) {
 }
 def password_admin=ctx.prefs.get('password_admin', '')
 %><title>CCU-Historian: Konfiguration</title><% 
-include 'skeleton-menu.gy'
-include 'skeleton-content.gy'
 %><h1>Konfiguration</h2><% 
 if (!ctx.user.loggedIn) { 
 	%><p class="bad">Sie sind nicht (mehr) angemeldet oder Ihre Berechtigungen reichen nicht aus!</p>
@@ -59,6 +57,6 @@ if (!ctx.user.loggedIn) {
 	</table>
 	</form><% 
 }
-include 'skeleton-end.gy' 
+include 'page-end.gy' 
 } // catchToLog
 %>

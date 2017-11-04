@@ -1,0 +1,249 @@
+import mdz.hc.itf.hm.HmSysVarInterface
+import java.util.prefs.Preferences
+import groovy.transform.Field
+import org.slf4j.LoggerFactory
+
+@Field
+private final static log = LoggerFactory.getLogger('mdz.ccuhistorian.webapp.page-template')
+
+// main
+utils.catchToLog(log) {
+	setup()
+	handleUserLogInOut()
+	writeDocument()
+}
+
+def setup() {
+	// setup page attributes
+	pageLog=request.getAttribute('pageLog')
+	pageHead=request.getAttribute('pageHead')
+	pageContent=request.getAttribute('pageContent')
+	pageEnd=request.getAttribute('pageEnd')
+	if (!pageLog || !pageHead || !pageContent)
+		throw new IllegalArgumentException('pageLog, pageHead or pageContent not set')
+	
+	// setup session
+	if (!session) {
+		session=request.session
+		session.maxInactiveInterval=1800
+	}
+	
+	// setup request context 
+	ctx=session.getAttribute('ctx')
+	if (!ctx) {
+		ctx=[
+			prefs: Preferences.userRoot().node('mdz/ccuhistorian/webpages'),
+			user: [loggedIn:false, logInFailed:false]
+		]
+		session.setAttribute('ctx', ctx)
+	}
+}
+
+def handleUserLogInOut() {
+	// already logged in?
+	if (!ctx.user.loggedIn) {
+		def password_admin=ctx.prefs.get('password_admin', '')
+		if (password_admin=='') {
+			// auto login, if no password is set
+			ctx.user.loggedIn=true
+		} else if (params.login) {
+			// check credentials
+			if (password_admin==utils.secureHash(params.login_password)) {
+				ctx.user.loggedIn=true
+				ctx.user.logInFailed=false
+			} else {
+				ctx.user.loggedIn=false
+				ctx.user.logInFailed=true
+			}
+		}
+	} else {
+		// logout?
+		if (params.logout) {
+			ctx.user.loggedIn=false
+			ctx.user.logInFailed=false
+		}
+	}
+}
+
+def writeDocument() {
+	// start of HTML document
+	println '<!doctype html>'
+	html.html(lang:'de') {
+		writeHead()
+		writeBody()
+	}
+}
+
+def writeHead() {
+	html.head {
+		// standard headers
+		meta charset:'utf-8'
+		meta 'http-equiv':'X-UA-Compatible', content:'IE=edge'
+		meta name:'viewport', content:'width=device-width, initial-scale=1'
+		
+		// bootstrap CSS
+		link href:'../external/bootstrap/css/bootstrap.css', rel:'stylesheet'
+		
+		// icon
+		// TODO: new icon with size 196 x 196 pixels
+		link href:'ccu-historian.ico', rel:'icon'
+		
+		// content supplied by the including page
+		utils.catchToLog(pageLog) {
+			pageHead.delegate=html
+			pageHead(html)
+		}
+	}
+}
+
+def writeBody() {
+	html.body {
+		div(class:'container-fluid') {
+			if (!ctx.user.loggedIn) {
+				writeLogIn()
+			} else {
+                writeNavigation()
+                writeContent()
+			}
+		}
+		// jquery JS
+		script src:'../external/jquery/jquery.js'
+		// bootstrap JS
+		script src:'../external/bootstrap/js/bootstrap.js'
+		// content supplied by the including page
+		if (pageEnd) {
+			utils.catchToLog(pageLog) {
+				pageEnd.delegate=html
+				pageEnd(html)
+			}
+		}
+	}
+}
+
+def writeLogIn() {
+	html.div(class:'row') {
+		div(class:'col-md-4 col-md-offset-4') {
+			div(class:'panel panel-default') {
+				div(class:'panel-heading') {
+					h3 class:'panel-title', 'CCU-Historian Anmeldung'
+				}
+				div(class:'panel-body') {
+					if (ctx.user.logInFailed) {
+						p class:'alert alert-danger', role:'alert', 'Die Anmeldung ist fehlgeschlagen!'
+					}
+					form(class:'form-horizontal', method:'post') {
+						div(class:'form-group') {
+							label class:'col-md-4 control-label', for:'input_password', 'Passwort:'
+							div(class:'col-md-8') {
+								input class:'form-control', type:'password', id:'input_password', name:'login_password', placeholder:'Passwort'
+							}
+						}
+						div(class:'form-group') {
+							div(class:'col-md-offset-4 col-md-8') {
+								button class:'btn btn-default', type:'submit', name:'login', value:1, 'Anmelden'
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+def writeNavigation() {
+    // navigation bar
+    html.nav(class:'navbar navbar-default') {
+        div(class:'container-fluid') {
+            // header for mobile display
+            div(class:'navbar-header') {
+                button (type:'button', class:'navbar-toggle collapsed', 'data-toggle':'collapse', 'data-target':'#navbar-collapse-id', 'aria-expanded':false) {
+                    span class:'icon-bar'
+                    span class:'icon-bar'
+                    span class:'icon-bar'
+                }
+                p class:'navbar-brand', 'CCU-Historian'
+            }
+            
+            // navbar content
+            div(class:'collapse navbar-collapse', id:'navbar-collapse-id') {
+                ul(class:'nav navbar-nav') {
+                    // datapoint list
+                    li { a href:'index.gy', 'Datenpunktliste' }
+                    
+                    // tools
+                    li(class:'dropdown') {
+                        a(href:'#', class:'dropdown-toggle', 'data-toggle':'dropdown', role:'button', 'aria-haspopup':true, 'aria-expanded':false) {
+                            mkp.yield 'Werkzeuge'
+                            span class:'caret'
+                        }
+                        ul(class:'dropdown-menu') {
+                            li { a href:'dbmanage.html', 'Datenpunktkonfiguration' }
+                            li { a href:'tools.html', 'Zeitreihenwerkzeuge' }
+                            li { a href:'config.html', 'CCU-Historian Konfiguration' }
+                            li { a href:'diagnosis.html', 'Diagnose' }
+                            
+                            // database web access
+                            def port; try { port=database.config.webPort } catch (e) { e.printStackTrace() }
+                            if (port)
+                                li { a href:"http://$webServer.historianAddress:$port", target:'_blank', 'Datenbank' }
+                        }
+                    }
+                    
+                    // CCU web UI
+                    // (each CCU has one HmSysVarInterface)
+                    def sysVarItfs=interfaceManager.interfaces.findAll { it.value instanceof HmSysVarInterface }
+                    if (sysVarItfs) {
+                        li(class:'dropdown') {
+                            a(href:'#', class:'dropdown-toggle', 'data-toggle':'dropdown', role:'button', 'aria-haspopup':true, 'aria-expanded':false) {
+                                mkp.yield 'Zentralen'
+                                span class:'caret'
+                            }
+                            ul(class:'dropdown-menu') {
+                                def ccuNo=1
+                                sysVarItfs.each { itfName, itf ->
+                                    li { a href:"http://$itf.scriptClient.address", target:'_blank', 'CCU '+(ccuNo>1?ccuNo:'') }
+                                    ccuNo++
+                                }
+                            }
+                        }
+                    }
+                    
+                    // configured menu entries
+                    if (webServer.config.menuLinks) {
+                        li(class:'dropdown') {
+                            a(href:'#', class:'dropdown-toggle', 'data-toggle':'dropdown', role:'button', 'aria-haspopup':true, 'aria-expanded':false) {
+                                mkp.yield 'Extras'
+                                span class:'caret'
+                            }
+                            ul(class:'dropdown-menu') {
+                                webServer.config.menuLinks.each { k, v ->
+                                    li { a href:v.address, v.text }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+				// logout button
+				if (ctx.prefs.get('password_admin', '')!='') {
+                    form(class:'navbar-form navbar-right') {
+                        div(class:'form-group') {
+                            button class:'btn btn-default', type:'submit', name:'logout', value:1, 'Abmelden'
+                        }
+                    }
+				}
+                
+                // version
+                p class:'navbar-text navbar-right', "V$utils.historianVersion"
+            }
+        }
+    }
+}
+
+def writeContent() {
+	// content supplied by the including page
+	utils.catchToLog(pageLog) {
+		pageContent.delegate=html
+		pageContent(html)
+	}
+}

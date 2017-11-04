@@ -1,3 +1,122 @@
+// setup page
+def renderer=new mdz.ccuhistorian.webapp.PageRenderer(servlet: this)
+
+renderer.head={
+	title 'CCU-Historian: Datenpunktkonfiguration'
+	// bootstrap-table CSS
+	link href:'../external/bootstrap-table/bootstrap-table.css', rel:'stylesheet'
+}
+
+renderer.content={
+	div(class:'panel panel-default') {
+		div(class:'panel-heading') {
+			h3 class:'panel-title', 'Datenpunktkonfiguration'
+		}
+		div(class:'panel-body') {
+			form(method:'post') {
+				div(id:'toolbar', class:'btn-group') {
+					button class:'btn btn-default', type:'submit', name:'save', value:1, 'Änderungen speichern'
+				}
+				table(
+                    id:'dp-table',
+					'data-toggle':'table',
+					'data-toolbar':'#toolbar', 
+					'data-show-columns':true,
+					'data-search':true,
+					'data-trim-on-search':false,
+				) {
+					thead {
+						tr {
+							th 'data-sortable':true, 'Schnittstelle'
+							th 'data-sortable':true, 'Kanal'
+							th 'data-visible':false, 'data-sortable':true,  'Adresse'
+							th 'data-sortable':true, 'Parameter'
+							th 'data-visible':false, 'data-sortable':true, 'Raum'
+							th 'data-visible':false, 'data-sortable':true, 'Gewerk'
+							th 'data-visible':false, 'data-sortable':true, 'data-align':'right', 'ID'
+							th 'data-visible':false, 'data-sortable':true, 'Einheit'
+							th 'data-visible':false, 'data-sortable':true, 'Typ'
+                            th 'data-sortable':true, 'data-align':'right', 'Einträge'
+                            th(
+                                'data-field':'disabled', 
+                                'data-formatter':'inputFormatterDisabled', 
+                                'data-events':'inputEventsDisabled',
+                                'data-align':'center', 
+                                'Inaktiv'
+                            )
+                            th 'data-field':'hidden', 'data-align':'center', 'Versteckt'
+                            th 'data-field':'preprocType', 'Vorverarb.'
+                            th 'data-field':'proprocParam', 'Parameter'
+						}
+					}
+					tbody {
+						database.dataPoints.findAll { !it.historyHidden }.each { dp ->
+							def last=database.getLast(dp)
+							tr {
+								td dp.id.interfaceId
+								td dp.attributes.displayName?:dp.id.address
+								td dp.id.address
+								td dp.id.identifier
+								td dp.attributes.room
+								td dp.attributes.function
+								td dp.idx
+								td dp.attributes.unit
+								td dp.attributes.type
+                                td database.getCount(dp, null, null)
+                                td dp.historyDisabled?'checked':''
+                                td dp.historyHidden?'checked':''
+                                td dp.attributes.preprocType?:0
+                                td dp.attributes.preprocParam?:''
+/*                                
+                                td {
+                                    select(name:"preproc_type_$dp.idx", size:1) {
+                                        option(value:0, *:(((dp.attributes.preprocType?:0)==0)?[selected:'selected']:[:]), '-')
+                                        option(value:1, *:(((dp.attributes.preprocType?:0)==1)?[selected:'selected']:[:]), 'Delta K.')
+                                        option(value:2, *:(((dp.attributes.preprocType?:0)==2)?[selected:'selected']:[:]), 'Zeitl.K.')
+                                    }
+                                }
+                                td {
+                                    input type:'text', size:5, maxlength:30, name:"preproc_param_$dp.idx", value:utils.format(dp.attributes.preprocParam)
+                                }
+*/                                
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+renderer.end={
+	// bootstrap-table JS
+	script src:'../external/bootstrap-table/bootstrap-table.js'
+	script src:'../external/bootstrap-table/bootstrap-table-de-DE.js'
+    script { mkp.yieldUnescaped '''\
+        var $dpTable=$('#dp-table');
+        
+        function inputFormatterDisabled(value) {
+            var checked = value ? 'checked' : '';
+            return '<input type="checkbox" ' + checked + ' />';
+        }
+
+        window.inputEventsDisabled = {
+            'change :checkbox': function (e, value, row, index) {
+                row.disabled = $(e.target).prop('checked')?'checked':'';
+//                $dpTable.bootstrapTable('updateRow', {
+//                    index: index,
+//                    row: row        
+//                });
+            }
+        };
+    ''' }
+}
+
+// render page
+renderer.render()
+
+/*
+
 <% 
 import mdz.hc.DataPoint
 import groovy.transform.Field
@@ -142,3 +261,5 @@ if (!ctx.user.loggedIn) {
 include 'page-end.gy'
 } // catchToLog
 %>
+
+*/

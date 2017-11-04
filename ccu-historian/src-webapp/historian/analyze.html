@@ -8,7 +8,7 @@ private final static log = LoggerFactory.getLogger('mdz.ccuhistorian.webapp.Anal
 
 utils.catchToLog(log) {
 
-include 'skeleton-header.gy' 
+include 'page-begin.gy' 
 def ctx=request.session.getAttribute('ctx')
 
 def dpIds
@@ -59,8 +59,6 @@ if (params.g) ctx.groups=true else ctx.groups=false
 def apiKey=webServer.config.apiKeys?'&k='+URLEncoder.encode(webServer.config.apiKeys[0], 'UTF-8'):''
 
 %><title>CCU-Historian: Trend-Darstellung</title><% 
-include 'skeleton-menu.gy'
-include 'skeleton-content.gy'
 %><h1>Trend-Darstellung</h1><%
 
 if (!ctx.user.loggedIn) { 
@@ -129,6 +127,6 @@ if (!ctx.user.loggedIn) {
 	</tr></table>
 	</form><% 
 }
-include 'skeleton-end.gy'
+include 'page-end.gy'
 } // catchToLog
 %>

@@ -3,21 +3,27 @@ import groovy.transform.Field
 import org.slf4j.LoggerFactory
 
 @Field
-private final static log = LoggerFactory.getLogger('mdz.ccuhistorian.webapp.SkeletonHeader')
+private final static log = LoggerFactory.getLogger('mdz.ccuhistorian.webapp.page-init')
 
 utils.catchToLog(log) {
+	
+	// setup session
 	if (!session) {
 		session=request.session
 		session.maxInactiveInterval=1800
 	}
+	
+	// setup request context 
 	def ctx=session.getAttribute('ctx')
 	if (!ctx) {
 		ctx=[
-			prefs: Preferences.userRoot().node('mdz/ccuhistorian/webpages'), 
+			prefs: Preferences.userRoot().node('mdz/ccuhistorian/webpages'),
 			user: [loggedIn:false, logInFailed:false]
 		]
 		session.setAttribute('ctx', ctx)
 	}
+	
+	// handle user login /logout
 	if (!ctx.user.loggedIn) {
 		def password_admin=ctx.prefs.get('password_admin', '')
 		if (password_admin=='')
@@ -29,24 +35,12 @@ utils.catchToLog(log) {
 			} else {
 				ctx.user.loggedIn=false
 				ctx.user.logInFailed=true
-			}	
-		}	
+			}
+		}
 	} else {
 		if (params.logout) {
 			ctx.user.loggedIn=false
 			ctx.user.logInFailed=false
 		}
 	}
-	
-	// HTML document start
-	println '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">'
-	println '<html><head>'
-	
-	// standard headers
-	html.meta 'http-equiv':'content-type', content:'text/html; charset=utf-8'
-	html.meta 'http-equiv':'expires', content:'0'
-	html.meta name:'robots', content:'noindex, nofollow'
-	html.link rel:'shortcut icon', type:'image/x-icon', href:'/historian/ccu-historian.ico'
-	html.link rel:'stylesheet', type:'text/css', href:'/historian/historian.css'
-	
-} // catchToLog
+}
