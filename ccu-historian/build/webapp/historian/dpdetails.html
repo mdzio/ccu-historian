@@ -14,7 +14,7 @@ def bitToText(value, bitMask) {
 
 utils.catchToLog(log) {
 
-include 'skeleton-header.gy' 
+include 'page-begin.gy' 
 def ctx=request.session.getAttribute('ctx')
 %><meta http-equiv="refresh" content="60">
 <%
@@ -38,9 +38,6 @@ def last=database.getLast(dataPoint)
 def apiKey=webServer.config.apiKeys?'&k='+URLEncoder.encode(webServer.config.apiKeys[0], 'UTF-8'):''
  
 %><title>CCU-Historian: Datenpunkt <%=displayName%></title><% 
-
-include 'skeleton-menu.gy'
-include 'skeleton-content.gy'
 
 %><h1>Datenpunkt <%=displayName%></h1><%
 
@@ -137,6 +134,6 @@ if (!ctx.user.loggedIn) {
 		</table><%
 	}
 }
-include 'skeleton-end.gy'
+include 'page-end.gy'
 } // catchToLog
 %>

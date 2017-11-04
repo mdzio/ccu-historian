@@ -1,1 +1,3 @@
 /dist-ccu/build
+/ccu-historian/run/*.log
+/ccu-historian/run/*.lck

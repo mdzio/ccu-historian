@@ -33,11 +33,9 @@ def getClockSynchronicities() {
 
 utils.catchToLog(log) {
 
-	include 'skeleton-header.gy'
+	include 'page-begin.gy'
 	def ctx=request.session.getAttribute('ctx')
 	html.title 'CCU-Historian: Diagnose' 
-	include 'skeleton-menu.gy'
-	include 'skeleton-content.gy'
 	html.h1 'Diagnose' 
 
 	if (!ctx.user.loggedIn) { 
@@ -59,6 +57,6 @@ utils.catchToLog(log) {
         	}
         }
 	}
-	include 'skeleton-end.gy'
+	include 'page-end.gy'
 }
 %>

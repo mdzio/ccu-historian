@@ -1,0 +1,107 @@
+import mdz.hc.DataPoint
+import mdz.ccuhistorian.Database
+import groovy.transform.Field
+import org.slf4j.LoggerFactory
+
+@Field
+private final static log = LoggerFactory.getLogger('mdz.ccuhistorian.webapp.index')
+
+utils.catchToLog(log) {
+
+	include 'page-init.gy'
+	
+	def ctx=request.session.getAttribute('ctx')
+	if (!ctx.user.loggedIn) {
+		request.setAttribute('page-begin-title', 'Anmeldung')   
+	} else { 
+		request.setAttribute('page-begin-title', 'Übersicht Datenpunkte')
+		request.setAttribute('page-begin-head-appender', { html ->
+			html.script src:'TableFilter/tablefilter_all_min.js'
+		}) 
+	}
+	
+	include 'page-begin.gy'
+	
+	if (!ctx.user.loggedIn) { 
+		html.h1 'Anmeldung'
+		if (ctx.user.logInFailed) {
+			html.p class:'bad', 'Die Anmeldung ist fehlgeschlagen!' 
+		}
+		html.form(method:'post') {
+			table {
+				tr {
+					th 'Passwort'
+					td { input name:'login_password', type:'password', maxlength:'30' }
+					td { input name:'login', type:'submit', value:' Anmelden ' }
+				}
+			}
+		}
+	} else {
+		html.h1 'Übersicht Datenpunkte'
+		html.form(action:'analyze.html', method:'get') {
+			table {
+				tr {
+					th 'Aktion für die ausgewählten Datenpunkte'
+					td { input name:'trend_set', type:'submit', value:' Trend-Darstellung ' }
+				}
+			}
+			table(id:'datapoints') {
+				thead {
+					tr {
+						th style:'width:3em', 'Ausw.'
+						th 'Schnittstelle'
+						th 'Kanal'
+						th 'Parameter'
+						th 'Raum'
+						th 'Gewerk'
+						th style:'width:3em', 'ID'
+						th 'Akt. Wert'
+						th 'Einheit'
+						th 'Zeitstempel'
+						th 'Details'
+					}
+				}
+				tbody {
+					database.dataPoints.findAll { !it.historyHidden }.each { dp ->
+						def last=database.getLast(dp)
+						html.tr {
+							def disabled=dp.historyString?[disabled:'disabled']:[:]
+							td { input(type:'checkbox', name:'i', value:dp.idx, *:disabled) }
+							td dp.id.interfaceId
+							td dp.attributes.displayName?:dp.id.address
+							td dp.id.identifier
+							td dp.attributes.room
+							td dp.attributes.function
+							td class:'number', dp.idx
+							td class:'number', utils.format(last?.value)
+							td dp.attributes.unit
+							td utils.format(last?.timestamp)
+							td { a href:"dpdetails.html?i=<%=dp.idx%>", 'Details' } 
+						}
+					}
+				}
+			}
+		} 
+		html.script { mkp.yieldUnescaped '''  
+			var tf_props={
+				filters_row_index: 1,
+				display_all_text: " [ Alle ]",
+				col_0: "none",
+				col_1: "select",
+				col_3: "select",
+				col_7: "none",
+				col_8: "select",
+				col_9: "none",
+				col_10: "none",
+				col_number_format: [null, null, null, "eu", null, null, "eu", null, null, null, null],
+				on_keyup: true,  
+                on_keyup_delay: 500,
+				sort: true,
+				sort_config: { sort_types: ["none", "string", "string", "string", "string", "string", "eu", "eu", "string", "none", "none"] }	
+			}
+			setFilterGrid("datapoints", tf_props);  
+		'''	
+		}
+	}
+	include 'page-end.gy' 
+} // catchToLog
