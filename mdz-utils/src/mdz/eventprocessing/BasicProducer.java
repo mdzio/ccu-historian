@@ -30,6 +30,8 @@ public class BasicProducer<T> implements Producer<T> {
 	private final static Logger log = LoggerFactory.getLogger(BasicProducer.class);
 	private Consumer<? super T> firstConsumer;
 	private Map<Consumer<? super T>, ?> otherConsumers;
+	// use separate mutex to not affect derived classes
+	private Object mutex = new Object();
 
 	private void safeProduce(Consumer<? super T> consumer, T t) {
 		try {
@@ -40,31 +42,37 @@ public class BasicProducer<T> implements Producer<T> {
 		}
 	}
 
-	public synchronized void produce(T t) {
-		if (firstConsumer != null)
-			safeProduce(firstConsumer, t);
-		if (otherConsumers != null)
-			for (Consumer<? super T> consumer : otherConsumers.keySet())
-				safeProduce(consumer, t);
-	}
-
-	@Override
-	public synchronized void addConsumer(Consumer<? super T> consumer) {
-		if (firstConsumer == null) {
-			if (otherConsumers == null || !otherConsumers.containsKey(consumer))
-				firstConsumer = consumer;
-		} else if (firstConsumer != consumer) {
-			if (otherConsumers == null)
-				otherConsumers = new HashMap<>();
-			otherConsumers.put(consumer, null);
+	public void produce(T t) {
+		synchronized (mutex) {
+			if (firstConsumer != null)
+				safeProduce(firstConsumer, t);
+			if (otherConsumers != null)
+				for (Consumer<? super T> consumer : otherConsumers.keySet())
+					safeProduce(consumer, t);
 		}
 	}
 
 	@Override
-	public synchronized void removeConsumer(Consumer<? super T> consumer) {
-		if (firstConsumer == consumer)
-			firstConsumer = null;
-		else if (otherConsumers != null)
-			otherConsumers.remove(consumer);
+	public void addConsumer(Consumer<? super T> consumer) {
+		synchronized (mutex) {
+			if (firstConsumer == null) {
+				if (otherConsumers == null || !otherConsumers.containsKey(consumer))
+					firstConsumer = consumer;
+			} else if (firstConsumer != consumer) {
+				if (otherConsumers == null)
+					otherConsumers = new HashMap<>();
+				otherConsumers.put(consumer, null);
+			}
+		}
+	}
+
+	@Override
+	public void removeConsumer(Consumer<? super T> consumer) {
+		synchronized (mutex) {
+			if (firstConsumer == consumer)
+				firstConsumer = null;
+			else if (otherConsumers != null)
+				otherConsumers.remove(consumer);
+		}
 	}
 }
