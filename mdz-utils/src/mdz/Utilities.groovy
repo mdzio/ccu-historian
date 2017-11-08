@@ -73,7 +73,6 @@ public class Utilities {
 		sb.toString()
 	}	
 
-	// TODO: Adjust when switching to LogBack
 	public static String getStackTrace(Throwable ex) {
 		StackTraceUtils.sanitize ex
 		StackTraceUtils.sanitizeRootCause ex
@@ -88,9 +87,8 @@ public class Utilities {
 			null
 		} catch (Throwable ex) {
 			String msg=ex.message?:ex.class.name
-			log.error "Exception: $msg"
-			// TODO: Adjust when switching to LogBack (e.g. use Exceptions.sanitize())
-			log.debug getStackTrace(ex)
+			log.error 'Exception: {}', msg
+			log.error 'Detail: {}', getStackTrace(ex)
 			ex
 		}
 	}

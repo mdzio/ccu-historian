@@ -97,12 +97,12 @@ public class LogSystem {
 		} catch (Throwable ex) {
 			String msg=ex.message
 			if (!msg) msg=ex.class.name
-			log.severe "Exception: $msg"
+			log.severe { "Exception: " + msg }
 			StackTraceUtils.sanitize ex
 			StackTraceUtils.sanitizeRootCause ex
 			StringWriter trace=new StringWriter()
 			ex.printStackTrace new PrintWriter(trace)
-			log.fine trace.toString()
+			log.severe { "Detail: " + trace }
 			true
 		}
 	}
