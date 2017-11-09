@@ -89,7 +89,7 @@ public class BinRpcServer {
 	}
 	
 	private void acceptClients() {
-		Utilities.catchToLog(log) {
+		Exceptions.catchToLog(log) {
 			try {
 				while (true) {
 					Socket socket=serverSocket.accept()
@@ -152,7 +152,7 @@ public class BinRpcServer {
 	}
 	
 	private void handleClient(Socket socket) {
-		Utilities.catchToLog (log) {
+		Exceptions.catchToLog (log) {
 			BinRpcEncoder encoder=[]
 			BinRpcDecoder decoder=[]
 		

@@ -19,11 +19,11 @@ package mdz.hc.itf.hm
 
 import groovy.transform.TupleConstructor
 import groovy.transform.CompileStatic
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Log
 
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
-
+import mdz.Exceptions
 import mdz.Utilities
 import mdz.eventprocessing.BasicProducer
 import mdz.hc.itf.BrowseSupport
@@ -36,7 +36,7 @@ import mdz.hc.DataPointIdentifier
 import mdz.hc.RawEvent
 import mdz.hc.ProcessValue
 
-@Slf4j
+@Log
 @TupleConstructor
 @CompileStatic
 public class HmSysVarInterface extends BasicProducer<RawEvent> implements Interface, SubscriptionSupport, BrowseSupport, WriteSupport {
@@ -97,7 +97,7 @@ public class HmSysVarInterface extends BasicProducer<RawEvent> implements Interf
 				dp.attributes.operations=foundDp.attributes.operations
 				dp.attributes.type=foundDp.attributes.type
 			} else
-				log.warn 'Unknown system variable {}', dp.id 
+				log.warning "Unknown system variable $dp.id" 
 		}
 	}
 	
@@ -113,8 +113,8 @@ public class HmSysVarInterface extends BasicProducer<RawEvent> implements Interf
 	
 	private synchronized void readVariables() {
 		if (readVariablesFuture==null) return
-		Utilities.catchToLog(log) {
-			log.debug 'Reading system variable values'
+		Exceptions.catchToLog(log) {
+			log.fine 'Reading system variable values'
 			List<RawEvent> events=scriptClient.getSystemVariableValues(subscription)
 			events.each { RawEvent event -> 
 				if (event!=null) {

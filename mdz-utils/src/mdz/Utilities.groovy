@@ -19,7 +19,8 @@ package mdz
 
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.runtime.StackTraceUtils
-import org.slf4j.Logger
+import java.util.logging.Level
+import java.util.logging.Logger
 
 @CompileStatic
 public class Utilities {
@@ -73,26 +74,6 @@ public class Utilities {
 		sb.toString()
 	}	
 
-	public static String getStackTrace(Throwable ex) {
-		StackTraceUtils.sanitize ex
-		StackTraceUtils.sanitizeRootCause ex
-		StringWriter trace=new StringWriter()
-		ex.printStackTrace new PrintWriter(trace)
-		trace.toString()
-	}
-		
-	public static Throwable catchToLog(Logger log, Closure cl) {
-		try {
-			cl()
-			null
-		} catch (Throwable ex) {
-			String msg=ex.message?:ex.class.name
-			log.error 'Exception: {}', msg
-			log.error 'Detail: {}', getStackTrace(ex)
-			ex
-		}
-	}
-
 	public static String formatTimestamp(String pattern, Date timestamp) {
 		Calendar cal=Calendar.instance
 		cal.time=timestamp
@@ -106,14 +87,5 @@ public class Utilities {
 			case '%': '%'; break
 			}
 		})
-	}
-	
-	private static class ClosureTimerTask extends TimerTask {
-		private Closure codeToRun
-		public void run() { codeToRun()	}
-	}	
-	
-	public static TimerTask closureAsTimerTask(Closure codeToRun) {
-		new ClosureTimerTask(codeToRun: codeToRun)
 	}
 }

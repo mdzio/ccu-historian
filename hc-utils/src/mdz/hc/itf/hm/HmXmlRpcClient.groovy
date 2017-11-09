@@ -19,10 +19,10 @@ package mdz.hc.itf.hm
 
 import mdz.Utilities
 import groovy.net.xmlrpc.XMLRPCServerProxy as Proxy
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Log
 import groovy.lang.Lazy
 
-@Slf4j
+@Log
 public class HmXmlRpcClient {
 
 	String host
@@ -32,26 +32,26 @@ public class HmXmlRpcClient {
 	private Proxy proxy=new Proxy("http://$host:$port")
 	
 	public List<String> systemListMethods() {
-		log.debug "Calling system.listMethods()"
+		log.fine "Calling system.listMethods()"
 		def result=getProxy().system.listMethods()
 		if (!(result in List) || !result.every { it in String })
 			throw new Exception("XML-RPC call system.listMethods returned invalid data structure: " + result)
-		log.trace "Response: {}", "${->result.join(", ")}"
+		log.finer "Response: ${result.join(", ")}"
 		result
 	}
 		
 	public void init(String url, String interfaceId) {
-		log.debug "Calling init({}, {})", url, interfaceId
+		log.fine "Calling init($url, $interfaceId)"
 		proxy.init url, interfaceId
 	}
 
 	public void deinit(String url) {
-		log.debug "Calling init({})", url
+		log.fine "Calling init($url)"
 		proxy.init url
 	}	
 
 	public Map<String, Map<String, Object>> getParamsetDescription(String address, String type) {
-		log.debug "Calling getParamsetDescription({}, {})", address, type
+		log.fine "Calling getParamsetDescription($address, $type)"
 		def result=proxy.getParamsetDescription(address, type)
 		if (!(result in Map) || 
 			!result.every { 
@@ -64,17 +64,17 @@ public class HmXmlRpcClient {
 					// TYPE=='ENUM': VALUE_LIST=List<String>
 				} 
 			}) throw new Exception("XML-RPC call getParamsetDescription returned invalid data structure: " + result)
-		log.trace "Result: {}", "${->result}"
+		log.finer "Result: $result"
 		result
 	}
 
 	public void setValue(String address, String identifier, value) {
-		log.debug "Calling setValue({}, {}, {})", address, identifier, value
+		log.fine "Calling setValue($address, $identifier, $value)"
 		proxy.setValue address, identifier, value
 	}
 	
 	public void event(String interfaceId, String address, String key, value) {
-		log.debug "Calling event({}, {}, {}, {})", interfaceId, address, key, value
+		log.fine "Calling event($interfaceId, $address, $key, $value)"
 		proxy.event interfaceId, address, key, value
 	}
 }

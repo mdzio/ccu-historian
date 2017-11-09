@@ -18,14 +18,15 @@
 package mdz.ccuhistorian
 
 import groovy.transform.CompileStatic
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Log
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
+import mdz.Exceptions
 import mdz.Utilities
 import mdz.hc.itf.hm.HmScriptClient
 
 @CompileStatic
-@Slf4j
+@Log
 public class Watchdog implements Runnable {
 
 	private static final long INITIAL_DELAY = 5000; // [ms]
@@ -40,14 +41,14 @@ public class Watchdog implements Runnable {
 		this.cycle=cycle
 		this.executor=executor
 		this.scriptClient=scriptClient
-		log.debug 'Starting watchdog (program: {}, cycle: {} ms)', program, cycle
+		log.fine "Starting watchdog (program: $program, cycle: $cycle" 
 		executor.scheduleAtFixedRate this, INITIAL_DELAY, cycle, TimeUnit.MILLISECONDS
 	}
 
 	@Override
 	public void run() {
-		Utilities.catchToLog(log) {
-			log.trace 'Watchdog is triggered'
+		Exceptions.catchToLog(log) {
+			log.finer 'Watchdog is triggered'
 			scriptClient.executeProgram program
 		}
 	}

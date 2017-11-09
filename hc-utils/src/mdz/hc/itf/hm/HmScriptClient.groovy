@@ -17,19 +17,19 @@
 */
 package mdz.hc.itf.hm
 
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Log
 import groovy.transform.CompileStatic
 
 import java.text.SimpleDateFormat
 import java.text.ParseException
-
+import mdz.Exceptions
 import mdz.Utilities;
 import mdz.hc.RawEvent
 import mdz.hc.ProcessValue
 import mdz.hc.DataPoint
 import mdz.hc.DataPointIdentifier
 
-@Slf4j
+@Log
 @CompileStatic
 public class HmScriptClient {
 
@@ -55,7 +55,7 @@ public class HmScriptClient {
 	}
 	
 	public List<DataPoint> getSystemVariables(String interfaceIdFiller) {
-		log.trace 'Getting list of system variables'
+		log.finer 'Getting list of system variables'
 		List<String> response=execute('''string id; foreach(id, dom.GetObject(ID_SYSTEM_VARIABLES).EnumUsedIDs()) {
 			var sv=dom.GetObject(id);
 			var vt=sv.ValueType(); var st=sv.ValueSubType();
@@ -77,8 +77,8 @@ public class HmScriptClient {
 				case 'BOOL': min=0.0; max=1.0; break
 				case 'ALARM': min=0.0; max=1.0; break
 				case 'FLOAT': 
-					Utilities.catchToLog(log) { max=items[2].toDouble() }
-					Utilities.catchToLog(log) { min=items[4].toDouble() }
+					Exceptions.catchToLog(log) { max=items[2].toDouble() }
+					Exceptions.catchToLog(log) { min=items[4].toDouble() }
 					break
 				}
 				dataPoints << new DataPoint(
@@ -93,13 +93,13 @@ public class HmScriptClient {
 					] as Map<String, Object>
 				)
 			} else
-				log.warn "Invalid response: $line"
+				log.warning "Invalid response: $line"
 		}
 		dataPoints
 	}
 
 	public List<RawEvent> getSystemVariableValues(List<DataPoint> dataPoints) {
-		log.trace 'Getting values of system variables'
+		log.finer 'Getting values of system variables'
 		if (!dataPoints) return []
 		String sysVarIds=dataPoints.id*.address.join('\t')
 		List<String> response=execute('''string id; foreach(id, "''' + sysVarIds + '''") {
@@ -127,11 +127,11 @@ public class HmScriptClient {
 				try {
 					timestamp=df.parse(strval)
 					if (timestamp.time==0 || timestamp>maxTimestamp) {
-						log.debug "Timestamp $strval of system variable $dp.attributes.displayName is out of range"
+						log.fine "Timestamp $strval of system variable $dp.attributes.displayName is out of range"
 						timestamp=null
 					}
 				} catch (ParseException e) {
-					log.debug "Can't parse $strval as timestamp"
+					log.fine "Can't parse $strval as timestamp"
 				}
 				strval=response[lineIdx++]
 				while (!strval.endsWith(VALUE_TERMINATOR)) { strval+='\n'+response[lineIdx++] }
@@ -144,10 +144,10 @@ public class HmScriptClient {
 					case 'FLOAT': value=strval.toDouble(); break
 					case 'STRING': value=strval; break
 					default:
-						log.warn "Unknown data type: $dp.attributes.type"
+						log.warning "Unknown data type: $dp.attributes.type"
 					}
 				} catch (NumberFormatException e) {
-					log.warn "Value $strval is not valid for data type $dp.attributes.type of data point $dp.id"
+					log.warning "Value $strval is not valid for data type $dp.attributes.type of data point $dp.id"
 				}
 				if (value!=null) new RawEvent(
 					id: dp.id, 
@@ -155,7 +155,7 @@ public class HmScriptClient {
 				)
 				else null
 			} else {
-				log.warn "Error reading system variable $dp.attributes.displayName"
+				log.warning "Error reading system variable $dp.attributes.displayName"
 				null
 			}
 		}
@@ -256,7 +256,7 @@ public class HmScriptClient {
 					if (ch!=null)
 						room.channels << ch
 					else
-						log.warn "HM script client: Channel with ISE-ID {} not exists", it
+						log.warning "HM script client: Channel with ISE-ID $it not exists"
 				}
 			}
 			model.add room
@@ -289,7 +289,7 @@ public class HmScriptClient {
 					if (ch!=null)
 						func.channels << ch
 					else
-						log.warn "HM script client: Channel with ISE-ID {} not exists", it
+						log.warning "HM script client: Channel with ISE-ID $it not exists"
 				}
 			}
 			model.add func
@@ -299,13 +299,13 @@ public class HmScriptClient {
 	public HmModel getModel(long maxCacheAge) {
 		synchronized (modelMutex) {
 			if (modelLastScan==0 || (System.currentTimeMillis()-modelLastScan)>maxCacheAge) {
-				log.trace "Retrieving model from CCU"
+				log.finer "Retrieving model from CCU"
 				model=[]
 				retrieveDevices model
 				retrieveRooms model
 				retrieveFunctions model
 				modelLastScan=System.currentTimeMillis()
-				log.trace "Retrieved CCU model:\n{}", model
+				log.finer "Retrieved CCU model:\n$model"
 			}
 			model
 		}
@@ -334,13 +334,13 @@ public class HmScriptClient {
 	}
 	
 	public synchronized List<String> execute(String script) {
-		log.trace "Executing script: $script"
+		log.finer "Executing script: $script"
 		// pause
 		if (lastScriptExec!=0) {
 			long elapsed=System.currentTimeMillis()-lastScriptExec
 			if (elapsed < DEFAULT_SCRIPT_PAUSE) {
 				long wait=DEFAULT_SCRIPT_PAUSE-elapsed
-				log.trace "Pausing script execution for {} ms", wait
+				log.finer "Pausing script execution for $wait ms"
 				Thread.sleep wait // allow interrupts
 			}
 		}
@@ -359,7 +359,7 @@ public class HmScriptClient {
 			}
 		}
 		con.disconnect()
-		log.trace "Response: ${response.join('\n')}"
+		log.finer "Response: ${response.join('\n')}"
 		response
 	}
 }

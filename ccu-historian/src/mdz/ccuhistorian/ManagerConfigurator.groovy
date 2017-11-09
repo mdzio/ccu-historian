@@ -17,7 +17,7 @@
 */
 package mdz.ccuhistorian
 
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Log
 import mdz.hc.itf.Manager
 import mdz.hc.itf.hm.HmBinRpcInterface
 import mdz.hc.itf.hm.HmXmlRpcInterface
@@ -26,7 +26,7 @@ import mdz.hc.itf.hm.HmReinitTask
 import mdz.hc.itf.hm.HmSysVarInterface
 import mdz.hc.itf.misc.SimulationInterface
 
-@Slf4j
+@Log
 class ManagerConfigurator {
 
 	private static final int MAX_NUM_DEVICES = 10
@@ -62,10 +62,10 @@ class ManagerConfigurator {
 	private def getOption(ConfigObject devCfg, String name, Class clazz, String prefix='', boolean required=true) {
 		def value=devCfg."$name"
 		if (value instanceof ConfigObject) value=null
-		log.debug '{}Reading configuration option \'{}\': {}', prefix, name, value?:''
+		log.fine "${prefix}Reading configuration option '$name': ${value?:''}" 
 		if (value==null)
 			if (required)
-				throw new Exception(prefix+"Configuration option '$name' is not set")
+				throw new Exception("${prefix}Configuration option '$name' is not set")
 			else
 				return null
 		try {
@@ -90,7 +90,7 @@ class ManagerConfigurator {
 		String historianAddress=getOption(config, 'historianAddress', String, 'All devices: ', false)
 		if (historianAddress==null) {
 			historianAddress=InetAddress.localHost.hostAddress
-			log.info "Auto detected local address: {}", historianAddress
+			log.info "Auto detected local address (please check): {}", historianAddress
 		}
 		manager.binRpcServer.localAddress=historianAddress
 		manager.xmlRpcServer.localAddress=historianAddress
@@ -255,6 +255,6 @@ class ManagerConfigurator {
 				}
 			}
 		}
-		log.info "Configured following interfaces: {}", manager.getInterfaceNames().join(', ')
+		log.info "Configured following interfaces: ${manager.getInterfaceNames().join(', ')}" 
 	}
 }

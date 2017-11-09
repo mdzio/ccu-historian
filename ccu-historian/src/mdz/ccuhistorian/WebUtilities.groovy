@@ -22,13 +22,12 @@ import groovy.time.*
 import java.security.MessageDigest
 import java.text.*
 import java.util.regex.Matcher
-
-import mdz.Utilities
+import java.util.logging.Logger
+import mdz.Exceptions
 import mdz.hc.DataPoint
 import mdz.hc.DataPointIdentifier
 import mdz.hc.persistence.DataPointStorage
 
-import org.slf4j.Logger
 import groovy.transform.CompileStatic
 
 class WebUtilities {
@@ -143,7 +142,7 @@ class WebUtilities {
 	
 	@CompileStatic
 	public static Throwable catchToLog(Logger log, Closure cl) {
-		Utilities.catchToLog(log, cl)
+		Exceptions.catchToLog(log, cl)
 	}
 
 	@CompileStatic

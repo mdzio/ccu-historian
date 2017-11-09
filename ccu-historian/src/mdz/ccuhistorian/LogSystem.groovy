@@ -18,6 +18,8 @@
 package mdz.ccuhistorian
 
 import java.util.logging.*
+import mdz.Exceptions
+import mdz.Utilities
 import java.text.*
 import org.codehaus.groovy.runtime.StackTraceUtils
 import groovy.transform.CompileStatic
@@ -88,22 +90,5 @@ public class LogSystem {
 	public void directMessage(msg) {
 		if (config.directMessages)
 			System.err.println "[DIRECT MSG] $msg"	
-	}
-	
-	public static boolean catchToLog(Logger log, Closure cl) {
-		try {
-			cl()
-			false
-		} catch (Throwable ex) {
-			String msg=ex.message
-			if (!msg) msg=ex.class.name
-			log.severe { "Exception: " + msg }
-			StackTraceUtils.sanitize ex
-			StackTraceUtils.sanitizeRootCause ex
-			StringWriter trace=new StringWriter()
-			ex.printStackTrace new PrintWriter(trace)
-			log.severe { "Detail: " + trace }
-			true
-		}
 	}
 }

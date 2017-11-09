@@ -18,10 +18,10 @@
 package mdz.hc.itf.hm;
 
 import groovy.util.GroovyTestCase
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Log
 import mdz.hc.TestConfiguration
 
-@Slf4j(value='l')
+@Log(value='l')
 class HmScriptClientTest extends GroovyTestCase {
 	
 	void testExecute() {
@@ -31,7 +31,7 @@ class HmScriptClientTest extends GroovyTestCase {
 		assert ['test1']==script.execute('WriteLine("test1");')
 		assert ['test2']==script.execute('WriteLine("test2");')
 		t=System.currentTimeMillis()-t
-		l.debug "Script delay: {} ms", t
+		l.fine "Script delay: {} ms", t
 		assert t>=script.DEFAULT_SCRIPT_PAUSE
 	}
 	
@@ -40,7 +40,7 @@ class HmScriptClientTest extends GroovyTestCase {
 		Date tccu=script.getSystemDate()
 		Date thost=new Date()
 		long d=tccu.time-thost.time
-		l.debug "Host time: $thost, CCU time: $tccu, difference: $d ms"
+		l.fine "Host time: $thost, CCU time: $tccu, difference: $d ms"
 		// difference should be below 2 minutes
 		assert Math.abs(d)<120000
 	}

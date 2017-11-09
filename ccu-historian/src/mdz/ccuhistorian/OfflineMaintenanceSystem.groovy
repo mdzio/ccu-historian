@@ -17,12 +17,12 @@
 */
 package mdz.ccuhistorian
 
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Log
 import groovy.transform.CompileStatic
 import java.util.concurrent.TimeUnit
-import mdz.Utilities
+import mdz.Exceptions
 
-@Slf4j
+@Log
 @CompileStatic
 class OfflineMaintenanceSystem extends BaseSystem {
 
@@ -38,7 +38,7 @@ class OfflineMaintenanceSystem extends BaseSystem {
 		else
 			throw new Exception("No maintenance action selected")
 		base.executor.schedule({
-				Utilities.catchToLog(log) { action() }
+				Exceptions.catchToLog(log) { action() }
 				Main.shutdown()
 			}, 250, TimeUnit.MILLISECONDS)
 	}

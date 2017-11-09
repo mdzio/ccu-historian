@@ -17,13 +17,13 @@
 */
 package mdz.ccuhistorian
 
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Log
 import groovy.transform.CompileStatic
 
 import java.util.logging.Level
 import java.util.logging.Logger
 
-@Slf4j
+@Log
 @CompileStatic
 public class LogSystemConfig {
 
@@ -39,11 +39,11 @@ public class LogSystemConfig {
 	boolean directMessages=false
 	
 	void logDebug() {
-		log.debug "logSystem.consoleLevel=Level.$consoleLevel"
-		log.debug "logSystem.fileLevel=Level.$fileLevel"
-		log.debug "logSystem.fileName='$fileName'"
-		log.debug "logSystem.fileLimit=$fileLimit"
-		log.debug "logSystem.fileCount=$fileCount"
-		log.debug "logSystem.binRpcLevel=Level.$binRpcLevel"
+		log.fine "logSystem.consoleLevel=Level.$consoleLevel"
+		log.fine "logSystem.fileLevel=Level.$fileLevel"
+		log.fine "logSystem.fileName='$fileName'"
+		log.fine "logSystem.fileLimit=$fileLimit"
+		log.fine "logSystem.fileCount=$fileCount"
+		log.fine "logSystem.binRpcLevel=Level.$binRpcLevel"
 	}
 }

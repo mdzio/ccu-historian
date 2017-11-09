@@ -19,11 +19,11 @@ package mdz.hc.itf.misc
 
 import groovy.transform.TupleConstructor
 import groovy.transform.CompileStatic
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Log
 
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
-
+import mdz.Exceptions
 import mdz.Utilities
 
 import mdz.eventprocessing.BasicProducer
@@ -37,7 +37,7 @@ import mdz.hc.itf.Manager
 import mdz.hc.itf.SubscriptionSupport
 import mdz.hc.itf.WriteSupport
 
-@Slf4j
+@Log
 @TupleConstructor
 @CompileStatic
 class SimulationInterface extends BasicProducer<RawEvent> implements Interface, SubscriptionSupport, BrowseSupport, WriteSupport {
@@ -116,8 +116,8 @@ class SimulationInterface extends BasicProducer<RawEvent> implements Interface, 
 			)]
 			functions << [(id): tmpl.function]
 		}
-		log.debug 'Simulated data points:'
-		dataPoints.values().each { log.debug '{}', it }
+		log.fine 'Simulated data points:'
+		dataPoints.values().each { log.fine "$it" }
 		
 		counter=0
 		readVariablesFuture=manager.executor.scheduleWithFixedDelay(
@@ -140,7 +140,7 @@ class SimulationInterface extends BasicProducer<RawEvent> implements Interface, 
 			DataPoint foundDp=dataPoints[dp.id]
 			if (foundDp) {
 				dp.attributes.putAll foundDp.attributes
-			} else log.warn 'Unknown data point {}', dp.id 
+			} else log.warning "Unknown data point $dp.id" 
 		}
 	}
 	
@@ -154,8 +154,8 @@ class SimulationInterface extends BasicProducer<RawEvent> implements Interface, 
 	
 	private synchronized void readDataPoints() {
 		if (readVariablesFuture==null) return
-		Utilities.catchToLog(log) {
-			log.debug 'Reading simulation data points'
+		Exceptions.catchToLog(log) {
+			log.fine 'Reading simulation data points'
 			Date ts=new Date()
 			subscription?.each { dp ->
 				def value=functions[dp.id](counter)
@@ -180,6 +180,6 @@ class SimulationInterface extends BasicProducer<RawEvent> implements Interface, 
 	public void writeValue(DataPoint dp, Object value) {
 		if (!writeAccess)
 			throw new Exception("Write access on interface $name is disabled")
-		log.debug 'Writing value {} into data point {}', value, dp.id
+		log.fine "Writing value $value into data point $dp.id" 
 	}
 }
