@@ -1,10 +1,10 @@
 <%
 import mdz.ccuhistorian.Database
 import groovy.transform.Field
-import org.slf4j.LoggerFactory
+import java.util.logging.Logger
 
 @Field
-private final static log = LoggerFactory.getLogger('mdz.ccuhistorian.webapp.Tools')
+private final static log = Logger.getLogger('mdz.ccuhistorian.webapp.Tools')
 
 def displayName(dp) {
 	dp.id.interfaceId+'.'+(dp.attributes.displayName?:dp.id.address)+'.'+dp.id.identifier

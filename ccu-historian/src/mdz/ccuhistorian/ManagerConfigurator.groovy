@@ -90,7 +90,7 @@ class ManagerConfigurator {
 		String historianAddress=getOption(config, 'historianAddress', String, 'All devices: ', false)
 		if (historianAddress==null) {
 			historianAddress=InetAddress.localHost.hostAddress
-			log.info "Auto detected local address (please check): {}", historianAddress
+			log.info "Auto detected local address (please check): $historianAddress" 
 		}
 		manager.binRpcServer.localAddress=historianAddress
 		manager.xmlRpcServer.localAddress=historianAddress

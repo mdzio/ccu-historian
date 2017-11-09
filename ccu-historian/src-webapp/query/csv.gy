@@ -2,10 +2,10 @@ import groovy.time.TimeCategory
 import java.text.*
 import mdz.ccuhistorian.Database
 import groovy.transform.Field
-import org.slf4j.LoggerFactory
+import java.util.logging.Logger
 
 @Field
-private final static log = LoggerFactory.getLogger('mdz.ccuhistorian.webapp.Csv')
+private final static log = Logger.getLogger('mdz.ccuhistorian.webapp.Csv')
 
 utils.catchToLog(log) {
 
