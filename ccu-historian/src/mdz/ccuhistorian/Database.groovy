@@ -26,6 +26,7 @@ import java.sql.ResultSet
 
 import groovy.sql.Sql
 import groovy.transform.CompileStatic
+import groovy.util.logging.Log
 
 import org.h2.tools.Server
 
@@ -35,14 +36,15 @@ import mdz.hc.Event
 import mdz.hc.TimeSeries
 import mdz.hc.ProcessValue
 import mdz.hc.persistence.Storage
+import mdz.Exceptions
 import mdz.Utilities
 
+@Log
 public class Database implements Storage {
 
 	DatabaseConfig config
 	Base base
 	
-	private static Logger log=Logger.getLogger(Database.class.name)
 	private Server webServer, tcpServer, pgServer
 	private Sql db
 	private final static long TIMESERIES_COPY_INTERVAL=30l*24*60*60*1000 // 1 Monat
@@ -595,7 +597,7 @@ public class Database implements Storage {
 	@CompileStatic
 	private synchronized void checkBackupTime() {
 		if (!backupFuture) return
-		LogSystem.catchToLog(log) {
+		Exceptions.catchToLog(log) {
 			log.finest "Checking backup time"
 			String nextBackup=Utilities.formatTimestamp(config.backup, new Date())
 			if (backupLast!=nextBackup)

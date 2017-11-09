@@ -18,7 +18,8 @@
 package mdz.ccuhistorian.eventprocessing
 
 import groovy.transform.CompileStatic
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Log
+import java.util.logging.Level
 import mdz.eventprocessing.BasicProducer
 import mdz.eventprocessing.Processor
 import mdz.hc.DataPoint
@@ -27,10 +28,10 @@ import mdz.hc.RawEvent
 import mdz.hc.TimeSeries
 import mdz.hc.persistence.DataPointStorage
 import mdz.ccuhistorian.Main
-import mdz.Utilities
+import mdz.Exceptions
 
 @CompileStatic
-@Slf4j
+@Log
 public class DataPointStorageUpdater extends BasicProducer<Event> implements Processor<RawEvent, Event> {
 
 	DataPointStorage storage
@@ -58,9 +59,8 @@ public class DataPointStorageUpdater extends BasicProducer<Event> implements Pro
 				pv: rawEvent.pv 
 			)
 		} catch (Throwable t) {
-			log.error 'Error updating data point storage', t
-			// TODO: adjust when switching to logback
-			log.debug '{}', Utilities.getStackTrace(t)
+			log.severe 'Error updating data point storage'
+			Exceptions.logTo(log, Level.SEVERE, t)
 			Main.restart()
 		}
 	}

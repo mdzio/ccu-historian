@@ -19,7 +19,6 @@ package mdz.ccuhistorian
 
 import groovy.lang.Closure
 import groovy.transform.CompileStatic
-import groovy.util.logging.Slf4j;
 
 import java.util.Date
 import java.util.List
@@ -32,7 +31,6 @@ import mdz.hc.ProcessValue
 import mdz.hc.TimeSeries
 import mdz.hc.persistence.Storage
 
-@Slf4j
 class ExtendedStorage implements Storage {
 
 	Storage storage

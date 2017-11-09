@@ -17,13 +17,14 @@
 */
 package mdz.hc.itf.binrpc
 
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Log
 import groovy.transform.CompileStatic
 
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
-
+import java.util.logging.Level
+import mdz.Exceptions
 import mdz.Utilities
 import mdz.hc.itf.binrpc.BinRpcDecoder.Header
 import mdz.hc.itf.binrpc.BinRpcDecoder.Response
@@ -38,7 +39,7 @@ import static mdz.hc.itf.binrpc.BinRpcConstants.*
  * Closures can be published as RPC methods using the property procedures. 
  * These Closures must be thread-safe implemented. 
  */
-@Slf4j
+@Log
 @CompileStatic
 public class BinRpcServer {
 
@@ -74,7 +75,7 @@ public class BinRpcServer {
 	public void stop() {
 		if (acceptThread!=null)
 			log.info "Stopping BIN-RPC server on port $port"
-		// Sockets schließen, damit die Threads beendet werden
+		// close sockets to end threads
 		serverSocket?.close()
 		acceptThread?.join()
 		acceptThread=null
@@ -95,29 +96,29 @@ public class BinRpcServer {
 					clientSockets << socket
 					pool.execute {
 						String client="$socket.inetAddress.hostAddress:$socket.port"
-						log.debug "Client $client has connected"
+						log.fine "Client $client has connected"
 						try {
 							handleClient(socket)
 						} finally { 
-							log.trace "Client $client disconnected"
+							log.finer "Client $client disconnected"
 							clientSockets.remove(socket)
 							socket.close()
 						}
 					}
 				}
 			} catch (SocketException e) {
-				// serverSocket.close() wurde z.B. aufgerufen
+				// e.g. serverSocket.close() is called
 			}
 		}
 	}
 	
 	private void send(Socket socket, byte[] data) {
-		log.trace "Sending ${data.length} bytes:\n${Utilities.prettyPrint(data)}"
+		log.finest "Sending ${data.length} bytes:\n${Utilities.prettyPrint(data)}"
 		socket.getOutputStream().write(data)
 	}
 
 	private void receive(Socket socket, byte[] data) {
-		log.trace "Receiving ${data.length} bytes"
+		log.finest "Receiving ${data.length} bytes"
 		InputStream is=socket.getInputStream()
 		int pos=0
 		while (pos<data.length) {
@@ -126,7 +127,7 @@ public class BinRpcServer {
 				throw new IOException('Unexpected end of stream')
 			pos+=cnt
 		}
-		log.trace "Received data:\n${Utilities.prettyPrint(data)}"
+		log.finest "Received data:\n${Utilities.prettyPrint(data)}"
 	}
 
 	private Closure listMethodsHandler = { params ->
@@ -140,13 +141,13 @@ public class BinRpcServer {
 	}
 
 	private def handleCall(String methodName, List parameters) {
-		log.debug "Call of method '$methodName' received with parameters $parameters"
+		log.fine "Call of method '$methodName' received with parameters $parameters"
 		Closure proc=procedures[methodName]
 		if (proc==null)
 			throw new BinRpcException("Unknown method: $methodName")
 		def result=proc(parameters)
 		if (result==null) result=''
-		log.debug "Sending method result: $result"
+		log.fine "Sending method result: $result"
 		result
 	}
 	
@@ -156,12 +157,12 @@ public class BinRpcServer {
 			BinRpcDecoder decoder=[]
 		
 			while (true) {
-				// BIN-RPC-Kopf einlesen und dekodieren
+				// read and decode BIN-RPC header
 				byte[] data=new byte[HEADER_SIZE]
 				try {
 					receive socket, data
 				} catch (IOException e) {
-					// Client hat z.B. die Verbindung geschlossen
+					// e.g. client closed connection
 					break
 				}
 				BinRpcDecoder.Header header=decoder.decodeHeader(data)
@@ -169,32 +170,28 @@ public class BinRpcServer {
 					throw new Exception("Received payload length of $header.payloadLength exceeds the packet size limit")
 				if (header.type!=HEADER_REQUEST)
 					throw new Exception("Received invalid packet type $header.type")
-				// BIN-RPC-Request einlesen und dekodieren
+				// read and decode BIN-RPC request
 				data=new byte[header.payloadLength]
 				receive socket, data
 				BinRpcDecoder.Request request=decoder.decodeRequest(data)
 
-				// Prozedur aufrufen
+				// call procedure
 				try {
 					def result=handleCall(request.methodName, request.parameters)
 					data=encoder.encodeResponse(result)
 				} catch (BinRpcException e) {
+					Exceptions.logTo(log, Level.WARNING, e)
 					String msg=e.message?:e.class.name
-					log.warn "Exception: $msg"
-					// TODO: Bei Umstellung auf LogBack anpassen (u.a. Exceptions.sanitize() verwenden)
-					log.debug Utilities.getStackTrace(e)
-					log.debug "Sending fault: code $e.faultCode, message '$msg'"
+					log.fine "Sending fault: code $e.faultCode, message '$msg'"
 					data=encoder.encodeFault(e.faultCode, msg)
 				} catch (Exception e) {
+					Exceptions.logTo(log, Level.WARNING, e)
 					String msg=e.message?:e.class.name
-					log.warn "Exception: $msg"
-					// TODO: Bei Umstellung auf LogBack anpassen (u.a. Exceptions.sanitize() verwenden)
-					log.debug Utilities.getStackTrace(e)
-					log.debug "Sending fault: code $BinRpcException.GENERIC_ERROR, message '$msg'"
+					log.fine "Sending fault: code $BinRpcException.GENERIC_ERROR, message '$msg'"
 					data=encoder.encodeFault(BinRpcException.GENERIC_ERROR, msg)
 				}
 				
-				// BIN-RPC Antwort schicken
+				// send BIN-RPC response
 				if (data.length>PACKET_SIZE_LIMIT)
 					throw new Exception("Encoded packet of size $data.length exceeds packet size limit")
 				send socket, data

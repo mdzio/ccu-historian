@@ -20,9 +20,9 @@ package mdz.ccuhistorian
 import java.util.Map;
 
 import groovy.transform.CompileStatic
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Log
 
-@Slf4j
+@Log
 @CompileStatic
 class HistorianConfig {
 
@@ -34,8 +34,8 @@ class HistorianConfig {
 	Map counters
 
 	void logDebug() {
-		log.debug "historian.metaCycle=$metaCycle"
-		log.debug "historian.bufferCount=$bufferCount"
-		log.debug "historian.bufferTime=$bufferTime"
+		log.fine "historian.metaCycle=$metaCycle"
+		log.fine "historian.bufferCount=$bufferCount"
+		log.fine "historian.bufferTime=$bufferTime"
 	}
 }

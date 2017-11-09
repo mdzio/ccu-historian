@@ -17,7 +17,14 @@
 */
 package mdz;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.codehaus.groovy.runtime.StackTraceUtils;
+
+import groovy.lang.Closure;
 
 public class Exceptions {
 
@@ -38,5 +45,42 @@ public class Exceptions {
 	public static void sanitize(Throwable t) {
 		StackTraceUtils.sanitize(t);
 		StackTraceUtils.sanitizeRootCause(t);
+	}
+
+	public static String getStackTrace(Throwable ex) {
+		sanitize(ex);
+		StringWriter trace = new StringWriter();
+		ex.printStackTrace(new PrintWriter(trace));
+		return trace.toString();
+	}
+
+	public static void logTo(Logger log, Level level, Throwable e) {
+		if (log.isLoggable(level)) {
+			String msg = e.getMessage();
+			if (msg == null)
+				msg = e.getClass().getName();
+			log.log(level, "Exception: " + msg);
+			log.log(level, "Detail: " + getStackTrace(e));
+		}
+	}
+
+	@FunctionalInterface
+	public interface RunnableCanThrow {
+		void run() throws Throwable;
+	}
+
+	public static Throwable catchToLog(Logger log, RunnableCanThrow runnable) {
+		try {
+			runnable.run();
+			return null;
+		} catch (Throwable e) {
+			throwIfFatal(e);
+			logTo(log, Level.SEVERE, e);
+			return e;
+		}
+	}
+
+	public static <V> Throwable catchToLog(Logger log, Closure<V> closure) {
+		return catchToLog(log, () -> closure.call());
 	}
 }

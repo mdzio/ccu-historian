@@ -22,24 +22,18 @@ import java.util.Map;
 
 import mdz.Exceptions;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Logger;
 
 public class BasicProducer<T> implements Producer<T> {
 
-	private final static Logger log = LoggerFactory.getLogger(BasicProducer.class);
+	private final static Logger log = Logger.getLogger(BasicProducer.class.getName());
 	private Consumer<? super T> firstConsumer;
 	private Map<Consumer<? super T>, ?> otherConsumers;
 	// use separate mutex to not affect derived classes
 	private Object mutex = new Object();
 
 	private void safeProduce(Consumer<? super T> consumer, T t) {
-		try {
-			consumer.consume(t);
-		} catch (Throwable e) {
-			Exceptions.throwIfFatal(e);
-			log.error("Consumer signals an error", e);
-		}
+		Exceptions.catchToLog(log, () -> consumer.consume(t));
 	}
 
 	public void produce(T t) {

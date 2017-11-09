@@ -17,10 +17,10 @@
 */
 package mdz.ccuhistorian
 
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Log
 import groovy.transform.CompileStatic
 
-@Slf4j
+@Log
 @CompileStatic
 public class DatabaseSystem extends BaseSystem {
 

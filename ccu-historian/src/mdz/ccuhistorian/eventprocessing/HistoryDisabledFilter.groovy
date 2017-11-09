@@ -18,15 +18,16 @@
 package mdz.ccuhistorian.eventprocessing
 
 import groovy.transform.CompileStatic
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Log
+import java.util.logging.Level
 import mdz.eventprocessing.BasicProducer
 import mdz.eventprocessing.Processor
 import mdz.hc.Event
 import mdz.ccuhistorian.Main
-import mdz.Utilities
+import mdz.Exceptions
 
 @CompileStatic
-@Slf4j
+@Log
 public class HistoryDisabledFilter extends BasicProducer<Event> implements Processor<Event, Event> {
 
 	public void consume(Event event) throws Exception {
@@ -34,9 +35,8 @@ public class HistoryDisabledFilter extends BasicProducer<Event> implements Proce
 			if (!event.dataPoint.historyDisabled)
 				produce event
 		} catch (Throwable t) {
-			log.error 'Error filtering disabled histories', t
-			// TODO: adjust when switching to logback
-			log.debug '{}', Utilities.getStackTrace(t)
+			log.severe 'Error filtering disabled histories'
+			Exceptions.logTo(log, Level.SEVERE, t)
 			Main.restart()
 		}
 	}

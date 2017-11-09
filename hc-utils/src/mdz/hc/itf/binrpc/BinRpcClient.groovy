@@ -17,7 +17,7 @@
 */
 package mdz.hc.itf.binrpc
 
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Log
 import groovy.transform.CompileStatic
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
@@ -34,7 +34,7 @@ import static mdz.hc.itf.binrpc.BinRpcConstants.*
  * 
  * The methods are not synchronized.  
  */
-@Slf4j
+@Log
 @CompileStatic
 public class BinRpcClient {
 
@@ -72,7 +72,7 @@ public class BinRpcClient {
 
 	public void send(byte[] data) {
 		connect()
-		log.trace "Sending ${data.length} bytes to $host:$port:\n${Utilities.prettyPrint(data)}"
+		log.finest "Sending ${data.length} bytes to $host:$port:\n${Utilities.prettyPrint(data)}"
 		socket.getOutputStream().write(data)
 	}
 
@@ -85,7 +85,7 @@ public class BinRpcClient {
 	
 	public void receive(byte[] data) {
 		connect()
-		log.trace "Receiving ${data.length} bytes from $host:$port"
+		log.finest "Receiving ${data.length} bytes from $host:$port"
 		InputStream is=socket.getInputStream()
 		int pos=0
 		while (pos<data.length) {
@@ -118,19 +118,19 @@ public class BinRpcClient {
 				throw new IOException('Unexpected end of stream')
 			pos+=cnt
 		}
-		log.trace "Received data:\n${Utilities.prettyPrint(data)}"
+		log.finest "Received data:\n${Utilities.prettyPrint(data)}"
 	}
 	
 	public call(String methodName, List parameters) {
 		synchronized(callMutex) {
 			try {
-				log.debug "Calling method '$methodName' with parameters $parameters"
+				log.fine "Calling method '$methodName' with parameters $parameters"
 				// pause
 				if (lastCallTime!=0) {
 					long elapsed=System.currentTimeMillis()-lastCallTime
 					if (elapsed < DEFAULT_CALL_PAUSE) {
 						long wait=DEFAULT_CALL_PAUSE-elapsed
-						log.debug "Pausing call for {} ms", wait
+						log.fine "Pausing call for $wait ms"
 						Thread.sleep wait // allow interrupts
 					}
 				}
@@ -150,7 +150,7 @@ public class BinRpcClient {
 				switch (header.type) {
 					case HEADER_RESPONSE:
 						Response response=decoder.decodeResponse(data)
-						log.debug "Received response: $response.result"
+						log.fine "Received response: $response.result"
 						return response.result
 					case HEADER_FAULT:
 						Fault fault=decoder.decodeFault(data)

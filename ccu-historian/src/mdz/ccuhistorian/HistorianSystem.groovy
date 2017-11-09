@@ -18,10 +18,10 @@
 package mdz.ccuhistorian
 
 import mdz.hc.itf.Manager
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Log
 import groovy.transform.CompileStatic
 
-@Slf4j
+@Log
 @CompileStatic
 class HistorianSystem extends DatabaseSystem {
 
@@ -33,7 +33,7 @@ class HistorianSystem extends DatabaseSystem {
 		super(config)
 		try {
 			interfaceManager=new Manager()
-			log.debug 'Configuring interfaces'
+			log.fine 'Configuring interfaces'
 			new ManagerConfigurator().configure(interfaceManager, config.deviceConfigs)
 			interfaceManager.start()
 			historian=new Historian(config.historianConfig, base, extendedStorage, interfaceManager)
