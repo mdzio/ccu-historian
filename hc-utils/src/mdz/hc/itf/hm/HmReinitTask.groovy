@@ -20,12 +20,12 @@ package mdz.hc.itf.hm
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
-
+import mdz.Exceptions
 import mdz.Utilities;
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Log
 import groovy.transform.CompileStatic
 
-@Slf4j
+@Log
 @CompileStatic
 public class HmReinitTask {
 
@@ -48,7 +48,7 @@ public class HmReinitTask {
 	public void add(HmReinitable itf) {
 		synchronized(interfaces) {
 			if (checkInterfacesFuture==null) {
-				log.debug 'Starting re-init task'
+				log.fine 'Starting re-init task'
 				checkInterfacesFuture=executor.scheduleWithFixedDelay(
 					this.&checkInterfaces, checkTime, checkTime, TimeUnit.MILLISECONDS
 				)
@@ -61,7 +61,7 @@ public class HmReinitTask {
 		synchronized(interfaces) {
 			interfaces.remove itf
 			if (!interfaces && checkInterfacesFuture!=null) {
-				log.debug 'Stopping re-init task'
+				log.fine 'Stopping re-init task'
 				checkInterfacesFuture.cancel(false)
 				checkInterfacesFuture=null
 			}
@@ -71,13 +71,13 @@ public class HmReinitTask {
 	private void checkInterfaces () {
 		synchronized(interfaces) {
 			if (checkInterfacesFuture==null) return
-			Utilities.catchToLog(log) {
-				log.trace 'Checking timeouts'
+			Exceptions.catchToLog(log) {
+				log.finer 'Checking timeouts'
 				Date now=[]
 				Collection<HmReinitable> timedOut=interfaces.findAll { now.time-it.lastCommTime.time>timeout }
 				if (timedOut.size()==interfaces.size()) {
-					log.warn "Timeout on interface(s) ${timedOut*.name.join(', ')}; reinitializing all callbacks"
-					interfaces.each { itf -> Utilities.catchToLog(log) { itf.init() } }
+					log.warning "Timeout on interface(s) ${timedOut*.name.join(', ')}; reinitializing all callbacks"
+					interfaces.each { itf -> Exceptions.catchToLog(log) { itf.init() } }
 				}
 			}
 		}

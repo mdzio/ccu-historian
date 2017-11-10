@@ -21,6 +21,7 @@ import java.util.logging.Logger
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.ScheduledFuture
 import groovy.transform.CompileStatic
+import groovy.util.logging.Log
 import mdz.hc.TimeSeries
 import mdz.eventprocessing.Buffer
 import mdz.eventprocessing.Consumer
@@ -32,11 +33,13 @@ import mdz.hc.itf.Interface
 import mdz.hc.itf.SubscriptionSupport
 import mdz.hc.itf.Manager
 import mdz.hc.persistence.Storage
+import mdz.Exceptions
 import mdz.ccuhistorian.eventprocessing.DataPointStorageUpdater
 import mdz.ccuhistorian.eventprocessing.HistoryDisabledFilter
 import mdz.ccuhistorian.eventprocessing.OverflowHandler
 import mdz.ccuhistorian.eventprocessing.Preprocessor
 
+@Log
 @CompileStatic
 class Historian implements Runnable {
 
@@ -47,7 +50,6 @@ class Historian implements Runnable {
 	ExtendedStorage database
 	Manager interfaceManager
 	
-	private Logger log=Logger.getLogger(Historian.class.name)
 	private Buffer buffer
 	private DataPointStorageUpdater dataPointStorageUpdater
 	private HistoryDisabledFilter historyDisabledFilter
@@ -93,12 +95,12 @@ class Historian implements Runnable {
 
 	@Override
 	public void run() {
-		boolean restart=LogSystem.catchToLog(log) {
+		Throwable t=Exceptions.catchToLog(log) {
 			updateSubscriptionsAndProperties();
 			updateWithoutSubscriptionSupport();
 			base.executor.schedule this, config.metaCycle, TimeUnit.MILLISECONDS
 		}
-		if (restart) Main.restart()
+		if (t) Main.restart()
 	}
 
 	private void updateSubscriptionsAndProperties() {
@@ -123,12 +125,12 @@ class Historian implements Runnable {
 					DataPoint old=(DataPoint) dbDp.clone()
 					dbDp.attributes.putAll itfDp.attributes
 					if (dbDp!=old)
-						LogSystem.catchToLog(log) {
+						Exceptions.catchToLog(log) {
 							database.updateDataPoint dbDp
 						}
 				} else {
 					log.info "Historian: Creating data point $itfDp.id"
-					LogSystem.catchToLog(log) {
+					Exceptions.catchToLog(log) {
 						itfDp.historyString=itfDp.attributes.type=='STRING'
 						database.createDataPoint itfDp
 					}
@@ -140,7 +142,7 @@ class Historian implements Runnable {
 				if (!itfDp) {
 					log.info "Historian: Disabling data point $dbDp.id"
 					dbDp.historyDisabled=true
-					LogSystem.catchToLog(log) {
+					Exceptions.catchToLog(log) {
 						database.updateDataPoint dbDp
 					}
 				}
@@ -174,7 +176,7 @@ class Historian implements Runnable {
 		interfaceManager.updateProperties(dataPoints, config.metaCycle-1)
 		dataPoints.eachWithIndex { DataPoint dp, int index ->
 			if (dp!=oldDataPoints[index])
-				LogSystem.catchToLog(log) {
+				Exceptions.catchToLog(log) {
 					database.updateDataPoint dp
 				}
 		}

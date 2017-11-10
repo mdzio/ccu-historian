@@ -19,13 +19,13 @@ package mdz.ccuhistorian
 
 import groovy.transform.CompileStatic
 import groovy.util.ConfigObject;
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Log
 
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.customizers.ImportCustomizer
 import java.util.logging.Level
 
-@Slf4j
+@Log
 class Configuration {
 
 	CmdLineConfig cmdLineConfig
@@ -104,7 +104,7 @@ class Configuration {
 	}
 	
 	public void readFile() {
-		log.debug 'Reading configuration file {}', cmdLineConfig.configFileName
+		log.fine "Reading configuration file $cmdLineConfig.configFileName"
 		
 		Binding binding=new Binding()
 		binding.log=log

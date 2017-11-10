@@ -18,9 +18,9 @@
 package mdz.ccuhistorian
 
 import groovy.transform.CompileStatic
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Log
 
-@Slf4j
+@Log
 @CompileStatic
 class DatabaseConfig {
 
@@ -33,18 +33,18 @@ class DatabaseConfig {
 	String backup=''
 
 	void logDebug() {
-		log.debug "database.dir='$dir'"
-		log.debug "database.name='$name'"
-		log.debug "database.user='$user'"
-		log.debug "database.webEnable=$webEnable"
-		log.debug "database.webPort=$webPort"
-		log.debug "database.webAllowOthers=$webAllowOthers"
-		log.debug "database.tcpEnable=$tcpEnable"
-		log.debug "database.tcpPort=$tcpPort"
-		log.debug "database.tcpAllowOthers=$tcpAllowOthers"
-		log.debug "database.pgEnable=$pgEnable"
-		log.debug "database.pgPort=$pgPort"
-		log.debug "database.pgAllowOthers=$pgAllowOthers"
-		log.debug "database.backup='$backup'"
+		log.fine "database.dir='$dir'"
+		log.fine "database.name='$name'"
+		log.fine "database.user='$user'"
+		log.fine "database.webEnable=$webEnable"
+		log.fine "database.webPort=$webPort"
+		log.fine "database.webAllowOthers=$webAllowOthers"
+		log.fine "database.tcpEnable=$tcpEnable"
+		log.fine "database.tcpPort=$tcpPort"
+		log.fine "database.tcpAllowOthers=$tcpAllowOthers"
+		log.fine "database.pgEnable=$pgEnable"
+		log.fine "database.pgPort=$pgPort"
+		log.fine "database.pgAllowOthers=$pgAllowOthers"
+		log.fine "database.backup='$backup'"
 	}
 }

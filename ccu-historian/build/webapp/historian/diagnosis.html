@@ -2,11 +2,10 @@
 import mdz.hc.DataPoint
 import mdz.hc.itf.hm.HmSysVarInterface
 import groovy.transform.Field
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import java.util.logging.Logger
 
 @Field
-private final static Logger log = LoggerFactory.getLogger('mdz.ccuhistorian.webapp.Diagnosis')
+private final static Logger log = Logger.getLogger('mdz.ccuhistorian.webapp.Diagnosis')
 
 class DiagnosisItem {
 	String description

@@ -18,9 +18,9 @@
 package mdz.ccuhistorian
 
 import groovy.transform.CompileStatic
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Log
 
-@Slf4j
+@Log
 @CompileStatic
 class BaseConfig {
 

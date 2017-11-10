@@ -18,9 +18,9 @@
 package mdz.ccuhistorian.eventprocessing
 
 import java.util.Map
-
+import java.util.logging.Level
 import groovy.transform.CompileStatic
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Log
 import mdz.eventprocessing.BasicProducer
 import mdz.eventprocessing.Processor
 import mdz.hc.DataPointIdentifier
@@ -28,10 +28,11 @@ import mdz.hc.Event
 import mdz.hc.ProcessValue
 import mdz.hc.persistence.HistoryStorage
 import mdz.ccuhistorian.Main
+import mdz.Exceptions
 import mdz.Utilities
 
 @CompileStatic
-@Slf4j
+@Log
 public class OverflowHandler extends BasicProducer<Event> implements Processor<Event, Event> {
 
 	HistoryStorage historyStorage
@@ -44,7 +45,7 @@ public class OverflowHandler extends BasicProducer<Event> implements Processor<E
 			Double range=counters[event.dataPoint.id.identifier]
 			if (range!=null) {
 				if (!(event.pv.value instanceof Number))
-					log.warn 'Overflow handler: Event for data point {} is not numeric, no overflow calculation', event.dataPoint.id
+					log.warning "Overflow handler: Event for data point $event.dataPoint.id is not numeric, no overflow calculation"
 				else {
 					double eventDbl=((Number)event.pv.value).doubleValue()
 					def last=previousValues[event.dataPoint.id]
@@ -52,17 +53,17 @@ public class OverflowHandler extends BasicProducer<Event> implements Processor<E
 						last=historyStorage.getLast(event.dataPoint)?.value
 					if (last!=null) {
 						if (!(last instanceof Number))
-							log.warn 'Overflow handler: Data point {} is not numeric, no overflow calculation', event.dataPoint.id
+							log.warning "Overflow handler: Data point $event.dataPoint.id is not numeric, no overflow calculation" 
 						else {
 							double lastDbl=((Number)last).doubleValue()
 							int overflows=(int)(lastDbl/range)
 							double lastValue=lastDbl-overflows*range
 							if (eventDbl<lastValue-range/10.0D) {
 								overflows++
-								log.debug 'Overflow handler: Overflow on data point {} detected', event.dataPoint.id
+								log.fine "Overflow handler: Overflow on data point $event.dataPoint.id detected" 
 							}
 							double adjustedValue=eventDbl+overflows*range
-							log.trace 'Overflow handler: Adjusted value {} for event {}', adjustedValue, event
+							log.finer "Overflow handler: Adjusted value $adjustedValue for event $event"
 							event=new Event(
 								dataPoint:event.dataPoint,
 								pv:new ProcessValue(event.pv.timestamp, adjustedValue, event.pv.state),
@@ -75,9 +76,8 @@ public class OverflowHandler extends BasicProducer<Event> implements Processor<E
 			}
 			produce event
 		} catch (Throwable t) {
-			log.error 'Error handling overflows', t
-			// TODO: adjust when switching to logback
-			log.debug '{}', Utilities.getStackTrace(t)
+			log.severe "Error handling overflows"
+			Exceptions.logTo(log, Level.SEVERE, t)
 			Main.restart()
 		}
 	}

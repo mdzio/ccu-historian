@@ -24,7 +24,7 @@ import mdz.hc.RawEvent
 import mdz.hc.itf.hm.HmBinRpcServer
 import mdz.hc.itf.hm.HmXmlRpcServer
 import mdz.hc.itf.binrpc.BinRpcServer
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Log
 import groovy.transform.CompileStatic
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ScheduledExecutorService
@@ -32,7 +32,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
-@Slf4j
+@Log
 @CompileStatic
 public class Manager extends BasicProducer<RawEvent> implements Consumer<RawEvent> {
 	
@@ -119,7 +119,7 @@ public class Manager extends BasicProducer<RawEvent> implements Consumer<RawEven
 			if (itf!=null)
 				itf.updateProperties(itfDps, maxCacheAge)
 			else
-				log.warn 'Unknown HM interface \'{}\': Skipping update of properties', interfaceId 
+				log.warning "Unknown HM interface '$interfaceId': Skipping update of properties" 
 		}
 	}
 	
@@ -131,15 +131,11 @@ public class Manager extends BasicProducer<RawEvent> implements Consumer<RawEven
 	}
 	
 	public void sendEvents() {
-		try { 
-			while (true) {
-				RawEvent event
-				try { event=eventQueue.take() } 
-				catch (InterruptedException ex) { return }
-				produce event
-			}
-		} catch (Throwable t) { 
-			log.error 'Error distributing events', t 
+		while (true) {
+			RawEvent event
+			try { event=eventQueue.take() } 
+			catch (InterruptedException ex) { return }
+			produce event
 		}
 	}
 	
@@ -166,11 +162,11 @@ public class Manager extends BasicProducer<RawEvent> implements Consumer<RawEven
 
 	@Override
 	public void consume(RawEvent event) {
-		log.trace "Event received: $event"
+		log.finer "Event received: $event"
 		if (event.id.identifier=='PONG' &&
 			event.id.interfaceId=='BidCoS-RF' &&
 			event.id.address=='CENTRAL') {
-			log.debug 'Discarding ping response'
+			log.fine 'Discarding ping response'
 		} else {
 			eventQueue.offer event
 		}

@@ -1,11 +1,13 @@
 import mdz.hc.TimeSeries.CompactTimeSeries
+import mdz.Exceptions
 import groovy.json.JsonSlurper
 import groovy.json.StreamingJsonBuilder
 import groovy.transform.Field
-import org.slf4j.LoggerFactory
+import java.util.logging.Logger
+import java.util.logging.Level
 
 @Field
-private final static log = LoggerFactory.getLogger('mdz.ccuhistorian.webapp.JsonRpc')
+private final static log = Logger.getLogger('mdz.ccuhistorian.webapp.JsonRpc')
 
 def rpcResponse=[:]
 rpcResponse.id=null
@@ -39,11 +41,13 @@ try {
 } catch (RpcException e) {
 	rpcResponse.remove 'result'
 	rpcResponse.error=[code: e.code, message: e.message]
-	log.warn 'JSON-RPC error response', e
+	log.warning 'JSON-RPC error response'
+	Exceptions.logTo(log, Level.WARNING, e)
 } catch (Exception e) {
 	rpcResponse.remove 'result'
 	rpcResponse.error=[code: RpcException.SERVER_ERROR, message: e.message]
-	log.warn 'JSON-RPC error response', e
+	log.warning 'JSON-RPC error response'
+	Exceptions.logTo(log, Level.WARNING, e)
 }
 
 // send JSON response

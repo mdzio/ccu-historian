@@ -18,6 +18,7 @@
 package mdz.ccuhistorian
 
 import java.util.logging.Logger
+import mdz.Exceptions
 import mdz.hc.itf.Manager
 import mdz.hc.persistence.Storage
 import groovy.transform.CompileStatic
@@ -25,7 +26,7 @@ import groovy.transform.CompileStatic
 @CompileStatic
 class Main {
 
-	public static String version='1.1.1beta1'
+	public static String version='1.1.1beta2'
 	
 	private static final Logger log=Logger.getLogger(Main.class.name)
 	private static Main main
@@ -41,7 +42,7 @@ class Main {
 	}
 	
 	private void run(String[] args) {
-		if (LogSystem.catchToLog(log) {
+		if (Exceptions.catchToLog(log) {
 			config.readCommandLine(args)
 		}) return
 		if (config.cmdLineConfig.help)
@@ -62,14 +63,14 @@ class Main {
 		}
 		
 		while (true) {
-			LogSystem.catchToLog(log) {
+			Exceptions.catchToLog(log) {
 				if (config.fileModified)
 					restart=true
 			}
 			if (restart) {
 				restart=false
 				stop()
-				if (LogSystem.catchToLog(log) { start() })
+				if (Exceptions.catchToLog(log) { start() })
 					restart=true
 			}
 			log.finest 'Sleeping'

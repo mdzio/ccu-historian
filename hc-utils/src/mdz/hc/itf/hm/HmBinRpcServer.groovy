@@ -19,7 +19,7 @@ package mdz.hc.itf.hm
 
 import java.util.Date
 
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Log
 import groovy.transform.CompileStatic
 import mdz.eventprocessing.Consumer
 import mdz.eventprocessing.BasicProducer
@@ -29,7 +29,7 @@ import mdz.hc.DataPointIdentifier
 import mdz.hc.itf.binrpc.BinRpcException
 import mdz.hc.itf.binrpc.BinRpcServer
 
-@Slf4j
+@Log
 @CompileStatic
 public class HmBinRpcServer extends BasicProducer<RawEvent> {
 	
@@ -73,7 +73,7 @@ public class HmBinRpcServer extends BasicProducer<RawEvent> {
 	public String getUrl() { 'binary://'+getLocalAddress()+':'+port }
 	
 	private Closure handleEvent = { List params ->
-		// Parameter: interfaceId, address, key, value
+		// parameters: interfaceId, address, key, value
 		if (params.size()!=4)
 			throw new BinRpcException('Wrong number of parameters')
 		RawEvent event=new RawEvent(
@@ -85,32 +85,32 @@ public class HmBinRpcServer extends BasicProducer<RawEvent> {
 	}
 
 	private Closure handleListDevices = { List params ->
-		// Parameter: String interfaceId; Rückgabe: Array<DeviceDescription>
+		// parameters: String interfaceId; return: Array<DeviceDescription>
 		[]
 	}
 	
 	private Closure handleNewDevices = { List params ->
-		// Parameter: String interfaceId , Array<DeviceDescription> deviceDescriptions
+		// parameters: String interfaceId, Array<DeviceDescription> deviceDescriptions
 		''
 	}
 	
 	private Closure handleDeleteDevices = { List params ->
-		// Parameter: String interfaceId, Array<String> addresses
+		// parameters: String interfaceId, Array<String> addresses
 		''
 	}
 	
 	private Closure handleUpdateDevices = { List params ->
-		// Parameter: String interfaceId, String address, int hint
+		// parameters: String interfaceId, String address, int hint
 		''
 	}
 
 	private Closure handleReplaceDevices = { List params ->
-		// Parameter: String interfaceId, String oldDeviceAddress, String newDeviceAddress
+		// parameters: String interfaceId, String oldDeviceAddress, String newDeviceAddress
 		''
 	}
 	
 	private Closure handleReaddedDevices = { List params ->
-		// Parameter: String interfaceId, Array<String> addresses
+		// parameters: String interfaceId, Array<String> addresses
 		''
 	}
 }

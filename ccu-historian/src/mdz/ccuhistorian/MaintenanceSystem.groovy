@@ -17,11 +17,12 @@
 */
 package mdz.ccuhistorian
 
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Log
 import groovy.transform.CompileStatic
 import java.util.concurrent.TimeUnit
-import mdz.Utilities
+import mdz.Exceptions
 import mdz.ccuhistorian.eventprocessing.Preprocessor
+import mdz.ccuhistorian.eventprocessing.Preprocessor.Type
 import mdz.eventprocessing.ConsumerIteratorAdapter
 import mdz.eventprocessing.IteratorProducerAdapter
 import mdz.eventprocessing.Processor
@@ -32,9 +33,8 @@ import mdz.hc.Event
 import mdz.hc.ProcessValue
 import mdz.hc.TimeSeries
 import mdz.hc.TimeSeriesBulkIterator
-import Preprocessor.Type
 
-@Slf4j
+@Log
 @CompileStatic
 class MaintenanceSystem extends DatabaseSystem {
 
@@ -48,7 +48,7 @@ class MaintenanceSystem extends DatabaseSystem {
 		else
 			throw new Exception("No maintenance action selected")
 		base.executor.schedule({
-				Utilities.catchToLog(log) { action() }
+				Exceptions.catchToLog(log) { action() }
 				Main.shutdown()
 			}, 250, TimeUnit.MILLISECONDS)
 	}
@@ -61,7 +61,7 @@ class MaintenanceSystem extends DatabaseSystem {
 			int typeIndex=(dp.attributes.preprocType as Integer)?:Type.DISABLED.ordinal()
 			if (typeIndex!=Type.DISABLED.ordinal()) {
 				if (typeIndex<0 || typeIndex>=Type.values().length)
-					log.warn 'Invalid preprocessing type {} (data point: {})', typeIndex, dp.id
+					log.warning "Invalid preprocessing type $typeIndex (data point: $dp.id)"
 				else {
 					Type type=Type.values()[typeIndex]
 					switch (type) {
@@ -77,7 +77,7 @@ class MaintenanceSystem extends DatabaseSystem {
 		long totalNewNumOfEntries=0
 		long totalTimeTaken=0
 		dps.each { DataPoint dp ->
-			log.info 'Recalculating compressed data point {}', dp.displayName
+			log.info "Recalculating compressed data point $dp.displayName" 
 			
 			// statistics
 			long timeTaken=System.currentTimeMillis()
@@ -112,8 +112,8 @@ class MaintenanceSystem extends DatabaseSystem {
 			totalNewNumOfEntries+=newNumOfEntries
 			timeTaken=System.currentTimeMillis()-timeTaken
 			float percentDropped=curNumOfEntries?(curNumOfEntries-newNumOfEntries)/curNumOfEntries*100:0.0
-			log.info '{} entries from {} dropped ({} %); {} seconds', curNumOfEntries-newNumOfEntries, curNumOfEntries, 
-				percentDropped, timeTaken/1000
+			log.info "${curNumOfEntries-newNumOfEntries} entries from $curNumOfEntries dropped" +
+				" ($percentDropped %); ${timeTaken/1000} seconds" 
 			totalTimeTaken+=timeTaken
 			
 			if (Thread.interrupted()) 
@@ -121,20 +121,21 @@ class MaintenanceSystem extends DatabaseSystem {
 		}
 		
 		// statistics
-		float percentDropped=totalCurNumOfEntries?(totalCurNumOfEntries-totalNewNumOfEntries)/totalCurNumOfEntries*100:0.0
-		log.info 'Summary: {} entries from {} dropped ({} %); {} seconds', totalCurNumOfEntries-totalNewNumOfEntries, totalCurNumOfEntries, 
-			percentDropped, totalTimeTaken/1000
-		log.info 'Recalculation completed'
+		float percentDropped=totalCurNumOfEntries?(totalCurNumOfEntries-totalNewNumOfEntries)/
+			totalCurNumOfEntries*100:0.0
+		log.info "Summary: ${totalCurNumOfEntries-totalNewNumOfEntries} entries from $totalCurNumOfEntries" +
+			" dropped ($percentDropped %); ${totalTimeTaken/1000} seconds" 
+		log.info 'Recalculation completed' 
 	}
 	
 	private void clean() {
-		log.info 'Starting cleaning of time series date before {}', config.cmdLineConfig.clean
+		log.info "Starting cleaning of time series date before $config.cmdLineConfig.clean" 
 
 		long totalCurNumOfEntries=0
 		long totalNewNumOfEntries=0
 		long totalTimeTaken=0
 		database.dataPoints.each { DataPoint dp ->
-			log.info 'Cleaning data point {}', dp.displayName
+			log.info "Cleaning data point $dp.displayName"
 			
 			// statistics
 			long timeTaken=System.currentTimeMillis()
@@ -149,8 +150,8 @@ class MaintenanceSystem extends DatabaseSystem {
 			totalNewNumOfEntries+=newNumOfEntries
 			timeTaken=System.currentTimeMillis()-timeTaken
 			float percentDropped=curNumOfEntries?(curNumOfEntries-newNumOfEntries)/curNumOfEntries*100:0.0
-			log.info '{} entries from {} dropped ({} %); {} seconds', curNumOfEntries-newNumOfEntries, curNumOfEntries,
-				percentDropped, timeTaken/1000
+			log.info "${curNumOfEntries-newNumOfEntries} entries from $curNumOfEntries dropped" + 
+				" ($percentDropped %); ${timeTaken/1000} seconds"
 			totalTimeTaken+=timeTaken
 			
 			if (Thread.interrupted())
@@ -158,9 +159,10 @@ class MaintenanceSystem extends DatabaseSystem {
 		}
 		
 		// statistics
-		float percentDropped=totalCurNumOfEntries?(totalCurNumOfEntries-totalNewNumOfEntries)/totalCurNumOfEntries*100:0.0
-		log.info 'Summary: {} entries from {} dropped ({} %); {} seconds', totalCurNumOfEntries-totalNewNumOfEntries, totalCurNumOfEntries, 
-			percentDropped, totalTimeTaken/1000
+		float percentDropped=totalCurNumOfEntries?(totalCurNumOfEntries-totalNewNumOfEntries)/
+			totalCurNumOfEntries*100:0.0
+		log.info "Summary: ${totalCurNumOfEntries-totalNewNumOfEntries} entries from $totalCurNumOfEntries" +
+			" dropped ($percentDropped %); ${totalTimeTaken/1000} seconds" 
 		log.info 'Cleaning completed'
 	}
 }

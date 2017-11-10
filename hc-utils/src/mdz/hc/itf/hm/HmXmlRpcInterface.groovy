@@ -19,11 +19,12 @@ package mdz.hc.itf.hm
 
 import java.util.List
 import java.util.concurrent.ScheduledExecutorService
-
-import groovy.util.logging.Slf4j
+import java.util.logging.Level
+import groovy.util.logging.Log
 import groovy.transform.TupleConstructor
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.CompileStatic
+import mdz.Exceptions
 import mdz.Utilities
 import mdz.eventprocessing.Consumer
 import mdz.eventprocessing.BasicProducer
@@ -38,7 +39,7 @@ import mdz.hc.DataPointIdentifier
  * 
  * Methods start, stop are not synchronized.
  */
-@Slf4j
+@Log
 @TupleConstructor
 @CompileStatic
 public class HmXmlRpcInterface extends BasicProducer<RawEvent> implements Interface, WriteSupport, Consumer<RawEvent>, HmReinitable {
@@ -82,7 +83,7 @@ public class HmXmlRpcInterface extends BasicProducer<RawEvent> implements Interf
 		if (!disableRegistration) {
 			reinitTask.remove this
 			if (registered)
-				Utilities.catchToLog(log) {	deinit() }
+				Exceptions.catchToLog(log) {	deinit() }
 		}
 		server.removeConsumer(this)
 		devicePropCache.clear()
@@ -176,12 +177,15 @@ public class HmXmlRpcInterface extends BasicProducer<RawEvent> implements Interf
 					cachedProperties=devicePropCache[dp.id]
 				} catch (Exception e) {
 					// FIXME: test and narrow exception type
-					if (e.getMessage()!=null && e.getMessage().equals(UNKNOWN_DEVICE_ERROR_TEXT))
-						log.warn "Device $dp.id does not exist"
-					else
-						log.warn "Communication error", e
+					if (e.getMessage()!=null && e.getMessage().equals(UNKNOWN_DEVICE_ERROR_TEXT)) {
+						log.warning "Device $dp.id does not exist"
+					} else {
+						log.warning "Communication error"
+						Exceptions.logTo(log, Level.WARNING, e)
+					}
 				} catch (IOException e) {
-					log.warn "Communication error", e
+					log.warning "Communication error"
+					Exceptions.logTo(log, Level.WARNING, e)
 				}
 			}
 			if (cachedProperties!=null) {

@@ -20,9 +20,9 @@ package mdz.ccuhistorian
 import java.util.logging.Level
 
 import groovy.transform.CompileStatic
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Log
 
-@Slf4j
+@Log
 @CompileStatic
 class CmdLineConfig {
 
@@ -36,12 +36,12 @@ class CmdLineConfig {
 	String runScriptFileName
 	
 	void logDebug() {
-		log.debug "cmdLine.configFileName=$configFileName"
-		log.debug "cmdLine.logLevel=${logLevel?:''}"
-		log.debug "cmdLine.recalculation=$recalculation"
-		log.debug "cmdLine.compaction=$compaction"
-		log.debug "cmdLine.clean=$clean"
-		log.debug "cmdLine.scriptFileName=${scriptFileName?:''}"
-		log.debug "cmdLine.runScriptFileName=${runScriptFileName?:''}"
+		log.fine "cmdLine.configFileName=$configFileName"
+		log.fine "cmdLine.logLevel=${logLevel?:''}"
+		log.fine "cmdLine.recalculation=$recalculation"
+		log.fine "cmdLine.compaction=$compaction"
+		log.fine "cmdLine.clean=$clean"
+		log.fine "cmdLine.scriptFileName=${scriptFileName?:''}"
+		log.fine "cmdLine.runScriptFileName=${runScriptFileName?:''}"
 	}
 }

@@ -17,7 +17,7 @@
 */
 package mdz.ccuhistorian
 
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Log
 import groovy.transform.CompileStatic
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledThreadPoolExecutor
@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit
  * modules are completed but no new tasks are accepted. After all other 
  * modules have been stopped, the base module is finally stopped.
  */
-@Slf4j
+@Log
 @CompileStatic
 class Base {
 	
@@ -48,7 +48,7 @@ class Base {
 	
 	protected synchronized stopScheduler() {
 		if (executor) {
-			log.debug 'Stopping main scheduler'
+			log.fine 'Stopping main scheduler'
 			executor.shutdownNow()
 			try {
 				executor.awaitTermination(SHUTDOWN_TIMEOUT, TimeUnit.MILLISECONDS);
@@ -61,7 +61,7 @@ class Base {
 		log.info 'Stopping base services'
 		if (executor) {
 			if (!executor.terminated)
-				log.error 'Main scheduler is not terminated'
+				log.severe 'Main scheduler is not terminated'
 			executor=null
 		}
 	}

@@ -20,9 +20,9 @@ package mdz.ccuhistorian
 import java.util.Map
 import java.util.logging.Level
 import groovy.transform.CompileStatic
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Log
 
-@Slf4j
+@Log
 @CompileStatic
 class WebServerConfig {
 	
@@ -40,12 +40,12 @@ class WebServerConfig {
 	String[] apiKeys
 
 	void logDebug() {
-		log.debug "webServer.port=$port"
-		log.debug "webServer.dir='$dir'"
-		log.debug "webServer.logLevel=Level.$logLevel"
-		log.debug "webServer.historianAddress='${getHistorianAddress()}'"
-		log.debug "webServer.trendDesigns=[${trendDesigns.collect { it.key }.join(', ')}]"
-		log.debug "webServer.apiKeys=[${apiKeys.collect { "'$it'" }.join(', ')}]"
-		log.debug "webServer.menuLinks=[${menuLinks.collect { it.value.text }.join(', ')}]"
+		log.fine "webServer.port=$port"
+		log.fine "webServer.dir='$dir'"
+		log.fine "webServer.logLevel=Level.$logLevel"
+		log.fine "webServer.historianAddress='${getHistorianAddress()}'"
+		log.fine "webServer.trendDesigns=[${trendDesigns.collect { it.key }.join(', ')}]"
+		log.fine "webServer.apiKeys=[${apiKeys.collect { "'$it'" }.join(', ')}]"
+		log.fine "webServer.menuLinks=[${menuLinks.collect { it.value.text }.join(', ')}]"
 	}
 }

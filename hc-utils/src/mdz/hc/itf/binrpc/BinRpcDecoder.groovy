@@ -17,7 +17,6 @@
 */
 package mdz.hc.itf.binrpc
 
-import groovy.util.logging.Slf4j
 import groovy.transform.CompileStatic
 import static mdz.hc.itf.binrpc.BinRpcConstants.*
 import mdz.Utilities;

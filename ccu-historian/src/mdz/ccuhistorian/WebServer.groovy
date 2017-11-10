@@ -19,7 +19,7 @@ package mdz.ccuhistorian
 
 import java.util.logging.Logger
 import java.util.logging.Level
-
+import mdz.Exceptions
 import mdz.hc.itf.Manager;
 
 import org.eclipse.jetty.server.Server
@@ -76,7 +76,7 @@ public class WebServer {
 	public synchronized stop() {
 		if (server) {
 			log.info 'Stopping web server'
-			LogSystem.catchToLog(log) { server.stop() }
+			Exceptions.catchToLog(log) { server.stop() }
 			server=null
 		}
 		webUtilities=null
@@ -89,6 +89,6 @@ public class WebServer {
 		config.historianAddress
 	}
 
-	// // required for the servlets
+	// required for the servlets
 	public static WebServer getInstance() { instance }
 }

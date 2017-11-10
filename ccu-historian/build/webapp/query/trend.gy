@@ -18,12 +18,12 @@ import mdz.hc.DataPoint
 import mdz.ccuhistorian.LogSystem
 import mdz.ccuhistorian.TrendDesign
 import mdz.ccuhistorian.Database
-import org.slf4j.LoggerFactory
+import java.util.logging.Logger
 
 @Field
-private final static log=LoggerFactory.getLogger('mdz.ccuhistorian.webapp.Trend')
+private final static log=Logger.getLogger('mdz.ccuhistorian.webapp.Trend')
 
-// Hilfsfunktionen
+// helpers
 
 def applyDesign(obj, cl) {
 	if (cl) {
@@ -56,7 +56,7 @@ static addToXYSeries(TimeSeries timeSeries, XYSeries xySeries) {
 		xySeries.add(timestamps[idx], values[idx]);
 }
 
-// Klasse für die Aufnahme der URL-Parameter
+// class for storage of the URL parameters
 
 class Parameters {
 
@@ -72,10 +72,10 @@ class Parameters {
 	int width, height
 	Date begin, end
 	TrendDesign trendDesign
-	Map<Integer /* Gruppen-ID */, Group> groups=new TreeMap<>().withDefault { new Group() }
+	Map<Integer /* group id */, Group> groups=new TreeMap<>().withDefault { new Group() }
 
 	Parameters(params, binding) {
-		// Höhe und Breite der Trend-Grafik
+		// height and width of the graphics
 		try {
 			width=(params.w?:'640') as Integer
 			height=(params.h?:'260') as Integer
@@ -83,12 +83,12 @@ class Parameters {
 			throw new Exception('Page parameter w (width) or h (height) is invalid')
 		}
 		
-		// Datenpunkt-IDs
+		// datapoint IDs
 		if (!params.i)
 			throw new Exception('Page parameter i (data point id/s) not set')
 		def dataPoints=binding.utils.parseDataPointList(params.i, binding.database)
 	
-		// Datenpunkt-Gruppen
+		// data point groups
 		def dpGroups
 		if (!params.g)
 			dpGroups=[0]*dataPoints.size()
@@ -105,13 +105,13 @@ class Parameters {
 		if (dataPoints.size()!=dpGroups.size())
 			throw new Exception('Page parameter g (data point group/s) is invalid (wrong count)')
 
-		// Gruppen zusammen bauen
+		// build groups
 		[dataPoints, dpGroups].transpose().each {
 			def (dp, group)=it
 			groups[group].dataPoints << dp
 		}
 
-		// Gruppenhöhen
+		// group heights
 		def groupHeights
 		if (!params.gh)
 			groupHeights=[1]*dpGroups.unique().size()
@@ -133,7 +133,7 @@ class Parameters {
 			group.height=height
 		}
 
-		// Zeitbereich	
+		// time range	
 		begin=binding.utils.parseDate(params.b)
 		end=binding.utils.parseDate(params.e)
 		def duration=binding.utils.parseDuration(params.d)
@@ -148,7 +148,7 @@ class Parameters {
 					else end=begin+duration
 		}	}	}
 		
-		// Trend-Design
+		// trend design
 		if (params.t && params.t!='default') {
 			trendDesign=binding.webServer.config.trendDesigns[params.t]
 			if (!trendDesign)
@@ -162,7 +162,7 @@ class Parameters {
 	}
 }
 
-// Chart erzeugen
+// generate chart
 
 class PlotState {
 	int totalDataPointIdx=0
@@ -170,19 +170,18 @@ class PlotState {
 }
 
 def createPlot(parameters, dataPoints, plotState) {
-	// Plot erzeugen
+	// generate plot
 	def plot=new XYPlot()
 	plot.backgroundPaint=new ChartColor(245, 245, 245)
 	applyDesign plot, parameters.trendDesign.plot
 	
-	// Y-Achsen
-	// Datenpunkte mit identischem Wertebereich und identischer Einheit erhalten
-	// die gleiche Y-Achse.
+	// y-axis
+	// data points with same range and unit should use the same y-axis.
 	def rangeAxes=[:]
 	def rangeAxesDisplayIdx=[]
 	def visibleRangeAxesCnt=0
 	
-	// Zeitreihen und Y-Achsen erstellen
+	// create time series and y-axis
 	dataPoints.eachWithIndex { dataPoint, dpIdx ->
 		
 		if (dataPoint.historyString)
@@ -191,7 +190,7 @@ def createPlot(parameters, dataPoints, plotState) {
 			dataPoint.id.identifier
 		def isAction=dataPoint.attributes.type=='ACTION'
 	
-		// Y-Achse auswaehlen bzw. erstellen
+		// create/select y-axis
 		def axisKey=[dataPoint.attributes.type, dataPoint.attributes.unit, dataPoint.attributes.minimum, dataPoint.attributes.maximum]
 		def axisIdx=rangeAxes[axisKey]
 		if (axisIdx==null) {
@@ -214,7 +213,7 @@ def createPlot(parameters, dataPoints, plotState) {
 			plotState.totalAxisIdx++
 		}
 			
-		// Zeitreihe abfragen und konvertieren
+		// request time series and convert
 		def timeSeries
 		if (isAction) timeSeries=database.getTimeSeriesRaw(dataPoint, parameters.begin, parameters.end)
 		else timeSeries=database.getTimeSeries(dataPoint, parameters.begin, parameters.end)
@@ -225,10 +224,10 @@ def createPlot(parameters, dataPoints, plotState) {
 		def xySeriesCollection=new XYSeriesCollection(xySeries)
 		plot.setDataset(dpIdx, xySeriesCollection)
 		
-		// Y-Achsenzuordnung
+		// y-axis
 		plot.mapDatasetToRangeAxis(dpIdx, axisIdx)
 	
-		// Renderer anlegen
+		// create renderer
 		def renderer
 		if (isAction) {
 			renderer=new XYLineAndShapeRenderer()
@@ -245,19 +244,19 @@ def createPlot(parameters, dataPoints, plotState) {
 }
 
 def createCombinedPlot(parameters) {
-	// Zeitachse
+	// time axis
 	def timeAxis = new DateAxis()
 	timeAxis.lowerMargin=0.00 // keine Raender
 	timeAxis.upperMargin=0.00
 	timeAxis.setRange(parameters.begin, parameters.end)
 	applyDesign timeAxis, parameters.trendDesign.timeAxis
 
-	// kombinierten Plot anlegen
+	// create combined plot
 	def combinedPlot=new CombinedDomainXYPlot(timeAxis)
 	combinedPlot.setGap(10.0);
 	combinedPlot.setOrientation(PlotOrientation.VERTICAL);
 	
-	// Subplots erzeugen
+	// create subplots
 	PlotState plotState=[]
 	parameters.groups.values().each { group ->
 		combinedPlot.add(createPlot(parameters, group.dataPoints, plotState), group.height)
@@ -266,38 +265,38 @@ def createCombinedPlot(parameters) {
 }
 
 def createChart(parameters) {
-	// Chart erzeugen
+	// create chart
 	def chart=new JFreeChart(null, JFreeChart.DEFAULT_TITLE_FONT, createCombinedPlot(parameters), true)
 	chart.backgroundPaint=ChartColor.WHITE
 	applyDesign chart, parameters.trendDesign.chart
 	chart
 }
 
-// Hauptfunktion
+// main function
 
 utils.catchToLog(log) {
 	def startTime=System.currentTimeMillis()
-	log.trace 'Web server: Generating trend'
+	log.finer 'Web server: Generating trend'
 	
-	// Schlüsselwort überprüfen
+	// check key
 	if (webServer.config.apiKeys)
 		if (!params.k || !webServer.config.apiKeys.contains(params.k))
 			throw new Exception('Access denied')
 			
-	// Aufrufparameter auswerten
+	// parse parameters
 	Parameters parameters=[params, binding]
-	log.trace "Web server: Parameters: $parameters"
+	log.finer "Web server: Parameters: $parameters"
 	
-	// Chart erzeugen
+	// create chart
 	def chart=createChart(parameters)
 	
-	// Grafik erzeugen
+	// create graphics
 	def image=chart.createBufferedImage(parameters.width, parameters.height)
 	def encoder=ImageEncoderFactory.newInstance('png')
 	
-	// Grafik verschicken
+	// send graphics
 	response.contentType='image/png'
 	encoder.encode(image, sout)
 	
-	log.trace "Web server: Trend generated in ${System.currentTimeMillis()-startTime}ms"
+	log.finer "Web server: Trend generated in ${System.currentTimeMillis()-startTime}ms"
 } // catchToLog

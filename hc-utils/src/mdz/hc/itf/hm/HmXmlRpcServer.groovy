@@ -19,14 +19,15 @@ package mdz.hc.itf.hm
 
 import java.net.ServerSocket
 import groovy.net.xmlrpc.XMLRPCServer
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Log
 import mdz.Utilities
 import mdz.eventprocessing.BasicProducer
 import mdz.hc.RawEvent
 import mdz.hc.ProcessValue
 import mdz.hc.DataPointIdentifier
+import java.util.logging.Level
 
-@Slf4j
+@Log
 public class HmXmlRpcServer extends BasicProducer<RawEvent> {
 
 	private final static int DEFAULT_PORT = 2098
@@ -36,7 +37,7 @@ public class HmXmlRpcServer extends BasicProducer<RawEvent> {
 	
 	final Map rpcMethods=[
 		event: { interfaceId, address, key, value ->
-			log.debug "event($interfaceId, $address, $key, $value) call received"
+			log.fine "event($interfaceId, $address, $key, $value) call received"
 			RawEvent event=new RawEvent(
 				id:new DataPointIdentifier((String)interfaceId, (String)address, (String)key),
 				pv:new ProcessValue(new Date(), value, ProcessValue.STATE_QUALITY_NOT_SUPPORTED)
@@ -45,23 +46,24 @@ public class HmXmlRpcServer extends BasicProducer<RawEvent> {
 			''
 		},
 		listDevices: { interfaceId ->
-			log.debug "listDevices($interfaceId) call received"
+			log.fine "listDevices($interfaceId) call received"
 			[]
 		},
 		newDevices: { interfaceId, deviceDescriptions ->
-			log.debug "newDevices($interfaceId) call received"
-			if (log.debugEnabled)
+			if (log.isLoggable(Level.FINE)) {
+				log.fine "newDevices($interfaceId) call received"
 				deviceDescriptions.each {
-					log.debug "newDevices($interfaceId): "+it
+					log.fine "newDevices($interfaceId): " + it
 				}
+			}
 			''
 		},
 		deleteDevices: { interfaceId, addresses ->
-			log.debug "deleteDevices($interfaceId, $addresses) call received"
+			log.fine "deleteDevices($interfaceId, $addresses) call received"
 			''
 		},
 		updateDevice: { interfaceId, address, hint ->
-			log.debug "updateDevice($interfaceId, $address, $hint) call received"
+			log.fine "updateDevice($interfaceId, $address, $hint) call received"
 			''
 		}
 	]
@@ -75,7 +77,7 @@ public class HmXmlRpcServer extends BasicProducer<RawEvent> {
 		rpcMethods.each { name, method -> server."$name"=method }
 		
 		server.system.multicall={ multiCall ->
-			log.debug "system.multicall() with $multiCall.size item(s) received"
+			log.fine "system.multicall() with $multiCall.size item(s) received"
 			multiCall.collect { oneCall ->
 				String name=oneCall.methodName
 				Closure method=rpcMethods[name]
@@ -84,28 +86,28 @@ public class HmXmlRpcServer extends BasicProducer<RawEvent> {
 			}
 		}
 		server.system.listMethods={  
-			log.debug "system.listMethods($it) received"
+			log.fine "system.listMethods($it) received"
 			List<String> methods=rpcMethods.collect { it.key } + 'system.multicall' + 'system.listMethods'
-			log.trace "Response: {}", methods
+			log.finer "Response: $methods"
 			methods
 		}
 		
 		def defaultMethod={ name, params ->
-			log.warn "Unknown method $name called"
+			log.warning "Unknown method $name called"
 			returnFault "Unknown method $name called", -1
 		}
 		defaultMethod.delegate=server
 		server.setupDefaultMethod defaultMethod
 		 
 		server.setupFaultMethod { String message, int code ->
-			 log.warn "Returning error message '$message', $code"
+			 log.warning "Returning error message '$message', $code"
 		}
 		
 		ServerSocket serverSocket = new ServerSocket(port)
 		serverSocket.reuseAddress=true
 		server.startServer serverSocket
 		
-		log.debug "XML-RPC server address is $url"
+		log.fine "XML-RPC server address is $url"
 	}
 	
 	String getUrl() { 'http://'+getLocalAddress()+':'+port }
@@ -118,7 +120,7 @@ public class HmXmlRpcServer extends BasicProducer<RawEvent> {
 
 	synchronized void stop() {
 		if (server) { 
-			log.debug 'Stopping XML-RPC server'
+			log.fine 'Stopping XML-RPC server'
 			Utilities.catchToLog(log) { server.stopServer(); } 
 			server=null 
 		}
