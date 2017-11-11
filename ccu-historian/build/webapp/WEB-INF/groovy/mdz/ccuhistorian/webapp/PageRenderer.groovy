@@ -2,11 +2,10 @@ package mdz.ccuhistorian.webapp
 
 import mdz.hc.itf.hm.HmSysVarInterface
 import java.util.prefs.Preferences
-import org.slf4j.LoggerFactory
+import groovy.util.logging.Log
 
+@Log
 public class PageRenderer {
-
-	private final static log=LoggerFactory.getLogger(PageRenderer)
 
     // the "user" of this class
     def servlet
