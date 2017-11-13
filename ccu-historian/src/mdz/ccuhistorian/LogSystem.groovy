@@ -22,6 +22,8 @@ import mdz.Exceptions
 import mdz.Utilities
 import java.text.*
 import org.codehaus.groovy.runtime.StackTraceUtils
+import org.eclipse.jetty.util.log.JavaUtilLog
+import org.eclipse.jetty.util.log.Log
 import groovy.transform.CompileStatic
 
 @CompileStatic
@@ -60,6 +62,11 @@ public class LogSystem {
 		this.config=config
 		consoleHandler.formatter=new MdzFormatter(this, 'yyyy-MM-dd HH:mm:ss')
 		rootLogger.level=Level.WARNING
+		
+		// configure jetty logging
+		Log.setLog(new JavaUtilLog());
+
+		// append handlers
 		['mdz', 'org.eclipse.jetty'].each {
 			Logger logger=Logger.getLogger(it)
 			logger.level=Level.ALL
