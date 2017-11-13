@@ -20,7 +20,7 @@ package mdz.hc.itf.hm
 import java.net.ServerSocket
 import groovy.net.xmlrpc.XMLRPCServer
 import groovy.util.logging.Log
-import mdz.Utilities
+import mdz.Exceptions
 import mdz.eventprocessing.BasicProducer
 import mdz.hc.RawEvent
 import mdz.hc.ProcessValue
@@ -121,7 +121,7 @@ public class HmXmlRpcServer extends BasicProducer<RawEvent> {
 	synchronized void stop() {
 		if (server) { 
 			log.fine 'Stopping XML-RPC server'
-			Utilities.catchToLog(log) { server.stopServer(); } 
+			Exceptions.catchToLog(log) { server.stopServer(); } 
 			server=null 
 		}
 	}
