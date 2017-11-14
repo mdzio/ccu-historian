@@ -7,15 +7,15 @@ renderer.head={
 
 renderer.content={
     form(action:'analyze.html', method:'get') {
-		div(class:'row') {
+		div(class:'row', style:'margin-bottom: 0.5em') {
 			div(class:'col-sm-4 mb-2') {
 				div(class:'input-group') {
 					div(class:'input-group-addon') {
 						span class:'glyphicon glyphicon-filter'
 					}
-					input type:'text', class:'form-control', placeholder:'Filterausdruck'
+					input id:'filter-input', type:'text', class:'form-control', placeholder:'Filterausdruck'
 					span(class:'input-group-btn') {
-						button(class:'btn btn-default', type:'button') {
+						button(id:'reset-filter-btn', class:'btn btn-default', type:'button') {
 							span class:'glyphicon glyphicon-remove'
 						}
 					}
@@ -27,7 +27,7 @@ renderer.content={
 				button class:'btn btn-default btn-block', type:'submit', name:'trend_set', value:1, 'Trend-Darstellung'
 			}
 		}
-        table(id:'dptable', class:'table table-bordered table-hover') {
+        table(id:'dp-table', class:'table table-bordered table-hover') {
             thead {
                 tr {
                     th class:'select', 'Ausw.'
@@ -59,14 +59,30 @@ renderer.content={
 renderer.end={
     script { mkp.yieldUnescaped($/
 		// select data point also by clicking on row
-		$('#dptable tbody tr').on('click', function (e) {
+		$('#dp-table tbody tr').on('click', function(e) {
 			// clicked on checkbox? then do nothing
 			if ($(e.target).is('input')) return;
 			// simulate click on checkbox
 			$(this).find('input').trigger('click');
 		});
 		
-		// TODO: filter
+		// reset filter
+		$('#reset-filter-btn').on('click', function(e) {
+			$('#filter-input').val('');
+			$('#dp-table tbody tr').css('display', '');
+		});
+		
+		// filter
+		$('#filter-input').on('keyup', function(e) {
+			var terms=$(this).val().toLowerCase().split(/\s+/);
+			$('#dp-table tbody tr').each(function() {
+				var val=$(this).children('td').text().toLowerCase();
+				if (terms.every(t => val.indexOf(t) >= 0))
+					$(this).css('display', '');
+				else 
+					$(this).css('display', 'none');
+			});
+		});
 	/$) }
 }
 
