@@ -118,11 +118,15 @@ public class PageRenderer {
 					writeContent()
 				}
 			}
+			
 			// jquery JS
 			script src:'../external/jquery/jquery.js'
 			// bootstrap JS
 			script src:'../external/bootstrap/js/bootstrap.js'
-            // execute the page end closure
+			// underscore JS
+			script src:'../external/underscore/underscore.js'
+
+			// execute the page end closure
 			if (end) {
 				servlet.utils.catchToLog(log) {
 					end.delegate=servlet.html

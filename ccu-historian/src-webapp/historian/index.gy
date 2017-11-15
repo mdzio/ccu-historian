@@ -73,7 +73,7 @@ renderer.end={
 		});
 		
 		// filter
-		$('#filter-input').on('keyup', function(e) {
+		var filter=function(e) {
 			var terms=$(this).val().toLowerCase().split(/\s+/);
 			$('#dp-table tbody tr').each(function() {
 				var val=$(this).children('td').text().toLowerCase();
@@ -82,7 +82,8 @@ renderer.end={
 				else 
 					$(this).css('display', 'none');
 			});
-		});
+		};
+		$('#filter-input').on('keyup', _.debounce(filter, 500));
 	/$) }
 }
 
