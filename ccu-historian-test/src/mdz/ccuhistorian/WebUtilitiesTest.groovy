@@ -15,13 +15,13 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package mdz.ccuhistorian.test
+package mdz.ccuhistorian
 
 import groovy.util.GroovyTestCase
 import mdz.ccuhistorian.WebUtilities
 import mdz.Utilities
 
-class TestWebUtilities extends GroovyTestCase {
+class WebUtilitiesTest extends GroovyTestCase {
 
 	public void testEscapeHtml() {
 		WebUtilities wu=new WebUtilities()
