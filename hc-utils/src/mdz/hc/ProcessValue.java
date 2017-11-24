@@ -27,6 +27,8 @@ public class ProcessValue {
 	public final static int STATE_QUALITY_NOT_SUPPORTED = 0x00000002;
 	public final static int STATE_QUALITY_GOOD = 0x00000003;
 
+	public final static int STATE_PREPROCESSED = 0x00000004;
+	
 	private Date timestamp;
 	private Object value;
 	private int state;
