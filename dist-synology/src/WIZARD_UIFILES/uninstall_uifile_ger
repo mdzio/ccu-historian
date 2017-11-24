@@ -1,0 +1,15 @@
+[
+  {
+    "step_title": "!!! DEINSTALLATIONS-WARNUNG !!!",
+    "items": [
+      {
+        "type": "multiselect",
+        "desc": "ALLE DATEN UND DIE KONFIGRUATION WERDEN GELÖSCHT! BITTE SICHERSTELLEN, DASS EIN BACKUP VORHANDEN IST!",
+		"subitems": [{
+			"key": "pkgwizard_confirm",
+			"desc": "Ich habe ein Backup, bitte fortfahren!"
+		}]
+      }
+    ]
+  }
+]

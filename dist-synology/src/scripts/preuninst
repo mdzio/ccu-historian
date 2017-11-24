@@ -1,0 +1,16 @@
+#!/bin/sh
+
+if [ "$pkgwizard_confirm" = "false" ]; then
+	case $SYNOPKG_DSM_LANGUAGE in
+		ger)
+			printf "Bitte die Warnung bestätigen!" > $SYNOPKG_TEMP_LOGFILE
+		;;
+		
+		*)
+			printf "Please confirm the warning!" > $SYNOPKG_TEMP_LOGFILE
+		;;
+	esac
+	exit 1
+fi
+
+exit 0

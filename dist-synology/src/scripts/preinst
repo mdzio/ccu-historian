@@ -1,0 +1,15 @@
+#!/bin/sh
+
+source /etc/profile
+
+if [ -z ${JAVA_HOME} ]; then
+	echo "Java is not installed or not properly configured. JAVA_HOME is not defined. " > $SYNOPKG_TEMP_LOGFILE
+	exit 1
+fi
+
+if [ ! -f ${JAVA_HOME}/bin/java ]; then
+	echo "Java is not installed or not properly configured. The Java binary could not be located. " > $SYNOPKG_TEMP_LOGFILE
+	exit 1
+fi
+
+exit 0

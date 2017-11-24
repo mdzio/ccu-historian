@@ -1,0 +1,14 @@
+{
+    ".url": {
+        "SYNO.SDS.CCU-HISTORIAN": {
+            "type": "url",
+            "allUsers": true,
+            "title": "CCU-Historian",
+            "desc": "CCU-Historian Server for Synology",
+            "icon": "ccu-historian_{0}.png",
+            "protocol": "http",
+            "url": "/",
+            "port": "8080"            
+        }
+    }
+}

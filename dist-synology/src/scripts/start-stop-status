@@ -1,0 +1,54 @@
+#!/bin/sh
+###BEGIN INIT INFO########################
+#
+# start-stop-status
+# Starts, stops the CCU-Historian server and
+# reports status to the package manager
+#
+###END INIT INFO##########################
+
+source /etc/profile
+
+PID=""
+
+get_pid ()
+{
+   PID=`ps aux |grep [j]ava |grep [c]cu-hist |awk '{print $2}'`
+}
+
+
+case $1 in
+  start)
+    get_pid
+    if [ -z  $PID ]; then
+		cd "${SYNOPKG_PKGDEST}"
+		java -Duser.timezone=Europe/Berlin -Duser.language=de -Duser.country=DE -Xms16m -Xmx64m -jar ccu-historian.jar > ccu-historian.log 2>&1 &
+		exit $?
+    else
+		exit 0
+    fi
+  ;;
+  stop)
+    get_pid
+    kill $PID
+    exit $?
+  ;;
+  status)
+     get_pid
+     if [ -z  $PID ]; then
+     # is not running
+      exit 1
+     else
+     # is running
+   exit 0
+      fi   
+
+  ;;
+  log)
+    echo "${SYNOPKG_PKGDEST}/ccu-historian.log";
+    exit 0
+  ;;
+  *)
+    exit 0
+  ;;
+esac

@@ -1,0 +1,15 @@
+[
+  {
+    "step_title": "!!! UPGRADE WARNUNG !!!",
+    "items": [
+      {
+        "type": "multiselect",
+        "desc": "Bitte sicherstellen, dass ein Backup vorhanden ist!",
+		"subitems": [{
+			"key": "pkgwizard_confirm",
+			"desc": "Ich habe ein Backup, bitte fortfahren!"
+		}]
+      }
+    ]
+  }
+]
