@@ -180,7 +180,7 @@ public class Preprocessor extends BasicProducer<Event> implements Processor<Even
 	private Map<DataPointIdentifier, IntervalProcessor> intervalProcessors=[:]
 	
 	private void applyIntervalProcessor(Event event, Type type, double param) {
-		long intervalLength=(long)param
+		long intervalLength=(long)(param*1000)
 		if (intervalLength<=0) {
 			log.warning "Preprocessor: Invalid interval length (data point: $event.dataPoint.id)"
 			produce event

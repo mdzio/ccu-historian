@@ -19,15 +19,20 @@ package mdz.ccuhistorian.eventprocessing
 
 import groovy.util.GroovyTestCase
 import mdz.eventprocessing.Collector
+import mdz.hc.DataPoint
+import mdz.hc.DataPointIdentifier
 import mdz.hc.Event
 import mdz.hc.ProcessValue
 
 class IntervalProcessorTest extends GroovyTestCase {
 
 	Event createEvent(long ts, value) {
-		new Event(pv:new ProcessValue(
-			new Date(ts), value, ProcessValue.STATE_QUALITY_GOOD
-		))
+		new Event(
+			dataPoint: new DataPoint(id:new DataPointIdentifier("", "", "Test")),
+			pv:new ProcessValue(
+				new Date(ts), value, ProcessValue.STATE_QUALITY_GOOD
+			)
+		)
 	}
 	
 	public void testMax() {
