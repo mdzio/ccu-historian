@@ -26,26 +26,20 @@ import mdz.hc.ProcessValue
 
 class IntervalProcessorTest extends GroovyTestCase {
 
-	Event createEvent(long ts, value) {
+	Event createEvent(long ts, value, int state = ProcessValue.STATE_QUALITY_GOOD) {
 		new Event(
 			dataPoint: new DataPoint(id:new DataPointIdentifier("", "", "Test")),
 			pv:new ProcessValue(
-				new Date(ts), value, ProcessValue.STATE_QUALITY_GOOD
+				new Date(ts), value, state
 			)
 		)
 	}
 	
-	public void testMax() {
+	public void testMaxValue() {
 		Collector c = []
 		IntervalProcessor ip = [
 			intervalLength: 10,
-			function: { long begin, long end, List<Event> events -> 
-				Event e = events.max { it.pv.value } 
-				new Event(
-					dataPoint: e.dataPoint,
-					pv: new ProcessValue(new Date(begin), e.pv.value, e.pv.state)
-				)
-			}
+			function: Preprocessor.&maxComprFunction
 		]
 		ip.addConsumer c
 		
@@ -62,14 +56,14 @@ class IntervalProcessorTest extends GroovyTestCase {
 		assert r.size() == 1
 		assert r[0].pv.timestamp.time == 0
 		assert r[0].pv.value == 0.0
-		assert r[0].pv.state == ProcessValue.STATE_QUALITY_GOOD
+		assert r[0].pv.state == (ProcessValue.STATE_QUALITY_GOOD | ProcessValue.STATE_PREPROCESSED)
 
 		ip.consume createEvent(20, 2.0)
 		r = c.get()
 		assert r.size() == 1
 		assert r[0].pv.timestamp.time == 10
 		assert r[0].pv.value == 1.0
-		assert r[0].pv.state == ProcessValue.STATE_QUALITY_GOOD
+		assert r[0].pv.state == (ProcessValue.STATE_QUALITY_GOOD | ProcessValue.STATE_PREPROCESSED)
 
 		ip.consume createEvent(21, 3.0)
 		ip.consume createEvent(22, 4.0)
@@ -82,7 +76,7 @@ class IntervalProcessorTest extends GroovyTestCase {
 		assert r.size() == 1
 		assert r[0].pv.timestamp.time == 20
 		assert r[0].pv.value == 4.0
-		assert r[0].pv.state == ProcessValue.STATE_QUALITY_GOOD
+		assert r[0].pv.state == (ProcessValue.STATE_QUALITY_GOOD | ProcessValue.STATE_PREPROCESSED)
 		
 		ip.consume createEvent(139, 2.0)
 		r = c.get()
@@ -94,36 +88,51 @@ class IntervalProcessorTest extends GroovyTestCase {
 		assert r.size() == 2
 		assert r.every { it.pv.value == 2.0 }
 	}
-	
-	private static class AvgHelper {
-		long end
-		double sum
+
+	public void testMaxQuality() {
+		Collector c = []
+		IntervalProcessor ip = [
+			intervalLength: 20,
+			function: Preprocessor.&maxComprFunction
+		]
+		ip.addConsumer c
+
+		ip.consume createEvent(0, 10)
+		ip.consume createEvent(10, 20, ProcessValue.STATE_QUALITY_QUESTIONABLE)
+		ip.consume createEvent(20, 30)
+		List<Event> r = c.get()
+		assert r.size() == 1
+		assert r[0].pv.timestamp.time == 0
+		assert r[0].pv.value == 20
+		assert r[0].pv.state == (ProcessValue.STATE_QUALITY_QUESTIONABLE | ProcessValue.STATE_PREPROCESSED)
 	}
 
-	public void testAvg() {
+	public void testMin() {
+		Collector c = []
+		IntervalProcessor ip = [
+			intervalLength: 20,
+			function: Preprocessor.&minComprFunction
+		]
+		ip.addConsumer c
+
+		ip.consume createEvent(0, 10)
+		ip.consume createEvent(10, 20, ProcessValue.STATE_QUALITY_QUESTIONABLE)
+		ip.consume createEvent(20, 30)
+		List<Event> r = c.get()
+		assert r.size() == 1
+		assert r[0].pv.timestamp.time == 0
+		assert r[0].pv.value == 10
+		assert r[0].pv.state == (ProcessValue.STATE_QUALITY_QUESTIONABLE | ProcessValue.STATE_PREPROCESSED)
+	}
+
+	public void testAvgValue() {
 		Collector c = []
 		IntervalProcessor ip = [
 			intervalLength: 10,
-			function: { long begin, long end, List<Event> events -> 
-				AvgHelper res=events.reverse().inject(new AvgHelper(sum:0.0d, end:end)) { AvgHelper r, Event e ->
-					double value
-					switch (e.pv.value) {
-						case Number: value=((Number)e.pv.value).doubleValue(); break
-						case Boolean: value=(Boolean)e.pv.value?1.0:0.0; break
-					}
-					r.sum += value * (r.end - e.pv.timestamp.time)
-					r.end = e.pv.timestamp.time
-					r
-				}
-				double avg=res.sum / (end-begin)
-				new Event(
-					dataPoint: events[0].dataPoint,
-					pv: new ProcessValue(new Date(begin), avg, events[0].pv.state)
-				)
-			}
+			function: Preprocessor.&avgComprFunction
 		]
 		ip.addConsumer c
-		
+
 		ip.consume createEvent(0, 0)
 		ip.consume createEvent(5, 10)
 		ip.consume createEvent(15, 20)
@@ -131,17 +140,64 @@ class IntervalProcessorTest extends GroovyTestCase {
 		assert r.size() == 1
 		assert r[0].pv.timestamp.time == 0
 		assert r[0].pv.value == 5
+		assert r[0].pv.state == (ProcessValue.STATE_QUALITY_GOOD | ProcessValue.STATE_PREPROCESSED)
 		
 		ip.consume createEvent(25, 25)
 		r = c.get()
 		assert r.size() == 1
 		assert r[0].pv.timestamp.time == 10
 		assert r[0].pv.value == 15
+		assert r[0].pv.state == (ProcessValue.STATE_QUALITY_GOOD | ProcessValue.STATE_PREPROCESSED)
 		
 		ip.consume createEvent(30, 0)
 		r = c.get()
 		assert r.size() == 1
 		assert r[0].pv.timestamp.time == 20
 		assert r[0].pv.value == 22.5
+		assert r[0].pv.state == (ProcessValue.STATE_QUALITY_GOOD | ProcessValue.STATE_PREPROCESSED)
+	}
+	
+	public void testAvgWithIncompleteInterval() {
+		Collector c = []
+		IntervalProcessor ip = [
+			intervalLength: 100,
+			function: Preprocessor.&avgComprFunction
+		]
+		ip.addConsumer c
+
+		ip.consume createEvent(50, 10)
+		ip.consume createEvent(100, 20)
+		List<Event> r = c.get()
+		assert r.size() == 1
+		assert r[0].pv.timestamp.time == 0
+		assert r[0].pv.value == 10
+		assert r[0].pv.state == (ProcessValue.STATE_QUALITY_QUESTIONABLE | ProcessValue.STATE_PREPROCESSED)
+	}
+	
+	public void testAvgQuality() {
+		Collector c = []
+		IntervalProcessor ip = [
+			intervalLength: 20,
+			function: Preprocessor.&avgComprFunction
+		]
+		ip.addConsumer c
+
+		ip.consume createEvent(0, 10)
+		ip.consume createEvent(10, 20, ProcessValue.STATE_QUALITY_QUESTIONABLE)
+		ip.consume createEvent(20, 30)
+		List<Event> r = c.get()
+		assert r.size() == 1
+		assert r[0].pv.timestamp.time == 0
+		assert r[0].pv.value == 15
+		assert r[0].pv.state == (ProcessValue.STATE_QUALITY_QUESTIONABLE | ProcessValue.STATE_PREPROCESSED)
+		
+		ip.consume createEvent(21, 30, ProcessValue.STATE_QUALITY_BAD)
+		ip.consume createEvent(40, 30, ProcessValue.STATE_QUALITY_BAD)
+		r = c.get()
+		assert r.size() == 1
+		assert r[0].pv.timestamp.time == 20
+		assert r[0].pv.value == 30
+		assert r[0].pv.state == (ProcessValue.STATE_QUALITY_BAD | ProcessValue.STATE_PREPROCESSED)
+
 	}
 }

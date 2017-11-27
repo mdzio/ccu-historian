@@ -136,46 +136,65 @@ public class Preprocessor extends BasicProducer<Event> implements Processor<Even
 		}
 	}
 
-	private static class AvgHelper {
+	private static int minQuality(int first, int second) {
+		// get minimum quality
+		int q = Math.min(first & ProcessValue.STATE_QUALITY_MASK, second & ProcessValue.STATE_QUALITY_MASK) 
+		// replace quality bits, keep other bits
+		(first & ~ProcessValue.STATE_QUALITY_MASK) | q
+	}
+	
+	private static int stateComprFunction(long begin, List<Event> events) {
+		int state = events[0].pv.state
+		// incomplete interval?
+		if (events[0].pv.timestamp.time > begin)
+			state = minQuality(state, ProcessValue.STATE_QUALITY_QUESTIONABLE)
+		// compress state
+		state = events.inject(state) { int s, Event e -> Preprocessor.minQuality(s, e.pv.state) }
+		// return preprocessed
+		state | ProcessValue.STATE_PREPROCESSED
+	}
+	
+	private static class AvgComprSum {
 		long end
 		double sum
 	}
 	
-	private Map<Type, Closure> intervalFunctions=[
-		(Type.AVG_COMPR): { long begin, long end, List<Event> events -> 
-			AvgHelper res=events.reverse().inject(new AvgHelper(sum:0.0d, end:end)) { AvgHelper r, Event e ->
-				double value
-				switch (e.pv.value) {
-					case Number: value=((Number)e.pv.value).doubleValue(); break
-					case Boolean: value=(Boolean)e.pv.value?1.0:0.0; break
-				}
-				r.sum += value * (r.end - e.pv.timestamp.time)
-				r.end = e.pv.timestamp.time
-				r
+	private static Event avgComprFunction(long begin, long end, List<Event> events) {
+		AvgComprSum res=events.reverse().inject(new AvgComprSum(sum:0.0d, end:end)) { AvgComprSum r, Event e ->
+			double value
+			switch (e.pv.value) {
+				case Number: value=((Number)e.pv.value).doubleValue(); break
+				case Boolean: value=(Boolean)e.pv.value?1.0:0.0; break
 			}
-			double avg=res.sum / (end-begin)
-			new Event(
-				dataPoint: events[0].dataPoint,
-				pv: new ProcessValue(new Date(begin), avg, events[0].pv.state)
-			)
-		},
-		
-		(Type.MIN_COMPR): { long begin, long end, List<Event> events -> 
-			Event e = events.min { it.pv.value }
-			new Event(
-				dataPoint: e.dataPoint,
-				pv: new ProcessValue(new Date(begin), e.pv.value, e.pv.state)
-			)
-		},
-		
-		(Type.MAX_COMPR): { long begin, long end, List<Event> events -> 
-			Event e = events.max { it.pv.value }
-			new Event(
-				dataPoint: e.dataPoint,
-				pv: new ProcessValue(new Date(begin), e.pv.value, e.pv.state)
-			)
+			r.sum += value * (r.end - e.pv.timestamp.time)
+			r.end = e.pv.timestamp.time
+			r
 		}
-	]
+		double avg = res.sum / (end - events[0].pv.timestamp.time)
+		int state = stateComprFunction(begin, events)
+		new Event(
+			dataPoint: events[0].dataPoint,
+			pv: new ProcessValue(new Date(begin), avg, state)
+		)
+	}
+
+	private static Event minComprFunction(long begin, long end, List<Event> events) {
+		Event e = events.min { it.pv.value }
+		int state = stateComprFunction(begin, events)
+		new Event(
+			dataPoint: e.dataPoint,
+			pv: new ProcessValue(new Date(begin), e.pv.value, state)
+		)
+	}
+
+	private static Event maxComprFunction(long begin, long end, List<Event> events) {
+		Event e = events.max { it.pv.value }
+		int state = stateComprFunction(begin, events)
+		new Event(
+			dataPoint: e.dataPoint,
+			pv: new ProcessValue(new Date(begin), e.pv.value, state)
+		)
+	}
 	
 	private Map<DataPointIdentifier, IntervalProcessor> intervalProcessors=[:]
 	
@@ -196,11 +215,12 @@ public class Preprocessor extends BasicProducer<Event> implements Processor<Even
 			log.fine "Preprocessor: Creating interval processor (type: $type, intervalLength: $intervalLength, data point: $event.dataPoint.id)"
 			ip=[]
 			ip.intervalLength=intervalLength
-			ip.function=intervalFunctions[type] as IntervalProcessor.Function
-			ip.addConsumer { Event e -> 
-				e.pv.state |= ProcessValue.STATE_PREPROCESSED
-				produce e 
+			switch (type) {
+				case Type.AVG_COMPR: ip.function = Preprocessor.&avgComprFunction; break 
+				case Type.MIN_COMPR: ip.function = Preprocessor.&minComprFunction; break 
+				case Type.MAX_COMPR: ip.function = Preprocessor.&maxComprFunction; break 
 			}
+			ip.addConsumer { Event e -> produce e }
 			intervalProcessors[event.dataPoint.id]=ip
 		}
 		ip.consume event
