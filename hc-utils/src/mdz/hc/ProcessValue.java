@@ -28,6 +28,7 @@ public class ProcessValue {
 	public final static int STATE_QUALITY_GOOD = 0x00000003;
 
 	public final static int STATE_PREPROCESSED = 0x00000004;
+	public final static int STATE_FIRST_ARCHIVED = 0x00000008;
 	
 	private Date timestamp;
 	private Object value;

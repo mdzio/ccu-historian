@@ -35,6 +35,7 @@ import mdz.hc.itf.Manager
 import mdz.hc.persistence.Storage
 import mdz.Exceptions
 import mdz.ccuhistorian.eventprocessing.DataPointStorageUpdater
+import mdz.ccuhistorian.eventprocessing.FirstArchived
 import mdz.ccuhistorian.eventprocessing.HistoryDisabledFilter
 import mdz.ccuhistorian.eventprocessing.OverflowHandler
 import mdz.ccuhistorian.eventprocessing.Preprocessor
@@ -55,6 +56,7 @@ class Historian implements Runnable {
 	private HistoryDisabledFilter historyDisabledFilter
 	private OverflowHandler overflowHandler
 	private Preprocessor preprocessor
+	private FirstArchived firstArchived
 	
 	Historian(HistorianConfig config, Base base, ExtendedStorage database, Manager interfaceManager) {
 		log.info 'Starting historian'
@@ -64,6 +66,7 @@ class Historian implements Runnable {
 		this.interfaceManager=interfaceManager
 		config.logDebug()
 		
+		firstArchived=[]
 		preprocessor=[]
 		overflowHandler=[]
 		overflowHandler.historyStorage=database
@@ -72,7 +75,8 @@ class Historian implements Runnable {
 		dataPointStorageUpdater.storage=database
 		buffer=[]
 		
-		preprocessor.addConsumer database
+		firstArchived.addConsumer database
+		preprocessor.addConsumer firstArchived
 		overflowHandler.addConsumer preprocessor
 		historyDisabledFilter.addConsumer overflowHandler
 		dataPointStorageUpdater.addConsumer historyDisabledFilter
