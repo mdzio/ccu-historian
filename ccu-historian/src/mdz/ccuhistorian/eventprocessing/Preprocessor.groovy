@@ -216,9 +216,15 @@ public class Preprocessor extends BasicProducer<Event> implements Processor<Even
 			ip=[]
 			ip.intervalLength=intervalLength
 			switch (type) {
-				case Type.AVG_COMPR: ip.function = Preprocessor.&avgComprFunction; break 
-				case Type.MIN_COMPR: ip.function = Preprocessor.&minComprFunction; break 
-				case Type.MAX_COMPR: ip.function = Preprocessor.&maxComprFunction; break 
+				case Type.AVG_COMPR: 
+					ip.function = Preprocessor.&avgComprFunction as IntervalProcessor.Function
+					break 
+				case Type.MIN_COMPR: 
+					ip.function = Preprocessor.&minComprFunction as IntervalProcessor.Function
+					break 
+				case Type.MAX_COMPR: 
+					ip.function = Preprocessor.&maxComprFunction as IntervalProcessor.Function
+					break 
 			}
 			ip.addConsumer { Event e -> produce e }
 			intervalProcessors[event.dataPoint.id]=ip
