@@ -75,7 +75,7 @@ class BinRpcEncoder {
 			write 0; write 0
 		} else {
 			// v=mant*2^exp mit 0.5<=mant<1.0 
-			int exp=(int)(Math.log(Math.abs(v))/Math.log(2.0))+1
+			int exp=(int)(Math.log(Math.abs(v))/Math.log(2.0d))+1
 			int mant=(int)(v/(2**exp)*MANTISSA_MULTIPLICATOR)
 			write mant; write exp
 		}

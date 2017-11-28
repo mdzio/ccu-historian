@@ -50,6 +50,11 @@ if (ctx.user.loggedIn) {
 					errors << (displayName(dp)+': <b>Parameter</b> darf bei <b>Zeitl. Kompression</b> nicht negativ sein.')
 					return 
 				}
+			} else if (preprocType>=3 && preprocType<=5) {
+				if ((preprocParam?:0.0)<60.0) { 
+					errors << (displayName(dp)+': <b>Parameter</b> darf bei <b>Mittelw./Min./Max.-Vorverarbeitung</b> nicht kleiner als 60 Sekunden sein.')
+					return 
+				}
 			}
 			
 			def orig_dp=dp.clone()
@@ -112,6 +117,9 @@ if (!ctx.user.loggedIn) {
 				<option value="0"<%=((it.attributes.preprocType?:0)==0)?' selected="selected"':''%>>-</option>
 				<option value="1"<%=((it.attributes.preprocType?:0)==1)?' selected="selected"':''%>>Delta K.</option>
 				<option value="2"<%=((it.attributes.preprocType?:0)==2)?' selected="selected"':''%>>Zeitl.K.</option>
+				<option value="3"<%=((it.attributes.preprocType?:0)==3)?' selected="selected"':''%>>Mittelw.</option>
+				<option value="4"<%=((it.attributes.preprocType?:0)==4)?' selected="selected"':''%>>Minimum</option>
+				<option value="5"<%=((it.attributes.preprocType?:0)==5)?' selected="selected"':''%>>Maximum</option>
 			</select></td>
 			<td><input name="preproc_param_<%=it.idx%>" type="text" 
 				value="<%=utils.escapeHtml(utils.format(it.attributes.preprocParam)) %>" size="5" maxlength="20"></td>

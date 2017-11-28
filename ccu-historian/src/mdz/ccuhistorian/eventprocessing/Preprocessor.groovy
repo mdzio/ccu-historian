@@ -33,7 +33,7 @@ import java.util.logging.Level
 @Log
 public class Preprocessor extends BasicProducer<Event> implements Processor<Event, Event> {
 
-	public enum Type { DISABLED, DELTA_COMPR, TEMPORAL_COMPR }
+	public enum Type { DISABLED, DELTA_COMPR, TEMPORAL_COMPR, AVG_COMPR, MIN_COMPR, MAX_COMPR }
 	
 	public void consume(Event event) throws Exception {
 		try {
@@ -45,13 +45,17 @@ public class Preprocessor extends BasicProducer<Event> implements Processor<Even
 					Type type=Type.values()[typeIndex]
 					double param=(event.dataPoint.attributes.preprocParam as Double)?:0.0D
 					switch (type) {
-						case Type.DELTA_COMPR: event=applyDelta(event, param); break
-						case Type.TEMPORAL_COMPR: event=applyTemporal(event, param); break
+						case Type.DELTA_COMPR: applyDelta(event, param); break
+						case Type.TEMPORAL_COMPR: applyTemporal(event, param); break
+						case Type.AVG_COMPR:
+						case Type.MIN_COMPR:
+						case Type.MAX_COMPR: applyIntervalProcessor(event, type, param); break
 					}
 				}
-			}
-			if (event!=null)
+			} else {
+				// forward unmodified
 				produce event
+			}
 		} catch (Throwable t) {
 			log.severe 'Preprocessor: Error'
 			Exceptions.logTo(log, Level.SEVERE, t)
@@ -65,19 +69,25 @@ public class Preprocessor extends BasicProducer<Event> implements Processor<Even
 
 	private Map<DataPointIdentifier, ProcessValue> deltaPreviousValues=[:]
 
-	private Event applyDelta(Event event, double param) {
+	private void applyDelta(Event event, double param) {
 		log.finer "Preprocessor: Applying delta compression to $event" 
 		ProcessValue previousValue=deltaPreviousValues[event.dataPoint.id]
 		event=applyDeltaHelper(event, previousValue, param)
-		if (event!=null)
+		if (event!=null) {
+			event.pv.state |= ProcessValue.STATE_PREPROCESSED
 			deltaPreviousValues[event.dataPoint.id]=event.pv
-		event
+			produce event
+		}
 	}
 	
 	private Event applyDeltaHelper(Event event, ProcessValue previousValue, double param) {
 		if (previousValue==null) return event
 		if (!event.pv.value.class.is(previousValue.value.class)) {
 			log.finer "Preprocessor: Data type of data point $event.dataPoint.id changed"
+			return event
+		}
+		if ((event.pv.state & ProcessValue.STATE_QUALITY_MASK) != (previousValue.state & ProcessValue.STATE_QUALITY_MASK)) {
+			log.finer "Preprocessor: State of data point $event.dataPoint.id changed"
 			return event
 		}
 		if (event.pv.value instanceof Number) {
@@ -112,16 +122,113 @@ public class Preprocessor extends BasicProducer<Event> implements Processor<Even
 	
 	private Map<DataPointIdentifier, Date> temporalTimestamps=[:]
 	
-	private Event applyTemporal(Event event, double param) {
+	private void applyTemporal(Event event, double param) {
 		log.finer "Preprocessor: Applying temporal compression to $event"
 		Date lastTimestamp=temporalTimestamps[event.dataPoint.id]
 		
 		if (lastTimestamp==null || (event.pv.timestamp.time-lastTimestamp.time)>=(param*1000)) {
+			event.pv.state |= ProcessValue.STATE_PREPROCESSED
 			temporalTimestamps[event.dataPoint.id]=event.pv.timestamp
-			event
+			produce event
 		} else {
 			log.fine "Preprocessor: Time not elapsed, event discarded (event: $event)"
 			null
 		}
+	}
+
+	private static int minQuality(int first, int second) {
+		// get minimum quality
+		int q = Math.min(first & ProcessValue.STATE_QUALITY_MASK, second & ProcessValue.STATE_QUALITY_MASK) 
+		// replace quality bits, keep other bits
+		(first & ~ProcessValue.STATE_QUALITY_MASK) | q
+	}
+	
+	private static int stateComprFunction(long begin, List<Event> events) {
+		int state = events[0].pv.state
+		// incomplete interval?
+		if (events[0].pv.timestamp.time > begin)
+			state = minQuality(state, ProcessValue.STATE_QUALITY_QUESTIONABLE)
+		// compress state
+		state = events.inject(state) { int s, Event e -> Preprocessor.minQuality(s, e.pv.state) }
+		// return preprocessed
+		state | ProcessValue.STATE_PREPROCESSED
+	}
+	
+	private static class AvgComprSum {
+		long end
+		double sum
+	}
+	
+	private static Event avgComprFunction(long begin, long end, List<Event> events) {
+		AvgComprSum res=events.reverse().inject(new AvgComprSum(sum:0.0d, end:end)) { AvgComprSum r, Event e ->
+			double value
+			switch (e.pv.value) {
+				case Number: value=((Number)e.pv.value).doubleValue(); break
+				case Boolean: value=(Boolean)e.pv.value?1.0:0.0; break
+			}
+			r.sum += value * (r.end - e.pv.timestamp.time)
+			r.end = e.pv.timestamp.time
+			r
+		}
+		double avg = res.sum / (end - events[0].pv.timestamp.time)
+		int state = stateComprFunction(begin, events)
+		new Event(
+			dataPoint: events[0].dataPoint,
+			pv: new ProcessValue(new Date(begin), avg, state)
+		)
+	}
+
+	private static Event minComprFunction(long begin, long end, List<Event> events) {
+		Event e = events.min { it.pv.value }
+		int state = stateComprFunction(begin, events)
+		new Event(
+			dataPoint: e.dataPoint,
+			pv: new ProcessValue(new Date(begin), e.pv.value, state)
+		)
+	}
+
+	private static Event maxComprFunction(long begin, long end, List<Event> events) {
+		Event e = events.max { it.pv.value }
+		int state = stateComprFunction(begin, events)
+		new Event(
+			dataPoint: e.dataPoint,
+			pv: new ProcessValue(new Date(begin), e.pv.value, state)
+		)
+	}
+	
+	private Map<DataPointIdentifier, IntervalProcessor> intervalProcessors=[:]
+	
+	private void applyIntervalProcessor(Event event, Type type, double param) {
+		long intervalLength=(long)(param*1000)
+		if (intervalLength<=0) {
+			log.warning "Preprocessor: Invalid interval length (data point: $event.dataPoint.id)"
+			produce event
+			return
+		}
+		if (!(event.pv.value instanceof Number) && !(event.pv.value instanceof Boolean)) {
+			log.warning "Preprocessor: Invalid data type ${event.pv.value.class.name} for interval procesing (data point: $event.dataPoint.id)"
+			produce event
+			return
+		}
+		IntervalProcessor ip=intervalProcessors[event.dataPoint.id]
+		if (ip==null || ip.intervalLength!=intervalLength) {
+			log.fine "Preprocessor: Creating interval processor (type: $type, intervalLength: $intervalLength, data point: $event.dataPoint.id)"
+			ip=[]
+			ip.intervalLength=intervalLength
+			switch (type) {
+				case Type.AVG_COMPR: 
+					ip.function = Preprocessor.&avgComprFunction as IntervalProcessor.Function
+					break 
+				case Type.MIN_COMPR: 
+					ip.function = Preprocessor.&minComprFunction as IntervalProcessor.Function
+					break 
+				case Type.MAX_COMPR: 
+					ip.function = Preprocessor.&maxComprFunction as IntervalProcessor.Function
+					break 
+			}
+			ip.addConsumer { Event e -> produce e }
+			intervalProcessors[event.dataPoint.id]=ip
+		}
+		ip.consume event
 	}
 }
