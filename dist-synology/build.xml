@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="dist-synology" default="build">
+	<property file="../ccu-historian/build.properties"/>
+	<property name="destfile" value="build/ccu-historian-${version}.spk"/>
+	<property name="tmpdir" value="build/tmp-${version}"/>
+	<target name="build">
+		<!-- build pkgfile -->
+		<tar destfile="${tmpdir}/package.tgz" compression="gzip">
+			<!-- ccu-historian -->
+			<tarfileset dir="../ccu-historian/build" username="root" group="root">
+				<exclude name="VERSION.txt"/>
+			</tarfileset>
+			<!-- TODO: convert to unix eol? -->
+			<tarfileset dir="../dist-generic/src" username="root" group="root">
+				<include name="ccu-historian-sample.config"/>
+			</tarfileset>
+			<tarfileset dir=".."  username="root" group="root">
+				<include name="LICENSE.txt"/>
+			</tarfileset>
+			<!-- ui files -->
+			<tarfileset dir="src/package"  username="root" group="root"/>
+		</tar>
+		<!-- TODO: update INFO with version -->
+		<!-- TODO: update INFO with md5sum -->
+		<!-- build destfile -->
+		<tar destfile="${destfile}" compression="gzip">
+			<tarfileset dir="${tmpdir}"  username="root" group="root">
+				<include name="package.tgz"/>
+			</tarfileset>
+			<!-- TODO: convert to unix eol? -->
+			<tarfileset dir=".." fullpath="LICENSE" username="root" group="root">
+				<include name="LICENSE.txt"/>
+			</tarfileset>
+			<!-- TODO: file attributes (e.g. exec flag) -->
+			<tarfileset dir="src/root"  username="root" group="root"/>
+		</tar>	
+	</target>
+	<target name="clean">
+		<delete file="${destfile}"/>
+		<delete dir="${tmpdir}"/>
+	</target>
+</project>
