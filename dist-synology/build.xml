@@ -2,16 +2,20 @@
 <project name="dist-synology" default="build">
 	<property file="../ccu-historian/build.properties"/>
 	<property name="destfile" value="build/ccu-historian-${version}.spk"/>
-	<property name="tmpdir" value="build/tmp-${version}"/>
+	<property name="tmpdir" value="build/tmp"/>
 	<target name="build">
+		<mkdir dir="${tmpdir}"/>
+		<!-- convert ccu-historian-sample.config to unix eol -->
+		<fixcrlf eol="unix" file="../dist-generic/src/ccu-historian-sample.config" destDir="${tmpdir}"/>
+		<!-- convert LICENSE.txt to unix eol -->
+		<fixcrlf eol="unix" file="../LICENSE.txt" destDir="${tmpdir}"/>
 		<!-- build pkgfile -->
 		<tar destfile="${tmpdir}/package.tgz" compression="gzip">
 			<!-- ccu-historian -->
 			<tarfileset dir="../ccu-historian/build" username="root" group="root">
 				<exclude name="VERSION.txt"/>
 			</tarfileset>
-			<!-- TODO: convert to unix eol? -->
-			<tarfileset dir="../dist-generic/src" username="root" group="root">
+			<tarfileset dir="${tmpdir}" username="root" group="root">
 				<include name="ccu-historian-sample.config"/>
 			</tarfileset>
 			<tarfileset dir=".."  username="root" group="root">
@@ -20,15 +24,26 @@
 			<!-- ui files -->
 			<tarfileset dir="src/package"  username="root" group="root"/>
 		</tar>
-		<!-- TODO: update INFO with version -->
-		<!-- TODO: update INFO with md5sum -->
+		<!-- update INFO file with md5 checksum -->
+		<checksum file="${tmpdir}/package.tgz" property="checksum"/>
+		<echo>Checksum: ${checksum}</echo>
+		<replaceregexp 
+			file="src/root/INFO" 
+			match='(checksum\s*=\s*)"[^"]+"' 
+			replace='\1"${checksum}"'
+		/>
+		<!-- update INFO with version -->
+		<replaceregexp 
+			file="src/root/INFO" 
+			match='(version\s*=\s*)"[^"]+"' 
+			replace='\1"${version}"'
+		/>
 		<!-- build destfile -->
 		<tar destfile="${destfile}" compression="gzip">
 			<tarfileset dir="${tmpdir}"  username="root" group="root">
 				<include name="package.tgz"/>
 			</tarfileset>
-			<!-- TODO: convert to unix eol? -->
-			<tarfileset dir=".." fullpath="LICENSE" username="root" group="root">
+			<tarfileset dir="${tmpdir}" fullpath="LICENSE" username="root" group="root">
 				<include name="LICENSE.txt"/>
 			</tarfileset>
 			<!-- TODO: file attributes (e.g. exec flag) -->
