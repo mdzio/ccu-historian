@@ -12,17 +12,17 @@
 		<!-- build pkgfile -->
 		<tar destfile="${tmpdir}/package.tgz" compression="gzip">
 			<!-- ccu-historian -->
-			<tarfileset dir="../ccu-historian/build" username="root" group="root">
+			<tarfileset dir="../ccu-historian/build" filemode="600" dirmode="600" username="root" group="root">
 				<exclude name="VERSION.txt"/>
 			</tarfileset>
-			<tarfileset dir="${tmpdir}" username="root" group="root">
+			<tarfileset dir="${tmpdir}" filemode="600" username="root" group="root">
 				<include name="ccu-historian-sample.config"/>
 			</tarfileset>
-			<tarfileset dir=".."  username="root" group="root">
+			<tarfileset dir=".."  filemode="600" username="root" group="root">
 				<include name="LICENSE.txt"/>
 			</tarfileset>
 			<!-- ui files -->
-			<tarfileset dir="src/package"  username="root" group="root"/>
+			<tarfileset dir="src/package" filemode="644" dirmode="755" username="root" group="root"/>
 		</tar>
 		<!-- update INFO file with md5 checksum -->
 		<checksum file="${tmpdir}/package.tgz" property="checksum"/>
@@ -40,14 +40,22 @@
 		/>
 		<!-- build destfile -->
 		<tar destfile="${destfile}" compression="gzip">
-			<tarfileset dir="${tmpdir}"  username="root" group="root">
+			<tarfileset dir="${tmpdir}" filemode="600" username="root" group="root">
 				<include name="package.tgz"/>
 			</tarfileset>
-			<tarfileset dir="${tmpdir}" fullpath="LICENSE" username="root" group="root">
+			<tarfileset dir="${tmpdir}" filemode="600" fullpath="LICENSE" username="root" group="root">
 				<include name="LICENSE.txt"/>
 			</tarfileset>
-			<!-- TODO: file attributes (e.g. exec flag) -->
-			<tarfileset dir="src/root"  username="root" group="root"/>
+			<!-- exclude executable files -->
+			<tarfileset dir="src/root" filemode="600" username="root" group="root">
+				<exclude name="WIZARD_UIFILES/*"/>
+				<exclude name="scripts/*"/>
+			</tarfileset>
+			<!-- only include executable files -->
+			<tarfileset dir="src/root" filemode="711" username="root" group="root">
+				<include name="WIZARD_UIFILES/*"/>
+				<include name="scripts/*"/>
+			</tarfileset>
 		</tar>	
 	</target>
 	<target name="clean">
