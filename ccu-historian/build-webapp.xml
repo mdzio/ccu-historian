@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="webapp" default="build">
-	<!-- TODO: implement clean task -->
-	<target name="build">
-		<delete includeemptydirs="true">
-			<fileset dir="build/webapp" includes="**/*"/>
-		</delete>
+	<target name="build" depends="clean">
 		<copy todir="build/webapp">
-			<fileset dir="src-webapp"/>
+			<fileset dir="src-webapp" />
 		</copy>
+	</target>
+
+	<target name="clean">
+		<delete dir="build/webapp" />
 	</target>
 </project>

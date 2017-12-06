@@ -1,36 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="dist-ccu" default="build">
-	<!-- TODO: implement clean task -->
 	<target name="build">
-		<property file="../ccu-historian/build.properties"/>
-		<property name="destfile" value="build/ccu-historian-addon-${version}.tar.gz"/>
+		<property file="../ccu-historian/build.properties" />
+		<property name="destfile" value="build/ccu-historian-addon-${version}.tar.gz" />
+
 		<!-- write version to file, use unix eol -->
 		<echo file="src/VERSION">${version}&#10;</echo>
+
+		<!-- build tar -->
 		<tar destfile="${destfile}" compression="gzip">
 			<!-- normal files -->
 			<tarfileset dir="src" username="root" group="root">
-				<exclude name="update_script"/>
-				<exclude name="addon/ccu2/update_addon"/>
-				<exclude name="addon/ccurm/update_addon"/>
-				<exclude name="addon/rc.d/ccu-historian"/>
+				<exclude name="update_script" />
+				<exclude name="addon/ccu2/update_addon" />
+				<exclude name="addon/ccurm/update_addon" />
+				<exclude name="addon/rc.d/ccu-historian" />
 			</tarfileset>
 			<!-- executable files -->
 			<tarfileset dir="src" filemode="755" username="root" group="root">
-				<include name="update_script"/>
-				<include name="addon/ccu2/update_addon"/>
-				<include name="addon/ccurm/update_addon"/>
-				<include name="addon/rc.d/ccu-historian"/>
+				<include name="update_script" />
+				<include name="addon/ccu2/update_addon" />
+				<include name="addon/ccurm/update_addon" />
+				<include name="addon/rc.d/ccu-historian" />
 			</tarfileset>
 			<!-- directory /ccu-historian -->
 			<tarfileset dir="../ccu-historian/build" prefix="ccu-historian" username="root" group="root">
-				<exclude name="VERSION.txt"/>
+				<exclude name="VERSION.txt" />
 			</tarfileset>
 			<tarfileset dir="../dist-generic/src" prefix="ccu-historian" username="root" group="root">
-				<include name="ccu-historian-sample.config"/>
+				<include name="ccu-historian-sample.config" />
 			</tarfileset>
 			<tarfileset dir=".." prefix="ccu-historian" username="root" group="root">
-				<include name="LICENSE.txt"/>
+				<include name="LICENSE.txt" />
 			</tarfileset>
 		</tar>
+	</target>
+
+	<target name="clean">
+		<delete>
+			<fileset dir="build" includes="ccu-historian-addon-*.tar.gz" />
+		</delete>
 	</target>
 </project>

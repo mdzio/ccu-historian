@@ -1,65 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="dist-synology" default="build">
-	<property file="../ccu-historian/build.properties"/>
-	<property name="destfile" value="build/ccu-historian-${version}.spk"/>
-	<property name="tmpdir" value="build/tmp"/>
+	<property file="../ccu-historian/build.properties" />
+	<property name="destfile" value="build/ccu-historian-${version}.spk" />
+	<property name="tmpdir" value="build/tmp" />
+	
 	<target name="build">
-		<mkdir dir="${tmpdir}"/>
+		<mkdir dir="${tmpdir}" />
 		<!-- convert ccu-historian-sample.config to unix eol -->
-		<fixcrlf eol="unix" file="../dist-generic/src/ccu-historian-sample.config" destDir="${tmpdir}"/>
+		<fixcrlf eol="unix" file="../dist-generic/src/ccu-historian-sample.config" destDir="${tmpdir}" />
 		<!-- convert LICENSE.txt to unix eol -->
-		<fixcrlf eol="unix" file="../LICENSE.txt" destDir="${tmpdir}"/>
+		<fixcrlf eol="unix" file="../LICENSE.txt" destDir="${tmpdir}" />
 		<!-- build pkgfile -->
 		<tar destfile="${tmpdir}/package.tgz" compression="gzip">
 			<!-- ccu-historian -->
 			<tarfileset dir="../ccu-historian/build" username="root" group="root">
-				<exclude name="VERSION.txt"/>
+				<exclude name="VERSION.txt" />
 			</tarfileset>
 			<tarfileset dir="${tmpdir}" username="root" group="root">
-				<include name="ccu-historian-sample.config"/>
+				<include name="ccu-historian-sample.config" />
 			</tarfileset>
 			<tarfileset dir=".." username="root" group="root">
-				<include name="LICENSE.txt"/>
+				<include name="LICENSE.txt" />
 			</tarfileset>
 			<!-- ui files -->
-			<tarfileset dir="src/package" username="root" group="root"/>
+			<tarfileset dir="src/package" username="root" group="root" />
 		</tar>
 		<!-- update INFO file with md5 checksum -->
-		<checksum file="${tmpdir}/package.tgz" property="checksum"/>
+		<checksum file="${tmpdir}/package.tgz" property="checksum" />
 		<echo>Checksum: ${checksum}</echo>
-		<replaceregexp 
-			file="src/root/INFO" 
-			match='(checksum\s*=\s*)"[^"]+"' 
-			replace='\1"${checksum}"'
-		/>
+		<replaceregexp file="src/root/INFO" match='(checksum\s*=\s*)"[^"]+"' replace='\1"${checksum}"' />
 		<!-- update INFO with version -->
-		<replaceregexp 
-			file="src/root/INFO" 
-			match='(version\s*=\s*)"[^"]+"' 
-			replace='\1"${version}"'
-		/>
+		<replaceregexp file="src/root/INFO" match='(version\s*=\s*)"[^"]+"' replace='\1"${version}"' />
 		<!-- build destfile -->
 		<tar destfile="${destfile}" compression="gzip">
 			<tarfileset dir="${tmpdir}" username="root" group="root">
-				<include name="package.tgz"/>
+				<include name="package.tgz" />
 			</tarfileset>
 			<tarfileset dir="${tmpdir}" fullpath="LICENSE" username="root" group="root">
-				<include name="LICENSE.txt"/>
+				<include name="LICENSE.txt" />
 			</tarfileset>
 			<!-- exclude executable files -->
 			<tarfileset dir="src/root" username="root" group="root">
-				<exclude name="WIZARD_UIFILES/*.sh"/>
-				<exclude name="scripts/*"/>
+				<exclude name="WIZARD_UIFILES/*.sh" />
+				<exclude name="scripts/*" />
 			</tarfileset>
 			<!-- only include executable files -->
 			<tarfileset dir="src/root" filemode="755" username="root" group="root">
-				<include name="WIZARD_UIFILES/*.sh"/>
-				<include name="scripts/*"/>
+				<include name="WIZARD_UIFILES/*.sh" />
+				<include name="scripts/*" />
 			</tarfileset>
-		</tar>	
+		</tar>
 	</target>
+	
 	<target name="clean">
-		<delete file="${destfile}"/>
-		<delete dir="${tmpdir}"/>
+		<delete>
+			<fileset dir="build" includes="ccu-historian-*.spk" />
+		</delete>
+		<delete dir="${tmpdir}" />
 	</target>
 </project>

@@ -3,7 +3,7 @@
 	<name>dist-synology</name>
 	<comment></comment>
 	<projects>
-		<project>ccu-historian</project>
+		<project>dist-generic</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
