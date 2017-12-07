@@ -45,4 +45,9 @@ Alle Beiträge zum Projekt müssen unter die [GNU General Public License V3](LIC
 Dieses Projekt steht unter der [GNU General Public License V3](LICENSE.txt).
 
 # Autoren
-Copyright (c) 2011-2017 Mathias Dzionsko, Jens Maus
+
+Copyright (c) 2011-2017 
+
+* Mathias Dzionsko
+* Jens Maus (CCU/RaspberryMatic-Distribution)
+* Yannick Rocks, Thomas Zahari (Synology-Distribution)
