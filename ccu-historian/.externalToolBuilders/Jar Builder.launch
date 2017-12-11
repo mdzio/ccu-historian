@@ -11,7 +11,7 @@
 <mapAttribute key="org.eclipse.ui.externaltools.ATTR_ANT_PROPERTIES">
 <mapEntry key="eclipse.home" value="C:\Users\Mathias\eclipse\java-oxygen\eclipse"/>
 <mapEntry key="eclipse.running" value="true"/>
-<mapEntry key="project.classpath" value="${project_classpath}"/>
+<mapEntry key="project.classpath" value="${project_classpath:ccu-historian}"/>
 </mapAttribute>
 <stringAttribute key="org.eclipse.ui.externaltools.ATTR_LOCATION" value="${workspace_loc:/ccu-historian/build-jar.xml}"/>
 <stringAttribute key="org.eclipse.ui.externaltools.ATTR_RUN_BUILD_KINDS" value="full,incremental,clean"/>
