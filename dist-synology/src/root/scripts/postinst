@@ -35,13 +35,13 @@ if [ "$pkgwizard_create_initial_configuration_YES" = "true" ]; then
 	if [ "$pkgwizard_enable_cuxd" = "true" ]; then
 		printf "devices.device1.plugin1.type=CUXD\n" >> ./ccu-historian.config
 		if [ "$pkgwizard_enable_hmlgw" = "true" ]; then
-			printf "devices.device1.plugin2.type=HMLGW\n" >> ./ccu-historian.config
+			printf "devices.device1.plugin2.type=HMWLGW\n" >> ./ccu-historian.config
 		fi
 		config_message
 		exit 0
 	fi
 	if [ "$pkgwizard_enable_hmlgw" = "true" ]; then
-		printf "devices.device1.plugin1.type=HMLGW\n" >> ./ccu-historian.config
+		printf "devices.device1.plugin1.type=HMWLGW\n" >> ./ccu-historian.config
 	fi
 	config_message
 	exit 0
