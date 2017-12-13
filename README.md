@@ -24,9 +24,10 @@ Für bestimmte Systeme existieren fertige Installationspakete:
 
 * CCU-Addon für folgende HomeMatic-Zentralen:
   * [RaspberryMatic](https://github.com/jens-maus/RaspberryMatic)
+  * [piVCCU](https://github.com/alexreinert/piVCCU)
   * [YAHM](https://github.com/leonsio/YAHM)
   * [LXCCU](http://www.lxccu.com/)
-* [Synology-Paket](https://homematic-forum.de/forum/viewtopic.php?f=38&t=24115&p=352616#p352616)
+* Synology-Paket
 
 **Hinweis:** Durch die geringen CPU- und RAM-Ressourcen einer CCU2 wird die Installation als CCU-Addon auf dieser Plattform nicht unterstützt. Es wird daher empfohlen den CCU-Historian auf einem weiteren System zu installieren und so zu konfigurieren, dass er sich über Netzwerk mit der CCU2 verbindet.
 
