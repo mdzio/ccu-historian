@@ -59,7 +59,6 @@ public class Preprocessor extends BasicProducer<Event> implements Processor<Even
 		} catch (Throwable t) {
 			log.severe 'Preprocessor: Error'
 			Exceptions.logTo(log, Level.SEVERE, t)
-			Main.restart()
 		}
 	}
 	

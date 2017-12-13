@@ -37,7 +37,6 @@ public class HistoryDisabledFilter extends BasicProducer<Event> implements Proce
 		} catch (Throwable t) {
 			log.severe 'Error filtering disabled histories'
 			Exceptions.logTo(log, Level.SEVERE, t)
-			Main.restart()
 		}
 	}
 }

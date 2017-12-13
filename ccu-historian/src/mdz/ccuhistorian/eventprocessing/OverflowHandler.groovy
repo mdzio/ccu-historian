@@ -77,7 +77,6 @@ public class OverflowHandler extends BasicProducer<Event> implements Processor<E
 		} catch (Throwable t) {
 			log.severe "Error handling overflows"
 			Exceptions.logTo(log, Level.SEVERE, t)
-			Main.restart()
 		}
 	}
 }

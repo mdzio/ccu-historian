@@ -99,12 +99,11 @@ class Historian implements Runnable {
 
 	@Override
 	public void run() {
-		Throwable t=Exceptions.catchToLog(log) {
+		Exceptions.catchToLog(log) {
 			updateSubscriptionsAndProperties();
 			updateWithoutSubscriptionSupport();
 			base.executor.schedule this, config.metaCycle, TimeUnit.MILLISECONDS
 		}
-		if (t) Main.restart()
 	}
 
 	private void updateSubscriptionsAndProperties() {
