@@ -66,8 +66,7 @@ public class OverflowHandler extends BasicProducer<Event> implements Processor<E
 							log.finer "Overflow handler: Adjusted value $adjustedValue for event $event"
 							event=new Event(
 								dataPoint:event.dataPoint,
-								pv:new ProcessValue(event.pv.timestamp, adjustedValue, event.pv.state),
-								attributes:event.attributes
+								pv:new ProcessValue(event.pv.timestamp, adjustedValue, event.pv.state)
 							)
 						}
 					}
@@ -78,7 +77,6 @@ public class OverflowHandler extends BasicProducer<Event> implements Processor<E
 		} catch (Throwable t) {
 			log.severe "Error handling overflows"
 			Exceptions.logTo(log, Level.SEVERE, t)
-			Main.restart()
 		}
 	}
 }

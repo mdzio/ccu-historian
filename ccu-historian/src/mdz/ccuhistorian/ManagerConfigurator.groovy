@@ -52,11 +52,11 @@ class ManagerConfigurator {
 	private final static String INTERFACE_SIMULATION_NAME = 'Sim'
 	
 	public static enum DeviceTypes {
-		CCU1, CCU2, BINRPC, XMLRPC, SIMULATION 
+		CCU1, CCU2, BINRPC, XMLRPC, SIMULATION, CUSTOM_CCU 
 	}
 	
 	public static enum PlugInTypes {
-		HMWLGW, CUXD
+		HMWLGW, CUXD, BIDCOS_WIRED /* alias for HMWLGW */, BIDCOS_RF, SYSTEM, HMIP_RF
 	}
 
 	private def getOption(ConfigObject devCfg, String name, Class clazz, String prefix='', boolean required=true) {
@@ -252,6 +252,87 @@ class ManagerConfigurator {
 					if (dataPointCount!=null) itf.dataPointCount=dataPointCount 
 					if (writeAccess!=null) itf.writeAccess=writeAccess
 					manager.addInterface(itf)
+					
+				} else if (type==DeviceTypes.CUSTOM_CCU) {
+					String address=getOption(cfg, 'address', String, "Device $idx: ")
+					Long reinitTimeout=getOption(cfg, 'reinitTimeout', Long, "Device $idx: ", false)
+					String prefix=getOption(cfg, 'prefix', String, "Device $idx: ", false)
+					if (prefix==null) prefix=''
+					Boolean writeAccess=getOption(cfg, 'writeAccess', Boolean, "Device $idx: ", false)
+					Integer sysVarDataCycle=getOption(cfg, 'sysVarDataCycle', Integer, "Device $idx: ", false)
+					Integer timeout=getOption(cfg, 'timeout', Integer, "Device $idx: ", false)
+					
+					HmReinitTask reinitTask=new HmReinitTask(manager.executor)
+					if (reinitTimeout!=null)
+						reinitTask.timeout=reinitTimeout
+					HmScriptClient scriptClient=new HmScriptClient(address)
+
+					HmSysVarInterface sysVarItf
+					if (sysVarDataCycle!=null)
+						sysVarItf=new HmSysVarInterface(prefix+INTERFACE_SYSVAR_NAME, scriptClient, manager, sysVarDataCycle)
+					else
+						sysVarItf=new HmSysVarInterface(prefix+INTERFACE_SYSVAR_NAME, scriptClient, manager)
+					manager.addInterface(sysVarItf)
+
+					Set<PlugInTypes> seen=[]
+					(1..MAX_NUM_PLUGINS).each { piIdx ->
+						def piCfg=cfg."plugin$piIdx"
+						if (piCfg) {
+							log.info "Setting up plug-in $piIdx"
+							PlugInTypes piType=getOption(piCfg, 'type', PlugInTypes, "Plug-in $piIdx: ")
+							
+							if (piType in seen)
+								throw new Exception('Duplicate plug-in: '+piType)
+							seen << piType
+							
+							String name
+							int port
+							switch (piType) {
+								case PlugInTypes.HMWLGW:
+								case PlugInTypes.BIDCOS_WIRED:
+									name=INTERFACE_WIRED_NAME
+									port=INTERFACE_WIRED_PORT
+									break;
+								case PlugInTypes.CUXD:
+									name=INTERFACE_CUXD_NAME
+									port=INTERFACE_CUXD_PORT
+									break
+								case PlugInTypes.BIDCOS_RF:
+									name=INTERFACE_RF_NAME
+									port=INTERFACE_RF_PORT
+									break
+								case PlugInTypes.SYSTEM:
+									name=INTERFACE_SYSTEM_NAME
+									port=INTERFACE_SYSTEM_PORT
+									break
+								case PlugInTypes.HMIP_RF:
+									name=INTERFACE_HMIP_RF_NAME
+									port=INTERFACE_HMIP_RF_PORT
+									break
+								default:
+									throw new Exception('Plug-in not supported: '+piType)
+							}
+
+							if (piType!=PlugInTypes.HMIP_RF) {				
+								HmBinRpcInterface binRpcItfPi=new HmBinRpcInterface(
+									prefix+name, name, address, port,
+									manager.binRpcServer, scriptClient, reinitTask, manager.executor,
+									timeout
+								)
+								if (writeAccess!=null)
+									binRpcItfPi.writeAccess=writeAccess
+								manager.addInterface(binRpcItfPi)
+							} else {
+								HmXmlRpcInterface hmIpItf=new HmXmlRpcInterface(
+									prefix+name, name, address, port,
+									manager.xmlRpcServer, scriptClient, reinitTask, manager.executor
+								)
+								if (writeAccess!=null)
+									hmIpItf.writeAccess=writeAccess
+								manager.addInterface(hmIpItf)
+							}
+						}
+					}
 				}
 			}
 		}

@@ -31,12 +31,6 @@ class Event {
 
 	DataPoint dataPoint
 	ProcessValue pv
-	Map<String, Object> attributes
-	
-	public Map<String, Object> getAttributes() { 
-		if (attributes==null) attributes=[:]
-		attributes	
-	} 
 	
 	@Override
 	public String toString() {
@@ -45,9 +39,6 @@ class Event {
 		list << pv.timestamp.toString()
 		list << pv.value.toString()
 		list << pv.state.toString()
-		attributes?.each { Map.Entry e ->
-			if (e.value!=null) list << ("$e.key: $e.value" as String)	
-		}
 		list.join(', ')
 	}
 }

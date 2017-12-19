@@ -1,0 +1,157 @@
+import mdz.hc.TimeSeries.CompactTimeSeries
+import mdz.Exceptions
+import groovy.json.JsonSlurper
+import groovy.json.StreamingJsonBuilder
+import groovy.transform.Field
+import java.util.logging.Logger
+import java.util.logging.Level
+
+@Field
+private final static log = Logger.getLogger('mdz.ccuhistorian.webapp.JsonRpc')
+
+def rpcResponse=[:]
+rpcResponse.id=null
+try {
+	// check API key
+	if (webServer.config.apiKeys)
+		if (!params.k || !webServer.config.apiKeys.contains(params.k))
+			throw new Exception('Access denied')
+			
+	// parse request
+	def rpcRequest=getRpcRequest()
+	
+	// check structure
+	checkRpcRequest rpcRequest
+	rpcResponse.id=rpcRequest.id
+	
+	// handle echo method
+	if (rpcRequest.method=='echo')
+		rpcResponse.result=rpcRequest.params
+	else {
+		// search method
+		def func=rpcFunctions[rpcRequest.method]
+		if (!func) 
+			throw new RpcException('Method not found', RpcException.METHOD_NOT_FOUND)
+		// execute method
+		synchronized (func) {
+			func.delegate=this
+			rpcResponse.result=func(rpcRequest.params)
+		}
+	}
+} catch (RpcException e) {
+	rpcResponse.remove 'result'
+	rpcResponse.error=[code: e.code, message: e.message]
+	log.warning 'JSON-RPC error response'
+	Exceptions.logTo(log, Level.WARNING, e)
+} catch (Exception e) {
+	rpcResponse.remove 'result'
+	rpcResponse.error=[code: RpcException.SERVER_ERROR, message: e.message]
+	log.warning 'JSON-RPC error response'
+	Exceptions.logTo(log, Level.WARNING, e)
+}
+
+// send JSON response
+response.contentType='application/json'
+new StreamingJsonBuilder(out)(rpcResponse)
+
+class RpcException extends Exception {
+	public final static int PARSE_ERROR		 = -32700
+	public final static int INVALID_REQUEST	 = -32600
+	public final static int METHOD_NOT_FOUND = -32601
+	public final static int INVALID_PARAMS	 = -32602
+	public final static int INTERNAL_ERROR	 = -32603
+	public final static int SERVER_ERROR	 = -32000
+
+	int code
+	RpcException(String message, int code=INTERNAL_ERROR, Throwable cause=null) {
+		super(message, cause)
+		this.code=code
+	}
+}
+
+def getRpcRequest() {
+	def rpcRequest
+	if (params.m) {
+		// Aufrufart GET/POST mit Parametern m/p/i
+		rpcRequest=[method:params.m]
+		rpcRequest.params=[]
+		def idx=1, p
+		while ((p=params."p$idx")!=null) { rpcRequest.params << p; idx++ }
+		rpcRequest.id=params.i
+	} else {
+		String json
+		if (params.j) {
+			// Aufrufart GET/POST mit Parameter j
+			json=params.j
+		} else {
+			// Aufrufart POST mit Content-Type application/json
+			StringWriter writer=[]
+			writer << request.reader
+			json=writer.toString()
+		}
+		// JSON-Anfrage parsen
+		try {
+			rpcRequest=new JsonSlurper().parseText(json)
+		} catch (Exception e) {
+			throw new RpcException('JSON parse error', RpcException.PARSE_ERROR, e)
+		}
+	}
+	rpcRequest
+}
+
+def checkRpcRequest(rpcRequest) {
+	if (!(rpcRequest instanceof Map) || rpcRequest.method==null || 
+		!(rpcRequest.method instanceof String) || rpcRequest.params==null ||
+		!(rpcRequest.params instanceof List))
+		throw new RpcException('Request object invalid', RpcException.INVALID_REQUEST);
+}
+
+def getDataPoint(histDb, dpId) {
+	def dp=histDb.getDataPoint(dpId as int)
+	if (!dp) throw new RpcException('Invalid data point id', RpcException.SERVER_ERROR)
+	dp	
+}
+
+def convertValue(v) {
+	[timestamp: v.timestamp.time, value: v.value, state: v.state]	
+}
+
+@Field 
+private static rpcFunctions=[
+	getDataPoint:{ params ->
+		if (params.size()==0)
+			database.dataPoints
+		else if (params[0] instanceof List)
+			params[0].collect { utils.parseDataPoint(it as String, database) }
+		else
+			utils.parseDataPoint(params[0] as String, database)
+	},
+	getValue:{ params ->
+		if (params[0] instanceof List)
+			params[0].collect { convertValue(database.getLast(
+				utils.parseDataPoint(it as String, database)
+			)) }
+		else
+			convertValue(database.getLast(
+				utils.parseDataPoint(params[0] as String, database)
+			))
+	},
+	getTimeSeriesRaw:{ params ->
+		new CompactTimeSeries(database.getTimeSeriesRaw(
+			utils.parseDataPoint(params[0] as String, database), 
+			new Date(params[1] as long), 
+			new Date(params[2] as long)
+		))
+	},
+	getTimeSeries:{ params ->
+		new CompactTimeSeries(database.getTimeSeries(
+			utils.parseDataPoint(params[0] as String, database), 
+			new Date(params[1] as long), 
+			new Date(params[2] as long)
+		))
+	},
+	setValue:{ params ->
+		interfaceManager.writeValue(utils.parseDataPoint(params[0] as String, database), params[1])
+		null
+	}
+]

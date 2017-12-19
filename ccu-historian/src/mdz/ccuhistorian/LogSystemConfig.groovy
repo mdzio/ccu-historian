@@ -29,7 +29,7 @@ public class LogSystemConfig {
 
 	Level fileLevel=Level.OFF
 	Level consoleLevel=Level.INFO
-	Level binRpcLevel=Level.WARNING
+	Level binRpcLevel=Level.INFO
 	String fileName='./ccu-historian-%g.log'
 	int fileLimit=1000000
 	int fileCount=5

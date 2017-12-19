@@ -1,0 +1,50 @@
+#!/bin/sh
+
+config_message () 
+{
+case $SYNOPKG_DSM_LANGUAGE in
+	ger)
+		printf "Die Konfiguration kann in folgendem File angepasst werden: $SYNOPKG_PKGDEST/ccu-historian.config" > $SYNOPKG_TEMP_LOGFILE
+	;;
+	
+	*)
+		printf "The configuration can be changed in the following file: $SYNOPKG_PKGDEST/ccu-historian.config" > $SYNOPKG_TEMP_LOGFILE
+	;;
+esac
+}
+
+if [ "$pkgwizard_create_initial_configuration_YES" = "true" ]; then
+	cd $SYNOPKG_PKGDEST
+	cp -p ./ccu-historian-sample.config ./ccu-historian.config
+	sed -i '/devices.device1.type=.*/s/^/\/\/ /' ./ccu-historian.config
+	sed -i '/devices.device1.address=.*/s/^/\/\/ /' ./ccu-historian.config
+	printf "\n// Configuration by spk-installer\n" >> ./ccu-historian.config
+    if [ "$pkgwizard_type_ccu1" = "true" ]; then
+		printf "devices.device1.type=CCU1\n" >> ./ccu-historian.config
+	fi
+    if [ "$pkgwizard_type_ccu2" = "true" ]; then
+        printf "devices.device1.type=CCU2\n" >> ./ccu-historian.config
+    fi
+	printf "devices.device1.address='$pkgwizard_ccu_ip'\n" >> ./ccu-historian.config
+	printf "devices.historianAddress='$pkgwizard_synology_ip'\n" >> ./ccu-historian.config
+	printf "webServer.historianAddress='$pkgwizard_synology_ip'\n" >> ./ccu-historian.config
+	printf "webServer.port=$pkgwizard_ccu_webport\n" >> ./ccu-historian.config
+	printf "database.webAllowOthers=true\n" >> ./ccu-historian.config
+	sed -i "/port/ s/8080/$pkgwizard_ccu_webport/" ./ui/config
+	sed -i "/adminport/ s/8080/$pkgwizard_ccu_webport/" /var/packages/ccu-historian/INFO
+	if [ "$pkgwizard_enable_cuxd" = "true" ]; then
+		printf "devices.device1.plugin1.type=CUXD\n" >> ./ccu-historian.config
+		if [ "$pkgwizard_enable_hmlgw" = "true" ]; then
+			printf "devices.device1.plugin2.type=HMWLGW\n" >> ./ccu-historian.config
+		fi
+		config_message
+		exit 0
+	fi
+	if [ "$pkgwizard_enable_hmlgw" = "true" ]; then
+		printf "devices.device1.plugin1.type=HMWLGW\n" >> ./ccu-historian.config
+	fi
+	config_message
+	exit 0
+fi
+config_message
+exit 0

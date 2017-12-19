@@ -61,7 +61,6 @@ public class DataPointStorageUpdater extends BasicProducer<Event> implements Pro
 		} catch (Throwable t) {
 			log.severe 'Error updating data point storage'
 			Exceptions.logTo(log, Level.SEVERE, t)
-			Main.restart()
 		}
 	}
 }

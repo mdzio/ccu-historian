@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="build" name="Create Runnable Jar">
+	<target name="build">
+		<!-- classpath with all class file directories and jars -->
+		<path id="classpath" path="${project.classpath}" />
+
+		<!-- find jar files -->
+		<restrict id="jarfiles">
+			<path refid="classpath" />
+			<type type="file" />
+		</restrict>
+
+		<!-- copy jars to lib folder -->
+		<copy todir="build/lib" flatten="true">
+			<restrict refid="jarfiles" />
+		</copy>
+
+		<!-- create fileset with the class files -->
+		<pathconvert pathsep="," property="bindirs.basedirs">
+			<path>
+				<restrict>
+					<path refid="classpath" />
+					<type type="dir" />
+					<!-- remove groovy dsld support files -->
+					<not>
+						<name name="**dsld_support**" />
+					</not>
+				</restrict>
+			</path>
+		</pathconvert>
+		<multirootfileset id="bindirs" basedirs="${bindirs.basedirs}" />
+
+		<!-- create class path for manifest -->
+		<pathconvert refid="jarfiles" pathsep=" " property="jarfiles.attr">
+			<chainedmapper>
+				<flattenmapper />
+				<globmapper from="*" to="lib/*" />
+			</chainedmapper>
+		</pathconvert>
+
+		<!-- build runnable jar -->
+		<jar destfile="build/ccu-historian.jar">
+			<manifest>
+				<attribute name="Main-Class" value="mdz.ccuhistorian.Main" />
+				<attribute name="Class-Path" value=". ${jarfiles.attr}" />
+			</manifest>
+			<multirootfileset refid="bindirs" />
+		</jar>
+	</target>
+
+	<!-- clean target -->
+	<target name="clean">
+		<delete dir="build/lib" />
+		<delete file="build/ccu-historian.jar" />
+	</target>
+</project>

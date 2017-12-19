@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	id="WebApp_ID" version="2.5">
+	<display-name>CCU-Historian Web Application</display-name>
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+		<welcome-file>index.htm</welcome-file>
+		<welcome-file>index.gsp</welcome-file>
+		<welcome-file>index.groovy</welcome-file>
+		<welcome-file>index.gy</welcome-file>
+	</welcome-file-list>
+	<servlet>
+		<servlet-name>Template</servlet-name>
+		<servlet-class>mdz.ccuhistorian.TemplateServlet</servlet-class>
+		<init-param>
+      		<param-name>generated.by</param-name>
+      		<param-value>false</param-value>
+    	</init-param>
+    	<init-param>
+        	<param-name>groovy.source.encoding</param-name>
+        	<param-value>UTF-8</param-value>
+        </init-param>	
+    </servlet>
+	<servlet-mapping>
+		<servlet-name>Template</servlet-name>
+		<url-pattern>*.html</url-pattern>
+		<url-pattern>*.htm</url-pattern>
+		<url-pattern>*.gsp</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>Groovy</servlet-name>
+		<servlet-class>mdz.ccuhistorian.GroovyServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Groovy</servlet-name>
+		<url-pattern>*.groovy</url-pattern>
+		<url-pattern>*.gy</url-pattern>
+	</servlet-mapping>
+	<filter>
+        <filter-name>cross-origin</filter-name>
+        <filter-class>org.eclipse.jetty.servlets.CrossOriginFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>cross-origin</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>	
+</web-app>

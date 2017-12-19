@@ -1,0 +1,91 @@
+// setup page
+def renderer=new mdz.ccuhistorian.webapp.PageRenderer(servlet: this)
+
+renderer.head={
+	title 'CCU-historian: Datenpunktliste'
+}
+
+renderer.content={
+    form(action:'analyze.html', method:'get') {
+		div(class:'row', style:'margin-bottom: 0.5em') {
+			div(class:'col-sm-4 mb-2') {
+				div(class:'input-group') {
+					div(class:'input-group-addon') {
+						span class:'glyphicon glyphicon-filter'
+					}
+					input id:'filter-input', type:'text', class:'form-control', placeholder:'Filterausdruck'
+					span(class:'input-group-btn') {
+						button(id:'reset-filter-btn', class:'btn btn-default', type:'button') {
+							span class:'glyphicon glyphicon-remove'
+						}
+					}
+				}
+			}
+			div(class:'col-sm-4 mb-2') {
+			}
+			div(class:'col-sm-4 mb-2') {
+				button class:'btn btn-default btn-block', type:'submit', name:'trend_set', value:1, 'Trend-Darstellung'
+			}
+		}
+        table(id:'dp-table', class:'table table-bordered table-hover') {
+            thead {
+                tr {
+                    th class:'select', 'Ausw.'
+                    th 'Schnittstelle'
+                    th 'Kanal'
+                    th 'Parameter'
+                    th 'Raum'
+                    th 'Gewerk'
+                }
+            }
+            tbody {
+                database.dataPoints.findAll { !it.historyHidden }.each { dp ->
+                    def last=database.getLast(dp)
+                    tr {
+                        def disabled=dp.historyString?[disabled:'disabled']:[:]
+						td { input(class:'form-control', type:'checkbox', name:'i', value:dp.idx, *:disabled) }
+                        td dp.id.interfaceId
+                        td dp.attributes.displayName?:dp.id.address
+                        td dp.id.identifier
+                        td dp.attributes.room
+                        td dp.attributes.function
+                    }
+                }
+            }
+        }
+    }
+}
+
+renderer.end={
+    script { mkp.yieldUnescaped($/
+		// select data point also by clicking on row
+		$('#dp-table tbody tr').on('click', function(e) {
+			// clicked on checkbox? then do nothing
+			if ($(e.target).is('input')) return;
+			// simulate click on checkbox
+			$(this).find('input').trigger('click');
+		});
+		
+		// reset filter
+		$('#reset-filter-btn').on('click', function(e) {
+			$('#filter-input').val('');
+			$('#dp-table tbody tr').css('display', '');
+		});
+		
+		// filter
+		var filter=function(e) {
+			var terms=$(this).val().toLowerCase().split(/\s+/);
+			$('#dp-table tbody tr').each(function() {
+				var val=$(this).children('td').text().toLowerCase();
+				if (terms.every(t => val.indexOf(t) >= 0))
+					$(this).css('display', '');
+				else 
+					$(this).css('display', 'none');
+			});
+		};
+		$('#filter-input').on('keyup', _.debounce(filter, 500));
+	/$) }
+}
+
+// render page
+renderer.render()
