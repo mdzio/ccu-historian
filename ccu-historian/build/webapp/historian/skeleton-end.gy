@@ -1,5 +1,0 @@
-// end of content
-println '</td></tr></table>'
-
-// end of document
-println '</body></html>'
