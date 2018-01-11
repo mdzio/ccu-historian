@@ -1,8 +1,9 @@
 package mdz.ccuhistorian.webapp
 
-import mdz.hc.itf.hm.HmSysVarInterface
-import java.util.prefs.Preferences
 import groovy.util.logging.Log
+import java.util.prefs.Preferences
+import mdz.Exceptions
+import mdz.hc.itf.hm.HmSysVarInterface
 
 @Log
 public class PageRenderer {
@@ -43,6 +44,29 @@ public class PageRenderer {
             ]
             servlet.session.setAttribute('ctx', servlet.ctx)
         }
+	}
+	
+	private def runSafe(cl) {
+		if (cl!=null) {
+			def e=servlet.utils.catchToLog(log) {
+				cl.delegate=servlet.html
+				cl()
+			}
+			if (e) {
+				// show error description
+				servlet.html.div(class:'alert alert-danger', role:'alert') {
+					h4 {
+						strong 'Fehler: '
+						mkp.yield e.message?:e.class.name
+					}
+					button class:'btn btn-primary', type:'button', 'data-toggle':'collapse', 
+						'data-target':'#errdescr', 'Details'
+					div(class:'collapse', id:'errdescr') {
+						pre Exceptions.getStackTrace(e)
+					}
+				}
+			}
+		}
 	}
 	
 	private def handleUserLogInOut() {
@@ -99,12 +123,7 @@ public class PageRenderer {
 			link href:'ccu-historian.ico', rel:'icon'
 			
 			// execute the head closure
-            if (head) {
-                servlet.utils.catchToLog(log) {
-                    head.delegate=servlet.html
-                    head()
-                }
-            }
+			runSafe head
 		}
 	}
 	
@@ -127,12 +146,7 @@ public class PageRenderer {
 			script src:'../external/underscore/underscore.js'
 
 			// execute the page end closure
-			if (end) {
-				servlet.utils.catchToLog(log) {
-					end.delegate=servlet.html
-					end()
-				}
-			}
+			runSafe end
 		}
 	}
 	
@@ -259,11 +273,6 @@ public class PageRenderer {
 	
 	private def writeContent() {
         // execute the content closure
-        if (content) {
-            servlet.utils.catchToLog(log) {
-                content.delegate=servlet.html
-                content()
-            }
-        }
+		runSafe content
 	}
 }
