@@ -6,7 +6,7 @@ renderer.head={
 }
 
 renderer.content={
-    form(action:'analyze.html', method:'get') {
+    form(action:'trend.gy', method:'get') {
 		div(class:'row', style:'margin-bottom: 0.5em') {
 			div(class:'col-sm-4 mb-2') {
 				div(class:'input-group') {

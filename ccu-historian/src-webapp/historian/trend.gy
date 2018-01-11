@@ -1,0 +1,25 @@
+import groovy.transform.Field
+import java.util.logging.Logger
+
+@Field
+private final static Logger log = Logger.getLogger('mdz.ccuhistorian.webapp.Trend')
+
+// setup page
+def renderer=new mdz.ccuhistorian.webapp.PageRenderer(servlet: this)
+
+renderer.head={
+	title 'CCU-historian: Trend'
+}
+
+renderer.content={
+	// TODO
+}
+
+renderer.end={
+    script { mkp.yieldUnescaped($/
+		// TODO
+	/$) }
+}
+
+// render page
+renderer.render()

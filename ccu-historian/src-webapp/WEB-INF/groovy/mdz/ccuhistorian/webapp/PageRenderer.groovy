@@ -54,12 +54,12 @@ public class PageRenderer {
 			}
 			if (e) {
 				// show error description
-				servlet.html.div(class:'alert alert-danger', role:'alert') {
+				servlet.html.div(class:'alert alert-danger') {
 					h4 {
 						strong 'Fehler: '
 						mkp.yield e.message?:e.class.name
 					}
-					button class:'btn btn-primary', type:'button', 'data-toggle':'collapse', 
+					button class:'btn btn-default', type:'button', 'data-toggle':'collapse', 
 						'data-target':'#errdescr', 'Details'
 					div(class:'collapse', id:'errdescr') {
 						pre Exceptions.getStackTrace(e)
@@ -160,7 +160,7 @@ public class PageRenderer {
 					}
 					div(class:'panel-body') {
 						if (servlet.ctx.user.logInFailed) {
-							p class:'alert alert-danger', role:'alert', 'Die Anmeldung ist fehlgeschlagen!'
+							p class:'alert alert-danger', 'Die Anmeldung ist fehlgeschlagen!'
 						}
 						form(class:'form-horizontal', method:'post') {
 							div(class:'form-group') {
@@ -187,7 +187,7 @@ public class PageRenderer {
 			div(class:'container-fluid') {
 				// header for mobile display
 				div(class:'navbar-header') {
-					button (type:'button', class:'navbar-toggle collapsed', 'data-toggle':'collapse', 'data-target':'#navbar-collapse-id', 'aria-expanded':false) {
+					button (type:'button', class:'navbar-toggle collapsed', 'data-toggle':'collapse', 'data-target':'#navbar-collapse-id') {
 						span class:'icon-bar'
 						span class:'icon-bar'
 						span class:'icon-bar'
@@ -203,7 +203,7 @@ public class PageRenderer {
 						
 						// tools
 						li(class:'dropdown') {
-							a(href:'#', class:'dropdown-toggle', 'data-toggle':'dropdown', role:'button', 'aria-haspopup':true, 'aria-expanded':false) {
+							a(href:'#', class:'dropdown-toggle', 'data-toggle':'dropdown', role:'button') {
 								mkp.yield 'Werkzeuge'
 								span class:'caret'
 							}
@@ -225,7 +225,7 @@ public class PageRenderer {
 						def sysVarItfs=servlet.interfaceManager.interfaces.findAll { it.value instanceof HmSysVarInterface }
 						if (sysVarItfs) {
 							li(class:'dropdown') {
-								a(href:'#', class:'dropdown-toggle', 'data-toggle':'dropdown', role:'button', 'aria-haspopup':true, 'aria-expanded':false) {
+								a(href:'#', class:'dropdown-toggle', 'data-toggle':'dropdown', role:'button') {
 									mkp.yield 'Zentralen'
 									span class:'caret'
 								}
@@ -242,7 +242,7 @@ public class PageRenderer {
 						// configured menu entries
 						if (servlet.webServer.config.menuLinks) {
 							li(class:'dropdown') {
-								a(href:'#', class:'dropdown-toggle', 'data-toggle':'dropdown', role:'button', 'aria-haspopup':true, 'aria-expanded':false) {
+								a(href:'#', class:'dropdown-toggle', 'data-toggle':'dropdown', role:'button') {
 									mkp.yield 'Extras'
 									span class:'caret'
 								}
