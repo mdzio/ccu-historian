@@ -25,27 +25,6 @@ import java.util.logging.Logger
 @CompileStatic
 public class Utilities {
 
-	public static boolean asBoolean(value) {
-		if (value instanceof Boolean)
-			return value
-		else if (value instanceof Number)
-			return value.asBoolean()
-		else if (value instanceof String) 
-			switch (value.trim().toLowerCase()) {
-				case '0': case 'false': case 'off': return false
-				case '1': case 'true': case 'on': return true
-			}
-		throw new Exception("Can't interpret $value as boolean value")
-	}
-	
-	public static String unescapeXml(String str) {
-		if (str==null || str=='') return ''
-		str.replaceAll(~/&lt;/, '<').replaceAll(~/&gt;/, '>').replaceAll(~/&quot;/, '"').
-		replaceAll(~/&apos;/, '\'').replaceAll(~/&#(\d+);/, { List<String> captures -> (captures[1] as Integer) as Character }).
-		replaceAll(~/&#x(\p{XDigit}+);/, { List<String> captures -> Integer.valueOf(captures[1], 16) as Character }).
-		replaceAll(~/&amp;/, '&')
-	}
-
 	private static final int BYTES_PER_ROW = 32
 	
 	public static String prettyPrint(byte[] data) {

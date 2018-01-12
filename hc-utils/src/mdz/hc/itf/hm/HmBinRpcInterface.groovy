@@ -25,7 +25,7 @@ import groovy.transform.TupleConstructor
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.CompileStatic
 import mdz.Exceptions
-import mdz.Utilities
+import mdz.Text
 import mdz.eventprocessing.Consumer
 import mdz.eventprocessing.BasicProducer
 import mdz.hc.RawEvent
@@ -173,7 +173,7 @@ public class HmBinRpcInterface extends BasicProducer<RawEvent> implements Interf
 							(Integer)meta.TAB_ORDER,
 							meta.MAX,
 							// incorrectly encoded by CCU
-							Utilities.unescapeXml((String)meta.UNIT),
+							Text.unescapeXml((String)meta.UNIT),
 							meta.MIN,
 							(String)meta.CONTROL,
 							(Integer)meta.OPERATIONS, 
@@ -228,7 +228,7 @@ public class HmBinRpcInterface extends BasicProducer<RawEvent> implements Interf
 			value=true
 			break 
 		case DataPoint.ATTR_TYPE_BOOL: 
-			value=Utilities.asBoolean(value)
+			value=Text.asBoolean(value)
 			break
 		case DataPoint.ATTR_TYPE_FLOAT: 
 			value=value as double
