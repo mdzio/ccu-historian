@@ -25,7 +25,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.logging.Level
 import mdz.Exceptions
-import mdz.Utilities
+import mdz.Text
 import mdz.hc.itf.binrpc.BinRpcDecoder.Header
 import mdz.hc.itf.binrpc.BinRpcDecoder.Response
 import mdz.hc.itf.binrpc.BinRpcDecoder.Fault
@@ -113,7 +113,7 @@ public class BinRpcServer {
 	}
 	
 	private void send(Socket socket, byte[] data) {
-		log.finest "Sending ${data.length} bytes:\n${Utilities.prettyPrint(data)}"
+		log.finest "Sending ${data.length} bytes:\n${Text.prettyPrint(data)}"
 		socket.getOutputStream().write(data)
 	}
 
@@ -127,7 +127,7 @@ public class BinRpcServer {
 				throw new IOException('Unexpected end of stream')
 			pos+=cnt
 		}
-		log.finest "Received data:\n${Utilities.prettyPrint(data)}"
+		log.finest "Received data:\n${Text.prettyPrint(data)}"
 	}
 
 	private Closure listMethodsHandler = { params ->

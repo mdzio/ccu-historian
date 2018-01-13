@@ -23,7 +23,6 @@ import groovy.transform.CompileStatic
 import java.text.SimpleDateFormat
 import java.text.ParseException
 import mdz.Exceptions
-import mdz.Utilities;
 import mdz.hc.RawEvent
 import mdz.hc.ProcessValue
 import mdz.hc.DataPoint

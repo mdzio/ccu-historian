@@ -22,7 +22,6 @@ import groovy.util.logging.Log
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import mdz.Exceptions
-import mdz.Utilities
 import mdz.hc.itf.hm.HmScriptClient
 
 @CompileStatic

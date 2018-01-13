@@ -17,7 +17,6 @@
 */
 package mdz.hc.itf;
 
-import mdz.Utilities
 import mdz.hc.TestConfiguration
 import mdz.hc.itf.Manager
 import mdz.hc.itf.hm.HmBinRpcInterface

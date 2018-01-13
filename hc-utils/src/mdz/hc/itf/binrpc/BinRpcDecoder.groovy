@@ -19,7 +19,6 @@ package mdz.hc.itf.binrpc
 
 import groovy.transform.CompileStatic
 import static mdz.hc.itf.binrpc.BinRpcConstants.*
-import mdz.Utilities;
 
 @CompileStatic
 class BinRpcDecoder {

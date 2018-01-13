@@ -26,7 +26,7 @@ import java.util.concurrent.Executors
 import mdz.hc.itf.binrpc.BinRpcDecoder.Header
 import mdz.hc.itf.binrpc.BinRpcDecoder.Response
 import mdz.hc.itf.binrpc.BinRpcDecoder.Fault
-import mdz.Utilities
+import mdz.Text
 import static mdz.hc.itf.binrpc.BinRpcConstants.*
 
 /**
@@ -72,7 +72,7 @@ public class BinRpcClient {
 
 	public void send(byte[] data) {
 		connect()
-		log.finest "Sending ${data.length} bytes to $host:$port:\n${Utilities.prettyPrint(data)}"
+		log.finest "Sending ${data.length} bytes to $host:$port:\n${Text.prettyPrint(data)}"
 		socket.getOutputStream().write(data)
 	}
 
@@ -118,7 +118,7 @@ public class BinRpcClient {
 				throw new IOException('Unexpected end of stream')
 			pos+=cnt
 		}
-		log.finest "Received data:\n${Utilities.prettyPrint(data)}"
+		log.finest "Received data:\n${Text.prettyPrint(data)}"
 	}
 	
 	public call(String methodName, List parameters) {

@@ -19,7 +19,6 @@ package mdz.ccuhistorian
 
 import java.util.logging.*
 import mdz.Exceptions
-import mdz.Utilities
 import java.text.*
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.eclipse.jetty.util.log.JavaUtilLog

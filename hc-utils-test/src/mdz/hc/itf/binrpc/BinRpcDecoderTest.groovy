@@ -18,7 +18,6 @@
 package mdz.hc.itf.binrpc;
 
 import groovy.util.GroovyTestCase
-import mdz.Utilities;
 import mdz.hc.itf.binrpc.BinRpcDecoder
 import mdz.hc.itf.binrpc.BinRpcEncoder
 import static mdz.hc.itf.binrpc.BinRpcConstants.*

@@ -24,6 +24,7 @@ import java.text.*
 import java.util.regex.Matcher
 import java.util.logging.Logger
 import mdz.Exceptions
+import mdz.Text
 import mdz.hc.DataPoint
 import mdz.hc.DataPointIdentifier
 import mdz.hc.persistence.DataPointStorage
@@ -120,11 +121,7 @@ class WebUtilities {
 	
 	@CompileStatic
 	public String escapeHtml(String str) {
-		if (str==null || str=='') return ''
-		str.replaceAll(~/&/, '&amp;').replaceAll(~/</, '&lt;').replaceAll(~/>/, '&gt;').
-		replaceAll(~/"/, '&quot;').replaceAll(~/ü/, '&uuml;').replaceAll(~/Ü/, '&Uuml;').
-		replaceAll(~/ö/, '&ouml;').replaceAll(~/Ö/, '&Ouml;').replaceAll(~/ä/, '&auml;').
-		replaceAll(~/Ä/, '&Auml;').replaceAll(~/ß/, '&szlig;')
+		Text.escapeXml(str)
 	}
 	
 	@CompileStatic

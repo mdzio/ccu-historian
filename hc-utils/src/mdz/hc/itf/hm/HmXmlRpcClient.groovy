@@ -17,7 +17,6 @@
 */
 package mdz.hc.itf.hm
 
-import mdz.Utilities
 import groovy.net.xmlrpc.XMLRPCServerProxy as Proxy
 import groovy.util.logging.Log
 import groovy.lang.Lazy

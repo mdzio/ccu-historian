@@ -37,7 +37,6 @@ import mdz.hc.TimeSeries
 import mdz.hc.ProcessValue
 import mdz.hc.persistence.Storage
 import mdz.Exceptions
-import mdz.Utilities
 
 @Log
 public class Database implements Storage {
@@ -595,11 +594,27 @@ public class Database implements Storage {
 	}
 	
 	@CompileStatic
+	public static String formatTimestamp(String pattern, Date timestamp) {
+		Calendar cal=Calendar.instance
+		cal.time=timestamp
+		pattern.replaceAll(~/%([%YMWDh])/, { List<String> captures ->
+			switch (captures[1]) {
+			case 'Y': cal[Calendar.YEAR]; break
+			case 'M': ((cal[Calendar.MONTH]-Calendar.JANUARY+1) as String).padLeft(2, '0'); break
+			case 'W': (cal[Calendar.WEEK_OF_YEAR] as String).padLeft(2, '0'); break
+			case 'D': (cal[Calendar.DAY_OF_MONTH] as String).padLeft(2, '0'); break
+			case 'h': (cal[Calendar.HOUR_OF_DAY] as String).padLeft(2, '0'); break
+			case '%': '%'; break
+			}
+		})
+	}
+	
+	@CompileStatic
 	private synchronized void checkBackupTime() {
 		if (!backupFuture) return
 		Exceptions.catchToLog(log) {
 			log.finest "Checking backup time"
-			String nextBackup=Utilities.formatTimestamp(config.backup, new Date())
+			String nextBackup=formatTimestamp(config.backup, new Date())
 			if (backupLast!=nextBackup)
 				createBackup nextBackup
 			backupLast=nextBackup

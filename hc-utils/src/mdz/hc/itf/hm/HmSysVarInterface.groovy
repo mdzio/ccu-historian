@@ -24,7 +24,6 @@ import groovy.util.logging.Log
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 import mdz.Exceptions
-import mdz.Utilities
 import mdz.eventprocessing.BasicProducer
 import mdz.hc.itf.BrowseSupport
 import mdz.hc.itf.Interface

@@ -21,7 +21,6 @@ import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 import mdz.Exceptions
-import mdz.Utilities;
 import groovy.util.logging.Log
 import groovy.transform.CompileStatic
 
