@@ -24,6 +24,21 @@ import org.junit.Test
 class TextTest {
 
 	@Test
+	public void testForEachMatch() {
+		def m = []
+		Text.forEachMatch('abc123def', ~/\d+/, { g -> m << g })
+		assert m == [['123']]
+		
+		m = []
+		Text.forEachMatch('abc123def678ghi', ~/\d+/, { g -> m << g })
+		assert m == [['123'], ['678']]
+		
+		m = []
+		Text.forEachMatch('abc123def678ghi901', ~/(\d+)(\p{Lower}+)/, { g -> m << g })
+		assert m == [['123def', '123', 'def'], ['678ghi', '678', 'ghi']]
+	}
+	
+	@Test
 	public void testUnescapeXml() {
 		assert Text.unescapeXml(null) == ''
 		assert Text.unescapeXml('') == ''

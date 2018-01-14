@@ -17,10 +17,47 @@
 */
 package mdz;
 
+import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Text {
+
+	public static void forEachMatch(String str, Pattern pat, Consumer<String[]> cons) {
+		Objects.requireNonNull(str);
+		Objects.requireNonNull(pat);
+		Objects.requireNonNull(cons);
+
+		Matcher mat = pat.matcher(str);
+		while (mat.find()) {
+			String[] grps = new String[mat.groupCount() + 1];
+			for (int idx = 0; idx < mat.groupCount() + 1; idx++) {
+				grps[idx] = mat.group(idx);
+			}
+			cons.accept(grps);
+		}
+	}
+
+	public static String replaceAll(String str, Pattern pat, Function<String[], String> replFunc) {
+		Objects.requireNonNull(str);
+		Objects.requireNonNull(pat);
+		Objects.requireNonNull(replFunc);
+
+		StringBuffer sb = new StringBuffer();
+		Matcher mat = pat.matcher(str);
+		while (mat.find()) {
+			String[] grps = new String[mat.groupCount() + 1];
+			for (int idx = 0; idx < mat.groupCount() + 1; idx++) {
+				grps[idx] = mat.group(idx);
+			}
+			String repl = replFunc.apply(grps);
+			mat.appendReplacement(sb, repl);
+		}
+		mat.appendTail(sb);
+		return sb.toString();
+	}
 
 	private static Pattern unescapeXmlPattern = Pattern
 			.compile("&((lt)|(gt)|(quot)|(apos)|(amp)|#(\\d+)|#x(\\p{XDigit}+));");
@@ -28,33 +65,28 @@ public class Text {
 	public static String unescapeXml(String str) {
 		if (str == null || str.isEmpty())
 			return "";
-		StringBuffer sb = new StringBuffer();
-		Matcher m = unescapeXmlPattern.matcher(str);
-		while (m.find()) {
-			String r = "";
-			if (m.group(2) != null) {
-				r = "<";
-			} else if (m.group(3) != null) {
-				r = ">";
-			} else if (m.group(4) != null) {
-				r = "\"";
-			} else if (m.group(5) != null) {
-				r = "'";
-			} else if (m.group(6) != null) {
-				r = "&";
-			} else if (m.group(7) != null) {
-				StringBuffer c = new StringBuffer();
-				c.appendCodePoint(Integer.parseInt(m.group(7)));
-				r = c.toString();
-			} else if (m.group(8) != null) {
-				StringBuffer c = new StringBuffer();
-				c.appendCodePoint(Integer.parseInt(m.group(8), 16));
-				r = c.toString();
+		return replaceAll(str, unescapeXmlPattern, groups -> {
+			if (groups[2] != null) {
+				return "<";
+			} else if (groups[3] != null) {
+				return ">";
+			} else if (groups[4] != null) {
+				return "\"";
+			} else if (groups[5] != null) {
+				return "'";
+			} else if (groups[6] != null) {
+				return "&";
+			} else if (groups[7] != null) {
+				StringBuilder c = new StringBuilder();
+				c.appendCodePoint(Integer.parseInt(groups[7]));
+				return c.toString();
+			} else if (groups[8] != null) {
+				StringBuilder c = new StringBuilder();
+				c.appendCodePoint(Integer.parseInt(groups[8], 16));
+				return c.toString();
 			}
-			m.appendReplacement(sb, r);
-		}
-		m.appendTail(sb);
-		return sb.toString();
+			return "";
+		});
 	}
 
 	public static String escapeXml(String str) {
