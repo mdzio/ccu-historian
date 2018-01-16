@@ -173,7 +173,7 @@ public class HmBinRpcInterface extends BasicProducer<RawEvent> implements Interf
 							(Integer)meta.TAB_ORDER,
 							meta.MAX,
 							// incorrectly encoded by CCU
-							Text.unescapeXml((String)meta.UNIT),
+							meta.UNIT!=null?Text.unescapeXml((String)meta.UNIT):null,
 							meta.MIN,
 							(String)meta.CONTROL,
 							(Integer)meta.OPERATIONS, 

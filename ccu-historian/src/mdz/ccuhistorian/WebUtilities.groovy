@@ -50,12 +50,16 @@ class WebUtilities {
 	
 	@CompileStatic
 	public String format(Date date) {
-		date!=null?dateFormat.format(date):''
+		synchronized(dateFormat) {
+			date!=null?dateFormat.format(date):''
+		}
 	}
 
 	@CompileStatic
 	public String format(Number number) {
-		number!=null?numberFormat.format(number):''
+		synchronized(numberFormat) {
+			number!=null?numberFormat.format(number):''
+		}
 	}
 
 	@CompileStatic
@@ -88,13 +92,55 @@ class WebUtilities {
 	
 	@CompileStatic
 	public Date parseDate(String str) {
-		(Date)(str?(dateFormats.findResult { DateFormat df -> try { df.parse(str) } catch (e) { null } }):null)
+		if (str==null) return null
+		(Date)dateFormats.findResult { DateFormat df -> 
+			try {
+				synchronized(df) { df.parse(str) } 
+			} catch (e) { 
+				null 
+			} 
+		}
 	}
-	
+
+	public Date parseDate(Date relativeTo, String str) {
+		// not a relative date?
+		if (!(str==~/\s*(((-|\+)?\d+)([YMDWhms])\s*)+/)) { 
+			// return absolute date
+			return parseDate(str)
+		}
+
+		// relativeTo must now be set
+		if (!relativeTo) return null
+
+		// parse relative date
+		Date res=relativeTo.clone()
+		use(TimeCategory) {
+			(str=~/\s*((-|\+)?(\d+))([YMDWhms])\s*/).each { String all, String num, String notUsed1, 
+					String notUsed2, String period ->
+				if (num.startsWith('+')) num=num.substring(1)
+				Integer n=num as Integer
+				switch (period) {
+					case 'Y': res+=n.years; break
+					case 'M': res+=n.months; break
+					case 'D': res+=n.days; break
+					case 'W': res+=n.weeks; break
+					case 'h': res+=n.hours; break
+					case 'm': res+=n.minutes; break
+					case 's': res+=n.seconds; break
+				}
+			}
+		}
+		res
+	}
+
 	@CompileStatic
 	public Number parseNumber(String str) {
-		if (!str) null
-		else try { numberFormat.parse(str) } catch (e) { null }
+		if (str==null) return null
+		try { 
+			synchronized(numberFormat) { numberFormat.parse(str) } 
+		} catch (e) { 
+			null 
+		}
 	}
 	
 	public BaseDuration parseDuration(str) {
@@ -121,7 +167,7 @@ class WebUtilities {
 	
 	@CompileStatic
 	public String escapeHtml(String str) {
-		Text.escapeXml(str)
+		str?Text.escapeXml(str):''
 	}
 	
 	@CompileStatic

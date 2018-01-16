@@ -17,13 +17,8 @@
 */
 package mdz
 
-import static org.junit.Assert.*
+class TextTest extends GroovyTestCase {
 
-import org.junit.Test
-
-class TextTest {
-
-	@Test
 	public void testForEachMatch() {
 		def m = []
 		Text.forEachMatch('abc123def', ~/\d+/, { g -> m << g })
@@ -38,9 +33,7 @@ class TextTest {
 		assert m == [['123def', '123', 'def'], ['678ghi', '678', 'ghi']]
 	}
 	
-	@Test
 	public void testUnescapeXml() {
-		assert Text.unescapeXml(null) == ''
 		assert Text.unescapeXml('') == ''
 		assert Text.unescapeXml(' abc def 123 \0x03b1') == ' abc def 123 \0x03b1'
 		assert Text.unescapeXml('-&amp;-') == '-&-'
@@ -56,9 +49,7 @@ class TextTest {
 		assert Text.unescapeXml('&#x;') == '&#x;'
 	}
 	
-	@Test
 	public void testEscapeXml() {
-		assert Text.escapeXml(null) == ''
 		assert Text.escapeXml('') == ''
 		assert Text.escapeXml('abc def 123 +~#ä') == 'abc def 123 +~#ä'
 		assert Text.escapeXml('-&-') == '-&amp;-'
@@ -69,7 +60,6 @@ class TextTest {
 		assert Text.escapeXml("'<&>\"") == '&apos;&lt;&amp;&gt;&quot;'
 	}
 	
-	@Test
 	public void testAsBoolean() {
 		assert Text.asBoolean(true)
 		assert !Text.asBoolean(false)
@@ -86,7 +76,6 @@ class TextTest {
 		}
 	}
 	
-	@Test
 	public void testPrettyPrint() {
 		assert Text.prettyPrint([0, 1, (byte)'1', (byte)'a'] as byte[]) == 
 			'0000: ..1a                              00 01 31 61 '

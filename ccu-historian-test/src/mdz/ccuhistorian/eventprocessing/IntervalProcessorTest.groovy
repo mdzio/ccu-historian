@@ -17,7 +17,6 @@
 */
 package mdz.ccuhistorian.eventprocessing
 
-import groovy.util.GroovyTestCase
 import mdz.eventprocessing.Collector
 import mdz.hc.DataPoint
 import mdz.hc.DataPointIdentifier

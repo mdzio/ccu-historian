@@ -59,39 +59,9 @@ public class Text {
 		return sb.toString();
 	}
 
-	private static Pattern unescapeXmlPattern = Pattern
-			.compile("&((lt)|(gt)|(quot)|(apos)|(amp)|#(\\d+)|#x(\\p{XDigit}+));");
-
-	public static String unescapeXml(String str) {
-		if (str == null || str.isEmpty())
-			return "";
-		return replaceAll(str, unescapeXmlPattern, groups -> {
-			if (groups[2] != null) {
-				return "<";
-			} else if (groups[3] != null) {
-				return ">";
-			} else if (groups[4] != null) {
-				return "\"";
-			} else if (groups[5] != null) {
-				return "'";
-			} else if (groups[6] != null) {
-				return "&";
-			} else if (groups[7] != null) {
-				StringBuilder c = new StringBuilder();
-				c.appendCodePoint(Integer.parseInt(groups[7]));
-				return c.toString();
-			} else if (groups[8] != null) {
-				StringBuilder c = new StringBuilder();
-				c.appendCodePoint(Integer.parseInt(groups[8], 16));
-				return c.toString();
-			}
-			return "";
-		});
-	}
-
 	public static String escapeXml(String str) {
-		if (str == null || str.isEmpty())
-			return "";
+		Objects.requireNonNull(str);
+
 		StringBuffer sb = new StringBuffer();
 		str.codePoints().forEachOrdered(cp -> {
 			switch (cp) {
@@ -118,12 +88,44 @@ public class Text {
 		return sb.toString();
 	}
 
+	private static Pattern unescapeXmlPattern = Pattern
+			.compile("&((lt)|(gt)|(quot)|(apos)|(amp)|#(\\d+)|#x(\\p{XDigit}+));");
+
+	public static String unescapeXml(String str) {
+		Objects.requireNonNull(str);
+
+		return replaceAll(str, unescapeXmlPattern, groups -> {
+			if (groups[2] != null) {
+				return "<";
+			} else if (groups[3] != null) {
+				return ">";
+			} else if (groups[4] != null) {
+				return "\"";
+			} else if (groups[5] != null) {
+				return "'";
+			} else if (groups[6] != null) {
+				return "&";
+			} else if (groups[7] != null) {
+				StringBuilder c = new StringBuilder();
+				c.appendCodePoint(Integer.parseInt(groups[7]));
+				return c.toString();
+			} else if (groups[8] != null) {
+				StringBuilder c = new StringBuilder();
+				c.appendCodePoint(Integer.parseInt(groups[8], 16));
+				return c.toString();
+			}
+			return "";
+		});
+	}
+
 	public static boolean asBoolean(Object value) {
-		if (value instanceof Boolean)
+		Objects.requireNonNull(value);
+
+		if (value instanceof Boolean) {
 			return (Boolean) value;
-		else if (value instanceof Number)
+		} else if (value instanceof Number) {
 			return ((Number) value).doubleValue() != 0.0;
-		else if (value instanceof String)
+		} else if (value instanceof String) {
 			switch (((String) value).trim().toLowerCase()) {
 			case "0":
 			case "false":
@@ -134,6 +136,7 @@ public class Text {
 			case "on":
 				return true;
 			}
+		}
 		throw new IllegalArgumentException(
 				"Can't interpret " + value + " (type: " + value.getClass().getName() + ") as boolean value");
 	}
@@ -141,6 +144,8 @@ public class Text {
 	private static final int BYTES_PER_ROW = 32;
 
 	public static String prettyPrint(byte[] data) {
+		Objects.requireNonNull(data);
+
 		int pos = 0;
 		boolean firstLine = true;
 		StringBuilder sb = new StringBuilder();
