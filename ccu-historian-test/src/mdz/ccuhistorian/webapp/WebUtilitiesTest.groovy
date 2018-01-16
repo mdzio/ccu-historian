@@ -1,5 +1,4 @@
-package mdz.ccuhistorian
-
+package mdz.ccuhistorian.webapp
 
 class WebUtilitiesTest extends GroovyTestCase {
 

@@ -20,6 +20,7 @@ package mdz.ccuhistorian
 import groovy.transform.CompileStatic
 import groovy.util.ConfigObject;
 import groovy.util.logging.Log
+import mdz.ccuhistorian.webapp.WebServerConfig
 
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.customizers.ImportCustomizer

@@ -17,6 +17,7 @@
 */
 package mdz.ccuhistorian
 
+import mdz.ccuhistorian.webapp.WebServer
 import mdz.hc.itf.Manager
 import groovy.util.logging.Log
 import groovy.transform.CompileStatic

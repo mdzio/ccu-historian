@@ -15,13 +15,13 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package mdz.ccuhistorian
+package mdz.ccuhistorian.webapp
 
 import groovy.servlet.*
 import groovy.transform.CompileStatic
 
 @CompileStatic
-class TemplateServlet extends groovy.servlet.TemplateServlet {
+class GroovyServlet extends groovy.servlet.GroovyServlet {
 
 	@Override
 	protected void setVariables(ServletBinding binding) {

@@ -15,12 +15,13 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package mdz.ccuhistorian
+package mdz.ccuhistorian.webapp
 
 import java.util.Map
 import java.util.logging.Level
 import groovy.transform.CompileStatic
 import groovy.util.logging.Log
+import mdz.ccuhistorian.TrendDesign
 
 @Log
 @CompileStatic

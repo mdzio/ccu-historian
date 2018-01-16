@@ -15,7 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package mdz.ccuhistorian
+package mdz.ccuhistorian.webapp
 
 import groovy.time.TimeCategory
 import groovy.time.BaseDuration
@@ -26,6 +26,7 @@ import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.regex.Matcher
 import java.util.logging.Logger
+import mdz.ccuhistorian.Main
 import mdz.Exceptions
 import mdz.Text
 import mdz.hc.DataPoint
