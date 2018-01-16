@@ -17,10 +17,13 @@
 */
 package mdz.ccuhistorian
 
-import groovy.time.*
-
+import groovy.time.TimeCategory
+import groovy.time.BaseDuration
 import java.security.MessageDigest
-import java.text.*
+import java.text.DateFormat
+import java.text.DecimalFormat
+import java.text.NumberFormat
+import java.text.SimpleDateFormat
 import java.util.regex.Matcher
 import java.util.logging.Logger
 import mdz.Exceptions
@@ -102,9 +105,14 @@ class WebUtilities {
 		}
 	}
 
+	// parser regex for relative date tokens
+	private static final String relativeDateToken = /(((-|\+)?\d+)([YMDWhms]))|((\d+)(=[YMDWwhms]))|(z)/
+	// expect at least one token, allow whitespace between tokens
+	private static final String relativeDateSequence = /\s*((/ + relativeDateToken + /)\s*)+/
+	
 	public Date parseDate(Date relativeTo, String str) {
 		// not a relative date?
-		if (!(str==~/\s*(((-|\+)?\d+)([YMDWhms])\s*)+/)) { 
+		if (!(str==~relativeDateSequence)) { 
 			// return absolute date
 			return parseDate(str)
 		}
@@ -114,25 +122,62 @@ class WebUtilities {
 
 		// parse relative date
 		Date res=relativeTo.clone()
-		use(TimeCategory) {
-			(str=~/\s*((-|\+)?(\d+))([YMDWhms])\s*/).each { String all, String num, String notUsed1, 
-					String notUsed2, String period ->
+		Text.forEachMatch(str, ~relativeDateToken) { grps ->
+			
+			// relative adjustments
+			if (grps[1]!=null) {
+				String num=grps[2]
 				if (num.startsWith('+')) num=num.substring(1)
 				Integer n=num as Integer
-				switch (period) {
-					case 'Y': res+=n.years; break
-					case 'M': res+=n.months; break
-					case 'D': res+=n.days; break
-					case 'W': res+=n.weeks; break
-					case 'h': res+=n.hours; break
-					case 'm': res+=n.minutes; break
-					case 's': res+=n.seconds; break
+				
+				use(TimeCategory) {
+					switch(grps[4]) {
+						case 'Y': res+=n.years; break
+						case 'M': res+=n.months; break
+						case 'D': res+=n.days; break
+						case 'W': res+=n.weeks; break
+						case 'h': res+=n.hours; break
+						case 'm': res+=n.minutes; break
+						case 's': res+=n.seconds; break
+					}
+				}
+			}
+			
+			// set fields
+			if (grps[5]!=null) {
+				Integer n=grps[6] as Integer
+				
+				switch (grps[7]) {
+					// year
+					case '=Y': res[Calendar.YEAR]=n; break
+					// month of year (1..12)
+					case '=M': res[Calendar.MONTH]=(n-1)+Calendar.JANUARY; break
+					// day of month
+					case '=D': res[Calendar.DAY_OF_MONTH]=n; break
+					// day of week
+					case '=w': res[Calendar.DAY_OF_WEEK]=n; break
+					// week of year
+					case '=W': res[Calendar.WEEK_OF_YEAR]=n; break
+					// hour of day
+					case '=h': res[Calendar.HOUR_OF_DAY]=n; break
+					// minute of hour
+					case '=m': res[Calendar.MINUTE]=n; break
+					// second of minute
+					case '=s': res[Calendar.SECOND]=n; res[Calendar.MILLISECOND]=0; break
+				}
+			}
+			
+			// special actions
+			if (grps[8]!=null) {
+				switch(grps[8]) {
+					// clear time components
+					case 'z': res.clearTime(); break
 				}
 			}
 		}
 		res
 	}
-
+	
 	@CompileStatic
 	public Number parseNumber(String str) {
 		if (str==null) return null

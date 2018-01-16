@@ -28,5 +28,17 @@ class WebUtilitiesTest extends GroovyTestCase {
 		
 		d=wu.parseDate(wu.parseDate('1.2.2018 11:22:33'), '-1Y+3D -1h-13M 10m-33s +1W')
 		assert wu.format(d)=='11.01.2016 10:32:00'
+
+		d=wu.parseDate(wu.parseDate('1.1.2018'), '2017=Y2=M3=D12=h31=m12=s')
+		assert wu.format(d)=='03.02.2017 12:31:12'
+
+		d=wu.parseDate(wu.parseDate('1.1.2018'), '  2017=Y 2=M 3=D 12=h 31=m 12=s \t')
+		assert wu.format(d)=='03.02.2017 12:31:12'
+		
+		d=wu.parseDate(wu.parseDate('1.1.2018'), '2=W')
+		assert wu.format(d)=='08.01.2018 00:00:00'
+		
+		d=wu.parseDate(wu.parseDate('3.1.2018 11:12:13'), 'z')
+		assert wu.format(d)=='03.01.2018 00:00:00'
 	}  
 }
