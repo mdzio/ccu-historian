@@ -13,7 +13,7 @@
 	</welcome-file-list>
 	<servlet>
 		<servlet-name>Template</servlet-name>
-		<servlet-class>mdz.ccuhistorian.TemplateServlet</servlet-class>
+		<servlet-class>mdz.ccuhistorian.webapp.TemplateServlet</servlet-class>
 		<init-param>
       		<param-name>generated.by</param-name>
       		<param-value>false</param-value>
@@ -31,7 +31,7 @@
 	</servlet-mapping>
 	<servlet>
 		<servlet-name>Groovy</servlet-name>
-		<servlet-class>mdz.ccuhistorian.GroovyServlet</servlet-class>
+		<servlet-class>mdz.ccuhistorian.webapp.GroovyServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>Groovy</servlet-name>
