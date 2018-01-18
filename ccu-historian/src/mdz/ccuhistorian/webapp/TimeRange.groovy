@@ -51,6 +51,9 @@ public class TimeRange {
 				throw new IllegalArgumentException("Invalid end time for time range: $endText")
 		}
 		
+		if (end==begin) {
+			throw new IllegalArgumentException("End time is equal to begin time: $beginText, $endText")
+		}
 		if (end<begin) {
 			throw new IllegalArgumentException("End time is before begin time: $beginText, $endText")
 		}

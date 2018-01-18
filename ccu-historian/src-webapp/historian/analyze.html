@@ -20,19 +20,9 @@ if (params.i)
 			dpIds=params.i.collect { it as Integer }
 	} catch (NumberFormatException e) {} 	
 
-def begin=utils.parseDate(params.b)
-def duration=utils.parseDuration(params.d)
-def end=utils.parseDate(params.e)
-use (TimeCategory) {
-	if (!begin) { 
-		if (!end) end=new Date()
-		if (!duration) begin=end-1
-		else begin=end-duration
-	} else { 
-		if (!end) {
-			if (!duration) end=new Date()
-			else end=begin+duration
-}	}	}
+def timeRange=utils.newTimeRange(params.b, params.e)
+def begin=timeRange.begin
+def end=timeRange.end
 
 if (params.trend_set || !ctx.timerange) 
 	ctx.timerange=[begin: begin, end:end]

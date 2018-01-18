@@ -134,19 +134,9 @@ class Parameters {
 		}
 
 		// time range	
-		begin=binding.utils.parseDate(params.b)
-		end=binding.utils.parseDate(params.e)
-		def duration=binding.utils.parseDuration(params.d)
-		use (TimeCategory) {
-			if (!begin) {
-				if (!end) end=new Date()
-				if (!duration) begin=end-1
-				else begin=end-duration
-			} else {
-				if (!end) {
-					if (!duration) end=new Date()
-					else end=begin+duration
-		}	}	}
+		def timeRange=binding.utils.newTimeRange(params.b, params.e)
+		begin=timeRange.begin
+		end=timeRange.end
 		
 		// trend design
 		if (params.t && params.t!='default') {
