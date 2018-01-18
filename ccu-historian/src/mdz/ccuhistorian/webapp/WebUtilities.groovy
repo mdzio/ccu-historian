@@ -73,10 +73,6 @@ class WebUtilities {
 		TextFormat.formatDuration(milliSeconds)
 	}
 	
-	public BaseDuration parseDuration(String str) {
-		TextFormat.parseDuration(str)
-	}
-	
 	public String escapeHtml(String str) {
 		str?Text.escapeXml(str):''
 	}
@@ -117,5 +113,9 @@ class WebUtilities {
 			param.collect { parseDataPoint(it as String, db) }
 		else
 			[parseDataPoint(param as String, db)]
+	}
+	
+	public newTimeRange(String begin, String end) {
+		new TimeRange(begin, end)
 	}
 }

@@ -17,29 +17,30 @@
 */
 package mdz.ccuhistorian.webapp
 
+import groovy.transform.CompileStatic
 import java.text.DateFormat
 import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.temporal.ChronoField
+import java.time.temporal.WeekFields
 import java.util.Date
 import java.util.regex.Pattern
 import mdz.Text
-import groovy.time.BaseDuration
-import groovy.time.TimeCategory
-import groovy.transform.CompileStatic
 
+@CompileStatic
 class TextFormat {
 
 	private static NumberFormat numberFormat=new DecimalFormat('#,##0.0#####')
 	
-	@CompileStatic
 	public static String format(Number number) {
 		synchronized(numberFormat) {
 			number!=null?numberFormat.format(number):''
 		}
 	}
 
-	@CompileStatic
 	public static Number parseNumber(String str) {
 		if (str==null) return null
 		try {
@@ -65,14 +66,12 @@ class TextFormat {
 	private static final String relDateSequence = /\s*((/ + relDateToken + /)\s*)*/
 	private static final Pattern relDateSequencePat = ~relDateSequence
 
-	@CompileStatic
 	public static String format(Date date) {
 		synchronized(dateFormat) {
 			date!=null?dateFormat.format(date):''
 		}
 	}
 
-	@CompileStatic
 	public static Date parseDate(String str) {
 		if (str==null) return null
 		(Date)dateFormats.findResult { DateFormat df ->
@@ -84,12 +83,10 @@ class TextFormat {
 		}
 	}
 	
-	@CompileStatic
 	public static boolean isRelativeDate(String str) {
 		str ==~ relDateSequencePat
 	}
 	
-	@CompileStatic
 	public static Date parseDate(Date relativeTo, String str) {
 		// not a relative date?
 		if (!isRelativeDate(str)) {
@@ -101,8 +98,7 @@ class TextFormat {
 		if (!relativeTo) return null
 
 		// parse relative date
-		Calendar res=Calendar.instance
-		res.time=relativeTo
+		ZonedDateTime res=ZonedDateTime.ofInstant(relativeTo.toInstant(), ZoneId.systemDefault())
 		Text.forEachMatch(str, relDateTokenPat) { String[] grps ->
 			
 			// relative adjustments
@@ -110,13 +106,13 @@ class TextFormat {
 				Integer n=grps[2] as Integer
 				
 				switch(grps[4]) {
-					case 'Y': res.add(Calendar.YEAR, n); break
-					case 'M': res.add(Calendar.MONTH, n); break
-					case 'D': res.add(Calendar.DAY_OF_MONTH, n); break
-					case 'W': res.add(Calendar.WEEK_OF_YEAR, n); break
-					case 'h': res.add(Calendar.HOUR_OF_DAY, n); break
-					case 'm': res.add(Calendar.MINUTE, n); break
-					case 's': res.add(Calendar.SECOND, n); break
+					case 'Y': res=res.plusYears(n); break
+					case 'M': res=res.plusMonths(n); break
+					case 'D': res=res.plusDays(n); break
+					case 'W': res=res.plusWeeks(n); break
+					case 'h': res=res.plusHours(n); break
+					case 'm': res=res.plusMinutes(n); break
+					case 's': res=res.plusSeconds(n); break
 				}
 			}
 			
@@ -126,21 +122,21 @@ class TextFormat {
 				
 				switch (grps[7]) {
 					// year
-					case '=Y': res[Calendar.YEAR]=n; break
+					case '=Y': res=res.withYear(n); break
 					// month of year (1..12)
-					case '=M': res[Calendar.MONTH]=(n-1)+Calendar.JANUARY; break
+					case '=M': res=res.withMonth(n); break
 					// day of month
-					case '=D': res[Calendar.DAY_OF_MONTH]=n; break
+					case '=D': res=res.withDayOfMonth(n); break
 					// day of week
-					case '=w': res[Calendar.DAY_OF_WEEK]=n; break
+					case '=w': res=res.with(ChronoField.DAY_OF_WEEK, n); break
 					// week of year
-					case '=W': res[Calendar.WEEK_OF_YEAR]=n; break
+					case '=W': res=res.with(WeekFields.of(Locale.getDefault()).weekOfYear(), n); break
 					// hour of day
-					case '=h': res[Calendar.HOUR_OF_DAY]=n; break
+					case '=h': res=res.withHour(n); break
 					// minute of hour
-					case '=m': res[Calendar.MINUTE]=n; break
+					case '=m': res=res.withMinute(n); break
 					// second of minute
-					case '=s': res[Calendar.SECOND]=n; res[Calendar.MILLISECOND]=0; break
+					case '=s': res=res.withSecond(n).withNano(0); break
 				}
 			}
 			
@@ -148,11 +144,11 @@ class TextFormat {
 			if (grps[8]!=null) {
 				switch(grps[8]) {
 					// clear time components
-					case 'z': res.clearTime(); break
+					case 'z': res=res.withHour(0).withMinute(0).withSecond(0).withNano(0); break
 				}
 			}
 		}
-		res.time
+		Date.from(res.toInstant())
 	}
 	
 	private static final long MILLISECONDS_PER_SECOND=1000
@@ -161,7 +157,6 @@ class TextFormat {
 	private static final long MILLISECONDS_PER_DAY=MILLISECONDS_PER_HOUR*24
 	private static final long MILLISECONDS_PER_WEEK=MILLISECONDS_PER_DAY*7
 	
-	@CompileStatic
 	public static String formatDuration(long milliSeconds) {
 		long weeks=(long)milliSeconds.intdiv(MILLISECONDS_PER_WEEK)
 		milliSeconds-=weeks*MILLISECONDS_PER_WEEK
@@ -175,28 +170,5 @@ class TextFormat {
 		(weeks?((weeks as String)+'W '):'')+(days?((days as String)+'D '):'')+
 		(hours?((hours as String)+'h '):'')+(minutes?((minutes as String)+'m '):'')+
 		(seconds?((seconds as String)+'s '):'')
-	}
-
-	public static BaseDuration parseDuration(String str) {
-		if (!str || !(str==~/\s*(((-|\+)?\d+)([YMDWhms])\s*)+/)) null
-		else {
-			def dur
-			use(TimeCategory) {
-				dur=0.seconds
-				(str=~/\s*((-|\+)?(\d+))([YMDWhms])\s*/).each { all, num, d1, d2, period ->
-					num=num as Integer
-					switch (period) {
-						case 'Y': dur+=num.years; break
-						case 'M': dur+=num.months; break
-						case 'D': dur+=num.days; break
-						case 'W': dur+=num.weeks; break
-						case 'h': dur+=num.hours; break
-						case 'm': dur+=num.minutes; break
-						case 's': dur+=num.seconds; break
-					}	
-				}	
-			}
-			dur
-		}
 	}
 }

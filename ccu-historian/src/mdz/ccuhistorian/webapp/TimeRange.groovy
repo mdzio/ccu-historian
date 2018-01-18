@@ -18,14 +18,41 @@
 package mdz.ccuhistorian.webapp
 
 import groovy.transform.CompileStatic
+import groovy.time.BaseDuration
 
-@CompileStatic
-class TimeRange {
+public class TimeRange {
 
 	Date begin
+	String beginText
 	Date end
+	String endText
 	
-	public static of(String b, String d, String e) {
-			
+	public TimeRange(String beginText, String endText) {
+		this.beginText=beginText
+		this.endText=endText
+		Date now=new Date()
+		
+		if (!beginText && !endText) {
+			begin=new Date(now.time-24l*60*60*1000)
+			end=now
+			return	
+		}
+		
+		begin=TextFormat.parseDate(now, beginText)
+		if (begin==null) {
+			throw new IllegalArgumentException("Invalid begin time for time range: $beginText")
+		}
+		
+		if (!endText) {
+			end=now
+		} else {
+			end=TextFormat.parseDate(begin, endText)
+			if (end==null)
+				throw new IllegalArgumentException("Invalid end time for time range: $endText")
+		}
+		
+		if (end<begin) {
+			throw new IllegalArgumentException("End time is before begin time: $beginText, $endText")
+		}
 	}
 }
