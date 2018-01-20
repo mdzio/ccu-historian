@@ -58,7 +58,7 @@ start() {
     elif [ -x "/opt/jre-1.8.0_121-compact3/bin/java" ]; then
       # we run on CCU2/YAHM/LXCCU
       JAVA_BIN=/opt/jre-1.8.0_121-compact3/bin/java
-      MAXHEAP=64m
+      MAXHEAP=192m
     else
       echo "ERROR: Java binary not found"
       logger -t homematic -p user.error "ERROR: Java binary not found for CCU-Historian startup"

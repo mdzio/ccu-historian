@@ -22,7 +22,7 @@ case $1 in
     get_pid
     if [ -z  $PID ]; then
 		cd "${SYNOPKG_PKGDEST}"
-		java -Duser.timezone=Europe/Berlin -Duser.language=de -Duser.country=DE -Xms16m -Xmx64m -jar ccu-historian.jar > ccu-historian.log 2>&1 &
+		java -Duser.timezone=Europe/Berlin -Duser.language=de -Duser.country=DE -Xms16m -Xmx192m -jar ccu-historian.jar > ccu-historian.log 2>&1 &
 		exit $?
     else
 		exit 0
