@@ -1,6 +1,7 @@
 package mdz.ccuhistorian.webapp
 
 import groovy.util.GroovyTestCase
+import javax.servlet.http.HttpServletRequest
 
 class TimeRangeTest extends GroovyTestCase {
 
@@ -47,5 +48,34 @@ class TimeRangeTest extends GroovyTestCase {
 		def r=new TimeRange('1.4.2016 1:2:3', '1M -3D +2h -3m +11s')
 		assert r.begin==Date.parse('yyyy-MM-dd HH:mm:ss', '2016-04-01 01:02:03')
 		assert r.end==Date.parse('yyyy-MM-dd HH:mm:ss', '2016-04-28 02:59:14')
+	}
+	
+	private HttpServletRequest buildRequest(b, e) {
+		{ name -> name=='b'?b:(name=='e'?e:null) } as HttpServletRequest	
+	}
+	
+	public void testRequestParameters() {
+		def r=new TimeRange(buildRequest(null, null))
+		assert r.beginText==null
+		assert r.endText==null
+
+		r=new TimeRange(buildRequest('1.1.2018', '1W'))
+		assert r.beginText=='1.1.2018'
+		assert r.endText=='1W'
+		assert r.begin==Date.parse('yyyy-MM-dd HH:mm:ss', '2018-01-01 00:00:00')
+		assert r.end==Date.parse('yyyy-MM-dd HH:mm:ss', '2018-01-08 00:00:00')
+	}
+	
+	public void testAddParameters() {
+		def p=[:]
+		def r=new TimeRange(buildRequest(null, null))
+		r.addParametersTo(p)
+		assert !p
+		
+		p.clear()
+		r=new TimeRange(buildRequest('   1.1.2018', '1h   '))
+		r.addParametersTo(p)
+		assert p==[b:['   1.1.2018'], e:['1h   ']]
+		assert p.b instanceof String[]
 	}
 }

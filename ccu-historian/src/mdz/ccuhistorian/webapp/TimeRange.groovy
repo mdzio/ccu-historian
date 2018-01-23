@@ -18,14 +18,19 @@
 package mdz.ccuhistorian.webapp
 
 import groovy.transform.CompileStatic
-import groovy.time.BaseDuration
+import javax.servlet.http.HttpServletRequest
 
+@CompileStatic 
 public class TimeRange {
 
 	Date begin
 	String beginText
 	Date end
 	String endText
+	
+	public TimeRange(HttpServletRequest request) {
+		this(request.getParameter('b'), request.getParameter('e'))
+	}
 	
 	public TimeRange(String beginText, String endText) {
 		this.beginText=beginText
@@ -56,6 +61,15 @@ public class TimeRange {
 		}
 		if (end<begin) {
 			throw new IllegalArgumentException("End time is before begin time: $beginText, $endText")
+		}
+	}
+	
+	public void addParametersTo(Map<String, String[]> params) {
+		if (beginText!=null) {
+			params.b=[beginText]
+		}
+		if (endText!=null) {
+			params.e=[endText]
 		}
 	}
 }

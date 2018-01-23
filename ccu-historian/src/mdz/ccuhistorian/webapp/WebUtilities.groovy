@@ -92,8 +92,20 @@ class WebUtilities {
 		Exceptions.catchToLog(log, cl)
 	}
 
+	public newTimeRange(String begin, String end) {
+		new TimeRange(begin, end)
+	}
+
 	public DataPoint parseDataPoint(String id, DataPointStorage db) {
-		def dataPoint
+		getDataPoint(id, db)
+	}
+
+	public List<DataPoint> parseDataPointList(String[] ids, DataPointStorage db) {
+		getDataPoints(ids, db)
+	}
+	
+	public static DataPoint getDataPoint(String id, DataPointStorage db) {
+		DataPoint dataPoint
 		if (id==~/\d+/) {
 			dataPoint=db.getDataPoint(id as Integer)
 		} else {
@@ -104,18 +116,11 @@ class WebUtilities {
 				)
 		}
 		if (dataPoint==null)
-			throw new Exception("Unknown data point: $id")
+			throw new IllegalArgumentException("Unknown data point: $id")
 		dataPoint
 	}
-
-	public List<DataPoint> parseDataPointList(param, DataPointStorage db) {
-		if (param instanceof String[] || param instanceof Iterable || param instanceof Object[])
-			param.collect { parseDataPoint(it as String, db) }
-		else
-			[parseDataPoint(param as String, db)]
-	}
 	
-	public newTimeRange(String begin, String end) {
-		new TimeRange(begin, end)
+	public static List<DataPoint> getDataPoints(String[] ids, DataPointStorage db) {
+		ids.collect { String id -> WebUtilities.getDataPoint(id, db) }
 	}
 }

@@ -8,5 +8,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/mdz-utils"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hc-utils"/>
+	<classpathentry kind="lib" path="/external-libs/servlet-api-2.4/servlet-api-2.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
