@@ -42,7 +42,7 @@ public class TrendParameters {
 		if (dpParam==null) {
 			throw new IllegalArgumentException('Parameter i (data point id/s) not set')
 		}
-		def dataPoints=WebUtilities.getDataPoints(dpParam, storage)
+		def dataPoints=WebUtilities.getDataPoints(dpParam.toList(), storage)
 
 		// data point groups
 		def groupParam=request.getParameterValues('g')

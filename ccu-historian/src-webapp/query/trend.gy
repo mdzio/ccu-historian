@@ -86,7 +86,8 @@ class Parameters {
 		// datapoint IDs
 		if (!params.i)
 			throw new Exception('Page parameter i (data point id/s) not set')
-		def dataPoints=binding.utils.parseDataPointList(params.i, binding.database)
+		def dpParam=(params.i instanceof String[])?:([params.i] as String[])
+		def dataPoints=binding.utils.parseDataPointList(dpParam, binding.database)
 	
 		// data point groups
 		def dpGroups

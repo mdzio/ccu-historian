@@ -17,20 +17,14 @@
 */
 package mdz.ccuhistorian.webapp
 
-import groovy.time.TimeCategory
-import groovy.time.BaseDuration
-import groovy.transform.CompileStatic
 import java.security.MessageDigest
-import java.text.DateFormat
-import java.text.DecimalFormat
-import java.text.NumberFormat
-import java.text.SimpleDateFormat
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 import java.util.logging.Logger
-import mdz.ccuhistorian.Main
+import java.util.regex.Matcher
+
+import groovy.transform.CompileStatic
 import mdz.Exceptions
 import mdz.Text
+import mdz.ccuhistorian.Main
 import mdz.hc.DataPoint
 import mdz.hc.DataPointIdentifier
 import mdz.hc.persistence.DataPointStorage
@@ -100,7 +94,7 @@ class WebUtilities {
 		getDataPoint(id, db)
 	}
 
-	public List<DataPoint> parseDataPointList(String[] ids, DataPointStorage db) {
+	public List<DataPoint> parseDataPointList(List<String> ids, DataPointStorage db) {
 		getDataPoints(ids, db)
 	}
 	
@@ -120,7 +114,7 @@ class WebUtilities {
 		dataPoint
 	}
 	
-	public static List<DataPoint> getDataPoints(String[] ids, DataPointStorage db) {
+	public static List<DataPoint> getDataPoints(List<String> ids, DataPointStorage db) {
 		ids.collect { String id -> WebUtilities.getDataPoint(id, db) }
 	}
 }
