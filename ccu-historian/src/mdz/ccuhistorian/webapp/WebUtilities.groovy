@@ -94,10 +94,6 @@ class WebUtilities {
 		getDataPoint(id, db)
 	}
 
-	public List<DataPoint> parseDataPointList(List<String> ids, DataPointStorage db) {
-		getDataPoints(ids, db)
-	}
-	
 	public static DataPoint getDataPoint(String id, DataPointStorage db) {
 		DataPoint dataPoint
 		if (id==~/\d+/) {

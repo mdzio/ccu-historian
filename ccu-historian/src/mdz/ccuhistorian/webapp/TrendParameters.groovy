@@ -108,8 +108,8 @@ public class TrendParameters {
 		if (trendDesign.identifier!='default') {
 			params.t=[trendDesign.identifier]
 		}
-		params.i=groups.values().collect { Group g -> g.dataPoints.idx }.flatten()
-		params.g=groups.collect { Integer id, Group group ->  [id]*group.dataPoints.size() }.flatten()
+		params.i=groups.values().collectMany { Group g -> g.dataPoints.idx }
+		params.g=groups.collectMany { Integer id, Group group ->  [id]*group.dataPoints.size() }
 		params.gh=groups.values()*.height
 	}
 	

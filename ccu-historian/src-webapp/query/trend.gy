@@ -1,4 +1,22 @@
-import groovy.time.TimeCategory
+/*
+    CCU-Historian, a long term archive for the HomeMatic CCU
+    Copyright (C) 2011-2018 MDZ (info@ccu-historian.de)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+import java.util.logging.Logger
+import javax.servlet.http.HttpServletResponse
 import groovy.transform.Field
 import groovy.transform.CompileStatic
 import org.jfree.chart.JFreeChart
@@ -15,10 +33,8 @@ import org.jfree.chart.plot.CombinedDomainXYPlot
 import org.jfree.chart.plot.PlotOrientation
 import mdz.hc.TimeSeries
 import mdz.hc.DataPoint
-import mdz.ccuhistorian.LogSystem
 import mdz.ccuhistorian.TrendDesign
-import mdz.ccuhistorian.Database
-import java.util.logging.Logger
+import mdz.ccuhistorian.webapp.TrendParameters
 
 @Field
 private final static log=Logger.getLogger('mdz.ccuhistorian.webapp.Trend')
@@ -54,103 +70,6 @@ static addToXYSeries(TimeSeries timeSeries, XYSeries xySeries) {
 	final int size=timeSeries.size
 	for (int idx = 0; idx < size; ++idx)
 		xySeries.add(timestamps[idx], values[idx]);
-}
-
-// class for storage of the URL parameters
-
-class Parameters {
-
-	static class Group {
-		int height=1
-		List<DataPoint> dataPoints=new ArrayList<DataPoint>()
-		@Override
-		String toString() {
-			"(height: $height, dataPoints: $dataPoints.displayName)"
-		}
-	}
-
-	int width, height
-	Date begin, end
-	TrendDesign trendDesign
-	Map<Integer /* group id */, Group> groups=new TreeMap<>().withDefault { new Group() }
-
-	Parameters(params, binding) {
-		// height and width of the graphics
-		try {
-			width=(params.w?:'640') as Integer
-			height=(params.h?:'260') as Integer
-		} catch (NumberFormatException e) {
-			throw new Exception('Page parameter w (width) or h (height) is invalid')
-		}
-		
-		// datapoint IDs
-		if (!params.i)
-			throw new Exception('Page parameter i (data point id/s) not set')
-		def dpParam=(params.i instanceof String[])?:([params.i] as String[])
-		def dataPoints=binding.utils.parseDataPointList(dpParam, binding.database)
-	
-		// data point groups
-		def dpGroups
-		if (!params.g)
-			dpGroups=[0]*dataPoints.size()
-		else {
-			try {
-				if (params.g instanceof String)
-					dpGroups=[params.g as Integer]
-				else
-					dpGroups=params.g.collect { it as Integer }
-			} catch (NumberFormatException e) {
-				throw new Exception('Page parameter g (data point group/s) is invalid (not a number)')
-			}
-		}
-		if (dataPoints.size()!=dpGroups.size())
-			throw new Exception('Page parameter g (data point group/s) is invalid (wrong count)')
-
-		// build groups
-		[dataPoints, dpGroups].transpose().each {
-			def (dp, group)=it
-			groups[group].dataPoints << dp
-		}
-
-		// group heights
-		def groupHeights
-		if (!params.gh)
-			groupHeights=[1]*dpGroups.unique().size()
-		else {
-			try {
-				if (params.gh instanceof String)
-					groupHeights=[params.gh as Integer]
-				else
-					groupHeights=params.gh.collect { it as Integer }
-			} catch (NumberFormatException e) {
-				throw new Exception('Page parameter gh (group height/s) is invalid (not a number)')
-			}
-		}
-		if (groups.size()!=groupHeights.size())
-			throw new Exception('Page parameter gh (group height/s) is invalid (wrong count)')
-
-		[groups.values().asList(), groupHeights].transpose().each {
-			def (group, height)=it
-			group.height=height
-		}
-
-		// time range	
-		def timeRange=binding.utils.newTimeRange(params.b, params.e)
-		begin=timeRange.begin
-		end=timeRange.end
-		
-		// trend design
-		if (params.t && params.t!='default') {
-			trendDesign=binding.webServer.config.trendDesigns[params.t]
-			if (!trendDesign)
-				throw new Exception("Page parameter t (trend design) is invalid")
-		} else trendDesign=binding.webServer.config.trendDesigns['default']?:new TrendDesign()
-	}
-	
-	@Override
-	String toString() {
-		"width: $width, height: $height, groups: $groups, begin: $begin, end: $end"
-	}
 }
 
 // generate chart
@@ -206,8 +125,8 @@ def createPlot(parameters, dataPoints, plotState) {
 			
 		// request time series and convert
 		def timeSeries
-		if (isAction) timeSeries=database.getTimeSeriesRaw(dataPoint, parameters.begin, parameters.end)
-		else timeSeries=database.getTimeSeries(dataPoint, parameters.begin, parameters.end)
+		if (isAction) timeSeries=database.getTimeSeriesRaw(dataPoint, parameters.timeRange.begin, parameters.timeRange.end)
+		else timeSeries=database.getTimeSeries(dataPoint, parameters.timeRange.begin, parameters.timeRange.end)
 		def dispIdx=rangeAxesDisplayIdx[axisIdx]
 		XYSeries xySeries=new XYSeries(displayName+(dispIdx>0?' ('+dispIdx+')':''))
 		addToXYSeries(timeSeries, xySeries)
@@ -239,7 +158,7 @@ def createCombinedPlot(parameters) {
 	def timeAxis = new DateAxis()
 	timeAxis.lowerMargin=0.00 // keine Raender
 	timeAxis.upperMargin=0.00
-	timeAxis.setRange(parameters.begin, parameters.end)
+	timeAxis.setRange(parameters.timeRange.begin, parameters.timeRange.end)
 	applyDesign timeAxis, parameters.trendDesign.timeAxis
 
 	// create combined plot
@@ -265,7 +184,7 @@ def createChart(parameters) {
 
 // main function
 
-utils.catchToLog(log) {
+def ex=utils.catchToLog(log) {
 	def startTime=System.currentTimeMillis()
 	log.finer 'Web server: Generating trend'
 	
@@ -275,7 +194,7 @@ utils.catchToLog(log) {
 			throw new Exception('Access denied')
 			
 	// parse parameters
-	Parameters parameters=[params, binding]
+	TrendParameters parameters=new TrendParameters(request, database, webServer.config.trendDesigns)
 	log.finer "Web server: Parameters: $parameters"
 	
 	// create chart
@@ -290,4 +209,12 @@ utils.catchToLog(log) {
 	encoder.encode(image, sout)
 	
 	log.finer "Web server: Trend generated in ${System.currentTimeMillis()-startTime}ms"
-} // catchToLog
+}
+
+// signal error
+
+if (ex) {
+	utils.catchToLog(log) {
+		response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.message?:ex.class.name)
+	}
+}
