@@ -64,12 +64,14 @@ public class TimeRange {
 		}
 	}
 	
-	public void addParametersTo(Map<String, String[]> params) {
+	public Map<String, String[]> getParameters() {
+		Map<String, String[]> params=[:]
 		if (beginText!=null) {
 			params.b=[beginText]
 		}
 		if (endText!=null) {
 			params.e=[endText]
 		}
+		params
 	}
 }

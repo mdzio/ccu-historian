@@ -57,8 +57,7 @@ class TrendParametersTest extends GroovyTestCase {
 		assert tp.groups[2].height==4
 		assert tp.groups[2].dataPoints.idx==[24]
 		
-		def params=[:]
-		tp.addParametersTo(params)
+		def params=tp.parameters
 		assert params.size()==8
 		assert params.w==['320']
 		assert params.h==['240']

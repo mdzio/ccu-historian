@@ -22,6 +22,7 @@ import java.util.logging.Logger
 import java.util.regex.Matcher
 
 import groovy.transform.CompileStatic
+import groovy.xml.MarkupBuilder
 import mdz.Exceptions
 import mdz.Text
 import mdz.ccuhistorian.Main
@@ -94,6 +95,10 @@ class WebUtilities {
 		getDataPoint(id, db)
 	}
 
+	public static String encodeURIComponent(String comp) {
+		URLEncoder.encode(comp, 'UTF-8')
+	}
+	
 	public static DataPoint getDataPoint(String id, DataPointStorage db) {
 		DataPoint dataPoint
 		if (id==~/\d+/) {
@@ -112,5 +117,43 @@ class WebUtilities {
 	
 	public static List<DataPoint> getDataPoints(List<String> ids, DataPointStorage db) {
 		ids.collect { String id -> WebUtilities.getDataPoint(id, db) }
+	}
+	
+	private static void forEachParameter(Map<?, ?>[] parameters, Closure cl) {
+		parameters.each { Map<?, ?> map ->
+			map.each { k, vs ->
+				if ((vs in Object[]) || (vs in String[]) || (vs in Iterable)) {
+					vs.each { v ->
+						cl(k.toString(), v.toString())
+					}
+				} else {
+					cl(k.toString(), vs.toString())
+				}
+			}
+		}
+	}
+	
+	public static String buildUrl(String base, Map<?, ?>... parameters) {
+		StringBuilder sb=[]
+		if (base) {
+			sb << base
+		}
+		boolean first=true 
+		forEachParameter(parameters) { String k, String v ->
+			if (first) {
+				sb << '?'
+				first=false
+			} else {
+				sb << '&'
+			}
+			sb << encodeURIComponent(k.toString()) << '=' << encodeURIComponent(v.toString())
+		}
+		sb
+	}
+	
+	public static void insertHiddenInputs(MarkupBuilder html, Map<?, ?>... parameters) {
+		forEachParameter(parameters) {  String k, String v ->
+			html.invokeMethod('input', [[type:'hidden', name:k, value:v]])
+		}
 	}
 }

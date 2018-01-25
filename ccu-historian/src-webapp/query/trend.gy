@@ -196,6 +196,9 @@ def ex=utils.catchToLog(log) {
 	// parse parameters
 	TrendParameters parameters=new TrendParameters(request, database, webServer.config.trendDesigns)
 	log.finer "Web server: Parameters: $parameters"
+	if (!parameters.groups) {
+		throw new IllegalArgumentException('Parameter i (data point id/s) not set')
+	}
 	
 	// create chart
 	def chart=createChart(parameters)

@@ -67,14 +67,12 @@ class TimeRangeTest extends GroovyTestCase {
 	}
 	
 	public void testAddParameters() {
-		def p=[:]
 		def r=new TimeRange(buildRequest(null, null))
-		r.addParametersTo(p)
+		def p=r.parameters
 		assert !p
 		
-		p.clear()
 		r=new TimeRange(buildRequest('   1.1.2018', '1h   '))
-		r.addParametersTo(p)
+		p=r.parameters
 		assert p==[b:['   1.1.2018'], e:['1h   ']]
 		assert p.b instanceof String[]
 	}

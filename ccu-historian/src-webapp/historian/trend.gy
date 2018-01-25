@@ -1,5 +1,7 @@
 import groovy.transform.Field
 import java.util.logging.Logger
+import mdz.ccuhistorian.webapp.TrendParameters
+import static mdz.ccuhistorian.webapp.WebUtilities.*
 
 @Field
 private final static Logger log = Logger.getLogger('mdz.ccuhistorian.webapp.Trend')
@@ -12,6 +14,21 @@ renderer.head={
 }
 
 renderer.content={
+	def trendParams=new TrendParameters(request, database, webServer.config.trendDesigns)
+	// FIXME
+	pre trendParams.toString()	
+	
+	div(class:'row') {
+		div(class:'col-sm-4 mb-2') {
+		}
+		div(class:'col-sm-4 mb-2') {
+		}
+		div(class:'col-sm-4 mb-2') {
+			//button class:'btn btn-default btn-block', type:'submit', name:'trend_set', value:1, 'Trend-Darstellung'
+			a class:'btn btn-default btn-block', href:buildUrl('index.gy', trendParams.parameters), role:'button', 'Datenpunktliste'
+		}
+	}
+
 	// TODO
 }
 

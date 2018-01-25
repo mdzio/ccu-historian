@@ -40,7 +40,8 @@ public class TrendParameters {
 		// data point IDs
 		def dpParam=request.getParameterValues('i')
 		if (dpParam==null) {
-			throw new IllegalArgumentException('Parameter i (data point id/s) not set')
+			// continue with no data points
+			dpParam=[] as String[]
 		}
 		def dataPoints=WebUtilities.getDataPoints(dpParam.toList(), storage)
 
@@ -97,20 +98,22 @@ public class TrendParameters {
 		}
 	}
 	
-	public void addParametersTo(Map<String, String[]> params) {
+	public Map<String, String[]> getParameters() {
+		Map<String, String[]> params=[:]
 		if (width!=DEFAULT_WIDTH) {
 			params.w=[width]
 		}
 		if (height!=DEFAULT_HEIGHT) {
 			params.h=[height]
 		}
-		timeRange.addParametersTo(params)
+		params << timeRange.parameters
 		if (trendDesign.identifier!='default') {
 			params.t=[trendDesign.identifier]
 		}
 		params.i=groups.values().collectMany { Group g -> g.dataPoints.idx }
 		params.g=groups.collectMany { Integer id, Group group ->  [id]*group.dataPoints.size() }
 		params.gh=groups.values()*.height
+		params
 	}
 	
 	@Override
