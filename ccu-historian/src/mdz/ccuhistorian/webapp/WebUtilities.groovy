@@ -151,7 +151,7 @@ class WebUtilities {
 		sb
 	}
 	
-	public static void insertHiddenInputs(MarkupBuilder html, Map<?, ?>... parameters) {
+	public static void buildHiddenInputs(MarkupBuilder html, Map<?, ?>... parameters) {
 		forEachParameter(parameters) {  String k, String v ->
 			html.invokeMethod('input', [[type:'hidden', name:k, value:v]])
 		}

@@ -31,14 +31,14 @@ class WebUtilitiesTest extends GroovyTestCase {
 		assert 'x?a=1&b=2&b=3'==buildUrl('x', [a:1], [b:[2, 3]])
 		
 		assert 'x?a=+'==buildUrl('x', [a:' '])
-		assert 'x?%C3%A4=%C3%9F'==buildUrl('x', ['Ã¤':'ÃŸ'])
+		assert 'x?%C3%A4=%C3%9F'==buildUrl('x', ['ä':'ß'])
 	}
 	
 	public void testInsertHiddenInputs() {
 		def writer=new StringWriter()
 		def html=new MarkupBuilder(writer)
 		
-		insertHiddenInputs(html, [a:[1, 2]], [a:[2, 3]])
+		buildHiddenInputs(html, [a:[1, 2]], [a:[2, 3]])
 		// ignore line endings
 		def lines=writer.toString().readLines()
 		assert lines==[
@@ -50,7 +50,7 @@ class WebUtilitiesTest extends GroovyTestCase {
 		
 		writer=new StringWriter()
 		html=new MarkupBuilder(writer)
-		insertHiddenInputs(html, ['>Ã¤':'ÃŸ\''])
-		assert writer.toString()=="<input type='hidden' name='&gt;Ã¤' value='ÃŸ&apos;' />"
+		buildHiddenInputs(html, ['>ä':'ß\''])
+		assert writer.toString()=="<input type='hidden' name='&gt;ä' value='ß&apos;' />"
 	}
 }

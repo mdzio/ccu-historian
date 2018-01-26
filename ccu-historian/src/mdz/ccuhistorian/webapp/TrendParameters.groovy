@@ -29,59 +29,60 @@ public class TrendParameters {
 	Map<Integer /* group id */, Group> groups=new TreeMap<Integer, Group>().withDefault { new Group() }
 
 	public TrendParameters(HttpServletRequest request, DataPointStorage storage, Map<String, TrendDesign> trendDesigns) {
-		// height and width of the graphics
+		// width and height of the graphics
 		try {
 			width=request.getParameter('w')?.toInteger()?:DEFAULT_WIDTH
 			height=request.getParameter('h')?.toInteger()?:DEFAULT_HEIGHT
 		} catch (NumberFormatException e) {
 			throw new IllegalArgumentException('Parameter w (width) or h (height) is invalid')
 		}
-		
-		// data point IDs
-		def dpParam=request.getParameterValues('i')
-		if (dpParam==null) {
-			// continue with no data points
-			dpParam=[] as String[]
-		}
-		def dataPoints=WebUtilities.getDataPoints(dpParam.toList(), storage)
 
-		// data point groups
-		def groupParam=request.getParameterValues('g')
-		def groupIds
-		if (groupParam==null) {
-			groupIds=[0]*dataPoints.size()
-		} else {
-			try {
-				groupIds=groupParam.collect { it as Integer }
-			} catch (NumberFormatException e) {
-				throw new IllegalArgumentException('Parameter g (data point group/s) is invalid (not a number)')
+		// data points
+		List<DataPoint> dataPoints=[]
+		List<Integer> groupIds=[]
+		request.parameterNames.each { String name ->
+			if (name.startsWith('dp')) {
+				// data point
+				dataPoints << WebUtilities.getDataPoint(request.getParameter(name), storage)
+				// extract row no.
+				int row
+				try {
+					row=name.substring(2).toInteger()
+				} catch (NumberFormatException e) {
+					throw new IllegalArgumentException('Parameter name dp... (data point) ends not with a number: ' + name)
+				}
+				// related group parameter
+				String groupTxt=request.getParameter('g' + row)
+				if (groupTxt==null) {
+					// use default group
+					groupIds << 1
+				} else {
+					try {
+						groupIds << groupTxt.toInteger()
+					} catch (NumberFormatException e) {
+						throw new IllegalArgumentException('Parameter g' + row + 
+							' (data point group) is invalid (not a number): ' + groupTxt)
+					}
+				}
 			}
 		}
-		if (dataPoints.size()!=groupIds.size())
-			throw new IllegalArgumentException('Parameter g (data point group/s) is invalid (wrong count)')
-
+		
 		// build groups
 		[dataPoints, groupIds].transpose().each { DataPoint dp, int groupId ->
 			groups[groupId].dataPoints << dp
 		}
 
 		// group heights
-		def ghParam=request.getParameterValues('gh')
-		def groupHeights
-		if (ghParam==null) {
-			groupHeights=[1]*groupIds.unique().size()
-		} else {
-			try {
-				groupHeights=ghParam.collect { it as Integer }
-			} catch (NumberFormatException e) {
-				throw new IllegalArgumentException('Parameter gh (group height/s) is invalid (not a number)')
+		groups.each { Integer groupId, Group group ->
+			String ghTxt=request.getParameter('gh' + groupId)
+			if (ghTxt!=null) {
+				try {
+					group.height=ghTxt.toInteger()
+				} catch (NumberFormatException e) {
+					throw new IllegalArgumentException('Parameter gh' + groupId + 
+						' (group height) is invalid (not a number):' + ghTxt)
+				}
 			}
-		}
-		if (groups.size()!=groupHeights.size())
-			throw new IllegalArgumentException('Parameter gh (group height/s) is invalid (wrong count)')
-
-		[groups.values() as List, groupHeights].transpose().each { Group group, Integer height ->
-			group.height=height
 		}
 
 		// time range
@@ -110,9 +111,15 @@ public class TrendParameters {
 		if (trendDesign.identifier!='default') {
 			params.t=[trendDesign.identifier]
 		}
-		params.i=groups.values().collectMany { Group g -> g.dataPoints.idx }
-		params.g=groups.collectMany { Integer id, Group group ->  [id]*group.dataPoints.size() }
-		params.gh=groups.values()*.height
+		int dpIdx=1
+		groups.each { Integer groupId, Group group ->
+			params['gh' + groupId]=[group.height] as String[]
+			group.dataPoints.each { DataPoint dp ->
+				params['dp' + dpIdx]=[dp.idx] as String[]
+				params['g' + dpIdx]=[groupId] as String[]
+				dpIdx++
+			} 
+		}
 		params
 	}
 	

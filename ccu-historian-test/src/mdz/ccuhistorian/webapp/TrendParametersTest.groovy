@@ -17,6 +17,9 @@ class TrendParametersTest extends GroovyTestCase {
 			getParameterValues: { String name ->
 				params[name] as String[]
 			},
+			getParameterNames: { -> 
+				Collections.enumeration(params.keySet())
+			}
 		] as HttpServletRequest
 	}
 	
@@ -29,15 +32,20 @@ class TrendParametersTest extends GroovyTestCase {
 		} as DataPointStorage
 	}
 
-	public void test() {
+	public void testCompleteParameters() {
 		def tp=new TrendParameters(
 			requestStub([
 				w:['320'],
 				h:['240'],
-				i:['42', '24', '1'], 
+				dp1:['42'],
+				dp2:['24'],
+				dp3:['1'],
 				b:['2018'], e:['2019'],
-				g:['1', '2', '1'],
-				gh:['3', '4'],
+				g1:['1'],
+				g2:['2'],
+				g3:['1'],
+				gh1:['3'],
+				gh2:['4'],
 				t:['t42']
 			]), 
 			storageStub(), 
@@ -58,14 +66,51 @@ class TrendParametersTest extends GroovyTestCase {
 		assert tp.groups[2].dataPoints.idx==[24]
 		
 		def params=tp.parameters
-		assert params.size()==8
+		assert params.size()==13
 		assert params.w==['320']
 		assert params.h==['240']
 		assert params.b==['2018']
 		assert params.e==['2019']
 		assert params.t==['design t42']
-		assert params.i==['42', '1', '24']
-		assert params.g==['1', '1', '2']
-		assert params.gh==['3', '4']
+		assert [params.dp1, params.dp2, params.dp3]==[['42'], ['1'], ['24']]
+		assert [params.g1, params.g2, params.g3]==[['1'], ['1'], ['2']]
+		assert [params.gh1, params.gh2]==[['3'], ['4']]
+	}
+	
+	public void testPartialParameters() {
+		def tp=new TrendParameters(
+			requestStub([
+				dp1:['42'],
+				dp3:['1'],
+				b:['2017'], e:['2018'],
+				g3:['3'],
+				gh1:['2'],
+				t:['my']
+			]),
+			storageStub(),
+			[
+				'my':new TrendDesign(identifier:'my design')
+			]
+		)
+		
+		assert tp.width==1000
+		assert tp.height==600
+		assert tp.timeRange.begin==Date.parse('yyyy', '2017')
+		assert tp.timeRange.end==Date.parse('yyyy', '2018')
+		assert tp.trendDesign.identifier=='my design'
+		assert tp.groups.size()==2
+		assert tp.groups[1].height==2
+		assert tp.groups[1].dataPoints.idx==[42]
+		assert tp.groups[3].height==1
+		assert tp.groups[3].dataPoints.idx==[1]
+		
+		def params=tp.parameters
+		assert params.size()==9
+		assert params.b==['2017']
+		assert params.e==['2018']
+		assert params.t==['my design']
+		assert [params.dp1, params.dp2]==[['42'], ['1']]
+		assert [params.g1, params.g2]==[['1'], ['3']]
+		assert [params.gh1, params.gh3]==[['2'], ['1']]
 	}
 }
