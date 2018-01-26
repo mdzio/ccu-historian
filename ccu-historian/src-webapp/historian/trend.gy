@@ -25,7 +25,7 @@ renderer.content={
 		}
 		div(class:'col-sm-4 mb-2') {
 			//button class:'btn btn-default btn-block', type:'submit', name:'trend_set', value:1, 'Trend-Darstellung'
-			a class:'btn btn-default btn-block', href:buildUrl('index.gy', trendParams.parameters), role:'button', 'Datenpunktliste'
+			a class:'btn btn-default btn-block', href:buildUrl('index.gy', trendParams.parameters), role:'button', 'Datenpunkte ändern'
 		}
 	}
 
