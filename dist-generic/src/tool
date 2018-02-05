@@ -1,5 +1,5 @@
 #!/bin/sh
-# Executes groovy scripts. The H2 Database driver is included.
+# Executes groovy scripts.
 
 # check which java version to use
 if [ -x "/opt/java/bin/java" ]; then
@@ -12,7 +12,7 @@ elif [ -x "/opt/jre-1.8.0_121-compact3/bin/java" ]; then
   # we run on CCU2/YAHM/LXCCU
   JAVA_BIN=/opt/jre-1.8.0_121-compact3/bin/java
 elif which java > /dev/null; then
-  # it is on the search path 
+  # java is on the search path 
   JAVA_BIN=java
 else
   >&2 echo "ERROR: Java binary not found"
@@ -20,4 +20,4 @@ else
 fi
 
 # start java with GroovyMain
-${JAVA_BIN} -cp lib/groovy-all-2.4.13.jar:lib/commons-cli-1.2.jar:lib/h2-1.4.196.jar groovy.ui.GroovyMain "$@"
+${JAVA_BIN} -cp ccu-historian.jar:lib\*.jar groovy.ui.GroovyMain "$@"
