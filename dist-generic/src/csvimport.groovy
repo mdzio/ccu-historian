@@ -61,7 +61,7 @@ catchToLog {
                     throw new IllegalArgumentException("Option -m invalid: Data point with ID $dpId not found")
                 }
                 // build mapping
-                new Mapping(colNo: colNo.toInteger(), dpId: dpId.toInteger(), tableName: tableName)
+                new Mapping(colNo: colNo.toInteger()-1, dpId: dpId.toInteger(), tableName: tableName)
             }
             log "mappings:"
             mappings.each { m ->
