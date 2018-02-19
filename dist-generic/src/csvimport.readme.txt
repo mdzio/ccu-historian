@@ -1,0 +1,88 @@
+Häufiger wurde schon die Möglichkeit angefragt, Massendaten aus einer CSV-Datei (comma-separated values) in den CCU-Historian zu importieren. Ich habe nun ein Kommandozeilenwerkzeug erstellt, das dieses bewerkstelligt.
+
+Das Werkzeug ist in der Skriptsprache Groovy erstellt worden. Eine Unterstützung für diese Skriptsprache bringt der CCU-Historian bereits mit. Nach der Installation können Skripte mit dem Befehl [i]tool Skriptname[/i] (auf Windows) bzw. [i]./tool Skriptname[/i] (auf Linux) ausgeführt werden. Dazu muss eine Konsole auf dem Rechner mit dem CCU-Historian geöffnet werden (z.B. cmd unter Windows oder mit SSH auf den Raspberry Pi).
+
+[b]Installation[/b]
+
+Die drei angehängten Dateien müssen in das Installationsverzeichnis des CCU-Historians kopiert werden. Auf Linux ist noch der Befehl [i]chmod 755 tool[/i] im Installationsverzeichnis auszuführen. 
+
+[b]Konfiguration[/b]
+
+Falls der Standardbenutzer und das Standardpasswort der Datenbank in der ccu-historian.config geändert worden sind, so sind die ersten Zeilen des Skriptes entsprechend anzupassen.
+
+[b]Vorbereitung[/b]
+
+Vor dem CSV-Import muss für jede CSV-Spalte der entsprechende Datenpunkt im CCU-Historian heraus gesucht werden. Über die Seite[i] Verwaltung Datenpunkte [/i]kann z.B. über die Seriennummer nach der entsprechenden CCU-Historian-ID gesucht werden. Diese Abbildung muss später über die Kommandozeilenoption [i]-m[/i] angegeben werden. Beispielsweise muss für den Import der 2. CSV-Spalte in den Datenpunkt mit der ID 287 folgende Option gesetzt werden: -m 2=287
+
+Der CCU-Historian muss gestoppt werden. [b]Auf jeden Fall sollte vorab ein Backup der Datenbank (Datei data/history.mv.db) erstellt werden.[/b]
+
+[b]Unterstützte CSV-Formate[/b]
+
+Das Werkzeug unterstützt zurzeit Komma (,) als Trennzeichen für Felder und Punkt (.) als Dezimaltrennzeichen. Das Format und die Spaltennummer des Zeitstempels können frei konfiguriert werden.
+
+Beispiel (z.B. Diagrammexport von der CCU, die letzten 3 Messungen sind erst später hinzugekommen):
+[code]Time,LEQ0000000:1_5,KEQ0000001:1_5,JEQ0000002:1_5,KEQ0000003:1_5,JEQ0000004:1_5,LEQ0000005:1_5,LEQ0000006:1_5,LEQ0000007:1_5
+ 18.08.14 02:00:00,19.633,20.503,20.446,19.269,16.062,,,
+ 19.08.14 02:00:00,19.388,20.426,20.294,18.995,14.379,,,
+ 20.08.14 02:00:00,18.974,19.904,19.995,18.609,12.882,,,
+ 21.08.14 02:00:00,20.673,20.055,20.355,18.539,13.24,,,
+ 22.08.14 02:00:00,19.901,20.193,20.802,18.688,14.323,,,[/code]
+
+[b]Kommandozeilenoptionen[/b]
+
+Der CSV-Import wird mit[i] tool csvimport[/i] bzw.[i] ./tool csvimport[/i] auf der Konsole gestartet. Dazu muss vorab in das Installationsverzeichnis des CCU-Historians gewechselt werden (z.B. mit cd). Ohne Angabe von Argumenten erscheint folgende Ausgabe:
+[code]>tool csvimport
+*** CSV-Import v1.0  ***
+(C)2018 info@ccu-historian.de
+usage: csvimport [options] <csv file>
+options:
+ -d                  delete import time range in database before inserting
+ -h                  prints this help message
+ -m <column=DP ID>   map CSV column number to data point ID (at least one
+                     mapping is required)
+ -nh                 CSV file has no header line
+ -t                  test run without modifying the database
+ -tc <column>        column number of the timestamp (default: 1)
+ -tf <format>        format of the timestamp (default: dd.MM.yy HH:mm:ss)
+ -v                  verbose log output (e.g. prints each time series
+                     entry)[/code]
+
+[b]Aufruf[/b]
+
+Für den Aufruf muss mindestens einmal die Option[i] -m[/i] gesetzt sein. Für die ersten Tests sollte die Option [i]-t [/i]verwendet werden, die alle Schritte des Imports durchführt, außer die Werte in die Datenbank zu schreiben. Zur detaillierten Fehlersuche eignet sich die Option [i]-v[/i]. Mit der Option[i] -d [/i]wird der importierte Zeitraum vorab in der Datenpunkttabelle geleert.
+
+Beispielaufruf:
+[code]>tool csvimport -d -m 2=287 -m 3=460 -m 4=382 -m 5=386 -m 6=462 -m 7=214 -m 8=394 -m 9=395 01-Temperatur.csv
+*** CSV-Import v1.0  ***
+(C)2018 info@ccu-historian.de
+connecting to database
+reading data points from database
+828 data points found
+mappings:
+  CSV column: 2 -> table: D_BIDCOS_RF_LEQ0000000_1_TEMPERATURE, DP ID: 287
+  CSV column: 3 -> table: D_BIDCOS_RF_KEQ0000001_1_TEMPERATURE, DP ID: 460
+  CSV column: 4 -> table: D_BIDCOS_RF_JEQ0000002_1_TEMPERATURE, DP ID: 382
+  CSV column: 5 -> table: D_BIDCOS_RF_KEQ0000003_1_TEMPERATURE, DP ID: 386
+  CSV column: 6 -> table: D_BIDCOS_RF_JEQ0000004_1_TEMPERATURE, DP ID: 462
+  CSV column: 7 -> table: D_BIDCOS_RF_LEQ0000005_1_TEMPERATURE, DP ID: 214
+  CSV column: 8 -> table: D_BIDCOS_RF_LEQ0000006_1_TEMPERATURE, DP ID: 394
+  CSV column: 9 -> table: D_BIDCOS_RF_LEQ0000007_1_TEMPERATURE, DP ID: 395
+deleting destination time ranges:
+  DP ID: 287, first: Mon Aug 18 02:00:00 CEST 2014, last: Tue Feb 06 01:00:00 CET 2018
+  DP ID: 460, first: Mon Aug 18 02:00:00 CEST 2014, last: Tue Feb 06 01:00:00 CET 2018
+  DP ID: 382, first: Mon Aug 18 02:00:00 CEST 2014, last: Tue Feb 06 01:00:00 CET 2018
+  DP ID: 386, first: Mon Aug 18 02:00:00 CEST 2014, last: Tue Feb 06 01:00:00 CET 2018
+  DP ID: 462, first: Mon Aug 18 02:00:00 CEST 2014, last: Tue Feb 06 01:00:00 CET 2018
+  DP ID: 214, first: Wed Nov 05 01:00:00 CET 2014, last: Tue Feb 06 01:00:00 CET 2018
+  DP ID: 394, first: Wed Nov 05 01:00:00 CET 2014, last: Tue Feb 06 01:00:00 CET 2018
+  DP ID: 395, first: Sat Jan 10 01:00:00 CET 2015, last: Tue Feb 06 01:00:00 CET 2018
+importing:
+  inserted 1251 entries into table D_BIDCOS_RF_LEQ0000000_1_TEMPERATURE
+  inserted 1252 entries into table D_BIDCOS_RF_KEQ0000001_1_TEMPERATURE
+  inserted 1252 entries into table D_BIDCOS_RF_JEQ0000002_1_TEMPERATURE
+  inserted 1252 entries into table D_BIDCOS_RF_KEQ0000003_1_TEMPERATURE
+  inserted 1251 entries into table D_BIDCOS_RF_JEQ0000004_1_TEMPERATURE
+  inserted 1173 entries into table D_BIDCOS_RF_LEQ0000005_1_TEMPERATURE
+  inserted 1171 entries into table D_BIDCOS_RF_LEQ0000006_1_TEMPERATURE
+  inserted 1106 entries into table D_BIDCOS_RF_LEQ0000007_1_TEMPERATURE
+finished[/code]
