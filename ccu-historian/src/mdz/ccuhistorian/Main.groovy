@@ -26,7 +26,7 @@ import groovy.transform.CompileStatic
 @CompileStatic
 class Main {
 
-	public static String version='1.2.0'
+	public static String version='1.2.1'
 	
 	private static final Logger log=Logger.getLogger(Main.class.name)
 	private static Main main
@@ -37,6 +37,10 @@ class Main {
 	private BaseSystem system
 
 	public static void main(String[] args) {
+		// set some properties for headless Java VMs, issue #82
+		System.setProperty('java.awt.headless', 'true')
+		System.setProperty('javax.accessibility.assistive_technologies', ' ')
+
 		main=new Main()
 		main.run(args)
 	}
