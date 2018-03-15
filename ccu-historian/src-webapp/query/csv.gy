@@ -50,7 +50,7 @@ if (dataPoint.historyString) {
 	valueFormatter={ '"'+it.tr('"', '""')+'"' }
 } else {
 	def numberFormat=new DecimalFormat('#,##0.###')
-	valueFormatter={ numberFormat.format(it.value) }
+	valueFormatter={ numberFormat.format(it) }
 }
 timeSeries.each {
 	sb << dateFormat.format(it.timestamp) << ';' << valueFormatter(it.value) << ';' << it.state << '\n'
