@@ -129,7 +129,7 @@ public class PageRenderer {
 	
 	private def writeBody() {
 		servlet.html.body {
-			div(class:'container-fluid') {
+			div(class:'container-fluid', style:'margin-top: 0.5em') {
 				if (!servlet.ctx.user.loggedIn) {
 					writeLogIn()
 				} else {

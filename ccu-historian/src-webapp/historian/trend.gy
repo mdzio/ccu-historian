@@ -16,7 +16,7 @@ renderer.head={
 renderer.content={
 	def trendParams=new TrendParameters(request, database, webServer.config.trendDesigns)
 	// FIXME
-	pre trendParams.toString()	
+	//pre trendParams.toString()	
 	
 	div(class:'row') {
 		div(class:'col-sm-4 mb-2') {
@@ -29,7 +29,12 @@ renderer.content={
 		}
 	}
 
-	// TODO
+	p(class:'text-center') {
+		img alt:'Trend-Darstellung', src:buildUrl('../query/trend.gy', trendParams.parameters),
+			width:trendParams.width, height:trendParams.height
+	}
+	
+	// TODO 
 }
 
 renderer.end={
