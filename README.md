@@ -13,6 +13,12 @@ Der CCU-Historian erfreut sich bei den HomeMatic-Anwendern einer großen Beliebt
 
 Viele weitere Informationen sind auf der [offiziellen Web-Seite des CCU-Historians](http://www.ccu-historian.de/) und im [umfangreichen Handbuch](doc/CCU-Historian_Kurzanleitung.pdf) zu finden.
 
+# Übersicht
+
+Im folgenden Diagramm ist eine Übersicht zu finden:
+
+![CCU-Historian Übersicht](doc/ccu-historian-overview.svg)
+
 # Unterstützte Plattformen
 
 Da der CCU-Historian nur eine [Java-Laufzeitumgebung](https://java.com/) zum Betrieb voraus setzt, ist er auf etlichen Hard- und Software-Plattformen lauffähig: 
@@ -47,7 +53,7 @@ Dieses Projekt steht unter der [GNU General Public License V3](LICENSE.txt).
 
 # Autoren
 
-Copyright (c) 2011-2017 
+Copyright (c) 2011-2018
 
 * Mathias Dzionsko
 * Jens Maus (CCU/RaspberryMatic-Distribution)

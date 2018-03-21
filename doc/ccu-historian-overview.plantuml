@@ -1,0 +1,103 @@
+@startuml
+left to right direction
+
+rectangle "CCU1/2/3\nRaspberryMatic\npiVCCU/YAHM\n(bis zu 10 Zentralen)" {
+  rectangle "Schnittstellen" as ccuitf #line.dashed {
+    rectangle "RegaHss" as regahss
+    rectangle "BidCos-RF" as bidcosrf
+    rectangle "BidCos-Wired" as bidcoswired #line.dotted
+    rectangle "CUxD" as cuxd #line.dotted
+    rectangle "HM-IP" as hmip
+  }
+}
+
+rectangle "CCU-Historian" {
+  rectangle "Schnittstellen" #line.dashed {
+    rectangle "HM-Skript" as hmskript
+    rectangle "BIN-RPC" as binrpc
+    rectangle "XML-RPC" as xmlrpc
+  }
+
+  regahss --> hmskript
+  bidcosrf --> binrpc
+  bidcoswired --> binrpc
+  hmip --> xmlrpc
+  cuxd --> binrpc
+
+  rectangle "Abgleich\nMeta-Informationen" as abglmeta
+  hmskript -- abglmeta
+  binrpc -- abglmeta
+  xmlrpc -- abglmeta
+
+  database db [
+    Zeitreihen-
+    Datenbank
+    ---
+    H2Database
+  ]
+  abglmeta -- db
+
+  rectangle "Autom.\nBackup" as backup
+  backup <- db
+
+  rectangle "Vorverarbeitung" #line.dashed {
+    queue "Puffer\nArb.Speicher" as puffer
+    hmskript --> puffer
+    binrpc --> puffer
+    xmlrpc --> puffer
+
+    rectangle "Überlauf-\nbehandlung" as overfl
+    overfl <- puffer
+
+    rectangle "Präprozessor\nKompr./Mittelw." as preproc
+    preproc <- overfl 
+
+    rectangle "Kennz.\nErster Wert" as firstar
+    firstar <- preproc 
+  }
+  firstar --> db
+
+  rectangle "Datenbank-\nSchnittstellen" #line.dashed {
+    rectangle "PostgreSQL-\nProtokoll" as postgresql
+    db --> postgresql
+
+    rectangle "JDBC" as jdbc
+    db --> jdbc
+  }
+
+  rectangle "Web-Server" #line.dashed {
+    rectangle "Web-Applikation" as webapp
+    rectangle "Trend-/CSV-\nExport" as export
+    rectangle "JSON-RPC" as jsonrpc
+    rectangle "Benutzerdef.\nSeiten" as custom
+
+    db --> webapp
+    db --> export
+    db --> custom
+    db --> jsonrpc
+  }
+}
+
+rectangle "Web-\nBrowser" as webb
+custom --> webb
+webapp --> webb
+
+rectangle "Grafana" as grafana
+postgresql --> grafana
+
+rectangle "Fremd-\nApplikationen" {
+  rectangle "Schnittstellen" as appitf #line.dashed {
+    rectangle "PostgreSQL" as itfpostgresql
+    rectangle "ODBC" as itfodbc
+    rectangle "JDBC" as itfjdbc
+    rectangle "HTTP-\nClient" as itfhttp
+    rectangle "JSON-RPC" as itfjsonrpc
+
+    postgresql --> itfpostgresql
+    postgresql --> itfodbc
+    jdbc --> itfjdbc
+    export --> itfhttp
+    jsonrpc --> itfjsonrpc
+  }
+}
+@enduml
