@@ -1,10 +1,37 @@
 import groovy.transform.Field
 import java.util.logging.Logger
 import mdz.ccuhistorian.webapp.TrendParameters
+import mdz.ccuhistorian.webapp.TimeRange
 import static mdz.ccuhistorian.webapp.WebUtilities.*
 
 @Field
 private final static Logger log = Logger.getLogger('mdz.ccuhistorian.webapp.Trend')
+
+@Field
+private final static timeNavigations=[
+	[id:'fast-backward', icon:'glyphicon-backward', func: { b, e ->
+		def d=e-b; [b-d, e-d]
+	}],
+	[id:'backward', icon:'glyphicon-triangle-left', func: { b, e ->
+		def d=(e-b)/3; [b-d, e-d]
+	}],
+	[id:'zoom-in', icon:'glyphicon-zoom-in', func: { b, e ->
+		def d=(e-b)/3
+		// force min. time range of 10 seconds
+		if (d<10000) d=(e-b-10000)/2 
+		[b+d, e-d]
+	}],
+	[id:'refresh', icon:'glyphicon-refresh', func: null /* do nothing */],
+	[id:'zoom-out', icon:'glyphicon-zoom-out', func: { b, e ->
+		def d=e-b; [b-d, e+d]
+	}],
+	[id:'forward', icon:'glyphicon-triangle-right', func: { b, e ->
+		def d=(e-b)/3; [b+d, e+d]
+	}],
+	[id:'fast-forward', icon:'glyphicon glyphicon-forward', func: { b, e ->
+		def d=e-b; [b+d, e+d]
+	}],
+]
 
 // setup page
 def renderer=new mdz.ccuhistorian.webapp.PageRenderer(servlet: this)
@@ -15,23 +42,52 @@ renderer.head={
 
 renderer.content={
 	def trendParams=new TrendParameters(request, database, webServer.config.trendDesigns)
-	// FIXME
-	//pre trendParams.toString()	
 	
+	// apply time navigation
+	def navId=request.getParameter('navigate')
+	def navFunc=timeNavigations.find { navId==it.id }?.func
+	if (navFunc) {
+		def tr=trendParams.timeRange
+		def (b, e)=navFunc(tr.begin.time, tr.end.time)
+		trendParams.timeRange=new TimeRange(new Date((long)b), new Date((long)e))
+	}
+
+	// FIXME
+	//pre trendParams.toString()
+	//pre "beginText: $trendParams.timeRange.beginText, endText: $trendParams.timeRange.endText"
+	
+	// inputs for time navigation	
 	div(class:'row') {
 		div(class:'col-sm-4 mb-2') {
 		}
 		div(class:'col-sm-4 mb-2') {
 		}
 		div(class:'col-sm-4 mb-2') {
-			//button class:'btn btn-default btn-block', type:'submit', name:'trend_set', value:1, 'Trend-Darstellung'
 			a class:'btn btn-default btn-block', href:buildUrl('index.gy', trendParams.parameters), role:'button', 'Datenpunkte ändern'
 		}
 	}
 
-	p(class:'text-center') {
-		img alt:'Trend-Darstellung', src:buildUrl('../query/trend.gy', trendParams.parameters),
-			width:trendParams.width, height:trendParams.height
+	// buttons for time navigation
+	div(class:'btn-group btn-group-justified', role:'group', style:'margin-top: 0.5em') {
+		timeNavigations.each { tn ->
+			a(class:'btn btn-default', href:buildUrl('trend.gy', trendParams.parameters, [navigate:tn.id]), role:'button') {
+				span class:'glyphicon '+tn.icon
+			}
+		}
+	}
+
+	// display trend graphics
+	if (trendParams.groups) {
+		p(class:'text-center') {
+			img alt:'Trend-Darstellung', src:buildUrl('../query/trend.gy', trendParams.parameters),
+				width:trendParams.width, height:trendParams.height
+		}
+	} else {
+		// no data points alert
+		div(class:'alert alert-danger', role:'alert', style:'margin-top: 0.5em') {
+			span class:'glyphicon glyphicon-exclamation-sign'
+			mkp.yield " Es wurden keine Datenpunkte angegeben!"
+		} 
 	}
 	
 	// TODO 

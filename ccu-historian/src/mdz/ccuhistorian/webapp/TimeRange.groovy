@@ -63,6 +63,14 @@ public class TimeRange {
 			throw new IllegalArgumentException("End time is before begin time: $beginText, $endText")
 		}
 	}
+
+	public TimeRange(Date begin, Date end) {
+		this.begin=begin
+		this.end=end
+			
+		beginText=TextFormat.format(begin)
+		endText=TextFormat.format(end)
+	}
 	
 	public Map<String, String[]> getParameters() {
 		Map<String, String[]> params=[:]
