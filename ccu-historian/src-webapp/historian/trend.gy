@@ -69,16 +69,49 @@ renderer.content={
 
 	// FIXME
 	//pre trendParams.toString()
-	//pre "beginText: $trendParams.timeRange.beginText, endText: $trendParams.timeRange.endText"
 	
-	// inputs for time navigation	
 	div(class:'row') {
-		div(class:'col-sm-4 mb-2') {
+		// inputs for time navigation	
+		form(id:'time-form') {
+			// forward other trend parameters
+			def forwardParams=trendParams.parameters.findAll { k, vs ->
+				k!='b' && k!='e'
+			}
+			WebUtilities.buildHiddenInputs(html, forwardParams)
+	
+			div(class:'col-sm-2') {
+				// presets
+				button(type:'button', class:'btn btn-default btn-block dropdown-toggle', 'data-toggle':'dropdown') {
+					mkp.yield 'Zeitbereiche'
+					span class:'caret'
+				}
+				ul(class:'dropdown-menu') {
+					presetRanges.each { rng -> 
+						li { a href:'#', id:rng.id, rng.text }
+					}
+				}
+			}
+			div(class:'col-sm-3') {
+				div(class:'input-group') {
+					span class:'input-group-addon', 'Start'
+					input type:'text', id:'time-begin', name:'b', class:'form-control', placeholder:'Start', 
+						value:trendParams.timeRange.beginText
+				}
+			}
+			div(class:'col-sm-3') {
+				div(class:'input-group') {
+					span class:'input-group-addon', 'Ende'
+					input type:'text', id:'time-end', name:'e', class:'form-control', placeholder:'Ende',
+						value:trendParams.timeRange.endText
+				}
+			}
+			div(class:'col-sm-2') {
+				button class:'btn btn-default btn-block', type:'submit', name:'update-timerange', value:1, 'Übernehmen'
+			}
 		}
-		div(class:'col-sm-4 mb-2') {
-		}
-		div(class:'col-sm-4 mb-2') {
-			a class:'btn btn-default btn-block', href:buildUrl('index.gy', trendParams.parameters), role:'button', 'Datenpunkte ändern'
+		// change data points
+		div(class:'col-sm-2') {
+			a class:'btn btn-default btn-block', href:buildUrl('index.gy', trendParams.parameters), role:'button', 'Datenpunkte'
 		}
 	}
 
@@ -93,7 +126,7 @@ renderer.content={
 
 	// display trend graphics
 	if (trendParams.groups) {
-		p(class:'text-center') {
+		p(class:'text-center', style:'margin-top: 0.5em') {
 			img alt:'Trend-Darstellung', src:buildUrl('../query/trend.gy', trendParams.parameters),
 				width:trendParams.width, height:trendParams.height
 		}
@@ -101,7 +134,7 @@ renderer.content={
 		// no data points alert
 		div(class:'alert alert-danger', role:'alert', style:'margin-top: 0.5em') {
 			span class:'glyphicon glyphicon-exclamation-sign'
-			mkp.yield " Es wurden keine Datenpunkte angegeben!"
+			mkp.yield " Es wurden keine Datenpunkte ausgewählt!"
 		} 
 	}
 	
@@ -116,6 +149,7 @@ renderer.end={
 				$('#${rng.id}').on('click', function(e) {
 					$('#time-begin').val('${rng.begin}');
 					$('#time-end').val('${rng.end}');
+					$('#time-form').submit();
 				});	
 			/$)
 		} 
