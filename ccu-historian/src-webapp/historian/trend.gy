@@ -2,6 +2,7 @@ import groovy.transform.Field
 import java.util.logging.Logger
 import mdz.ccuhistorian.webapp.TrendParameters
 import mdz.ccuhistorian.webapp.TimeRange
+import mdz.ccuhistorian.webapp.WebUtilities
 import static mdz.ccuhistorian.webapp.WebUtilities.*
 
 @Field
@@ -31,6 +32,20 @@ private final static timeNavigations=[
 	[id:'fast-forward', icon:'glyphicon glyphicon-forward', func: { b, e ->
 		def d=e-b; [b+d, e+d]
 	}],
+]
+
+@Field
+private final static presetRanges=[
+	[id:'preset-last-24-hours', text:'Letzten 24 Stunden', begin:'-24h', end:''],
+	[id:'preset-current-day', text:'Aktueller Tag', begin:'z', end:'1D'],
+	[id:'preset-previous-day', text:'Vortag', begin:'-1D z', end:'1D'],
+	[id:'preset-last-7-days', text:'Letzten 7 Tage', begin:'-7D', end:''],
+	[id:'preset-current-week', text:'Aktuelle Woche', begin:'1=w z', end:'1W'],
+	[id:'preset-previous-week', text:'Vorwoche', begin:'-1W 1=w z', end:'1W'],
+	[id:'preset-last-31-days', text:'Letzter Monat', begin:'-1M', end:''],
+	[id:'preset-current-month', text:'Aktueller Monat', begin:'1=D z', end:'1M'],
+	[id:'preset-previous-month', text:'Vormonat', begin:'-1M 1=D z', end:'1M'],
+	[id:'preset-last-6-months', text:'Letzten 6 Monate', begin:'-6M', end:''],
 ]
 
 // setup page
@@ -90,13 +105,21 @@ renderer.content={
 		} 
 	}
 	
-	// TODO 
+	// TODO: groups
 }
 
 renderer.end={
-    script { mkp.yieldUnescaped($/
-		// TODO
-	/$) }
+    script {
+		// bind preset ranges
+		presetRanges.each { rng ->
+			mkp.yieldUnescaped($/
+				$('#${rng.id}').on('click', function(e) {
+					$('#time-begin').val('${rng.begin}');
+					$('#time-end').val('${rng.end}');
+				});	
+			/$)
+		} 
+	}
 }
 
 // render page

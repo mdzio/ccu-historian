@@ -115,8 +115,7 @@ public class PageRenderer {
 			link href:'../external/bootstrap/css/bootstrap.css', rel:'stylesheet'
 
 			// own CSS
-			// TODO:
-			//link href:'ccu-historian.css', rel:'stylesheet'
+			//link href:'ccu-historian-bootstrap.css', rel:'stylesheet'
 			
 			// icon
 			// TODO: new icon with size 196 x 196 pixels

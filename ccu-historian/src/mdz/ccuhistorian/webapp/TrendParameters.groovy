@@ -40,29 +40,30 @@ public class TrendParameters {
 		// data points
 		List<DataPoint> dataPoints=[]
 		List<Integer> groupIds=[]
-		request.parameterNames.each { String name ->
-			if (name.startsWith('dp')) {
-				// data point
-				dataPoints << WebUtilities.getDataPoint(request.getParameter(name), storage)
-				// extract row no.
-				int row
+		Collection<String> rowsTxt=request.parameterNames.findAll { String name -> 
+			name.startsWith('dp')
+		}
+		Collection<Integer> rowsIdx=rowsTxt.collect { String name ->
+			try {
+				name.substring(2).toInteger()
+			} catch (NumberFormatException e) {
+				throw new IllegalArgumentException('Parameter name dp... (data point) ends not with a number: ' + name)
+			}
+		}.sort()
+		rowsIdx.each { Integer rowIdx ->
+			// data point
+			dataPoints << WebUtilities.getDataPoint(request.getParameter('dp' + rowIdx), storage)
+			// related group parameter
+			String groupTxt=request.getParameter('g' + rowIdx)
+			if (groupTxt==null) {
+				// use default group
+				groupIds << 1
+			} else {
 				try {
-					row=name.substring(2).toInteger()
+					groupIds << groupTxt.toInteger()
 				} catch (NumberFormatException e) {
-					throw new IllegalArgumentException('Parameter name dp... (data point) ends not with a number: ' + name)
-				}
-				// related group parameter
-				String groupTxt=request.getParameter('g' + row)
-				if (groupTxt==null) {
-					// use default group
-					groupIds << 1
-				} else {
-					try {
-						groupIds << groupTxt.toInteger()
-					} catch (NumberFormatException e) {
-						throw new IllegalArgumentException('Parameter g' + row + 
-							' (data point group) is invalid (not a number): ' + groupTxt)
-					}
+					throw new IllegalArgumentException('Parameter g' + rowIdx + 
+						' (data point group) is invalid (not a number): ' + groupTxt)
 				}
 			}
 		}
