@@ -26,7 +26,7 @@ public class TrendParameters {
 	int width, height
 	TimeRange timeRange
 	TrendDesign trendDesign
-	Map<Integer /* group id */, Group> groups=new TreeMap<Integer, Group>().withDefault { new Group() }
+	TreeMap<Integer /* group id */, Group> groups=new TreeMap<Integer, Group>()
 
 	public TrendParameters(HttpServletRequest request, DataPointStorage storage, Map<String, TrendDesign> trendDesigns) {
 		// width and height of the graphics
@@ -70,7 +70,12 @@ public class TrendParameters {
 		
 		// build groups
 		[dataPoints, groupIds].transpose().each { DataPoint dp, int groupId ->
-			groups[groupId].dataPoints << dp
+			Group grp=groups[groupId]
+			if (grp==null) {
+				grp=new Group()
+				groups[groupId]=grp
+			}
+			grp.dataPoints << dp
 		}
 
 		// group heights
@@ -85,7 +90,15 @@ public class TrendParameters {
 				}
 			}
 		}
-
+		
+		// normalize group indices
+		if (groups && (groups.firstKey()!=1 || groups.lastKey()!=groups.size())) {
+			TreeMap<Integer, Group> tmp=new TreeMap<Integer, Group>()
+			int idx=1
+			groups.each { k, v -> tmp[idx++]=v }
+			groups=tmp
+		}
+		
 		// time range
 		timeRange=new TimeRange(request.getParameter('b'), request.getParameter('e'))
 		
