@@ -60,7 +60,6 @@ renderer.content={
             }
             tbody {
                 database.dataPoints.findAll { !it.historyHidden }.eachWithIndex { dp, idx ->
-                    def last=database.getLast(dp)
                     tr {
 						td { 
 	                        def disabled=dp.historyString?[disabled:'disabled']:[:]

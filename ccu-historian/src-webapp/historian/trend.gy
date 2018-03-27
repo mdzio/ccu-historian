@@ -36,6 +36,7 @@ private final static timeNavigations=[
 
 @Field
 private final static presetRanges=[
+	[id:'preset-last-1-hour', text:'Letzte Stunde', begin:'-1h', end:''],
 	[id:'preset-last-24-hours', text:'Letzten 24 Stunden', begin:'-24h', end:''],
 	[id:'preset-current-day', text:'Aktueller Tag', begin:'z', end:'1D'],
 	[id:'preset-previous-day', text:'Vortag', begin:'-1D z', end:'1D'],
@@ -127,7 +128,7 @@ renderer.content={
 	// display trend graphics
 	if (trendParams.groups) {
 		p(class:'text-center', style:'margin-top: 0.5em') {
-			img alt:'Trend-Darstellung', src:buildUrl('../query/trend.gy', trendParams.parameters),
+			img alt:'Trend-Darstellung', src:buildUrl('../query/trend', trendParams.parameters),
 				width:trendParams.width, height:trendParams.height
 		}
 	} else {
@@ -138,7 +139,61 @@ renderer.content={
 		} 
 	}
 	
-	// TODO: groups
+	// trend options
+	button class:"btn btn-default", type:'button', 'data-toggle':'collapse', 'data-target':'#options', 'Optionen'
+	form {
+		// forward other trend parameters
+		def forwardParams=trendParams.parameters.findAll { k, vs ->
+			!k.startsWith('g')
+		}
+		WebUtilities.buildHiddenInputs(html, forwardParams)
+
+		div(id:'options', class:'panel panel-default collapse') {
+			div(class:'panel-body') {
+				div(class:'row') {
+					div(class:'col-sm-5') {
+						// data point groups
+						table(class:'table table-bordered table-hover') {
+							thead {
+								tr {
+									th 'Schnittstelle'
+									th 'Kanal'
+									th 'Parameter'
+									th 'Gruppe'
+								}
+							}
+							tbody {
+								trendParams.groups.each { grpIdx, grp ->
+									grp.dataPoints.each { dp ->
+										tr {
+					                        td dp.id.interfaceId
+					                        td dp.attributes.displayName?:dp.id.address
+					                        td dp.id.identifier
+											td {
+												// FIXME
+												select(class:'form-control') {
+													10.times { option value:it+1, it+1 }	
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+					div(class:'col-sm-3') {
+						// TODO: group heights
+					}
+					div(class:'col-sm-2') {
+						// TODO: trend size
+					}
+					div(class:'col-sm-2') {
+						button class:'btn btn-default btn-block', type:'submit', name:'update-options', value:1, 'Ãœbernehmen'
+					}
+				}
+			}
+		}
+	}
 }
 
 renderer.end={
