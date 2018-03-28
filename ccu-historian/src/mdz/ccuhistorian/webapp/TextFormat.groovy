@@ -35,7 +35,7 @@ class TextFormat {
 
 	private static NumberFormat numberFormat=new DecimalFormat('#,##0.0#####')
 	
-	public static String format(Number number) {
+	public static String formatNumber(Number number) {
 		synchronized(numberFormat) {
 			number!=null?numberFormat.format(number):''
 		}
@@ -66,7 +66,7 @@ class TextFormat {
 	private static final String relDateSequence = /\s*((/ + relDateToken + /)\s*)*/
 	private static final Pattern relDateSequencePat = ~relDateSequence
 
-	public static String format(Date date) {
+	public static String formatDate(Date date) {
 		synchronized(dateFormat) {
 			date!=null?dateFormat.format(date):''
 		}

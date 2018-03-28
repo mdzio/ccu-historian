@@ -7,6 +7,8 @@ import java.util.logging.Logger
 @Field
 private final static log = Logger.getLogger('mdz.ccuhistorian.webapp.Csv')
 
+// FIXME: use TrendParameters
+
 utils.catchToLog(log) {
 
 // Schlüsselwort überprüfen

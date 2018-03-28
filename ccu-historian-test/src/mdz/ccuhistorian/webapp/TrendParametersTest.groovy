@@ -101,8 +101,8 @@ class TrendParametersTest extends GroovyTestCase {
 		assert tp.groups.size()==2
 		assert tp.groups[1].height==2
 		assert tp.groups[1].dataPoints.idx==[42]
-		assert tp.groups[3].height==1
-		assert tp.groups[3].dataPoints.idx==[1]
+		assert tp.groups[2].height==1
+		assert tp.groups[2].dataPoints.idx==[1]
 		
 		def params=tp.parameters
 		assert params.size()==9
@@ -110,7 +110,7 @@ class TrendParametersTest extends GroovyTestCase {
 		assert params.e==['2018']
 		assert params.t==['my design']
 		assert [params.dp1, params.dp2]==[['42'], ['1']]
-		assert [params.g1, params.g2]==[['1'], ['3']]
-		assert [params.gh1, params.gh3]==[['2'], ['1']]
+		assert [params.g1, params.g2]==[['1'], ['2']]
+		assert [params.gh1, params.gh2]==[['2'], ['1']]
 	}
 }

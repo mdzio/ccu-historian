@@ -32,9 +32,10 @@
 	<servlet>
 		<servlet-name>Groovy</servlet-name>
 		<servlet-class>mdz.ccuhistorian.webapp.GroovyServlet</servlet-class>
+		<!-- Keep the URL patterns for this servlet aligned.  -->
 		<init-param>
 			<param-name>resource.name.regex</param-name>
-			<param-value>/query/csv|/query/trend</param-value>
+			<param-value>^/query/(jsonrpc|csv|trend)$</param-value>
 		</init-param>
 		<init-param>
 			<param-name>resource.name.replacement</param-name>
@@ -51,6 +52,7 @@
 		<url-pattern>*.gy</url-pattern>
 		<url-pattern>/query/trend</url-pattern>
 		<url-pattern>/query/csv</url-pattern>
+		<url-pattern>/query/jsonrpc</url-pattern>
 	</servlet-mapping>
 	<filter>
         <filter-name>cross-origin</filter-name>

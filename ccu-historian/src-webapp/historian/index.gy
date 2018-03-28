@@ -19,7 +19,10 @@ renderer.content={
 		}
 		WebUtilities.buildHiddenInputs(html, forwardParams)
 		
+		// toolbar
 		div(class:'row', style:'margin-bottom: 0.5em') {
+			
+			// filter input
 			div(class:'col-sm-4') {
 				div(class:'input-group') {
 					div(class:'input-group-addon') {
@@ -33,8 +36,25 @@ renderer.content={
 					}
 				}
 			}
+			
 			div(class:'col-sm-4') {
+				div(class:'btn-group', role:'group') {
+					// check/uncheck buttons
+					button(type:'button', class:'btn btn-default', id:'button-check-visible') {
+						span class:'glyphicon glyphicon-check'
+					}
+					button(type:'button', class:'btn btn-default', id:'button-uncheck-visible') {
+						span class:'glyphicon glyphicon-unchecked'
+					}
+					// show only selected 
+					button(type:'button', class:'btn btn-default', id:'button-show-selected') {
+						span class:'glyphicon glyphicon-filter'
+						span class:'glyphicon glyphicon-check'
+					}
+				}
 			}
+			
+			// data point actions
 			div(class:'col-sm-4') {
 				button class:'btn btn-default btn-block', type:'submit', name:'show-trend', value:1, 'Trend-Darstellung'
 			}
@@ -47,10 +67,11 @@ renderer.content={
 			}  
 		}.collectEntries()
 		
+		// data point table
         table(id:'dp-table', class:'table table-bordered table-hover') {
             thead {
                 tr {
-                    th class:'select', 'Ausw.'
+                    th 'Ausw.'
                     th 'Schnittstelle'
                     th 'Kanal'
                     th 'Parameter'
@@ -113,6 +134,26 @@ renderer.end={
 			});
 		};
 		$('#filter-input').on('keyup', _.debounce(filter, 500));
+		
+		// check/uncheck visible data points
+		$('#button-check-visible').on('click', function(e) {
+			$('#dp-table tbody > tr:visible td:first-child > input:enabled').prop('checked', true);
+		});
+		$('#button-uncheck-visible').on('click', function(e) {
+			$('#dp-table tbody > tr:visible td:first-child > input').prop('checked', false);
+		});
+		
+		// show only selected
+		$('#button-show-selected').on('click', function(e) {
+			$('#filter-input').val('');
+			$('#dp-table tbody tr').each(function() {
+				var selected=$(this).find('td:first-child > input').is(':checked');
+				if (selected)
+					$(this).css('display', '');
+				else 
+					$(this).css('display', 'none');
+			});
+		});
 	/$) }
 }
 

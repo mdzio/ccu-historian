@@ -68,8 +68,8 @@ public class TimeRange {
 		this.begin=begin
 		this.end=end
 			
-		beginText=TextFormat.format(begin)
-		endText=TextFormat.format(end)
+		beginText=TextFormat.formatDate(begin)
+		endText=TextFormat.formatDate(end)
 	}
 	
 	public Map<String, String[]> getParameters() {

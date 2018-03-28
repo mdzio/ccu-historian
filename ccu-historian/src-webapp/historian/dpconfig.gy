@@ -1,85 +1,196 @@
+import groovy.transform.Field
+import java.util.logging.Logger
+import mdz.ccuhistorian.webapp.TextFormat
+
+@Field
+private final static Logger log = Logger.getLogger('mdz.ccuhistorian.webapp.Trend')
+
+@Field
+private final static preprocTypes = [
+	0:'-',
+	1:'Delta K.',
+	2:'Zeitl.K.',
+	3:'Mittelw.',
+	4:'Minimum',
+	5:'Maximum',
+] as TreeMap
+
 // setup page
 def renderer=new mdz.ccuhistorian.webapp.PageRenderer(servlet: this)
 
+def displayName(dp) {
+	dp.id.interfaceId+'.'+(dp.attributes.displayName?:dp.id.address)+'.'+dp.id.identifier
+}
+
 renderer.head={
-	title 'CCU-Historian: Datenpunktkonfiguration'
-	// bootstrap-table CSS
-	link href:'../external/bootstrap-table/bootstrap-table.css', rel:'stylesheet'
+	title 'CCU-historian: Datenpunktkonfiguration'
 }
 
 renderer.content={
-	div(class:'panel panel-default') {
-		div(class:'panel-heading') {
-			h3 class:'panel-title', 'Datenpunktkonfiguration'
-		}
-		div(class:'panel-body') {
-			form(method:'post') {
-				div(id:'toolbar', class:'btn-group') {
-					button class:'btn btn-default', type:'submit', name:'save', value:1, 'Änderungen speichern'
+	form(method:'post') {
+		// persist changes to data points
+		if (params.'update-datapoints') {
+			def success=[]
+			def errors=[]
+			
+			database.dataPoints.each { dp ->
+				// read disabled and hidden
+				def disabled=(params."disabled-$dp.idx"=='1')
+				def hidden=(params."hidden-$dp.idx"=='1')
+				
+				// read preprocessing type
+				def preprocType=params."ptype-$dp.idx" as Integer
+				if (preprocType==null) return
+				
+				// read preprocessing parameter
+				def preprocParam=params."pparam-$dp.idx"
+				if (preprocParam) {
+					preprocParam=TextFormat.parseNumber(preprocParam)?.doubleValue()
+					if (preprocParam==null) {
+						errors << (displayName(dp)+': Der Parameter ist keine gültige Zahl.')
+						return
+					}
+				} else {
+					preprocParam=null
 				}
-				table(
-                    id:'dp-table',
-					'data-toggle':'table',
-					'data-toolbar':'#toolbar', 
-					'data-show-columns':true,
-					'data-search':true,
-					'data-trim-on-search':false,
-				) {
-					thead {
-						tr {
-							th 'data-sortable':true, 'Schnittstelle'
-							th 'data-sortable':true, 'Kanal'
-							th 'data-visible':false, 'data-sortable':true,  'Adresse'
-							th 'data-sortable':true, 'Parameter'
-							th 'data-visible':false, 'data-sortable':true, 'Raum'
-							th 'data-visible':false, 'data-sortable':true, 'Gewerk'
-							th 'data-visible':false, 'data-sortable':true, 'data-align':'right', 'ID'
-							th 'data-visible':false, 'data-sortable':true, 'Einheit'
-							th 'data-visible':false, 'data-sortable':true, 'Typ'
-                            th 'data-sortable':true, 'data-align':'right', 'Einträge'
-                            th(
-                                'data-field':'disabled', 
-                                'data-formatter':'inputFormatterDisabled', 
-                                'data-events':'inputEventsDisabled',
-                                'data-align':'center', 
-                                'Inaktiv'
-                            )
-                            th 'data-field':'hidden', 'data-align':'center', 'Versteckt'
-                            th 'data-field':'preprocType', 'Vorverarb.'
-                            th 'data-field':'proprocParam', 'Parameter'
+	
+				// validate preprocessing parameter
+				if (preprocType==1) {
+					if ((preprocParam?:0.0)<0.0) {
+						errors << (displayName(dp)+': Der Parameter darf bei Delta Kompression nicht negativ sein.')
+						return
+					}
+					if (dp.id.identifier in ['PRESS_LONG', 'PRESS_SHORT']) {
+						errors << (displayName(dp)+': Eine Delta Kompression ist hier nicht sinnvoll.')
+						return
+					}
+				} else if (preprocType==2) {
+					if ((preprocParam?:0.0)<0.0) {
+						errors << (displayName(dp)+': Der Parameter darf bei Zeitl. Kompression nicht negativ sein.')
+						return
+					}
+				} else if (preprocType>=3 && preprocType<=5) {
+					if ((preprocParam?:0.0)<60.0) { 
+						errors << (displayName(dp)+': Der Parameter darf bei Mittelw./Min./Max.-Vorverarbeitung nicht kleiner als 60 Sekunden sein.')
+						return 
+					}
+				}
+
+				// persist data point
+				def origDp=dp.clone()
+				dp.historyDisabled=disabled
+				dp.historyHidden=hidden
+				if ((dp.attributes.preprocType?:0) != preprocType)
+					dp.attributes.preprocType=preprocType
+				dp.attributes.preprocParam=preprocParam
+				// only if changed
+				if (dp!=origDp) {
+					if (utils.catchToLog(log) {
+						database.updateDataPoint dp
+						success << displayName(dp)
+					}) {
+						errors << (displayName(dp)+': Datenbankzugriff ist fehlgeschlagen.')
+					}
+				}
+			}
+			
+			// display errors
+			if (errors) {
+				div(class:'alert  alert-danger alert-dismissible', role:'alert', style:'margin-top: 0.5em') {
+					button(type:'button', class:'close', 'data-dismiss':'alert') {
+						span { mkp.yieldUnescaped '&times;' }
+					}
+					span class:'glyphicon glyphicon-exclamation-sign'
+					mkp.yield " Folgende Fehler sind aufgetreten:"
+					errors.each { msg ->
+						br {}; mkp.yield msg
+					}
+				}
+			}
+			
+			// display success
+			if (success) {
+				div(class:'alert  alert-success alert-dismissible', role:'alert', style:'margin-top: 0.5em') {
+					button(type:'button', class:'close', 'data-dismiss':'alert') {
+						span { mkp.yieldUnescaped '&times;' }
+					}
+					span class:'glyphicon glyphicon-exclamation-sign'
+					mkp.yield " Erfolgreich geänderte Datenpunkte:"
+					success.each { msg ->
+						br {}; mkp.yield msg
+					}
+				}
+			}
+		}
+		
+		// toolbar
+		div(class:'row', style:'margin-bottom: 0.5em') {
+			// filter input
+			div(class:'col-sm-4') {
+				div(class:'input-group') {
+					div(class:'input-group-addon') {
+						span class:'glyphicon glyphicon-filter'
+					}
+					input id:'filter-input', type:'text', class:'form-control', placeholder:'Filterausdruck'
+					span(class:'input-group-btn') {
+						button(id:'reset-filter-btn', class:'btn btn-default', type:'button') {
+							span class:'glyphicon glyphicon-remove'
 						}
 					}
-					tbody {
-						database.dataPoints.findAll { !it.historyHidden }.each { dp ->
-							def last=database.getLast(dp)
-							tr {
-								td dp.id.interfaceId
-								td dp.attributes.displayName?:dp.id.address
-								td dp.id.address
-								td dp.id.identifier
-								td dp.attributes.room
-								td dp.attributes.function
-								td dp.idx
-								td dp.attributes.unit
-								td dp.attributes.type
-                                td database.getCount(dp, null, null)
-                                td dp.historyDisabled?'checked':''
-                                td dp.historyHidden?'checked':''
-                                td dp.attributes.preprocType?:0
-                                td dp.attributes.preprocParam?:''
-/*                                
-                                td {
-                                    select(name:"preproc_type_$dp.idx", size:1) {
-                                        option(value:0, *:(((dp.attributes.preprocType?:0)==0)?[selected:'selected']:[:]), '-')
-                                        option(value:1, *:(((dp.attributes.preprocType?:0)==1)?[selected:'selected']:[:]), 'Delta K.')
-                                        option(value:2, *:(((dp.attributes.preprocType?:0)==2)?[selected:'selected']:[:]), 'Zeitl.K.')
-                                    }
-                                }
-                                td {
-                                    input type:'text', size:5, maxlength:30, name:"preproc_param_$dp.idx", value:utils.format(dp.attributes.preprocParam)
-                                }
-*/                                
+				}
+			}
+			div(class:'col-sm-4') {
+			}
+			// data point actions
+			div(class:'col-sm-4') {
+				button class:'btn btn-default btn-block', type:'submit', name:'update-datapoints', value:1, 'Übernehmen'
+			}
+		}
+		
+		// data point table
+		table(id:'dp-table', class:'table table-bordered table-hover') {
+			thead {
+				tr {
+					th 'Schnittstelle'
+					th 'Kanal'
+					th 'Parameter'
+					th 'Raum'
+					th 'Gewerk'
+					th 'Inaktiv'
+					th 'Versteckt'
+					th 'Vorverarb.'
+					th 'Parameter'
+				}
+			}
+			tbody {
+				database.dataPoints.each { dp ->
+					tr {
+						td dp.id.interfaceId
+						td dp.attributes.displayName?:dp.id.address
+						td dp.id.identifier
+						td dp.attributes.room
+						td dp.attributes.function
+						td {
+							// history disabled?
+							def checked=dp.historyDisabled?[checked:'checked']:[:]
+							input(type:'checkbox', class:'form-control', name:'disabled-'+dp.idx, value:1, *:checked)
+						}
+						td {
+							// history hidden?
+							def checked=dp.historyHidden?[checked:'checked']:[:]
+							input(type:'checkbox', class:'form-control', name:'hidden-'+dp.idx, value:1, *:checked)
+						}
+						td {
+							select(class:'form-control', name:'ptype-'+dp.idx, size:1) {
+								preprocTypes.each { idx, name ->
+									def selected=(idx==dp.attributes.preprocType)?[selected:'selected']:[:]
+									option(value: idx, *:selected, name)
+								}	
 							}
+						}
+						td {
+							input type:'text', class:'form-control', name:'pparam-'+dp.idx, 
+								value:TextFormat.formatNumber(dp.attributes.preprocParam), size:5, maxlength:20
 						}
 					}
 				}
@@ -89,177 +200,28 @@ renderer.content={
 }
 
 renderer.end={
-	// bootstrap-table JS
-	script src:'../external/bootstrap-table/bootstrap-table.js'
-	script src:'../external/bootstrap-table/bootstrap-table-de-DE.js'
-    script { mkp.yieldUnescaped '''\
-        var $dpTable=$('#dp-table');
-        
-        function inputFormatterDisabled(value) {
-            var checked = value ? 'checked' : '';
-            return '<input type="checkbox" ' + checked + ' />';
-        }
-
-        window.inputEventsDisabled = {
-            'change :checkbox': function (e, value, row, index) {
-                row.disabled = $(e.target).prop('checked')?'checked':'';
-//                $dpTable.bootstrapTable('updateRow', {
-//                    index: index,
-//                    row: row        
-//                });
-            }
-        };
-    ''' }
+    script { mkp.yieldUnescaped($/
+		// reset filter
+		$('#reset-filter-btn').on('click', function(e) {
+			$('#filter-input').val('');
+			$('#dp-table tbody tr').css('display', '');
+		});
+		
+		// filter
+		var filter=function(e) {
+			var terms=$(this).val().toLowerCase().split(/\s+/);
+			$('#dp-table tbody tr').each(function() {
+				// search only in column 1 to 5
+				var val=$(this).children('td').slice(0, 5).text().toLowerCase();
+				if (terms.every(t => val.indexOf(t) >= 0))
+					$(this).css('display', '');
+				else 
+					$(this).css('display', 'none');
+			});
+		};
+		$('#filter-input').on('keyup', _.debounce(filter, 500));
+	/$) }
 }
 
 // render page
 renderer.render()
-
-/*
-
-<% 
-import mdz.hc.DataPoint
-import groovy.transform.Field
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-
-@Field
-private final static Logger log = LoggerFactory.getLogger('mdz.ccuhistorian.webapp.DPManage')
-
-def displayName(dp) {
-	dp.id.interfaceId+'.'+(dp.attributes.displayName?:dp.id.address)+'.'+dp.id.identifier
-}
-
-utils.catchToLog(log) {
-
-include 'page-begin.gy'
-def ctx=request.session.getAttribute('ctx')
-
-def dataPoints
-def msg=''
-if (ctx.user.loggedIn) { 
-	dataPoints=database.dataPoints
-	if (params.save) {
-		def updated=[]
-		def errors=[]
-		dataPoints.each { dp ->
-			def preprocType=params."preproc_type_$dp.idx" as Integer
-			if (preprocType==null) return
-			def preprocParam=params."preproc_param_$dp.idx"
-			if (preprocParam) {
-				preprocParam=utils.parseNumber(preprocParam)?.doubleValue()
-				if (preprocParam==null) { 
-					errors << (displayName(dp)+': <b>Parameter</b> ist keine g&uuml;ltige Zahl.')
-					return 
-				}
-			} else preprocParam=null
-			def disabled=(params."disabled_$dp.idx"=='1')
-			def hidden=(params."hidden_$dp.idx"=='1')
-
-			if (preprocType==1) {
-				if ((preprocParam?:0.0)<0.0) { 
-					errors << (displayName(dp)+': <b>Parameter</b> darf bei <b>Delta Kompression</b> nicht negativ sein.')
-					return 
-				}
-				if (dp.id.identifier in ['PRESS_LONG', 'PRESS_SHORT']) { 
-					errors << (displayName(dp)+': <b>Delta Kompression</b> ist hier nicht sinnvoll.')
-					return 
-				} 
-			} else if (preprocType==2) {
-				if ((preprocParam?:0.0)<0.0) { 
-					errors << (displayName(dp)+': <b>Parameter</b> darf bei <b>Zeitl. Kompression</b> nicht negativ sein.')
-					return 
-				}
-			}
-			
-			def orig_dp=dp.clone()
-		    dp.historyDisabled=disabled
-		    dp.historyHidden=hidden
-		    if ((dp.attributes.preprocType?:0)!=preprocType)
-				dp.attributes.preprocType=preprocType
-			dp.attributes.preprocParam=preprocParam
-			if (dp!=orig_dp)
-				if (utils.catchToLog(log) {
-			    	database.updateDataPoint dp
-				    updated << displayName(dp)
-				}) errors << (displayName(dp)+': Datenbankzugriff ist fehlgeschlagen.')
-		}
-		if (updated) 
-			msg+='<p>Folgende Datenpunkte wurden ge&auml;ndert: '+updated.join(', ')+'</p>'
-		if (errors) 
-			msg+='<p class="bad">&Auml;nderung ist bei folgenden Datenpunkten fehlgeschlagen:<br/>'+
-				errors.join('<br/>')+'</p>'
-	}
-}
-
-%><title>CCU-Historian: Verwaltung Datenpunkte</title>
-<script src="TableFilter/tablefilter_all_min.js" type="text/javascript"></script><% 
-%><h1>Verwaltung Datenpunkte</h1><%
-
-if (!ctx.user.loggedIn) { 
-	%><p class="bad">Sie sind nicht (mehr) angemeldet oder Ihre Berechtigungen reichen nicht aus!</p>
-	<p><a href="index.html">Zur Anmeldung</a></p><% 
-} else {
-	println msg 
-	%><form action="dbmanage.html" method="post">	
-	<table><tr><th>Aktion</th><td><input name="save" type="submit" value=" &Auml;nderungen speichern "></td></tr></table>
-	<table id="datapoints">
-		<thead><tr>
-			<th>Schnittstelle</th>		
-			<th>Anzeigename</th>
-			<th>Parameter</th>
-			<th style="width:7em">Adresse</th>
-			<th style="width:3em">ID</th>
-			<th>Eintr&auml;ge</th>
-			<th>Inaktiv</th>
-			<th>Versteckt</th>
-			<th>Vorverarb.</th>
-			<th>Parameter</th>
-		</tr></thead><tbody><%
-	dataPoints.each {
-		%><tr>
-			<td><%=utils.escapeHtml(it.id.interfaceId)%></td>
-			<td><%=utils.escapeHtml(it.attributes.displayName)%></td>
-			<td><%=utils.escapeHtml(it.id.identifier)%></td>
-			<td><%=utils.escapeHtml(it.id.address)%></td>
-			<td class="number"><%=it.idx%></td>
-			<td class="number"><%=database.getCount(it, null, null)%></td>
-			<td><input type="checkbox" name="disabled_<%=it.idx%>" value="1"<%=it.historyDisabled?' checked="checked"':''%>/></td>
-			<td><input type="checkbox" name="hidden_<%=it.idx%>" value="1"<%=it.historyHidden?' checked="checked"':''%>/></td>
-			<td><select name="preproc_type_<%=it.idx%>" size="1">
-				<option value="0"<%=((it.attributes.preprocType?:0)==0)?' selected="selected"':''%>>-</option>
-				<option value="1"<%=((it.attributes.preprocType?:0)==1)?' selected="selected"':''%>>Delta K.</option>
-				<option value="2"<%=((it.attributes.preprocType?:0)==2)?' selected="selected"':''%>>Zeitl.K.</option>
-			</select></td>
-			<td><input name="preproc_param_<%=it.idx%>" type="text" 
-				value="<%=utils.escapeHtml(utils.format(it.attributes.preprocParam)) %>" size="5" maxlength="20"></td>
-		</tr><%
-		} 
-	%></tbody></table>
-	</form>
-	<script type="text/javascript">  
-		var tf_props={
-				filters_row_index: 1,
-				display_all_text: " [ Alle ]",
-				col_0: "select",
-				col_2: "select",
-				col_4: "none",
-				col_5: "none",
-				col_6: "none",
-				col_7: "none",
-				col_8: "none",
-				col_9: "none",
-				col_number_format: [null, null, null, null, "eu", null, null, null, null, "eu"],
-				on_keyup: true,  
-                on_keyup_delay: 500,
-				sort: true,
-				sort_config: { sort_types: ["string", "string", "string", "string", "eu", "none", "none", "none", "none", "none"] }	
-		}
-		setFilterGrid("datapoints", tf_props);  
-    </script><% 
-}
-include 'page-end.gy'
-} // catchToLog
-%>
-
-*/

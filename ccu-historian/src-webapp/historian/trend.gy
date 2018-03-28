@@ -6,7 +6,9 @@ import mdz.ccuhistorian.webapp.WebUtilities
 import static mdz.ccuhistorian.webapp.WebUtilities.*
 
 @Field
-private final static Logger log = Logger.getLogger('mdz.ccuhistorian.webapp.Trend')
+private final static int NUM_OF_GROUPS = 8
+@Field
+private final static int MAX_NUM_DATA_POINTS = 20
 
 @Field
 private final static timeNavigations=[
@@ -49,6 +51,16 @@ private final static presetRanges=[
 	[id:'preset-last-6-months', text:'Letzten 6 Monate', begin:'-6M', end:''],
 ]
 
+@Field
+private final static groupHeights=[
+	[height:1, text:'niedrig'],
+	[height:2, text:'mittel'],
+	[height:4, text:'hoch'],
+]
+
+@Field
+private final static Logger log = Logger.getLogger('mdz.ccuhistorian.webapp.Trend')
+
 // setup page
 def renderer=new mdz.ccuhistorian.webapp.PageRenderer(servlet: this)
 
@@ -67,9 +79,6 @@ renderer.content={
 		def (b, e)=navFunc(tr.begin.time, tr.end.time)
 		trendParams.timeRange=new TimeRange(new Date((long)b), new Date((long)e))
 	}
-
-	// FIXME
-	//pre trendParams.toString()
 	
 	div(class:'row') {
 		// inputs for time navigation	
@@ -126,53 +135,89 @@ renderer.content={
 	}
 
 	// display trend graphics
-	if (trendParams.groups) {
-		p(class:'text-center', style:'margin-top: 0.5em') {
-			img alt:'Trend-Darstellung', src:buildUrl('../query/trend', trendParams.parameters),
-				width:trendParams.width, height:trendParams.height
-		}
-	} else {
+	def dpCnt=trendParams.groups.values().dataPoints*.size().sum()
+	if (!dpCnt /* null or 0 */) {
 		// no data points alert
 		div(class:'alert alert-danger', role:'alert', style:'margin-top: 0.5em') {
 			span class:'glyphicon glyphicon-exclamation-sign'
 			mkp.yield " Es wurden keine Datenpunkte ausgewählt!"
 		} 
-	}
-	
-	// trend options
-	button class:"btn btn-default", type:'button', 'data-toggle':'collapse', 'data-target':'#options', 'Optionen'
-	form {
-		// forward other trend parameters
-		def forwardParams=trendParams.parameters.findAll { k, vs ->
-			!k.startsWith('g')
+	} else if (dpCnt>MAX_NUM_DATA_POINTS) {
+		// too many data points alert
+		div(class:'alert alert-danger', role:'alert', style:'margin-top: 0.5em') {
+			span class:'glyphicon glyphicon-exclamation-sign'
+			mkp.yield " Es wurden zu viele Datenpunkte ausgewählt (Max. Anzahl: $MAX_NUM_DATA_POINTS)!"
+		} 
+	} else {
+		// show trend
+		p(class:'text-center', style:'margin-top: 0.5em') {
+			img alt:'Trend-Darstellung', src:buildUrl('../query/trend', trendParams.parameters),
+				width:trendParams.width, height:trendParams.height
 		}
-		WebUtilities.buildHiddenInputs(html, forwardParams)
-
-		div(id:'options', class:'panel panel-default collapse') {
-			div(class:'panel-body') {
-				div(class:'row') {
-					div(class:'col-sm-5') {
+		
+		// trend options
+		button class:"btn btn-default", type:'button', 'data-toggle':'collapse', 'data-target':'#options', 'Optionen'
+		form {
+			// forward other trend parameters
+			def forwardParams=trendParams.parameters.findAll { k, vs ->
+				!k.startsWith('g') && !k.startsWith('gh') && k!='w' && k!='h'
+			}
+			WebUtilities.buildHiddenInputs(html, forwardParams)
+	
+			div(id:'options', class:'panel panel-default collapse') {
+				div(class:'panel-body') {
+					div(class:'row') {
 						// data point groups
-						table(class:'table table-bordered table-hover') {
-							thead {
-								tr {
-									th 'Schnittstelle'
-									th 'Kanal'
-									th 'Parameter'
-									th 'Gruppe'
+						div(class:'col-lg-6') {
+							table(class:'table table-bordered table-hover') {
+								thead {
+									tr { th 'Schnittstelle'; th 'Kanal'; th 'Parameter'; th 'Gruppe' }
+								}
+								tbody {
+									int dpIdx=1
+									trendParams.groups.each { grpIdx, grp ->
+										// remove unsupported group indices
+										if (grpIdx>NUM_OF_GROUPS)
+											grpIdx=NUM_OF_GROUPS
+										grp.dataPoints.each { dp ->
+											tr {
+												td dp.id.interfaceId
+												td dp.attributes.displayName?:dp.id.address
+												td dp.id.identifier
+												td {
+													select(class:'form-control', name:'g'+dpIdx) {
+														(1..NUM_OF_GROUPS).each { optIdx ->
+															def selected=(grpIdx==optIdx)?[selected:'selected']:[:]
+															option(value:optIdx, *:selected, optIdx)
+														}
+													}
+												}
+											}
+											dpIdx++
+										}
+									}
 								}
 							}
-							tbody {
-								trendParams.groups.each { grpIdx, grp ->
-									grp.dataPoints.each { dp ->
+						}
+						// group heights
+						div(class:'col-lg-3') {
+							table(class:'table table-bordered table-hover') {
+								thead {
+									tr { th 'Gruppe'; th 'Höhe' }
+								}
+								tbody {
+									(1..NUM_OF_GROUPS).each { grpIdx ->
+										def height=trendParams.groups[grpIdx]?.height?:1
+										// normalize height
+										height=groupHeights*.height.reverse().find { it<=height }
 										tr {
-					                        td dp.id.interfaceId
-					                        td dp.attributes.displayName?:dp.id.address
-					                        td dp.id.identifier
+											td 'Gruppe '+grpIdx
 											td {
-												// FIXME
-												select(class:'form-control') {
-													10.times { option value:it+1, it+1 }	
+												select(class:'form-control', name:'gh'+grpIdx) {
+													groupHeights.each { grpHeight ->
+														def selected=(height==grpHeight.height)?[selected:'selected']:[:]
+														option(value:grpHeight.height, *:selected, grpHeight.text)
+													}
 												}
 											}
 										}
@@ -180,15 +225,30 @@ renderer.content={
 								}
 							}
 						}
-					}
-					div(class:'col-sm-3') {
-						// TODO: group heights
-					}
-					div(class:'col-sm-2') {
-						// TODO: trend size
-					}
-					div(class:'col-sm-2') {
-						button class:'btn btn-default btn-block', type:'submit', name:'update-options', value:1, 'Ãœbernehmen'
+						div(class:'col-lg-3') {
+							// trend size
+							table(class:'table table-bordered table-hover') {
+								thead {
+									tr { th 'Größe'; th 'Wert' }
+								}
+								tbody {
+									tr {
+										td 'Breite'
+										td {
+											input class:'form-control', name:'w', value:trendParams.width
+										}
+									}
+									tr {
+										td 'Höhe'
+										td {
+											input class:'form-control', name:'h', value:trendParams.height
+										}
+									}
+								}
+							}
+							// submit button
+							button class:'btn btn-default btn-block', type:'submit', name:'update-options', value:1, 'Übernehmen'
+						}
 					}
 				}
 			}

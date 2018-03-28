@@ -30,11 +30,24 @@ public class TrendParameters {
 
 	public TrendParameters(HttpServletRequest request, DataPointStorage storage, Map<String, TrendDesign> trendDesigns) {
 		// width and height of the graphics
-		try {
-			width=request.getParameter('w')?.toInteger()?:DEFAULT_WIDTH
-			height=request.getParameter('h')?.toInteger()?:DEFAULT_HEIGHT
-		} catch (NumberFormatException e) {
-			throw new IllegalArgumentException('Parameter w (width) or h (height) is invalid')
+		String widthText=request.getParameter('w')
+		if (widthText) {
+			if (!widthText.isInteger()) {
+				throw new IllegalArgumentException('Parameter w (width) is invalid')
+			}
+			width=widthText.toInteger()
+		} else {
+			width=DEFAULT_WIDTH
+		}
+		
+		String heightText=request.getParameter('h')
+		if (heightText) {
+			if (!heightText.isInteger()) {
+				throw new IllegalArgumentException('Parameter h (height) is invalid')
+			}
+			height=heightText.toInteger()
+		} else {
+			height=DEFAULT_HEIGHT
 		}
 
 		// data points

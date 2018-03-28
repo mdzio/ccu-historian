@@ -45,7 +45,7 @@ class WebUtilities {
 	}
 
 	public String format(Number number) {
-		TextFormat.format(number)
+		TextFormat.formatNumber(number)
 	}
 	
 	public Number parseNumber(String str) {
@@ -53,7 +53,7 @@ class WebUtilities {
 	}
 	
 	public String format(Date date) {
-		TextFormat.format(date)
+		TextFormat.formatDate(date)
 	}
 
 	public Date parseDate(String str) {

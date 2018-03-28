@@ -7,12 +7,7 @@ class TimeRangeTest extends GroovyTestCase {
 
 	public void testEmpty() {
 		def now=new Date()
-		def r=new TimeRange(null, null)
-		assert r.end.time-r.begin.time==24*60*60*1000
-		assert Math.abs(r.end.time-now.time)<1000
-		
-		now=new Date()
-		r=new TimeRange('', '')
+		def r=new TimeRange('', '')
 		assert r.end.time-r.begin.time==24*60*60*1000
 		assert Math.abs(r.end.time-now.time)<1000
 	}

@@ -115,6 +115,7 @@ public class PageRenderer {
 			link href:'../external/bootstrap/css/bootstrap.css', rel:'stylesheet'
 
 			// own CSS
+			// TODO: new theme
 			//link href:'ccu-historian-bootstrap.css', rel:'stylesheet'
 			
 			// icon
@@ -181,7 +182,7 @@ public class PageRenderer {
 	}
 	
 	private def writeNavigation() {
-		// navigation bar
+		// navigation bart
 		servlet.html.nav(class:'navbar navbar-default') {
 			div(class:'container-fluid') {
 				// header for mobile display
@@ -208,10 +209,12 @@ public class PageRenderer {
 							}
 							ul(class:'dropdown-menu') {
 								li { a href:'dpconfig.gy', 'Datenpunktkonfiguration' }
+								// TODO
+								/*
 								li { a href:'tools.html', 'Zeitreihenwerkzeuge' }
 								li { a href:'config.html', 'CCU-Historian Konfiguration' }
 								li { a href:'diagnosis.html', 'Diagnose' }
-								
+								*/
 								// database web access
 								def port; servlet.utils.catchToLog(log) { port=servlet.database.config.webPort }
 								if (port)
