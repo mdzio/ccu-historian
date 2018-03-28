@@ -156,7 +156,8 @@ renderer.content={
 		}
 		
 		// trend options
-		button class:"btn btn-default", type:'button', 'data-toggle':'collapse', 'data-target':'#options', 'Optionen'
+		button class:"btn btn-default", type:'button', 'data-toggle':'collapse', 'data-target':'#options', 
+			style:'margin-bottom: 0.5em', 'Optionen'
 		form {
 			// forward other trend parameters
 			def forwardParams=trendParams.parameters.findAll { k, vs ->
