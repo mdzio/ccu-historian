@@ -56,7 +56,7 @@ renderer.content={
 			
 			// data point actions
 			div(class:'col-sm-4') {
-				button class:'btn btn-default btn-block', type:'submit', name:'show-trend', value:1, 'Trend-Darstellung'
+				button class:'btn btn-primary btn-block', type:'submit', name:'show-trend', value:1, 'Trend-Darstellung'
 			}
 		}
 		

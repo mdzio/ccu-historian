@@ -116,7 +116,7 @@ renderer.content={
 				}
 			}
 			div(class:'col-sm-2') {
-				button class:'btn btn-default btn-block', type:'submit', name:'update-timerange', value:1, 'Übernehmen'
+				button class:'btn btn-primary btn-block', type:'submit', name:'update-timerange', value:1, 'Übernehmen'
 			}
 		}
 		// change data points
@@ -235,20 +235,16 @@ renderer.content={
 								tbody {
 									tr {
 										td 'Breite'
-										td {
-											input class:'form-control', name:'w', value:trendParams.width
-										}
+										td { input class:'form-control', name:'w', value:trendParams.width }
 									}
 									tr {
 										td 'Höhe'
-										td {
-											input class:'form-control', name:'h', value:trendParams.height
-										}
+										td { input class:'form-control', name:'h', value:trendParams.height }
 									}
 								}
 							}
 							// submit button
-							button class:'btn btn-default btn-block', type:'submit', name:'update-options', value:1, 'Übernehmen'
+							button class:'btn btn-primary btn-block', type:'submit', name:'update-options', value:1, 'Übernehmen'
 						}
 					}
 				}

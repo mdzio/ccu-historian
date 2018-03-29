@@ -182,7 +182,7 @@ public class PageRenderer {
 	}
 	
 	private def writeNavigation() {
-		// navigation bart
+		// navigation bar
 		servlet.html.nav(class:'navbar navbar-default') {
 			div(class:'container-fluid') {
 				// header for mobile display
