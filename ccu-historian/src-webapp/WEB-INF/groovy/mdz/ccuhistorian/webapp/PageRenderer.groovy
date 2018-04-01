@@ -211,7 +211,6 @@ public class PageRenderer {
 								li { a href:'dpconfig.gy', 'Datenpunktkonfiguration' }
 								// TODO
 								/*
-								li { a href:'tools.html', 'Zeitreihenwerkzeuge' }
 								li { a href:'config.html', 'CCU-Historian Konfiguration' }
 								li { a href:'diagnosis.html', 'Diagnose' }
 								*/

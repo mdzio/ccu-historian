@@ -143,7 +143,7 @@ renderer.content={
 			}
 			// data point actions
 			div(class:'col-sm-4') {
-				button class:'btn btn-default btn-block', type:'submit', name:'update-datapoints', value:1, 'Übernehmen'
+				button class:'btn btn-primary btn-block', type:'submit', name:'update-datapoints', value:1, 'Übernehmen'
 			}
 		}
 		

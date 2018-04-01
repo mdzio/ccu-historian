@@ -1,3 +1,19 @@
+
+// setup page
+def renderer=new mdz.ccuhistorian.webapp.PageRenderer(servlet: this)
+
+renderer.head={
+	title 'CCU-historian: Datenpunktdetails'
+}
+
+renderer.content={
+	p 'Datenpunktdetails'
+}
+
+// render page
+renderer.render()
+
+/*
 <%
 import mdz.hc.DataPoint
 import mdz.ccuhistorian.Database
@@ -137,3 +153,5 @@ if (!ctx.user.loggedIn) {
 include 'page-end.gy'
 } // catchToLog
 %>
+
+*/

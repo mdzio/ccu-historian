@@ -12,7 +12,7 @@ renderer.content={
 	// parse trend parameters
 	def trendParams=new TrendParameters(request, database, webServer.config.trendDesigns)
 
-    form(action:'trend.gy') {
+    form(id:'dp-form', action:'trend.gy') {
 		// forward other trend parameters
 		def forwardParams=trendParams.parameters.findAll { k, vs -> 
 			k.startsWith('gh') || (!k.startsWith('dp') && !k.startsWith('g'))
@@ -55,8 +55,17 @@ renderer.content={
 			}
 			
 			// data point actions
-			div(class:'col-sm-4') {
-				button class:'btn btn-primary btn-block', type:'submit', name:'show-trend', value:1, 'Trend-Darstellung'
+			div(class:'col-sm-4 text-right') {
+				div(class:'btn-group pull-right') {
+					button class:'btn btn-primary', type:'submit', name:'show-trend', value:1, 'Trend-Darstellung'
+					button(class:'btn btn-default dropdown-toggle', 'data-toggle':'dropdown') {
+						span class:'caret'
+					}
+					ul(class:'dropdown-menu') {
+						li { a id:'button-dpdetails', href:'#', 'Details' }
+						li { a id:'button-dptools', href:'#', 'Werkzeuge' }
+					}
+				}
 			}
 		}
 		
@@ -154,6 +163,20 @@ renderer.end={
 					$(this).css('display', 'none');
 			});
 		});
+		
+		// show data point details
+		$('#button-dpdetails').on('click', function(e) {
+			var f=$('#dp-form');
+			f.attr('action', 'dpdetails.gy');
+			f.submit();
+		});
+		// show data point tools
+		$('#button-dptools').on('click', function(e) {
+			var f=$('#dp-form');
+			f.attr('action', 'dptools.gy');
+			f.submit();
+		});
+
 	/$) }
 }
 

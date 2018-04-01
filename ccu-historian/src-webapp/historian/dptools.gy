@@ -1,3 +1,19 @@
+// setup page
+def renderer=new mdz.ccuhistorian.webapp.PageRenderer(servlet: this)
+
+renderer.head={
+	title 'CCU-historian: Datenpunktwerkzeuge'
+}
+
+renderer.content={
+	p 'Datenpunktwerkzeuge'
+}
+
+// render page
+renderer.render()
+
+/*
+
 <%
 import mdz.ccuhistorian.Database
 import groovy.transform.Field
@@ -151,3 +167,5 @@ if (!ctx.user.loggedIn) {
 include 'page-end.gy' 
 } // catchToLog
 %>
+
+*/
