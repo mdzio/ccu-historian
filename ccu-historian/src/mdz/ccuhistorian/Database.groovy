@@ -46,7 +46,7 @@ public class Database implements Storage {
 	
 	private Server webServer, tcpServer, pgServer
 	private Sql db
-	private final static long TIMESERIES_COPY_INTERVAL=30l*24*60*60*1000 // 1 Monat
+	private final static long TIMESERIES_COPY_INTERVAL=30l*24*60*60*1000 // 1 month
 	private String backupLast
 	private ScheduledFuture backupFuture
 	
@@ -94,7 +94,7 @@ public class Database implements Storage {
 			}
 			if (config.backup) {
 				Calendar cal=Calendar.instance
-				backupLast=Utilities.formatTimestamp(config.backup, cal.time)
+				backupLast=formatTimestamp(config.backup, cal.time)
 				long initialDelay=-cal.timeInMillis
 				cal[Calendar.MINUTE]=0
 				cal[Calendar.SECOND]=0

@@ -26,7 +26,7 @@ import groovy.transform.CompileStatic
 @CompileStatic
 class Main {
 
-	public static String version='2.0.0-alpha1'
+	public static String version='2.0.0-alpha2'
 	
 	private static final Logger log=Logger.getLogger(Main.class.name)
 	private static Main main
