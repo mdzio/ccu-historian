@@ -37,7 +37,7 @@ renderer.content={
 				}
 			}
 			
-			div(class:'col-sm-4') {
+			div(class:'col-sm-3') {
 				div(class:'btn-group', role:'group') {
 					// check/uncheck buttons
 					button(type:'button', class:'btn btn-default', id:'button-check-visible') {
@@ -55,16 +55,11 @@ renderer.content={
 			}
 			
 			// data point actions
-			div(class:'col-sm-4 text-right') {
-				div(class:'btn-group pull-right') {
-					button class:'btn btn-primary', type:'submit', name:'show-trend', value:1, 'Trend-Darstellung'
-					button(class:'btn btn-default dropdown-toggle', 'data-toggle':'dropdown') {
-						span class:'caret'
-					}
-					ul(class:'dropdown-menu') {
-						li { a id:'button-dpdetails', href:'#', 'Details' }
-						li { a id:'button-dptools', href:'#', 'Werkzeuge' }
-					}
+			div(class:'col-sm-5 text-right') {
+				div(class:'btn-group') {
+					button class:'btn btn-default', id:'button-dpdetails', 'Details'
+					button class:'btn btn-default', id:'button-dptools', 'Werkzeuge'
+					button class:'btn btn-primary', id:'button-trend', style:'width: 8em', 'Trend'
 				}
 			}
 		}
@@ -81,11 +76,12 @@ renderer.content={
             thead {
                 tr {
                     th 'Ausw.'
-                    th 'Schnittstelle'
+                    th class:'hidden-xs hidden-sm', 'Schnittstelle'
                     th 'Kanal'
                     th 'Parameter'
-                    th 'Raum'
-                    th 'Gewerk'
+                    th class:'hidden-xs', 'Raum'
+                    th class:'hidden-xs', 'Gewerk'
+                    th class:'hidden-xs hidden-sm hidden-md', 'Adresse'
                 }
             }
             tbody {
@@ -103,11 +99,12 @@ renderer.content={
 								input(type:'hidden', name:'g'+(idx+1), value:group)
 							}
 						}
-                        td dp.id.interfaceId
+                        td class:'hidden-xs hidden-sm', dp.id.interfaceId
                         td dp.attributes.displayName?:dp.id.address
                         td dp.id.identifier
-                        td dp.attributes.room
-                        td dp.attributes.function
+                        td class:'hidden-xs', dp.attributes.room
+                        td class:'hidden-xs', dp.attributes.function
+                        td class:'hidden-xs hidden-sm hidden-md', dp.id.address
                     }
                 }
             }
@@ -176,7 +173,12 @@ renderer.end={
 			f.attr('action', 'dptools.gy');
 			f.submit();
 		});
-
+		// show trend
+		$('#button-trend').on('click', function(e) {
+			var f=$('#dp-form');
+			f.attr('action', 'trend.gy');
+			f.submit();
+		});
 	/$) }
 }
 

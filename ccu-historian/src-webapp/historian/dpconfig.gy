@@ -151,11 +151,12 @@ renderer.content={
 		table(id:'dp-table', class:'table table-bordered table-hover') {
 			thead {
 				tr {
-					th 'Schnittstelle'
+					th class:'hidden-xs hidden-sm hidden-md', 'Schnittstelle'
 					th 'Kanal'
 					th 'Parameter'
-					th 'Raum'
-					th 'Gewerk'
+					th class:'hidden-xs hidden-sm hidden-md', 'Raum'
+					th class:'hidden-xs hidden-sm hidden-md', 'Gewerk'
+                    th class:'hidden-xs hidden-sm', 'Adresse'
 					th 'Inaktiv'
 					th 'Versteckt'
 					th 'Vorverarb.'
@@ -165,11 +166,12 @@ renderer.content={
 			tbody {
 				database.dataPoints.each { dp ->
 					tr {
-						td dp.id.interfaceId
+						td class:'hidden-xs hidden-sm hidden-md', dp.id.interfaceId
 						td dp.attributes.displayName?:dp.id.address
 						td dp.id.identifier
-						td dp.attributes.room
-						td dp.attributes.function
+						td class:'hidden-xs hidden-sm hidden-md', dp.attributes.room
+						td class:'hidden-xs hidden-sm hidden-md', dp.attributes.function
+                        td class:'hidden-xs hidden-sm', dp.id.address
 						td {
 							// history disabled?
 							def checked=dp.historyDisabled?[checked:'checked']:[:]
@@ -212,7 +214,7 @@ renderer.end={
 			var terms=$(this).val().toLowerCase().split(/\s+/);
 			$('#dp-table tbody tr').each(function() {
 				// search only in column 1 to 5
-				var val=$(this).children('td').slice(0, 5).text().toLowerCase();
+				var val=$(this).children('td').slice(0, 6).text().toLowerCase();
 				if (terms.every(t => val.indexOf(t) >= 0))
 					$(this).css('display', '');
 				else 
