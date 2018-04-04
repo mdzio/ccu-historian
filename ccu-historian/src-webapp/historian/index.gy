@@ -88,12 +88,11 @@ renderer.content={
                 database.dataPoints.findAll { !it.historyHidden }.eachWithIndex { dp, idx ->
                     tr {
 						td { 
-	                        def disabled=dp.historyString?[disabled:'disabled']:[:]
 							def checked=dpToGroup.containsKey(dp.idx)?['checked':'checked']:[:]
 							def group=dpToGroup[dp.idx]
 							
 							input(class:'form-control', type:'checkbox', name:'dp'+(idx+1), 
-								value:dp.idx, *:disabled, *:checked)
+								value:dp.idx, *:checked)
 							// add group, if data point is already selected
 							if (group!=null) {
 								input(type:'hidden', name:'g'+(idx+1), value:group)

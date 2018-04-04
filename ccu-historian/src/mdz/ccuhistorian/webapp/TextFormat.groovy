@@ -171,4 +171,12 @@ class TextFormat {
 		(hours?((hours as String)+'h '):'')+(minutes?((minutes as String)+'m '):'')+
 		(seconds?((seconds as String)+'s '):'')
 	}
+	
+	public static String format(value) {
+		switch(value) {
+			case Number: formatNumber((Number)value); break
+			case Date: formatDate((Date)value); break
+			default: value as String; break
+		}
+	}
 }

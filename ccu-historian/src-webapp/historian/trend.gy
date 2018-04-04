@@ -71,6 +71,11 @@ renderer.head={
 renderer.content={
 	def trendParams=new TrendParameters(request, database, webServer.config.trendDesigns)
 	
+	// TODO: support string histories
+	trendParams.groups.values().each { group ->
+		group.dataPoints.removeAll { dp -> dp.historyString } 		
+	}
+	
 	// apply time navigation
 	def navId=request.getParameter('navigate')
 	def navFunc=timeNavigations.find { navId==it.id }?.func
@@ -151,7 +156,9 @@ renderer.content={
 	} else {
 		// show trend
 		p(class:'text-center', style:'margin-top: 0.5em') {
-			img alt:'Trend-Darstellung', src:buildUrl('../query/trend', trendParams.parameters),
+			// if required, use API key
+			def apiKey=webServer.config.apiKeys ? [k:webServer.config.apiKeys[0]] : [:]
+			img alt:'Trend-Darstellung', src:buildUrl('../query/trend', trendParams.parameters, apiKey),
 				width:trendParams.width, height:trendParams.height
 		}
 		

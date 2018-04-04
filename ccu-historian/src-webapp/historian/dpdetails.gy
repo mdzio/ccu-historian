@@ -1,157 +1,188 @@
+import mdz.ccuhistorian.webapp.TrendParameters
+import mdz.hc.DataPoint
+import groovy.transform.Field
+import static mdz.ccuhistorian.webapp.TextFormat.*
+import static mdz.ccuhistorian.webapp.WebUtilities.*
+
+@Field
+private static final int NUM_STRING_ENTRIES = 50
 
 // setup page
 def renderer=new mdz.ccuhistorian.webapp.PageRenderer(servlet: this)
+
+def displayName(dp) {
+	dp.id.interfaceId+'.'+(dp.attributes.displayName?:dp.id.address)+'.'+dp.id.identifier
+}
+
+def bitToText(value, bitMask) {
+	value==null?'':(value & bitMask?'Ja':'Nein')
+}
 
 renderer.head={
 	title 'CCU-historian: Datenpunktdetails'
 }
 
 renderer.content={
-	p 'Datenpunktdetails'
+	def trendParams=new TrendParameters(request, database, webServer.config.trendDesigns)
+	def apiKey=webServer.config.apiKeys ? [k:webServer.config.apiKeys[0]] : [:]
+	
+	trendParams.groups.values().dataPoints.flatten().each { dp ->
+		def last=database.getLast(dp)
+		
+		div(class:'panel panel-default') {
+			div(class:'panel-heading') {
+				h3 class:'panel-title', displayName(dp)
+			}
+			div(class:'panel-body') {
+				// list data point meta data
+				div(class:'row') {
+					div(class:'col-md-6') {
+						table(class:'table table-bordered') {
+							tbody {
+								tr { 
+									th 'Schnittstelle'
+									td dp.id.interfaceId 
+								}	
+								tr { 
+									th 'Kanalname'
+									td dp.attributes.displayName 
+								}	
+								tr { 
+									th 'Seriennr.:Kanalnr.'
+									td dp.id.address 
+								}	
+								tr { 
+									th 'Parameter'
+									td dp.id.identifier
+								}	
+								tr { 
+									th 'Historian-ID'
+									td dp.idx 
+								}	
+								tr { 
+									th 'Aktueller Wert'
+									td format(last?.value) 
+								}	
+								tr { 
+									th 'Minimum'
+									td formatNumber(dp.attributes.minimum) 
+								}	
+								tr { 
+									th 'Maximum'
+									td formatNumber(dp.attributes.maximum) 
+								}	
+								tr { 
+									th 'Einheit'
+									td dp.attributes.unit 
+								}	
+								tr { 
+									th 'Zeitstempel'
+									td formatDate(last?.timestamp) 
+								}	
+							} 
+						}
+					}
+					div(class:'col-md-6') {
+						table(class:'table table-bordered') {
+							tbody {
+								tr { 
+									th 'Standardwert'
+									td format(dp.attributes.defaultValue) 
+								}
+								tr { 
+									th 'Datentyp'
+									td dp.attributes.type 
+								}
+								tr { 
+									th 'Lesbar'
+									td bitToText(dp.attributes.operations, DataPoint.ATTR_OPERATIONS_READ) 
+								}
+								tr { 
+									th 'Beschreibbar'
+									td bitToText(dp.attributes.operations, DataPoint.ATTR_OPERATIONS_WRITE) 
+								}
+								tr {
+									 th 'Ereignis'
+									 td bitToText(dp.attributes.operations, DataPoint.ATTR_OPERATIONS_EVENT) 
+								}
+								tr { 
+									th 'Sichtbar'
+									td bitToText(dp.attributes.flags, DataPoint.ATTR_FLAGS_VISIBLE) 
+								}
+								tr { 
+									th 'Wartungsmeldung'
+									td bitToText(dp.attributes.flags, DataPoint.ATTR_FLAGS_SERVICE) 
+								}
+								tr { 
+									th 'Man. Bestätigung'
+									td bitToText(dp.attributes.flags, DataPoint.ATTR_FLAGS_STICKY) 
+								}
+								tr { 
+									th 'Tabellenname'
+									td dp.historyTableName 
+								}
+							}
+						}
+					}
+				}
+				if (!dp.historyString) {
+					// show trends
+					h4 '24h-Trend'
+					p {
+						img alt:'24h-Trend', src:buildUrl('../query/trend', [dp1:dp.idx], apiKey), 
+							width:trendParams.width, height:trendParams.height
+					}
+					// TODO: CSV export
+					h4 'Wochen-Trend'
+					p {
+						img alt:'Wochen-Trend', src:buildUrl('../query/trend', [dp1:dp.idx, b:'-1W'], apiKey),
+							width:trendParams.width, height:trendParams.height
+					}
+					// TODO: CSV export
+				} else {
+					// show table
+					h4 'Werte der letzten Woche'
+					def end=new Date()
+					def timeSeries=database.getTimeSeriesRaw(dp, end-7, end)
+					def toMany=timeSeries.size()>NUM_STRING_ENTRIES
+					if (toMany) {
+						timeSeries=timeSeries.takeRight(NUM_STRING_ENTRIES).sort { a, b -> b.timestamp <=> a.timestamp}
+					} else {
+						timeSeries=timeSeries.iterator().reverse()
+					}
+					table(class:'table table-bordered table-hover') {
+						thead {
+							tr {
+								th 'Zeitstempel'
+								th 'Wert'
+								th 'Status'
+							}
+						}
+						tbody {
+							timeSeries.each { entry ->
+								tr {
+									td formatDate(entry.timestamp)
+									td entry.value
+									td class:'text-right', entry.state
+								}
+							}
+						}
+					}
+					if (toMany) {
+						div(class:'alert alert-warning alert-dismissible', role:'alert') {
+							button(type:'button', class:'close', 'data-dismiss':'alert') {
+								span { mkp.yieldUnescaped '&times;' }
+							}
+							span class:'glyphicon glyphicon-exclamation-sign'
+							mkp.yield " Zu viele Einträge! Es werden die letzten $NUM_STRING_ENTRIES Einträge angezeigt!"
+						}
+					}
+					// TODO: CSV export
+				}
+			}
+		}
+	}	
 }
 
 // render page
 renderer.render()
-
-/*
-<%
-import mdz.hc.DataPoint
-import mdz.ccuhistorian.Database
-import groovy.transform.Field
-import java.util.logging.Logger
-
-@Field
-private final static log = Logger.getLogger('mdz.ccuhistorian.webapp.DPDetails')
-
-// Bit als Text anzeigen
-def bitToText(value, bitMask) {
-	value==null?'Unbekannt':value&bitMask?'Ja':'Nein'
-}
-
-utils.catchToLog(log) {
-
-include 'page-begin.gy' 
-def ctx=request.session.getAttribute('ctx')
-%><meta http-equiv="refresh" content="60">
-<%
-
-// Informationen zum Datenpunkt
-if (!params.i || !params.i.integer)
-	throw new Exception('Page parameter i (data point id) not set or invalid')
-def dpId=params.i as Integer
-def dataPoint=database.getDataPoint(dpId)
-if (!dataPoint)
-	throw new Exception("Data point with id $dpId not exists")
-
-// Anzeigename
-def displayName=dataPoint.id.interfaceId+'.'+(dataPoint.attributes.displayName?:dataPoint.id.address)+'.'+
-	dataPoint.id.identifier
-	
-// Letzter Wert
-def last=database.getLast(dataPoint)
-
-// Anfrageschlüssel
-def apiKey=webServer.config.apiKeys?'&k='+URLEncoder.encode(webServer.config.apiKeys[0], 'UTF-8'):''
- 
-%><title>CCU-Historian: Datenpunkt <%=displayName%></title><% 
-
-%><h1>Datenpunkt <%=displayName%></h1><%
-
-if (!ctx.user.loggedIn) { 
-	%><p class="bad">Sie sind nicht (mehr) angemeldet oder Ihre Berechtigungen reichen nicht aus!</p>
-	<p><a href="index.html">Zur Anmeldung</a></p><% 
-} else {
-	%><table>
-		<tr>
-			<th>Schnittstelle</th>		
-			<th>Kanalname</th>
-			<th>Seriennr.:Kanalnr.</th>
-			<th>Parameter</th>
-			<th>Historian-ID</th>
-			<th>Aktueller Wert</th>
-			<th>Minimum</th>
-			<th>Maximum</th>
-			<th>Einheit</th>
-			<th>Zeitstempel</th>
-		</tr>
-		<tr>
-			<td><%=utils.escapeHtml(dataPoint.id.interfaceId) %></td>
-			<td><%=utils.escapeHtml(dataPoint.attributes.displayName) %></td>
-			<td><%=utils.escapeHtml(dataPoint.id.address) %></td>
-			<td><%=utils.escapeHtml(dataPoint.id.identifier) %></td>
-			<td class="number"><%=dataPoint.idx%></td>
-			<td class="number"><%=utils.format(last?.value)%></td>
-			<td class="number"><%=utils.format(dataPoint.attributes.minimum)%></td>
-			<td class="number"><%=utils.format(dataPoint.attributes.maximum)%></td>
-			<td><%=utils.escapeHtml(dataPoint.attributes.unit) %></td>
-			<td><%=utils.format(last?.timestamp)%></td>
-		</tr>
-		<tr>
-			<th>Standardwert</th>		
-			<th>Datentyp</th>
-			<th>Lesbar</th>
-			<th>Beschreibbar</th>
-			<th>Ereignis</th>
-			<th>Sichtbar</th>
-			<th>Wartungsmeldung</th>
-			<th>Man. Bestätigung</th>
-			<th>&nbsp;</th>
-			<th>Tabelle</th>
-		</tr>
-		<tr>
-			<td class="number"><%=utils.format(dataPoint.attributes.defaultValue)%></td>
-			<td><%=utils.escapeHtml(dataPoint.attributes.type) %></td>
-			<td><%=bitToText(dataPoint.attributes.operations, DataPoint.ATTR_OPERATIONS_READ) %></td>
-			<td><%=bitToText(dataPoint.attributes.operations, DataPoint.ATTR_OPERATIONS_WRITE) %></td>
-			<td><%=bitToText(dataPoint.attributes.operations, DataPoint.ATTR_OPERATIONS_EVENT) %></td>
-			<td><%=bitToText(dataPoint.attributes.flags, DataPoint.ATTR_FLAGS_VISIBLE) %></td>
-			<td><%=bitToText(dataPoint.attributes.flags, DataPoint.ATTR_FLAGS_SERVICE) %></td>
-			<td><%=bitToText(dataPoint.attributes.flags, DataPoint.ATTR_FLAGS_STICKY) %></td>
-			<td>&nbsp;</td>
-			<td><%=utils.escapeHtml(dataPoint.historyTableName) %></td>
-		</tr>
-	</table><%
-	if (dataPoint.historyString) {
-		%><h2>Werte der letzten Woche</h2>
-		<table>
-			<tr>
-				<th>Zeitstempel</th>		
-				<th>Wert</th>
-				<th>Status</th>
-			</tr><%
-		def end=new Date()
-		def timeSeries=database.getTimeSeriesRaw(dataPoint, end-7, end)
-		timeSeries.iterator().reverse().each {
-			%><tr>
-				<td><%=utils.format(it.timestamp)%></td>
-				<td><%=utils.escapeHtml(it.value)%></td>
-				<td class="number"><%=it.state%></td>
-			</tr><%
-		}				
-		%></table>
-		<table>
-			<tr><th>Anzahl der Eintr&auml;ge</th><td class="number"><%=timeSeries.size %></td>
-			<th>Aktionen</th><td><a href="/query/csv.gy?i=<%=dataPoint.idx%>&amp;d=1W<%=apiKey%>">Als CSV-Datei exportieren</a></td></tr>
-		</table>
-		<%
-	} else {
-		def end=new Date()
-		%><h2>24 Stunden-Trend</h2>
-		<p><img alt="24 Stunden-Trend" src="/query/trend.gy?i=<%=dataPoint.idx%><%=apiKey%>"></p>
-		<table>
-			<tr><th>Anzahl der Eintr&auml;ge</th><td class="number"><%=database.getCount(dataPoint, end-1, end) %></td>
-			<th>Aktionen</th><td><a href="/query/csv.gy?i=<%=dataPoint.idx%><%=apiKey%>">Als CSV-Datei exportieren</a></td></tr>
-		</table>
-		<h2>Wochen-Trend</h2>
-		<p><img alt="Wochen-Trend" src="/query/trend.gy?i=<%=dataPoint.idx%>&amp;d=1W<%=apiKey%>"></p>
-		<table>
-			<tr><th>Anzahl der Eintr&auml;ge</th><td class="number"><%=database.getCount(dataPoint, end-7, end) %></td>
-			<th>Aktionen</th><td><a href="/query/csv.gy?i=<%=dataPoint.idx%>&amp;d=1W<%=apiKey%>">Als CSV-Datei exportieren</a></td></tr>
-		</table><%
-	}
-}
-include 'page-end.gy'
-} // catchToLog
-%>
-
-*/
