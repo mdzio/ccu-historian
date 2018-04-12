@@ -36,7 +36,6 @@ for(String id: searchList){
 
         // JSON erstellen
         def dateFormat = new SimpleDateFormat('yyyy-MM-dd HH:mm:ss')
-        def displayName = (dataPoint.attributes.displayName?:dataPoint.id.address) + '.' + dataPoint.id.identifier        
 
         def valueFormatter
         if (dataPoint.isHistoryString()) {

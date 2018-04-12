@@ -33,9 +33,8 @@ else
 	
 // CSV-Datei erstellen
 def dateFormat=new SimpleDateFormat('dd.MM.yyyy HH:mm:ss,SSS')
-def displayName=(dataPoint.attributes.displayName?:dataPoint.id.address)+'.'+dataPoint.id.identifier
 def sb=new StringBuilder()
-sb << displayName << ';;\n'
+sb << dataPoint.displayName << ';;\n'
 sb << 'Zeitstempel;Wert;Status\n'
 def valueFormatter
 if (dataPoint.historyString) {
@@ -49,7 +48,7 @@ timeSeries.each {
 }
 
 // CSV-Datei verschicken
-def fileName=displayName.replaceAll(/[^a-zA-Z0-9_]/, '_')+'.csv'
+def fileName=dataPoint.displayName.replaceAll(/[^a-zA-Z0-9_]/, '_')+'.csv'
 response.contentType='text/csv'
 response.setHeader 'Content-disposition', "attachment; filename=$fileName"
 out << sb

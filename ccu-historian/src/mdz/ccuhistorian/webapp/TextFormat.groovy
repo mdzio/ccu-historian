@@ -151,27 +151,6 @@ class TextFormat {
 		Date.from(res.toInstant())
 	}
 	
-	private static final long MILLISECONDS_PER_SECOND=1000
-	private static final long MILLISECONDS_PER_MINUTE=MILLISECONDS_PER_SECOND*60
-	private static final long MILLISECONDS_PER_HOUR=MILLISECONDS_PER_MINUTE*60
-	private static final long MILLISECONDS_PER_DAY=MILLISECONDS_PER_HOUR*24
-	private static final long MILLISECONDS_PER_WEEK=MILLISECONDS_PER_DAY*7
-	
-	public static String formatDuration(long milliSeconds) {
-		long weeks=(long)milliSeconds.intdiv(MILLISECONDS_PER_WEEK)
-		milliSeconds-=weeks*MILLISECONDS_PER_WEEK
-		long days=(long)milliSeconds.intdiv(MILLISECONDS_PER_DAY)
-		milliSeconds-=days*MILLISECONDS_PER_DAY
-		long hours=(long)milliSeconds.intdiv(MILLISECONDS_PER_HOUR)
-		milliSeconds-=hours*MILLISECONDS_PER_HOUR
-		long minutes=(long)milliSeconds.intdiv(MILLISECONDS_PER_MINUTE)
-		milliSeconds-=minutes*MILLISECONDS_PER_MINUTE
-		long seconds=(long)milliSeconds.intdiv(MILLISECONDS_PER_SECOND)
-		(weeks?((weeks as String)+'W '):'')+(days?((days as String)+'D '):'')+
-		(hours?((hours as String)+'h '):'')+(minutes?((minutes as String)+'m '):'')+
-		(seconds?((seconds as String)+'s '):'')
-	}
-	
 	public static String format(value) {
 		switch(value) {
 			case Number: formatNumber((Number)value); break

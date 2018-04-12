@@ -96,8 +96,6 @@ def createPlot(parameters, dataPoints, plotState) {
 		
 		if (dataPoint.historyString)
 			throw new Exception("Data point $dataPoint.displayName is not numeric")
-		def displayName=dataPoint.id.interfaceId+'.'+(dataPoint.attributes.displayName?:dataPoint.id.address)+'.'+
-			dataPoint.id.identifier
 		def isAction=dataPoint.attributes.type=='ACTION'
 	
 		// create/select y-axis
@@ -128,7 +126,7 @@ def createPlot(parameters, dataPoints, plotState) {
 		if (isAction) timeSeries=database.getTimeSeriesRaw(dataPoint, parameters.timeRange.begin, parameters.timeRange.end)
 		else timeSeries=database.getTimeSeries(dataPoint, parameters.timeRange.begin, parameters.timeRange.end)
 		def dispIdx=rangeAxesDisplayIdx[axisIdx]
-		XYSeries xySeries=new XYSeries(displayName+(dispIdx>0?' ('+dispIdx+')':''))
+		XYSeries xySeries=new XYSeries(dataPoint.displayName+(dispIdx>0?' ('+dispIdx+')':''))
 		addToXYSeries(timeSeries, xySeries)
 		applyDesign xySeries, parameters.trendDesign.series, plotState.totalDataPointIdx
 		def xySeriesCollection=new XYSeriesCollection(xySeries)

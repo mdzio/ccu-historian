@@ -304,7 +304,7 @@ public class Database implements Storage {
 		if (dp.idx==null)
 			throw new Exception('ID of data point is not set')
 		db.execute "DROP TABLE IF EXISTS $dp.historyTableName" as String
-		// delete tabel of other data type also
+		// delete table of other data type also
 		dp.historyString=!dp.historyString
 		String tableName=getDataPointTableName(dp)
 		dp.historyString=!dp.historyString

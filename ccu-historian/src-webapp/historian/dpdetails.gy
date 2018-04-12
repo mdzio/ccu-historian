@@ -10,10 +10,6 @@ private static final int NUM_STRING_ENTRIES = 50
 // setup page
 def renderer=new mdz.ccuhistorian.webapp.PageRenderer(servlet: this)
 
-def displayName(dp) {
-	dp.id.interfaceId+'.'+(dp.attributes.displayName?:dp.id.address)+'.'+dp.id.identifier
-}
-
 def bitToText(value, bitMask) {
 	value==null?'':(value & bitMask?'Ja':'Nein')
 }
@@ -31,7 +27,7 @@ renderer.content={
 		
 		div(class:'panel panel-default') {
 			div(class:'panel-heading') {
-				h3 class:'panel-title', displayName(dp)
+				h3 class:'panel-title', dp.displayName
 			}
 			div(class:'panel-body') {
 				// list data point meta data

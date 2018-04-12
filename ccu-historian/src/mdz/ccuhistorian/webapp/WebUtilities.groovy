@@ -64,10 +64,6 @@ class WebUtilities {
 		TextFormat.parseDate(relativeTo, str)
 	}
 	
-	public String formatDuration(long milliSeconds) {
-		TextFormat.formatDuration(milliSeconds)
-	}
-	
 	public String escapeHtml(String str) {
 		str?Text.escapeXml(str):''
 	}

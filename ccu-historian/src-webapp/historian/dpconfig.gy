@@ -18,10 +18,6 @@ private final static preprocTypes = [
 // setup page
 def renderer=new mdz.ccuhistorian.webapp.PageRenderer(servlet: this)
 
-def displayName(dp) {
-	dp.id.interfaceId+'.'+(dp.attributes.displayName?:dp.id.address)+'.'+dp.id.identifier
-}
-
 renderer.head={
 	title 'CCU-historian: Datenpunktkonfiguration'
 }
@@ -47,7 +43,7 @@ renderer.content={
 				if (preprocParam) {
 					preprocParam=TextFormat.parseNumber(preprocParam)?.doubleValue()
 					if (preprocParam==null) {
-						errors << (displayName(dp)+': Der Parameter ist keine gültige Zahl.')
+						errors << (dp.displayName+': Der Parameter ist keine gültige Zahl.')
 						return
 					}
 				} else {
@@ -57,21 +53,21 @@ renderer.content={
 				// validate preprocessing parameter
 				if (preprocType==1) {
 					if ((preprocParam?:0.0)<0.0) {
-						errors << (displayName(dp)+': Der Parameter darf bei Delta Kompression nicht negativ sein.')
+						errors << (dp.displayName+': Der Parameter darf bei Delta Kompression nicht negativ sein.')
 						return
 					}
 					if (dp.id.identifier in ['PRESS_LONG', 'PRESS_SHORT']) {
-						errors << (displayName(dp)+': Eine Delta Kompression ist hier nicht sinnvoll.')
+						errors << (dp.displayName+': Eine Delta Kompression ist hier nicht sinnvoll.')
 						return
 					}
 				} else if (preprocType==2) {
 					if ((preprocParam?:0.0)<0.0) {
-						errors << (displayName(dp)+': Der Parameter darf bei Zeitl. Kompression nicht negativ sein.')
+						errors << (dp.displayName+': Der Parameter darf bei Zeitl. Kompression nicht negativ sein.')
 						return
 					}
 				} else if (preprocType>=3 && preprocType<=5) {
 					if ((preprocParam?:0.0)<60.0) { 
-						errors << (displayName(dp)+': Der Parameter darf bei Mittelw./Min./Max.-Vorverarbeitung nicht kleiner als 60 Sekunden sein.')
+						errors << (dp.displayName+': Der Parameter darf bei Mittelw./Min./Max.-Vorverarbeitung nicht kleiner als 60 Sekunden sein.')
 						return 
 					}
 				}
@@ -87,9 +83,9 @@ renderer.content={
 				if (dp!=origDp) {
 					if (utils.catchToLog(log) {
 						database.updateDataPoint dp
-						success << displayName(dp)
+						success << dp.displayName
 					}) {
-						errors << (displayName(dp)+': Datenbankzugriff ist fehlgeschlagen.')
+						errors << (dp.displayName+': Datenbankzugriff ist fehlgeschlagen.')
 					}
 				}
 			}
