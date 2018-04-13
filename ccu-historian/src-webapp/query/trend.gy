@@ -97,7 +97,8 @@ def createPlot(parameters, dataPoints, plotState) {
 		if (dataPoint.historyString)
 			throw new Exception("Data point $dataPoint.displayName is not numeric")
 		def isAction=dataPoint.attributes.type=='ACTION'
-	
+		def isContinuous=dataPoint.id.identifier in parameters.trendDesign.continuousIdentifiers
+
 		// create/select y-axis
 		def axisKey=[dataPoint.attributes.type, dataPoint.attributes.unit, dataPoint.attributes.minimum, dataPoint.attributes.maximum]
 		def axisIdx=rangeAxes[axisKey]
@@ -141,7 +142,13 @@ def createPlot(parameters, dataPoints, plotState) {
 			renderer=new XYLineAndShapeRenderer()
 			renderer.baseShapesVisible=true
 			renderer.baseLinesVisible=false
-		} else renderer=new XYStepRenderer()
+		} else if (isContinuous) {
+			renderer=new XYLineAndShapeRenderer()
+			renderer.baseShapesVisible=false
+		} else { 
+			renderer=new XYStepRenderer()
+		}
+		
 		renderer.paint=TrendDesign.getDefaultColor(plotState.totalDataPointIdx)
 		applyDesign renderer, parameters.trendDesign.renderers, plotState.totalDataPointIdx
 		plot.setRenderer(dpIdx, renderer)
