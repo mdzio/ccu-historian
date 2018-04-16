@@ -179,17 +179,17 @@ renderer.content={
 						div(class:'col-lg-6') {
 							table(class:'table table-bordered table-hover') {
 								thead {
-									tr { th 'Schnittstelle'; th 'Kanal'; th 'Parameter'; th 'Gruppe' }
+									tr { th 'Kanal'; th 'Parameter'; th 'Gruppe' }
 								}
 								tbody {
 									int dpIdx=1
 									trendParams.groups.each { grpIdx, grp ->
 										// remove unsupported group indices
-										if (grpIdx>NUM_OF_GROUPS)
+										if (grpIdx>NUM_OF_GROUPS) {
 											grpIdx=NUM_OF_GROUPS
+										}
 										grp.dataPoints.each { dp ->
 											tr {
-												td dp.id.interfaceId
 												td dp.attributes.displayName?:dp.id.address
 												td dp.id.identifier
 												td {
