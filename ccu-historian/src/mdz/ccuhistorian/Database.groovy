@@ -675,5 +675,10 @@ public class Database implements Storage {
 		// add ROOM and FUNCTION
 		db.execute 'ALTER TABLE DATA_POINTS ADD IF NOT EXISTS ROOM VARCHAR BEFORE COMMENT'
 		db.execute 'ALTER TABLE DATA_POINTS ADD IF NOT EXISTS FUNCTION VARCHAR BEFORE COMMENT'
+		
+		// -> V2.0.0
+		// add database functions
+		db.execute 'CREATE ALIAS IF NOT EXISTS TS_TO_UNIX DETERMINISTIC FOR "mdz.ccuhistorian.DatabaseExtensions.TS_TO_UNIX"'
+		db.execute 'CREATE ALIAS IF NOT EXISTS UNIX_TO_TS DETERMINISTIC FOR "mdz.ccuhistorian.DatabaseExtensions.UNIX_TO_TS"'
 	}
 }
