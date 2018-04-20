@@ -1,3 +1,20 @@
+/*
+    CCU-Historian, a long term archive for the HomeMatic CCU
+    Copyright (C) 2011-2018 MDZ (info@ccu-historian.de)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 import mdz.ccuhistorian.webapp.TrendParameters
 import mdz.hc.DataPoint
 import groovy.transform.Field
@@ -19,7 +36,7 @@ renderer.head={
 }
 
 renderer.content={
-	def trendParams=new TrendParameters(request, database, webServer.config.trendDesigns)
+	def trendParams=TrendParameters.from(request, database, webServer.config.trendDesigns)
 	def apiKey=webServer.config.apiKeys ? [k:webServer.config.apiKeys[0]] : [:]
 	
 	trendParams.groups.values().dataPoints.flatten().each { dp ->
@@ -128,13 +145,13 @@ renderer.content={
 						img alt:'24h-Trend', src:buildUrl('../query/trend', [dp1:dp.idx], apiKey), 
 							width:trendParams.width, height:trendParams.height
 					}
-					// TODO: CSV export
+					a class:'btn btn-default', href:buildUrl('../query/csv', [dp1:dp.idx], apiKey), role:'button', 'Export CSV'
 					h4 'Wochen-Trend'
 					p {
-						img alt:'Wochen-Trend', src:buildUrl('../query/trend', [dp1:dp.idx, b:'-1W'], apiKey),
+						img alt:'Wochen-Trend', src:buildUrl('../query/trend', [dp1:dp.idx, b:'-1M'], apiKey),
 							width:trendParams.width, height:trendParams.height
 					}
-					// TODO: CSV export
+					a class:'btn btn-default', href:buildUrl('../query/csv', [dp1:dp.idx, b:'-1M'], apiKey), role:'button', 'Export CSV'
 				} else {
 					// show table
 					h4 'Werte der letzten Woche'

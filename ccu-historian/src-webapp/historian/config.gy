@@ -1,0 +1,90 @@
+/*
+ CCU-Historian, a long term archive for the HomeMatic CCU
+ Copyright (C) 2011-2018 MDZ (info@ccu-historian.de)
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+// setup page
+def renderer=new mdz.ccuhistorian.webapp.PageRenderer(servlet: this)
+
+renderer.head={
+	title 'CCU-historian: Konfiguration'
+}
+
+renderer.content={
+	div(class:'row') {
+		div(class:'col-sm-6 col-sm-offset-3') {
+			// save configuration
+			if (params.save) {
+				def err=[]
+				
+				// remove or set password?
+				if (params.'password-admin-remove') {
+					ctx.prefs.put('password_admin', '')
+				} else if (params.'password-admin') {
+					if (params.'password-admin' == params.'password-admin-check') {
+						ctx.prefs.put('password_admin', utils.secureHash(params.'password-admin'))
+					} else {
+						err << 'Das Passwort und die Passwortwiederholung stimmen nicht überein!'
+					}
+				}  
+				
+				// persist config
+				ctx.prefs.flush()
+				
+				// display result		
+				if (err) {
+					err.each { e ->
+						div(class:'alert alert-danger', role:'alert', style:'margin-top: 0.5em') {
+							span class:'glyphicon glyphicon-exclamation-sign'
+							mkp.yield ' ' + e
+						}
+					}
+				} else {	
+					div(class:'alert alert-success', role:'alert', style:'margin-top: 0.5em') {
+						span class:'glyphicon glyphicon-exclamation-sign'
+						mkp.yield ' Die Änderungen wurden abgespeichert!'
+					}
+				}
+			}
+		
+			// display form
+			def disabledPassword=ctx.prefs.get('password_admin', '') ? [:] : [disabled:'disabled']
+	
+			form(method:'post') {
+				div(class:'form-group') {
+					label class:'control-label', 'Passwort'
+					input class:'form-control', type:'password', name:'password-admin', placeholder:'Passwort'
+					p class:'help-block', 'Das Zugangspasswort für die Web-Seiten setzen oder ändern. ' +
+						'Bei einem leeren Feld wird das Passwort nicht geändert.'
+				}
+				div(class:'form-group') {
+					label class:'control-label', 'Passwortwiederholung'
+					input class:'form-control', type:'password', name:'password-admin-check', placeholder:'Passwort'
+					p class:'help-block', 'Passwortwiederholung zur Überprüfung der Eingabe.'
+				}
+				div(class:'checkbox') {
+					label {
+						input(type:'checkbox', name:'password-admin-remove', *:disabledPassword, 
+							'Durch das Setzen dieser Option wird der Passwortschutz entfernt.')
+					}
+				}
+				button class:'btn btn-primary', type:'submit', name:'save', value:1, 'Speichern'
+			}
+		}	
+	}
+}
+
+// render page
+renderer.render()

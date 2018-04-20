@@ -33,7 +33,7 @@ class TrendParametersTest extends GroovyTestCase {
 	}
 
 	public void testCompleteParameters() {
-		def tp=new TrendParameters(
+		def tp=TrendParameters.from(
 			requestStub([
 				w:['320'],
 				h:['240'],
@@ -78,7 +78,7 @@ class TrendParametersTest extends GroovyTestCase {
 	}
 	
 	public void testPartialParameters() {
-		def tp=new TrendParameters(
+		def tp=TrendParameters.from(
 			requestStub([
 				dp1:['42'],
 				dp3:['1'],
@@ -112,5 +112,59 @@ class TrendParametersTest extends GroovyTestCase {
 		assert [params.dp1, params.dp2]==[['42'], ['1']]
 		assert [params.g1, params.g2]==[['1'], ['2']]
 		assert [params.gh1, params.gh2]==[['2'], ['1']]
+	}
+	
+	public void testParametersV1() {
+		def tp=TrendParameters.from(
+			requestStub([
+				i:['42', '1'],
+				b:['2017'], e:['2018'],
+				g:['1', '3'],
+				gh:['5', '2'],
+				t:['my']
+			]),
+			storageStub(),
+			[
+				'my':new TrendDesign(identifier:'my design')
+			]
+		)
+		
+		assert tp.width==640
+		assert tp.height==260
+		assert tp.timeRange.begin==Date.parse('yyyy', '2017')
+		assert tp.timeRange.end==Date.parse('yyyy', '2018')
+		assert tp.trendDesign.identifier=='my design'
+		assert tp.groups.size()==2
+		assert tp.groups[1].height==5
+		assert tp.groups[1].dataPoints.idx==[42]
+		assert tp.groups[3].height==2
+		assert tp.groups[3].dataPoints.idx==[1]
+	}
+	
+	public void testParametersV1BeginAndDuration() {
+		def tp=TrendParameters.from(
+			requestStub([
+				i:['42'],
+				b:['2017'], d:['1D  2h'],
+			]),
+			storageStub(),
+			[:]
+		)
+		assert tp.timeRange.begin==Date.parse('yyyy', '2017')
+		assert tp.timeRange.end==Date.parse('yyyy-MM-dd hh:mm:ss', '2017-01-02 02:00:00')
+	}
+
+	public void testParametersV1Duration() {
+		def now=new Date()
+		def tp=TrendParameters.from(
+			requestStub([
+				i:['42'],
+				d:['1W'],
+			]),
+			storageStub(),
+			[:]
+		)
+		assert Math.abs(now.time-tp.timeRange.end.time)<1000
+		assert tp.timeRange.end.time-tp.timeRange.begin.time==7*24*60*60*1000
 	}
 }

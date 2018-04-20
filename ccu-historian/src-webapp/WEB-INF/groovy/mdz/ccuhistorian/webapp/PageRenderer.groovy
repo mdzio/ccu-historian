@@ -209,9 +209,9 @@ public class PageRenderer {
 							}
 							ul(class:'dropdown-menu') {
 								li { a href:'dpconfig.gy', 'Datenpunktkonfiguration' }
+								li { a href:'config.gy', 'Historian Konfiguration' }
 								// TODO
 								/*
-								li { a href:'config.html', 'CCU-Historian Konfiguration' }
 								li { a href:'diagnosis.html', 'Diagnose' }
 								*/
 								// database web access
