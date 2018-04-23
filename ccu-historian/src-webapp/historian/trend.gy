@@ -175,7 +175,7 @@ renderer.content={
 		p(class:'text-center', style:'margin-top: 0.5em') {
 			// if required, use API key
 			def apiKey=webServer.config.apiKeys ? [k:webServer.config.apiKeys[0]] : [:]
-			img alt:'Trend-Darstellung', src:buildUrl('../query/trend', trendParams.parameters, apiKey),
+			img alt:'Bitte warten: Die Trend-Darstellung wird generiert!', src:buildUrl('../query/trend', trendParams.parameters, apiKey),
 				width:trendParams.width, height:trendParams.height
 		}
 		
