@@ -215,13 +215,13 @@ public class Preprocessor extends BasicProducer<Event> implements Processor<Even
 			ip.intervalLength=intervalLength
 			switch (type) {
 				case Type.AVG_COMPR: 
-					ip.function = Preprocessor.&avgComprFunction as IntervalProcessor.Function
+					ip.function = Preprocessor.&avgComprFunction as IntervalFunction
 					break 
 				case Type.MIN_COMPR: 
-					ip.function = Preprocessor.&minComprFunction as IntervalProcessor.Function
+					ip.function = Preprocessor.&minComprFunction as IntervalFunction
 					break 
 				case Type.MAX_COMPR: 
-					ip.function = Preprocessor.&maxComprFunction as IntervalProcessor.Function
+					ip.function = Preprocessor.&maxComprFunction as IntervalFunction
 					break 
 			}
 			ip.addConsumer { Event e -> produce e }

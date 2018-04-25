@@ -25,14 +25,9 @@ import mdz.hc.ProcessValue
 
 @CompileStatic
 class IntervalProcessor extends BasicProducer<Event> implements Processor<Event, Event> {
-
-	public interface Function {
-		// parameter events must not be modified
-		Event apply(long intervalBegin, long intervalEnd, List<Event> events)
-	}
 	
 	long intervalLength // milliseconds
-	Function function 
+	IntervalFunction function 
 	
 	private List<Event> events = []
 	private Long intervalEnd

@@ -22,7 +22,7 @@ class BinRpcConstants {
 	public static final byte[] HEADER_START 	= ['B', 'i', 'n']
 	public static final byte HEADER_REQUEST 	= 0x00
 	public static final byte HEADER_RESPONSE 	= 0x01
-	public static final byte HEADER_FAULT 		= 0xFF
+	public static final byte HEADER_FAULT 		= (byte)0xFF
 	public static final byte HEADER_SIZE 		= 8
 	
 	public static final int TYPE_INT 			= 0x00000001
