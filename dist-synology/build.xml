@@ -17,6 +17,7 @@
 		<fixcrlf eol="unix" file="../dist-generic/src/ccu-historian-sample.config" destDir="${tmpdir}" />
 		<!-- convert LICENSE.txt to unix eol -->
 		<fixcrlf eol="unix" file="../LICENSE.txt" destDir="${tmpdir}" />
+		
 		<!-- build pkgfile -->
 		<tar destfile="${tmpdir}/package.tgz" compression="gzip">
 			<!-- ccu-historian -->
@@ -32,14 +33,16 @@
 			<!-- ui files -->
 			<tarfileset dir="src/package" username="root" group="root" />
 		</tar>
-		<!-- update INFO file with md5 checksum -->
 		<checksum file="${tmpdir}/package.tgz" property="checksum" />
 		<echo>Checksum: ${checksum}</echo>
-		<replaceregexp file="src/root/INFO" match='(checksum\s*=\s*)"[^"]+"' replace='\1"${checksum}"' />
-		<!-- update INFO with version -->
-		<replaceregexp file="src/root/INFO" match='(version\s*=\s*)"[^"]+"' replace='\1"${version}"' />
-		<!-- update INFO with beta flag -->
-		<replaceregexp file="src/root/INFO" match='(beta\s*=\s*)"[^"]+"' replace='\1"${betaflag}"' />
+		
+		<!-- copy and update INFO file -->
+		<copy file="src/root/INFO" toFile="${tmpdir}/INFO">
+			<filterchain>
+				<expandproperties />
+			</filterchain>
+		</copy>
+		
 		<!-- build destfile -->
 		<tar destfile="${destfile}" compression="gzip">
 			<tarfileset dir="${tmpdir}" username="root" group="root">
@@ -48,12 +51,17 @@
 			<tarfileset dir="${tmpdir}" fullpath="LICENSE" username="root" group="root">
 				<include name="LICENSE.txt" />
 			</tarfileset>
-			<!-- exclude executable files -->
+			<!-- include patched INFO -->
+			<tarfileset dir="${tmpdir}" username="root" group="root">
+				<include name="INFO" />
+			</tarfileset>
+			<!-- remaining files: exclude executable files and INFO -->
 			<tarfileset dir="src/root" username="root" group="root">
 				<exclude name="WIZARD_UIFILES/*.sh" />
 				<exclude name="scripts/*" />
+				<exclude name="INFO" />
 			</tarfileset>
-			<!-- only include executable files -->
+			<!-- remaining files: only include executable files -->
 			<tarfileset dir="src/root" filemode="755" username="root" group="root">
 				<include name="WIZARD_UIFILES/*.sh" />
 				<include name="scripts/*" />
