@@ -28,9 +28,10 @@ start() {
         fi
       fi
 
-      # lets set devices.historianAddress
+      # lets set the own ip address
       ipaddress=$(ip -4 route get 1 | head -1 | cut -d' ' -f8 | tr -d '\n')
       if [ -n "${ipaddress}" ]; then
+        sed -i "s/devices\.historianAddress=.*/devices.historianAddress='${ipaddress}'/g" ${ADDON_DIR}/ccu-historian.config
         sed -i "s/webServer\.historianAddress=.*/webServer.historianAddress='${ipaddress}'/g" ${ADDON_DIR}/ccu-historian.config
         sed -i "s/webServer\.menuLinks\.link1\.address=.*/webServer.menuLinks.link1.address='http:\/\/${ipaddress}'/g" ${ADDON_DIR}/ccu-historian.config
       fi

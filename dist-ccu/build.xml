@@ -1,14 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="dist-ccu" default="build">
+	<!-- setup properties -->
+	<property file="../ccu-historian/build.properties" />
+	<property name="destfile" value="build/ccu-historian-addon-${version}.tar.gz" />
+	<property name="tmpdir" value="build/tmp" />
+	
 	<target name="build">
-		<property file="../ccu-historian/build.properties" />
-		<property name="destfile" value="build/ccu-historian-addon-${version}.tar.gz" />
-
+		<mkdir dir="${tmpdir}" />
+		
 		<!-- write version to file, use unix eol -->
-		<echo file="src/VERSION">${version}&#10;</echo>
+		<echo file="${tmpdir}/VERSION">${version}&#10;</echo>
 
 		<!-- build tar -->
 		<tar destfile="${destfile}" compression="gzip">
+			<!-- version file -->
+			<tarfileset dir="${tmpdir}" username="root" group="root">
+				<include name="VERSION" />
+			</tarfileset>
 			<!-- normal files -->
 			<tarfileset dir="src" username="root" group="root">
 				<exclude name="update_script" />
@@ -40,5 +48,6 @@
 		<delete>
 			<fileset dir="build" includes="ccu-historian-addon-*.tar.gz" />
 		</delete>
+		<delete dir="${tmpdir}" />
 	</target>
 </project>
