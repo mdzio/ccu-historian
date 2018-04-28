@@ -1,15 +1,19 @@
 #!/usr/bin/env tclsh
-set fileName "/usr/local/addons/ccu-historian/ccu-historian.config"
-catch {set fptr [open $fileName r]}
-set contents [read -nonewline $fptr]
-close $fptr
-set splitCont [split $contents "\n"]
-foreach ele $splitCont {
-  if {[regexp {^webServer.port=(.*)} $ele -> port]} {
-    set hostName [info hostname]
-    puts "<html>"
-    puts "<meta http-equiv='refresh' content='0; url=http://$hostName:$port/' />"
-    puts "</html>"
-    break
+catch {
+  set fileName /usr/local/addons/ccu-historian/ccu-historian.config
+  set file [open $fileName r]
+  set config [read -nonewline $file]
+  close $file
+}
+if {[info exists config]} {
+  set lines [split $config "\n"]
+  foreach line $lines {
+    regexp {^webServer.historianAddress='(.*)'} $line -> ip
+    regexp {^webServer.port=(.*)} $line -> port
   }
+}
+if {[info exists ip] && [info exists port]} {
+  puts "<html><head><meta http-equiv='refresh' content='0; url=http://$ip:$port/' /></head></html>"
+} else {
+  puts "<html><body>Error reading file ccu-historian.config!</body></html>"
 }

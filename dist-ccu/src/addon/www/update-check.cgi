@@ -1,4 +1,4 @@
-#!/bin/tclsh
+#!/usr/bin/env tclsh
 set infoUrl https://api.github.com/repos/mdzio/ccu-historian/releases/latest
 set infoError [catch {
   set info [exec wget -q -O- --no-check-certificate $infoUrl]
@@ -10,7 +10,7 @@ set infoError [catch {
 set downloadCmd [regexp {\mcmd=download\M} $env(QUERY_STRING)]
 if {$downloadCmd} {
   if {$infoError} {
-    puts "<html><body>Fehler: Download-Link kann nicht ermittelt werden!</body></html>"
+    puts "<html><body>Error determining download link!</body></html>"
   } else {
     puts "<html><head><meta http-equiv='refresh' content='0; url=$downloadUrl' /></head></html>"
   }
