@@ -71,8 +71,8 @@ start() {
 }
 
 info() {
-    echo "Info: <b>CCU-Historian Addon</b><br>"
-    echo "Info: (c) 2011-2017 Mathias Dzionsko, Jens Maus<br>"
+    echo "Info: <b>CCU-Historian Add-On</b><br>"
+    echo "Info: (c) 2011-2018 Mathias Dzionsko, u.a.<br>"
     echo "Info: <a href="https://github.com/mdzio/ccu-historian" target="_blank">https://github.com/mdzio/ccu-historian</a>"
     echo "Name: CCU-Historian"
     echo "Version: $(cat ${ADDON_DIR}/VERSION)"
