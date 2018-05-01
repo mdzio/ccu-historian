@@ -6,18 +6,26 @@ RCD_DIR=/usr/local/etc/config/rc.d
 CONFIG_DIR=/usr/local/etc/config
 WWW_DIR=${CONFIG_DIR}/addons/www/${ADDONNAME}
 
+# Logging to syslog is currently not supported by the CCU during the install process.
+
 if [ "$1" = "" ]; then
-  echo "CCU1"
-  lcdtool "Addon not for CCU1...    "
+  echo "Add-On is not for CCU1"
+  lcdtool "Add-On is not for CCU1   "
   exit 1
 elif [ "$1" = "CCU2" ]; then
-  echo "CCU2"
+  echo "Installing on CCU2"
   if [ "`mount | grep ubi1:user | grep /usr/local | wc -l`" -eq 0 ]; then
     mount -t ubifs ubi1:user /usr/local
   fi
 elif [ "$1" == "HM-RASPBERRYMATIC" ]; then
-  echo "HM-RASPBERRYMATIC"
+  echo "Installing on RaspberryMatic"
   mount /usr/local
+fi
+
+# stop ccu-historian, if already installed
+if [ -f $CONFIG_DIR/rc.d/ccu-historian ]; then
+  echo "Previous installation detected"
+  $CONFIG_DIR/rc.d/ccu-historian stop
 fi
 
 # create directories
@@ -49,5 +57,7 @@ fi
 ${ADDON_DIR}/update_addon ccu-historian addon/ccu-historian_addon.cfg
 
 sync
+
+echo "Installed"
 
 exit 0

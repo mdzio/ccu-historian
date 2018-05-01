@@ -7,17 +7,17 @@ CONFIG_DIR=/usr/local/etc/config
 WWW_DIR=${CONFIG_DIR}/addons/www/${ADDONNAME}
 
 stop() {
-    echo -n "Stopping CCU-Historian... "
-    logger -t homematic -p user.info "stopping ccu-historian"
+    logger -t ccu-historian -p user.debug "Stopping"
     start-stop-daemon -K -q -p /var/run/ccu-historian.pid
-    echo "OK"
+    logger -t ccu-historian -p user.info "Stopped"
 }
 
 start() {
-    echo -n "Starting CCU-Historian... "
-    logger -t homematic -p user.info "starting ccu-historian"
+    logger -t ccu-historian -p user.debug "Starting"
 
     if [[ ! -e ${ADDON_DIR}/ccu-historian.config ]]; then
+      logger -t ccu-historian -p user.info "Generating configuration"
+      
       cp -a ${ADDON_DIR}/ccu-historian-sample.config ${ADDON_DIR}/ccu-historian.config
 
       # lets set devices.device1.plugin1.type if CUxD is installed
@@ -63,11 +63,12 @@ start() {
     else
       echo "ERROR: Java binary not found"
       logger -t homematic -p user.error "ERROR: Java binary not found for CCU-Historian startup"
+      exit 1
     fi
 
     # lets start ccu-historian
     start-stop-daemon -S -q -b -m -p /var/run/ccu-historian.pid --exec ${JAVA_BIN} -- -Xmx${MAXHEAP} -Djava.util.prefs.userRoot=/usr/local/addons/ccu-historian -Djava.util.prefs.systemRoot=/usr/local/addons/ccu-historian -jar ${ADDON_DIR}/ccu-historian/ccu-historian.jar -config ${ADDON_DIR}/ccu-historian.config -loglevel off
-    echo "OK"
+    logger -t ccu-historian -p user.info "Started"
 }
 
 info() {
@@ -82,12 +83,13 @@ info() {
 }
 
 uninstall() {
+    logger -t ccu-historian -p user.debug "Uninstalling"
     stop
     ${ADDON_DIR}/update_addon ccu-historian
     rm -rf ${ADDON_DIR}
     rm ${RCD_DIR}/ccu-historian
     rm -rf ${WWW_DIR}
-    logger -t homematic -p user.info "uninstalled ccu-historian"
+    logger -t ccu-historian -p user.info "Uninstalled"
 }
 
 case "$1" in
