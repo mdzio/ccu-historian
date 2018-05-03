@@ -20,15 +20,13 @@
 			<!-- normal files -->
 			<tarfileset dir="src" username="root" group="root">
 				<exclude name="update_script" />
-				<exclude name="addon/ccu2/update_addon" />
-				<exclude name="addon/ccurm/update_addon" />
+				<exclude name="addon/update_hm_addons.tcl" />
 				<exclude name="addon/rc.d/ccu-historian" />
 			</tarfileset>
 			<!-- executable files -->
 			<tarfileset dir="src" filemode="755" username="root" group="root">
 				<include name="update_script" />
-				<include name="addon/ccu2/update_addon" />
-				<include name="addon/ccurm/update_addon" />
+				<include name="addon/update_hm_addons.tcl" />
 				<include name="addon/rc.d/ccu-historian" />
 			</tarfileset>
 			<!-- directory /ccu-historian -->

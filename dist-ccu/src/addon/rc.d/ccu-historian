@@ -85,7 +85,7 @@ info() {
 uninstall() {
     logger -t ccu-historian -p user.debug "Uninstalling"
     stop
-    ${ADDON_DIR}/update_addon ccu-historian
+    ${ADDON_DIR}/update_hm_addons.tcl remove
     rm -rf ${ADDON_DIR}
     rm ${RCD_DIR}/ccu-historian
     rm -rf ${WWW_DIR}

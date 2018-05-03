@@ -48,13 +48,8 @@ cp -af addon/rc.d/* ${RCD_DIR}/
 cp -af addon/www/* ${WWW_DIR}/
 
 # add menu entry
-touch ${CONFIG_DIR}/hm_addons.cfg
-if [ "$1" = "CCU2" ]; then
-  cp -af addon/ccu2/update_addon ${ADDON_DIR}/
-elif [ "$1" == "HM-RASPBERRYMATIC" ]; then
-  cp -af addon/ccurm/update_addon ${ADDON_DIR}/
-fi
-${ADDON_DIR}/update_addon ccu-historian addon/ccu-historian_addon.cfg
+cp -af addon/update_hm_addons.tcl ${ADDON_DIR}/
+${ADDON_DIR}/update_hm_addons.tcl add
 
 sync
 
