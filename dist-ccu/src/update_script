@@ -49,7 +49,7 @@ cp -af addon/www/* ${WWW_DIR}/
 
 # add menu entry
 cp -af addon/update_hm_addons.tcl ${ADDON_DIR}/
-${ADDON_DIR}/update_hm_addons.tcl add
+${ADDON_DIR}/update_hm_addons.tcl -a ccu-historian -name CCU-Historian -url /addons/ccu-historian/config.cgi -de "Betriebsdatenerfassung f&uuml;r die CCU" -en "Operating data acquisition for the CCU"
 
 sync
 
