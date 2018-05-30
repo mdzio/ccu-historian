@@ -138,6 +138,16 @@ class ExtendedStorage implements Storage {
 		fireOnRead()
 		return storage.with(cl)
 	}
+	
+	@CompileStatic
+	String getConfig(String name) {
+		return storage.getConfig(name)
+	}
+	
+	@CompileStatic
+	void setConfig(String name, String value) {
+		storage.setConfig(name, value)
+	}
 
 	/**
 	 * Forward reading of configuration properties.

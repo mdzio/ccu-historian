@@ -59,7 +59,9 @@ public class Database implements Storage {
 	private final static String TABLE_PREFIX_DEVICE_STRING='VS_'
 	private final static String TABLE_PREFIX_SYSVAR_DOUBLE='S_'
 	private final static String TABLE_PREFIX_SYSVAR_STRING='SS_'
-	
+
+	private final static String CONFIG_DATABASE_VERSION='internal.databaseVersion'
+		
 	public Database(DatabaseConfig config, Base base) {
 		log.info 'Connecting to database'
 		this.config=config
@@ -680,5 +682,26 @@ public class Database implements Storage {
 		// add database functions
 		db.execute 'CREATE ALIAS IF NOT EXISTS TS_TO_UNIX DETERMINISTIC FOR "mdz.ccuhistorian.DatabaseExtensions.TS_TO_UNIX"'
 		db.execute 'CREATE ALIAS IF NOT EXISTS UNIX_TO_TS DETERMINISTIC FOR "mdz.ccuhistorian.DatabaseExtensions.UNIX_TO_TS"'
+		// add configuration table
+		db.execute 'CREATE TABLE IF NOT EXISTS CONFIG (NAME VARCHAR(128) NOT NULL, VALUE VARCHAR(8192))'
+		if (getConfig(CONFIG_DATABASE_VERSION)==null)
+			setConfig(CONFIG_DATABASE_VERSION, '0')
+	}
+	
+	@CompileStatic 
+	public String getConfig(String name) {
+		def row=db.firstRow('SELECT VALUE FROM CONFIG WHERE NAME=?', name)
+		String value=row?(String)(row[0]):null
+		log.fine("Read config: $name=$value")
+		value
+	}
+	
+	@CompileStatic
+	public void setConfig(String name, String value) {
+		log.fine("Writing config: $name=$value")
+		int cnt=db.executeUpdate('UPDATE CONFIG SET VALUE=? WHERE NAME=?', value, name)
+		if (cnt==0) {
+			db.executeUpdate('INSERT INTO CONFIG VALUES (?, ?)', name, value)
+		}
 	}
 }
