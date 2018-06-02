@@ -31,10 +31,18 @@ public class DataPoint {
 	
 	// Bits 0... 3 were used for the interface type. 
 	// They can still be set in existing databases (<V0.7.7)!
-	static public final int FLAGS_HISTORY_HIDDEN   	= 0x00000010
-	static public final int FLAGS_HISTORY_DISABLED 	= 0x00000020
-	static public final int FLAGS_HISTORY_STRING	= 0x00000040
-
+	
+	// Data point is hidden and is not displayed by default.
+	static public final int FLAGS_HISTORY_HIDDEN   	 = 0x00000010
+	// Data point is not recorded.
+	static public final int FLAGS_HISTORY_DISABLED 	 = 0x00000020
+	// Data type of the history is string and not double.
+	static public final int FLAGS_HISTORY_STRING	 = 0x00000040
+	// Changes of the data point value are continuous.
+	static public final int FLAGS_CONTINUOUS		 = 0x00000080
+	// Metadata of the data point should not be synchronized.
+	static public final int FLAGS_NO_SYNCHRONIZATION = 0x00000100
+	
 	// Attributes of Data Preprocessing
 	static public final String ATTR_PREPROC_TYPE	= 'preprocType'
 	static public final String ATTR_PREPROC_PARAM	= 'preprocParam'
@@ -92,23 +100,39 @@ public class DataPoint {
 	public boolean isHistoryHidden() { (managementFlags & FLAGS_HISTORY_HIDDEN)!=0 }
 	public void setHistoryHidden(boolean isHidden) {
 		managementFlags&= ~FLAGS_HISTORY_HIDDEN
-		managementFlags|= (isHidden?FLAGS_HISTORY_HIDDEN:0)
+		managementFlags|= (isHidden ? FLAGS_HISTORY_HIDDEN : 0)
 	}
 	
 	public boolean isHistoryDisabled() { (managementFlags & FLAGS_HISTORY_DISABLED)!=0 }
 	public void setHistoryDisabled(boolean isDisabled) {
 		managementFlags&= ~FLAGS_HISTORY_DISABLED
-		managementFlags|= (isDisabled?FLAGS_HISTORY_DISABLED:0)
+		managementFlags|= (isDisabled ? FLAGS_HISTORY_DISABLED : 0)
 	}
 
 	public boolean isHistoryString() { (managementFlags & FLAGS_HISTORY_STRING)!=0 }
 	public void setHistoryString(boolean isString) {
 		managementFlags&= ~FLAGS_HISTORY_STRING
-		managementFlags|= (isString?FLAGS_HISTORY_STRING:0)
+		managementFlags|= (isString ? FLAGS_HISTORY_STRING : 0)
 	}
-    
+
+	public boolean isContinuous() { (managementFlags & FLAGS_CONTINUOUS)!=0 }
+	public void setContinuous(boolean continuous) {
+		managementFlags&= ~FLAGS_CONTINUOUS
+		managementFlags|= (continuous ? FLAGS_CONTINUOUS : 0)
+	}
+
+	public boolean isNoSynchronization() { (managementFlags & FLAGS_NO_SYNCHRONIZATION)!=0 }
+	public void setNoSynchronizationc(boolean noSynchronization) {
+		managementFlags&= ~FLAGS_NO_SYNCHRONIZATION
+		managementFlags|= (noSynchronization ? FLAGS_NO_SYNCHRONIZATION : 0)
+	}
+
 	public String getDisplayName() {
-		id.interfaceId+'.'+(attributes.displayName?:id.address)+'.'+id.identifier
+		if (isNoSynchronization() && attributes.displayName) {
+			attributes.displayName
+		} else {
+			id.interfaceId+'.'+(attributes.displayName?:id.address)+'.'+id.identifier
+		}
 	}
 	
 	@Override

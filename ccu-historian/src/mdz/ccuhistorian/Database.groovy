@@ -642,7 +642,7 @@ public class Database implements Storage {
 	
 	@CompileStatic
 	private void prepareDatabase() {
-		log.fine 'Database: Preparing table DATA_POINTS'
+		log.fine 'Preparing database'
 		
 		// from V0.7.6 upwards
 		db.execute '''CREATE TABLE IF NOT EXISTS DATA_POINTS (
@@ -684,8 +684,17 @@ public class Database implements Storage {
 		db.execute 'CREATE ALIAS IF NOT EXISTS UNIX_TO_TS DETERMINISTIC FOR "mdz.ccuhistorian.DatabaseExtensions.UNIX_TO_TS"'
 		// add configuration table
 		db.execute 'CREATE TABLE IF NOT EXISTS CONFIG (NAME VARCHAR(128) NOT NULL, VALUE VARCHAR(8192))'
+		// introduce database version
 		if (getConfig(CONFIG_DATABASE_VERSION)==null)
 			setConfig(CONFIG_DATABASE_VERSION, '0')
+			
+		// migrate database
+		// initialize continuous flag for existing data points
+		migrateTo(1, '''UPDATE DATA_POINTS SET STATE=BITOR(STATE, 0x80) WHERE IDENTIFIER IN (
+			'ACTUAL_HUMIDITY', 'ACTUAL_TEMPERATURE', 'AIR_PRESSURE', 'BRIGHTNESS',
+			'CURRENT', 'ENERGY_COUNTER', 'FREQUENCY', 'HUMIDITY', 'ILLUMINATION',
+			'LUX', 'POWER', 'RAIN_COUNTER', 'SUNSHINEDURATION', 'TEMPERATURE',
+			'VOLTAGE', 'WIND_SPEED')''')
 	}
 	
 	@CompileStatic 
@@ -702,6 +711,15 @@ public class Database implements Storage {
 		int cnt=db.executeUpdate('UPDATE CONFIG SET VALUE=? WHERE NAME=?', value, name)
 		if (cnt==0) {
 			db.executeUpdate('INSERT INTO CONFIG VALUES (?, ?)', name, value)
+		}
+	}
+	
+	@CompileStatic
+	private void migrateTo(int toVersion, String sql) {
+		if (getConfig(CONFIG_DATABASE_VERSION).toInteger() < toVersion) {
+			log.info "Migrating database to version $toVersion"
+			db.execute sql
+			setConfig(CONFIG_DATABASE_VERSION, toVersion.toString())
 		}
 	}
 }
