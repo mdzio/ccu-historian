@@ -161,6 +161,27 @@ public class HmBinRpcInterface extends BasicProducer<RawEvent> implements Interf
 	
 	private void updateDeviceProperties(List<DataPoint> dps, long maxCacheAge) {
 		dps.each { DataPoint dp ->
+			// detect a continuous data point
+			dp.continuous=dp.id.identifier in [
+				'ACTUAL_HUMIDITY',
+				'ACTUAL_TEMPERATURE',
+				'AIR_PRESSURE',
+				'BRIGHTNESS',
+				'CURRENT',
+				'ENERGY_COUNTER',
+				'FREQUENCY',
+				'HUMIDITY',
+				'ILLUMINATION',
+				'LUX',
+				'POWER',
+				'RAIN_COUNTER',
+				'SUNSHINEDURATION',
+				'TEMPERATURE',
+				'VOLTAGE',
+				'WIND_SPEED',
+			]
+			
+			// device properties never changes
 			if (dp.attributes.type!=null) return
 			DevicePropCacheValue cachedProperties=devicePropCache[dp.id]
 			if (cachedProperties==null) {

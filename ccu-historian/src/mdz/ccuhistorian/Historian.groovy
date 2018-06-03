@@ -127,14 +127,13 @@ class Historian implements Runnable {
 				if (dbDp) {
 					DataPoint old=(DataPoint) dbDp.clone()
 					dbDp.attributes.putAll itfDp.attributes
-					if (dbDp!=old)
+					if (dbDp!=old && !dbDp.noSynchronization)
 						Exceptions.catchToLog(log) {
 							database.updateDataPoint dbDp
 						}
 				} else {
 					log.info "Historian: Creating data point $itfDp.id"
 					Exceptions.catchToLog(log) {
-						itfDp.historyString=itfDp.attributes.type=='STRING'
 						database.createDataPoint itfDp
 					}
 				}
@@ -170,7 +169,9 @@ class Historian implements Runnable {
 		List<DataPoint> dataPoints=[]
 		interfaces.each { Interface itf ->
 			dataPoints.addAll(
-				database.getDataPointsOfInterface(itf.name).findAll { !it.historyDisabled }
+				database.getDataPointsOfInterface(itf.name).findAll { 
+					!it.historyDisabled && !it.noSynchronization 
+				}
 			)
 		}
 

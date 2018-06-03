@@ -41,24 +41,6 @@ class TrendDesign {
 	List<Closure> rangeAxes
 	List<Closure> series
 	List<Closure> renderers
-	Set<String> continuousIdentifiers=[
-		'ACTUAL_HUMIDITY',
-		'ACTUAL_TEMPERATURE',
-		'AIR_PRESSURE',
-		'BRIGHTNESS',
-		'CURRENT',
-		'ENERGY_COUNTER',
-		'FREQUENCY',
-		'HUMIDITY',
-		'ILLUMINATION',
-		'LUX',
-		'POWER',
-		'RAIN_COUNTER',
-		'SUNSHINEDURATION',
-		'TEMPERATURE',
-		'VOLTAGE',
-		'WIND_SPEED',
-	] as Set
 		
 	static Paint getDefaultColor(int idx) {
 		defaultColors[idx%defaultColors.length]
