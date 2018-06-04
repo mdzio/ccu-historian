@@ -73,10 +73,12 @@ public class HmReinitTask {
 			Exceptions.catchToLog(log) {
 				log.finer 'Checking timeouts'
 				Date now=[]
-				Collection<HmReinitable> timedOut=interfaces.findAll { now.time-it.lastCommTime.time>timeout }
-				if (timedOut.size()==interfaces.size()) {
-					log.warning "Timeout on interface(s) ${timedOut*.name.join(', ')}; reinitializing all callbacks"
-					interfaces.each { itf -> Exceptions.catchToLog(log) { itf.init() } }
+				// find all timed out interfaces
+				interfaces.findAll { now.time-it.lastCommTime.time>timeout }.each { ri ->
+					log.warning "Timeout on interface $ri.name: reinitializing callback"
+					Exceptions.catchToLog(log) { 
+						ri.init()
+					}
 				}
 			}
 		}
