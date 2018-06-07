@@ -127,7 +127,7 @@ renderer.content={
 				div(class:'input-group') {
 					span class:'input-group-addon', 'Start'
 					input type:'text', id:'time-begin', name:'b', class:'form-control', placeholder:'Start', 
-						value:trendParams.timeRange.beginText, autofocus:'autofocus'
+						value:trendParams.timeRange.beginText
 				}
 			}
 			div(class:'col-sm-3') {

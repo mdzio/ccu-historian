@@ -144,8 +144,7 @@ renderer.content={
 					div(class:'input-group-addon') {
 						span class:'glyphicon glyphicon-filter'
 					}
-					input id:'filter-input', type:'text', class:'form-control', placeholder:'Filterausdruck',
-						autofocus:'autofocus'
+					input id:'filter-input', type:'text', class:'form-control', placeholder:'Filterausdruck'
 					span(class:'input-group-btn') {
 						button(id:'reset-filter-btn', class:'btn btn-default', type:'button') {
 							span class:'glyphicon glyphicon-remove'
