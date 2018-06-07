@@ -89,7 +89,7 @@ renderer.content={
 		}.collectEntries()
 		
 		// data point table
-        table(id:'dp-table', class:'table table-bordered table-hover') {
+        table(id:'dp-table', class:'table table-bordered table-condensed table-hover') {
             thead {
                 tr {
                     th 'Ausw.'

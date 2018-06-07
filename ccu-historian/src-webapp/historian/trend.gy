@@ -194,7 +194,7 @@ renderer.content={
 					div(class:'row') {
 						// data point groups
 						div(class:'col-lg-6') {
-							table(class:'table table-bordered table-hover') {
+							table(class:'table table-bordered table-condensed table-hover') {
 								thead {
 									tr { th 'Kanal'; th 'Parameter'; th 'Gruppe' }
 								}
@@ -226,7 +226,7 @@ renderer.content={
 						}
 						// group heights
 						div(class:'col-lg-3') {
-							table(class:'table table-bordered table-hover') {
+							table(class:'table table-bordered table-condensed table-hover') {
 								thead {
 									tr { th 'Gruppe'; th 'Höhe' }
 								}
@@ -252,7 +252,7 @@ renderer.content={
 						}
 						div(class:'col-lg-3') {
 							// trend size
-							table(class:'table table-bordered table-hover') {
+							table(class:'table table-bordered table-condensed table-hover') {
 								thead {
 									tr { th 'Größe'; th 'Wert' }
 								}

@@ -115,8 +115,9 @@ public class PageRenderer {
 			link href:'../external/bootstrap/css/bootstrap.css', rel:'stylesheet'
 
 			// own CSS
-			// TODO: new theme
-			//link href:'ccu-historian-bootstrap.css', rel:'stylesheet'
+			style {
+				mkp.yieldUnescaped '.table > tbody > tr > td { vertical-align: middle; }'
+			}
 			
 			// icon
 			// TODO: new icon with size 196 x 196 pixels
