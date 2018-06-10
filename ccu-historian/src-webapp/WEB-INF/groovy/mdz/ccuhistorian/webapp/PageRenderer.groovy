@@ -114,10 +114,8 @@ public class PageRenderer {
 			// bootstrap CSS
 			link href:'../external/bootstrap/css/bootstrap.css', rel:'stylesheet'
 
-			// own CSS
-			style {
-				mkp.yieldUnescaped '.table > tbody > tr > td { vertical-align: middle; }'
-			}
+			// historian CSS
+			link href:'historian.css', rel:'stylesheet'
 			
 			// icon
 			// TODO: new icon with size 196 x 196 pixels
