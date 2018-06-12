@@ -18,17 +18,20 @@
 package mdz.ccuhistorian.webapp
 
 import groovy.transform.CompileStatic
+import groovy.transform.AutoClone
 import javax.servlet.http.HttpServletRequest
 import mdz.ccuhistorian.TrendDesign
 import mdz.hc.DataPoint
 import mdz.hc.persistence.DataPointStorage
 
 @CompileStatic
+@AutoClone
 public class TrendParameters {
 
 	public static int DEFAULT_WIDTH = 1000
 	public static int DEFAULT_HEIGHT = 600
 	
+	@AutoClone
 	public static class Group {
 		int height=1
 		List<DataPoint> dataPoints=[]

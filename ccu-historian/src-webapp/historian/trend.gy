@@ -179,9 +179,31 @@ renderer.content={
 				width:trendParams.width, height:trendParams.height
 		}
 		
+		// layout toolbar
+		div(style:'margin-bottom: 0.5em') {
+			// show/hide trend options
+			button(class:'btn btn-default', type:'button', 'data-toggle':'collapse', 'data-target':'#options', 
+				'Optionen') {
+				span class:'caret'
+			}
+			
+			// individual groups
+			button class:'btn btn-default', form:'individual-groups', type:'submit', 'Einzelne Gruppen'
+			form(id:'individual-groups') {
+				def fp=trendParams.clone()
+				def dps=trendParams.groups.values().dataPoints.flatten()
+				fp.groups.clear()
+				// create group for each data point
+				dps.eachWithIndex { dp, idx ->
+					def gr=new TrendParameters.Group()
+					gr.dataPoints << dp
+					fp.groups[idx+1]=gr  
+				}
+				WebUtilities.buildHiddenInputs(html, fp.parameters)
+			}
+		}
+		
 		// trend options
-		button class:"btn btn-default", type:'button', 'data-toggle':'collapse', 'data-target':'#options', 
-			style:'margin-bottom: 0.5em', 'Optionen'
 		form {
 			// forward other trend parameters
 			def forwardParams=trendParams.parameters.findAll { k, vs ->

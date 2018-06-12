@@ -17,10 +17,12 @@
 */
 package mdz.ccuhistorian.webapp
 
+import groovy.transform.AutoClone
 import groovy.transform.CompileStatic
 import javax.servlet.http.HttpServletRequest
 
 @CompileStatic 
+@AutoClone
 public class TimeRange {
 
 	Date begin
