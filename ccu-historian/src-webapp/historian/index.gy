@@ -42,29 +42,36 @@ renderer.content={
 			// filter input
 			div(class:'col-sm-4') {
 				div(class:'input-group') {
-					div(class:'input-group-addon') {
+					div(class:'input-group-addon', 'data-toggle':'tooltip', title:'Es wird nach allen Teilen des ' +
+						'Filterausdrucks in allen Eigenschaften des Datenpunktes gesucht.') {
 						span class:'glyphicon glyphicon-filter'
 					}
-					input id:'filter-input', type:'text', class:'form-control', placeholder:'Filterausdruck'
-					span(class:'input-group-btn') {
-						button(id:'reset-filter-btn', class:'btn btn-default', type:'button') {
-							span class:'glyphicon glyphicon-remove'
-						}
-					}
+					input id:'filter-input', type:'text', class:'form-control', placeholder:'Filterausdruck',
+						'data-toggle':'tooltip', title:'Es wird nach allen Teilen des Suchausdrucks in allen ' +
+						'Eigenschaften des Datenpunktes gesucht.'
 				}
 			}
 			
 			div(class:'col-sm-3') {
 				div(class:'btn-group', role:'group') {
-					// check/uncheck buttons
-					button(type:'button', class:'btn btn-default', id:'button-check-visible') {
+					// reset filters
+					button(id:'reset-filter-btn', class:'btn btn-default', type:'button', 'data-toggle':'tooltip',
+						title:'Alle Filter werden gelöscht.') {
+						span class:'glyphicon glyphicon-remove'
+					}
+					// check data points
+					button(type:'button', class:'btn btn-default', id:'button-check-visible', 'data-toggle':'tooltip', 
+						title:'Alle sichtbaren Datenpunkte werden selektiert.') {
 						span class:'glyphicon glyphicon-check'
 					}
-					button(type:'button', class:'btn btn-default', id:'button-uncheck-visible') {
+					// uncheck data points
+					button(type:'button', class:'btn btn-default', id:'button-uncheck-visible', 'data-toggle':'tooltip', 
+						title:'Alle sichtbaren Datenpunkte werden deselektiert.') {
 						span class:'glyphicon glyphicon-unchecked'
 					}
 					// show only selected 
-					button(type:'button', class:'btn btn-default', id:'button-show-selected') {
+					button(type:'button', class:'btn btn-default', id:'button-show-selected', 'data-toggle':'tooltip', 
+						title:'Nur die selektierten Datenpunkte werden sichtbar geschaltet.') {
 						span class:'glyphicon glyphicon-filter'
 						span class:'glyphicon glyphicon-check'
 					}
@@ -74,9 +81,12 @@ renderer.content={
 			// data point actions
 			div(class:'col-sm-5 text-right') {
 				div(class:'btn-group') {
-					button class:'btn btn-default', id:'button-dpdetails', 'Details'
-					button class:'btn btn-default', id:'button-dptools', 'Werkzeuge'
-					button class:'btn btn-primary', id:'button-trend', style:'width: 8em', 'Trend'
+					button class:'btn btn-default', id:'button-dpdetails', 'data-toggle':'tooltip', 
+						title:'Details zu den Datenpunkten anzeigen.', 'Details'
+					button class:'btn btn-default', id:'button-dptools', 'data-toggle':'tooltip', 
+						title:'Ein Werkzeug auf die Datenpunkte anwenden.', 'Werkzeuge'
+					button class:'btn btn-primary', id:'button-trend', style:'width: 8em', 'data-toggle':'tooltip', 
+						title:'Die Datenpunkte als Trend anzeigen.', 'Trend'
 				}
 			}
 		}
