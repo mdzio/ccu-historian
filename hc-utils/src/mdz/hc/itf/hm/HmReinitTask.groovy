@@ -75,7 +75,7 @@ public class HmReinitTask {
 				Date now=[]
 				// find all timed out interfaces
 				interfaces.findAll { now.time-it.lastCommTime.time>timeout }.each { ri ->
-					log.warning "Timeout on interface $ri.name: reinitializing callback"
+					log.fine "Timeout on interface $ri.name: reinitializing callback"
 					Exceptions.catchToLog(log) { 
 						ri.init()
 					}
