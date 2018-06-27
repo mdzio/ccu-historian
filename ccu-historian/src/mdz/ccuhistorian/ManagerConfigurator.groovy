@@ -333,6 +333,12 @@ class ManagerConfigurator {
 							}
 						}
 					}
+					
+					// watchdog
+					String watchdogProgram=getOption(cfg, 'watchdogProgram', String, "Device $idx: ", false)
+					Long watchdogCycle=getOption(cfg, 'watchdogCycle', Long, "Device $idx: ", false)
+					if (watchdogProgram && watchdogCycle)
+						new Watchdog(watchdogProgram, watchdogCycle, manager.executor, scriptClient)
 				}
 			}
 		}
