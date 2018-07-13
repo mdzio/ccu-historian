@@ -59,6 +59,7 @@ public class Manager extends BasicProducer<RawEvent> implements Consumer<RawEven
 				itf.addConsumer(this) 
 				itf.start() 
 			}
+			log.fine 'Interfaces started'
 			eventSenderThread=[this.&sendEvents as Runnable, 'manager-eventsender']
 			eventSenderThread.start()
 			started=true
