@@ -117,9 +117,10 @@ public class PageRenderer {
 			// historian CSS
 			link href:'historian.css', rel:'stylesheet'
 			
-			// icon
-			// TODO: new icon with size 196 x 196 pixels
-			link href:'ccu-historian.ico', rel:'icon'
+			// android icon
+			link rel:'icon', sizes:'192x192', href:'historian-196.ico'
+			// ios icon
+			link rel:'apple-touch-icon', sizes:'180x180', href:'historian-180.png'
 			
 			// execute the head closure
 			runSafe head
