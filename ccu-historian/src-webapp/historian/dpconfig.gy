@@ -141,12 +141,16 @@ renderer.content={
 			// filter input
 			div(class:'col-sm-4') {
 				div(class:'input-group') {
-					div(class:'input-group-addon') {
+					div(class:'input-group-addon', 'data-toggle':'tooltip', title:'Es wird nach allen Teilen des ' +
+						'Filterausdrucks in allen Eigenschaften des Datenpunktes gesucht.') {
 						span class:'glyphicon glyphicon-filter'
 					}
-					input id:'filter-input', type:'text', class:'form-control', placeholder:'Filterausdruck'
+					input id:'filter-input', type:'text', class:'form-control', placeholder:'Filterausdruck',
+						'data-toggle':'tooltip', title:'Es wird nach allen Teilen des ' +
+						'Filterausdrucks in allen Eigenschaften des Datenpunktes gesucht.'
 					span(class:'input-group-btn') {
-						button(id:'reset-filter-btn', class:'btn btn-default', type:'button') {
+						button(id:'reset-filter-btn', class:'btn btn-default', type:'button',
+							'data-toggle':'tooltip', title:'Alle Filter werden gelöscht.') {
 							span class:'glyphicon glyphicon-remove'
 						}
 					}
@@ -156,7 +160,8 @@ renderer.content={
 			}
 			// data point actions
 			div(class:'col-sm-4') {
-				button class:'btn btn-primary btn-block', type:'submit', name:'update-datapoints', value:1, 'Übernehmen'
+				button class:'btn btn-primary btn-block', type:'submit', name:'update-datapoints', value:1, 'Übernehmen',
+					'data-toggle':'tooltip', title:'Alle Änderungen werden in der Datenbank abgespeichert.'
 			}
 		}
 		
@@ -164,16 +169,27 @@ renderer.content={
 		table(id:'dp-table', class:'table table-bordered table-condensed table-hover') {
 			thead {
 				tr {
-					th class:'hidden-xs hidden-sm hidden-md', 'Schnittstelle'
-					th 'Kanal'
-					th 'Parameter'
-					th class:'hidden-xs hidden-sm hidden-md', 'Raum'
-					th class:'hidden-xs hidden-sm hidden-md', 'Gewerk'
-                    th class:'hidden-xs hidden-sm', 'Adresse'
-					th 'Inaktiv'
-					th 'Versteckt'
-					th 'Vorverarb.'
-					th 'Parameter'
+					th class:'hidden-xs hidden-sm hidden-md', 'Schnittstelle',
+						'data-toggle':'tooltip', title:'Über die Schnittstelle wird mit den zugehörigen Geräten kommuniziert.'
+					th 'Gerät / Kanal',
+						'data-toggle':'tooltip', title:'Dies ist der Anzeigename des Geräts und/oder des Kanals. Wenn kein ' +
+						'Anzeigename bekannt ist, wird die Adresse angezeigt.'
+					th 'Parameter',
+						'data-toggle':'tooltip', title:'Ein Kanal kann mehrere Parameter besitzen.'
+					th class:'hidden-xs hidden-sm hidden-md', 'Raum',
+						'data-toggle':'tooltip', title:'Raum des Datenpunktes'
+					th class:'hidden-xs hidden-sm hidden-md', 'Gewerk',
+						'data-toggle':'tooltip', title:'Gewerk oder Funktion des Datenpunktes'
+                    th class:'hidden-xs hidden-sm', 'Adresse',
+						'data-toggle':'tooltip', title:'Bei HomeMatic-Geräten ist der Adressaufbau "Geräteseriennummer:Kanalnummer".'
+					th 'Inaktiv',
+						'data-toggle':'tooltip', title:'Inaktive Datenpunkte werden nicht weiter aufgezeichnet.'
+					th 'Versteckt',
+						'data-toggle':'tooltip', title:'Versteckte Datenpunkte erscheinen nicht in der "Datenpunktliste".'
+					th 'Vorverarb.',
+						'data-toggle':'tooltip', title:'Rohdaten können mit verschiedenen Verfahren verdichtet werden.'
+					th 'Parameter',
+						'data-toggle':'tooltip', title:'Manche Verdichtungsverfahren können mit einem Parameter konfiguriert werden.'
 				}
 			}
 			tbody {

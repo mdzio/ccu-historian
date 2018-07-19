@@ -102,13 +102,22 @@ renderer.content={
         table(id:'dp-table', class:'table table-bordered table-condensed table-hover') {
             thead {
                 tr {
-                    th 'Ausw.'
-                    th class:'hidden-xs hidden-sm', 'Schnittstelle'
-                    th 'Kanal'
-                    th 'Parameter'
-                    th class:'hidden-xs', 'Raum'
-                    th class:'hidden-xs', 'Gewerk'
-                    th class:'hidden-xs hidden-sm hidden-md', 'Adresse'
+                    th 'Ausw.',
+						'data-toggle':'tooltip', title:'Mit den ausgewählten Datenpunkten können verschiedene ' +
+						'Aktionen durchgeführt werden.'
+                    th class:'hidden-xs hidden-sm', 'Schnittstelle',
+						'data-toggle':'tooltip', title:'Über die Schnittstelle wird mit den zugehörigen Geräten kommuniziert.'
+                    th 'Gerät / Kanal',
+						'data-toggle':'tooltip', title:'Dies ist der Anzeigename des Geräts und/oder des Kanals. Wenn kein ' +
+						'Anzeigename bekannt ist, wird die Adresse angezeigt.'
+                    th 'Parameter',
+						'data-toggle':'tooltip', title:'Ein Kanal kann mehrere Parameter besitzen.'
+                    th class:'hidden-xs', 'Raum',
+						'data-toggle':'tooltip', title:'Raum des Datenpunktes'
+                    th class:'hidden-xs', 'Gewerk',
+						'data-toggle':'tooltip', title:'Gewerk oder Funktion des Datenpunktes'
+                    th class:'hidden-xs hidden-sm hidden-md', 'Adresse',
+						'data-toggle':'tooltip', title:'Bei HomeMatic-Geräten ist der Adressaufbau "Geräteseriennummer:Kanalnummer".'
                 }
             }
             tbody {
