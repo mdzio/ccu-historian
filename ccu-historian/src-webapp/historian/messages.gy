@@ -1,0 +1,250 @@
+/*
+    CCU-Historian, a long term archive for the HomeMatic CCU
+    Copyright (C) 2011-2018 MDZ (info@ccu-historian.de)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+import groovy.transform.Field
+import java.util.logging.Logger
+import mdz.ccuhistorian.webapp.TimeRange
+import mdz.hc.DataPoint
+import static mdz.ccuhistorian.webapp.TextFormat.*
+
+@Field
+private final static presetRanges=[
+	[id:'preset-last-1-hour', text:'Letzte Stunde', begin:'-1h', end:''],
+	[id:'preset-last-24-hours', text:'Letzten 24 Stunden', begin:'-24h', end:''],
+	[id:'preset-current-day', text:'Aktueller Tag', begin:'z', end:'1D'],
+	[id:'preset-previous-day', text:'Vortag', begin:'-1D z', end:'1D'],
+	[id:'preset-last-7-days', text:'Letzten 7 Tage', begin:'-7D', end:''],
+	[id:'preset-current-week', text:'Aktuelle Woche', begin:'1=w z', end:'1W'],
+	[id:'preset-previous-week', text:'Vorwoche', begin:'-1W 1=w z', end:'1W'],
+	[id:'preset-last-31-days', text:'Letzter Monat', begin:'-1M', end:''],
+	[id:'preset-current-month', text:'Aktueller Monat', begin:'1=D z', end:'1M'],
+	[id:'preset-previous-month', text:'Vormonat', begin:'-1M 1=D z', end:'1M'],
+	[id:'preset-last-6-months', text:'Letzten 6 Monate', begin:'-6M', end:''],
+]
+
+@Field
+private final static Logger log = Logger.getLogger('mdz.ccuhistorian.webapp.Messages')
+@Field
+private final static int MAX_DISPLAYED_MESSAGES = 100
+@Field
+private final static int MAX_TOP_MESSAGES = 10
+
+class Message {
+	DataPoint dataPoint
+	Date begin
+	Date end
+	String toString() {
+		"$begin, $end, $dataPoint.id"
+	}
+}
+
+class IdHasher {
+	DataPoint dataPoint
+	int hashCode() {
+		dataPoint.id.hashCode()
+	}
+	boolean equals(o) {
+		dataPoint.id.equals(o.dataPoint.id)
+	}
+}
+
+def generateMessages(timeSeries) {
+	def messages=[]
+	def curmsg
+	timeSeries.each { e ->
+		if (curmsg==null && e.value) {
+			// rising edge
+			curmsg=new Message(begin: e.timestamp, dataPoint: timeSeries.dataPoint)
+		} else if (curmsg!=null && !e.value) {
+			// falling edge
+			curmsg.end=e.timestamp
+			messages << curmsg
+			curmsg=null
+		}
+	}
+	if (curmsg!=null) {
+		messages << curmsg
+	}
+	messages
+}
+
+// setup page
+def renderer=new mdz.ccuhistorian.webapp.PageRenderer(servlet: this)
+
+renderer.head={
+	title 'CCU-historian: Meldungen'
+}
+
+renderer.content={
+	def timeRange=new TimeRange(request)
+	
+	div(class:'row') {
+		// inputs for time navigation	
+		form(id:'time-form') {
+			div(class:'col-md-2') {
+				// presets
+				button(type:'button', class:'btn btn-default btn-block dropdown-toggle', 'data-toggle':'dropdown') {
+					mkp.yield 'Zeitbereiche'
+					span class:'caret'
+				}
+				ul(class:'dropdown-menu') {
+					presetRanges.each { rng -> 
+						li { a href:'#', id:rng.id, rng.text }
+					}
+				}
+			}
+			div(class:'col-md-4') {
+				div(class:'input-group') {
+					span class:'input-group-addon', 'Start'
+					input type:'text', id:'time-begin', name:'b', class:'form-control', placeholder:'Start', 
+						value:timeRange.beginText
+				}
+			}
+			div(class:'col-md-4') {
+				div(class:'input-group') {
+					span class:'input-group-addon', 'Ende'
+					input type:'text', id:'time-end', name:'e', class:'form-control', placeholder:'Ende',
+						value:timeRange.endText
+				}
+			}
+			div(class:'col-md-2') {
+				button class:'btn btn-primary btn-block', type:'submit', name:'update-timerange', value:1, 'Übernehmen'
+			}
+		}
+	}
+
+	// find message data points		
+	def dataPoints=database.dataPoints.findAll { dp ->
+		int flags=dp.attributes.(DataPoint.ATTR_FLAGS)?:0
+		// only service data points which must not be acknowledged
+		(flags & DataPoint.ATTR_FLAGS_SERVICE) && !(flags & DataPoint.ATTR_FLAGS_STICKY)
+	}
+	
+	// retrieve, merge and sort messages
+	def allMessages=new TreeSet({ a, b -> 
+		b.begin<=>a.begin ?: b.dataPoint.displayName<=>a.dataPoint.displayName 
+	})
+	def maxReached=false
+	def messageCount=[:].withDefault { 0 } 	
+	dataPoints.each { dp ->
+		// message list 
+		def messages=generateMessages(database.getTimeSeriesRaw(dp, timeRange.begin, timeRange.end))
+		allMessages.addAll(messages)
+		
+		// free memory
+		if (allMessages.size()>MAX_DISPLAYED_MESSAGES) {
+			maxReached=true
+			while (allMessages.size()>MAX_DISPLAYED_MESSAGES) {
+				// remove oldest
+				allMessages.remove(allMessages.last())
+			}
+		}
+		
+		// message statistics
+		messages.each { m ->
+			messageCount[new IdHasher(dataPoint: m.dataPoint)]++
+		}
+	}
+	
+	// order top messages
+	def topMessages=messageCount.collect { e, cnt ->
+		[cnt, e.dataPoint]
+	}.sort { e ->
+		-e[0] // cnt
+	}.take(MAX_TOP_MESSAGES)
+
+	// list messages
+	h3 "Meldungen"
+	p "${ formatDate(timeRange.begin) } bis ${ formatDate(timeRange.end) }"
+	table(class:'table table-bordered table-condensed table-hover') {
+		thead {
+			tr {
+				th 'Gekommen', 
+					'data-toggle':'tooltip', title:'Zu diesem Zeitpunkt ist die Meldung gekommen.'
+				th 'Gegangen', 
+					'data-toggle':'tooltip', title:'Zu diesem Zeitpunkt ist die Meldung gegangen.'
+				th 'Gerät / Kanal',
+					'data-toggle':'tooltip', title:'Dies ist der Anzeigename des Geräts und/oder des Kanals. Wenn kein ' +
+					'Anzeigename bekannt ist, wird die Adresse angezeigt.'
+				th 'Meldungstyp',
+					'data-toggle':'tooltip', title:'Der Meldungstyp gibt an, welcher Fehlerzustand gemeldet wird.'
+			}
+		}
+		tbody {
+			allMessages.each { msg ->
+				tr {
+					td formatDate(msg.begin)
+					td formatDate(msg.end)
+					td msg.dataPoint.attributes.displayName?:msg.dataPoint.id.address
+					td msg.dataPoint.id.identifier
+				}
+			}
+		}
+	}
+	if (maxReached) {
+		div(class:'alert alert-warning alert-dismissible', role:'alert') {
+			button(type:'button', class:'close', 'data-dismiss':'alert') {
+				span { mkp.yieldUnescaped '&times;' }
+			}
+			span class:'glyphicon glyphicon-exclamation-sign'
+			mkp.yield " Zu viele Einträge! Es werden die jüngsten $MAX_DISPLAYED_MESSAGES Einträge angezeigt!"
+		}
+	}
+	
+	// list top messages
+	h3 "Top $MAX_TOP_MESSAGES Meldungen nach Häufigkeit"
+	table(class:'table table-bordered table-condensed table-hover') {
+		thead {
+			tr {
+				th 'Anzahl',
+					'data-toggle':'tooltip', title:'Häufigkeit der Meldung im angefragten Zeitbereich.'
+				th 'Gerät / Kanal',
+					'data-toggle':'tooltip', title:'Dies ist der Anzeigename des Geräts und/oder des Kanals. Wenn kein ' +
+					'Anzeigename bekannt ist, wird die Adresse angezeigt.'
+				th 'Meldungstyp',
+					'data-toggle':'tooltip', title:'Der Meldungstyp gibt an, welcher Fehlerzustand gemeldet wird.'
+			}
+		}
+		tbody {
+			topMessages.each { cnt, dp ->
+				tr {
+					td class:'text-right', cnt
+					td dp.attributes.displayName?:dp.id.address
+					td dp.id.identifier
+				}
+			}
+		}
+	}
+}
+
+renderer.end={
+    script {
+		// bind preset ranges
+		presetRanges.each { rng ->
+			mkp.yieldUnescaped($/
+				$('#${rng.id}').on('click', function(e) {
+					$('#time-begin').val('${rng.begin}');
+					$('#time-end').val('${rng.end}');
+					$('#time-form').submit();
+				});	
+			/$)
+		} 
+	}
+}
+
+// render page
+renderer.render()

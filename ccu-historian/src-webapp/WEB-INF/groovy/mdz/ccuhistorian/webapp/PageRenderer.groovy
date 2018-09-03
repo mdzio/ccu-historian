@@ -208,6 +208,7 @@ public class PageRenderer {
 								span class:'caret'
 							}
 							ul(class:'dropdown-menu') {
+								li { a href:'messages.gy', 'Meldungsanalyse' }
 								li { a href:'dpconfig.gy', 'Datenpunktkonfiguration' }
 								li { a href:'config.gy', 'Historian Konfiguration' }
 								// TODO
