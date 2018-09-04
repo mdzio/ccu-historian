@@ -62,6 +62,13 @@ class IdHasher {
 	}
 }
 
+class MessageStatistics {
+	DataPoint dataPoint
+	int count
+	long duration
+	boolean notGone
+}
+
 def generateMessages(timeSeries) {
 	def messages=[]
 	def curmsg
@@ -139,7 +146,10 @@ renderer.content={
 		b.begin<=>a.begin ?: b.dataPoint.displayName<=>a.dataPoint.displayName 
 	})
 	def maxReached=false
-	def messageCount=[:].withDefault { 0 } 	
+	def messageStatistics=[:].withDefault { idHasher -> 
+		new MessageStatistics(dataPoint: idHasher.dataPoint) 
+	} 	
+	
 	dataPoints.each { dp ->
 		// message list 
 		def messages=generateMessages(database.getTimeSeriesRaw(dp, timeRange.begin, timeRange.end))
@@ -156,20 +166,36 @@ renderer.content={
 		
 		// message statistics
 		messages.each { m ->
-			messageCount[new IdHasher(dataPoint: m.dataPoint)]++
+			def stat = messageStatistics[new IdHasher(dataPoint: m.dataPoint)]
+			stat.count++
+			def end
+			if (m.end) {
+				end=m.end
+			} else {
+				end=timeRange.end
+				stat.notGone=true
+			}
+			stat.duration += end.time - m.begin.time
 		}
 	}
 	
 	// order top messages
-	def topMessages=messageCount.collect { e, cnt ->
-		[cnt, e.dataPoint]
-	}.sort { e ->
-		-e[0] // cnt
+	def topMessages=messageStatistics.values().sort { stat ->
+		-stat.count
 	}.take(MAX_TOP_MESSAGES)
 
 	// list messages
 	h3 "Meldungen"
-	p "${ formatDate(timeRange.begin) } bis ${ formatDate(timeRange.end) }"
+	table(class:'table table-bordered table-condensed table-hover') {
+		tbody {
+			th 'Start'
+			td formatDate(timeRange.begin)
+			th 'Ende'
+			td formatDate(timeRange.end)
+			th 'Zeitbereichslänge [h:m:s]'
+			td formatDuration(timeRange.end.time - timeRange.begin.time)
+		}
+	}
 	table(class:'table table-bordered table-condensed table-hover') {
 		thead {
 			tr {
@@ -177,6 +203,8 @@ renderer.content={
 					'data-toggle':'tooltip', title:'Zu diesem Zeitpunkt ist die Meldung gekommen.'
 				th 'Gegangen', 
 					'data-toggle':'tooltip', title:'Zu diesem Zeitpunkt ist die Meldung gegangen.'
+				th 'Dauer [h:m:s]',
+					'data-toggle':'tooltip', title:'Diese Zeitlänge stand die Meldung an.'
 				th 'Gerät / Kanal',
 					'data-toggle':'tooltip', title:'Dies ist der Anzeigename des Geräts und/oder des Kanals. Wenn kein ' +
 					'Anzeigename bekannt ist, wird die Adresse angezeigt.'
@@ -189,6 +217,7 @@ renderer.content={
 				tr {
 					td formatDate(msg.begin)
 					td formatDate(msg.end)
+					td  class:'text-right', formatDuration(msg.end!=null ? msg.end.time - msg.begin.time : null)
 					td msg.dataPoint.attributes.displayName?:msg.dataPoint.id.address
 					td msg.dataPoint.id.identifier
 				}
@@ -201,7 +230,7 @@ renderer.content={
 				span { mkp.yieldUnescaped '&times;' }
 			}
 			span class:'glyphicon glyphicon-exclamation-sign'
-			mkp.yield " Zu viele Einträge! Es werden die jüngsten $MAX_DISPLAYED_MESSAGES Einträge angezeigt!"
+			mkp.yield " Zu viele Einträge! Es wurden die jüngsten $MAX_DISPLAYED_MESSAGES Einträge angezeigt!"
 		}
 	}
 	
@@ -212,6 +241,9 @@ renderer.content={
 			tr {
 				th 'Anzahl',
 					'data-toggle':'tooltip', title:'Häufigkeit der Meldung im angefragten Zeitbereich.'
+				th 'Gesamtdauer [h:m:s]',
+					'data-toggle':'tooltip', title:'Diese Zeitlänge stand die Meldung insgesamt an. Ein Pluszeichen (+) bedeutet, dass ' +
+					'die Meldung im Abfragezeitraum nicht gegangen ist, also noch am Zeitbereichsende anstand.'
 				th 'Gerät / Kanal',
 					'data-toggle':'tooltip', title:'Dies ist der Anzeigename des Geräts und/oder des Kanals. Wenn kein ' +
 					'Anzeigename bekannt ist, wird die Adresse angezeigt.'
@@ -220,11 +252,12 @@ renderer.content={
 			}
 		}
 		tbody {
-			topMessages.each { cnt, dp ->
+			topMessages.each { stat ->
 				tr {
-					td class:'text-right', cnt
-					td dp.attributes.displayName?:dp.id.address
-					td dp.id.identifier
+					td class:'text-right', stat.count
+					td class:'text-right', (stat.notGone?"+ ":"") + formatDuration(stat.duration)
+					td stat.dataPoint.attributes.displayName ?: stat.dataPoint.id.address
+					td stat.dataPoint.id.identifier
 				}
 			}
 		}

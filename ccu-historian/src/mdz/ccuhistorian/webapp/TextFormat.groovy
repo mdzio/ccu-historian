@@ -158,4 +158,18 @@ class TextFormat {
 			default: value as String; break
 		}
 	}
+	
+	public static String formatDuration(Long dur) {
+		if (dur==null) {
+			return "";
+		}
+		long ms=dur % 1000
+		dur/=1000
+		long s=dur % 60
+		dur/=60
+		long m=dur % 60
+		dur/=60
+		long h=dur
+		String.format('%d:%02d:%02d,%03d', h, m, s, ms)
+	}
 }

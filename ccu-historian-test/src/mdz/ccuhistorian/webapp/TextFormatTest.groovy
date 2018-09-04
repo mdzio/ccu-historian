@@ -74,4 +74,10 @@ class TextFormatTest extends GroovyTestCase {
 		d=TextFormat.parseDate(TextFormat.parseDate('13.12.2017'), '7=w')
 		assert TextFormat.formatDate(d)=='17.12.2017 00:00:00'
 	}
+	
+	public void testFormatDuration() {
+		assert TextFormat.formatDuration(0)=='0:00:00,000'
+		assert TextFormat.formatDuration(12)=='0:00:00,012'
+		assert TextFormat.formatDuration(1234567890)=='342:56:07,890'
+	}
 }
