@@ -52,7 +52,7 @@ class ManagerConfigurator {
 	private final static String INTERFACE_SIMULATION_NAME = 'Sim'
 	
 	public static enum DeviceTypes {
-		CCU1, CCU2, BINRPC, XMLRPC, SIMULATION, CUSTOM_CCU 
+		CCU1, CCU2, BINRPC, XMLRPC, SIMULATION, CUSTOM_CCU, CCU3
 	}
 	
 	public static enum PlugInTypes {
@@ -102,7 +102,7 @@ class ManagerConfigurator {
 				
 				DeviceTypes type=getOption(cfg, 'type', DeviceTypes, "Device $idx: ") 
 
-				if (type==DeviceTypes.CCU1 || type==DeviceTypes.CCU2) {
+				if (type==DeviceTypes.CCU1 || type==DeviceTypes.CCU2 || type==DeviceTypes.CCU3) {
 					String address=getOption(cfg, 'address', String, "Device $idx: ") 
 					Long reinitTimeout=getOption(cfg, 'reinitTimeout', Long, "Device $idx: ", false) 
 					String prefix=getOption(cfg, 'prefix', String, "Device $idx: ", false) 
@@ -144,7 +144,7 @@ class ManagerConfigurator {
 						manager.addInterface(binRpcItfSys)
 					}
 					
-					if (type==DeviceTypes.CCU2) {
+					if (type==DeviceTypes.CCU2 || type==DeviceTypes.CCU3) {
 						HmXmlRpcInterface hmIpItf=new HmXmlRpcInterface(
 							prefix+INTERFACE_HMIP_RF_NAME, INTERFACE_HMIP_RF_NAME, address, INTERFACE_HMIP_RF_PORT,
 							manager.xmlRpcServer, scriptClient, reinitTask, manager.executor
