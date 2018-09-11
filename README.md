@@ -1,9 +1,13 @@
-&nbsp;![CCU-Historian](https://github.com/mdzio/ccu-historian/raw/master/doc/ccu-historian-logo.png)
-
 [![Release](https://img.shields.io/github/release/mdzio/ccu-historian.svg)](https://github.com/mdzio/ccu-historian/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/mdzio/ccu-historian/latest/total.svg)](https://github.com/mdzio/ccu-historian/releases/latest)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=SF4BR9ZE2JUBS)
 [![Github Issues](http://githubbadges.herokuapp.com/mdzio/ccu-historian/issues.svg)](https://github.com/mdzio/ccu-historian/issues)
+
+# CCU-Historian
+
+Langzeitarchiv für die Zentrale (CCU) des Hausautomations-Systems HomeMatic
+
+![](doc/cover.png)
 
 Der CCU-Historian ist ein Langzeitarchiv für die Zentrale (CCU) des [Hausautomations-Systems](http://de.wikipedia.org/wiki/Hausautomation) HomeMatic der Firma [eQ-3](http://www.eq-3.de/).
 
@@ -11,7 +15,7 @@ Die Kommunikationsvorgänge der CCU-Schnittstellen (BidCos-RF, BidCos-Wired und 
 
 Der CCU-Historian erfreut sich bei den HomeMatic-Anwendern einer großen Beliebtheit und verfügt über eine breite Installationsbasis.
 
-Viele weitere Informationen sind auf der [offiziellen Web-Seite des CCU-Historians](http://www.ccu-historian.de/) und im [umfangreichen Handbuch](doc/CCU-Historian_Kurzanleitung.pdf) zu finden.
+Viele weitere Informationen sind auf der [offiziellen Web-Seite des CCU-Historians](http://www.ccu-historian.de/) und im [umfangreichen Handbuch](https://github.com/mdzio/ccu-historian/wiki) zu finden.
 
 # Übersicht
 
