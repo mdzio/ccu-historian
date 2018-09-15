@@ -19,13 +19,15 @@ import groovy.transform.Field
 import java.util.logging.Logger
 import mdz.ccuhistorian.webapp.TrendParameters
 import mdz.ccuhistorian.webapp.TimeRange
-import mdz.ccuhistorian.webapp.WebUtilities
 import static mdz.ccuhistorian.webapp.WebUtilities.*
+import static mdz.ccuhistorian.webapp.TextFormat.*
 
 @Field
 private final static int NUM_OF_GROUPS = 8
 @Field
 private final static int MAX_NUM_DATA_POINTS = 20
+@Field
+private static final int NUM_STRING_ENTRIES = 50
 
 @Field
 private final static timeNavigations=[
@@ -88,10 +90,13 @@ renderer.head={
 renderer.content={
 	def trendParams=TrendParameters.from(request, database, webServer.config.trendDesigns)
 	
-	// TODO: support string histories
+	// separate string data points
+	def stringDataPoints=[]
 	trendParams.groups.values().each { group ->
-		group.dataPoints.removeAll { dp -> dp.historyString } 		
+		stringDataPoints.addAll(group.dataPoints.findAll { dp -> dp.historyString }) 
+		group.dataPoints.removeAll { dp -> dp.historyString }
 	}
+	def stringDpParams=stringDataPoints.withIndex(10000).collectEntries { dp, idx -> ["dp$idx": dp.idx] }
 	
 	// apply time navigation
 	def navId=request.getParameter('navigate')
@@ -109,7 +114,7 @@ renderer.content={
 			def forwardParams=trendParams.parameters.findAll { k, vs ->
 				k!='b' && k!='e'
 			}
-			WebUtilities.buildHiddenInputs(html, forwardParams)
+			buildHiddenInputs(html, forwardParams + stringDpParams)
 	
 			div(class:'col-sm-2') {
 				// presets
@@ -143,34 +148,38 @@ renderer.content={
 		}
 		// change data points
 		div(class:'col-sm-2') {
-			a class:'btn btn-default btn-block', href:buildUrl('index.gy', trendParams.parameters), role:'button', 'Datenpunkte'
+			a class:'btn btn-default btn-block', href:buildUrl('index.gy', trendParams.parameters + stringDpParams),
+				role:'button', 'Datenpunkte'
 		}
 	}
 
 	// buttons for time navigation
 	div(class:'btn-group btn-group-justified', role:'group', style:'margin-top: 0.5em') {
 		timeNavigations.each { tn ->
-			a(class:'btn btn-default', href:buildUrl('trend.gy', trendParams.parameters, [navigate:tn.id]), role:'button') {
+			a(class:'btn btn-default', href:buildUrl('trend.gy', trendParams.parameters + stringDpParams, [navigate:tn.id]), role:'button') {
 				span class:'glyphicon '+tn.icon
 			}
 		}
 	}
 
-	// display trend graphics
+	// any data points selected?
 	def dpCnt=trendParams.groups.values().dataPoints*.size().sum()
-	if (!dpCnt /* null or 0 */) {
+	if (stringDataPoints.size()==0 && !dpCnt /* null or 0 */) {
 		// no data points alert
 		div(class:'alert alert-danger', role:'alert', style:'margin-top: 0.5em') {
 			span class:'glyphicon glyphicon-exclamation-sign'
 			mkp.yield " Es wurden keine Datenpunkte ausgewählt!"
-		} 
-	} else if (dpCnt>MAX_NUM_DATA_POINTS) {
+		}
+	}
+	
+	// display trend graphics
+	if (dpCnt>MAX_NUM_DATA_POINTS) {
 		// too many data points alert
 		div(class:'alert alert-danger', role:'alert', style:'margin-top: 0.5em') {
 			span class:'glyphicon glyphicon-exclamation-sign'
-			mkp.yield " Es wurden zu viele Datenpunkte ausgewählt (Max. Anzahl: $MAX_NUM_DATA_POINTS)!"
+			mkp.yield " Es wurden zu viele Datenpunkte für den Trend ausgewählt (Max. Anzahl: $MAX_NUM_DATA_POINTS)!"
 		} 
-	} else {
+	} else if (dpCnt) {
 		// show trend
 		p(class:'text-center', style:'margin-top: 0.5em') {
 			// if required, use API key
@@ -199,7 +208,7 @@ renderer.content={
 					gr.dataPoints << dp
 					fp.groups[idx+1]=gr  
 				}
-				WebUtilities.buildHiddenInputs(html, fp.parameters)
+				buildHiddenInputs(html, fp.parameters + stringDpParams)
 			}
 		}
 		
@@ -209,7 +218,7 @@ renderer.content={
 			def forwardParams=trendParams.parameters.findAll { k, vs ->
 				!k.startsWith('g') && !k.startsWith('gh') && k!='w' && k!='h'
 			}
-			WebUtilities.buildHiddenInputs(html, forwardParams)
+			buildHiddenInputs(html, forwardParams + stringDpParams)
 	
 			div(id:'options', class:'panel panel-default collapse') {
 				div(class:'panel-body') {
@@ -294,6 +303,46 @@ renderer.content={
 						}
 					}
 				}
+			}
+		}
+	}
+	
+	// display string data points
+	stringDataPoints.each { dp ->
+		// show table
+		h4 dp.displayName
+		def timeSeries=database.getTimeSeriesRaw(dp, trendParams.timeRange.begin, trendParams.timeRange.end)
+		def toMany=timeSeries.size()>NUM_STRING_ENTRIES
+		if (toMany) {
+			timeSeries=timeSeries.takeRight(NUM_STRING_ENTRIES).reverse() //sort { a, b -> b.timestamp <=> a.timestamp}
+		} else {
+			timeSeries=timeSeries.iterator().reverse()
+		}
+		table(class:'table table-bordered table-hover') {
+			thead {
+				tr {
+					th 'Zeitstempel'
+					th 'Wert'
+					th 'Status'
+				}
+			}
+			tbody {
+				timeSeries.each { entry ->
+					tr {
+						td formatDate(entry.timestamp)
+						td entry.value
+						td class:'text-right', entry.state
+					}
+				}
+			}
+		}
+		if (toMany) {
+			div(class:'alert alert-warning alert-dismissible', role:'alert') {
+				button(type:'button', class:'close', 'data-dismiss':'alert') {
+					span { mkp.yieldUnescaped '&times;' }
+				}
+				span class:'glyphicon glyphicon-exclamation-sign'
+				mkp.yield " Zu viele Einträge! Es werden die letzten $NUM_STRING_ENTRIES Einträge angezeigt!"
 			}
 		}
 	}
