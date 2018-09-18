@@ -7,7 +7,6 @@
 			<fileset dir="src" />
 			<fileset dir="../ccu-historian/build" />
 			<file file="../LICENSE.txt" />
-			<file file="../doc/CCU-Historian_Kurzanleitung.pdf" />
 		</zip>
 	</target>
 

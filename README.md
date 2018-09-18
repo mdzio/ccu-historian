@@ -43,7 +43,7 @@ Für bestimmte Systeme existieren fertige Installationspakete:
 
 # Installation und Konfiguration
 
-Die Installation und Konfiguration ist im [Handbuch](doc/CCU-Historian_Kurzanleitung.pdf) ausführlich beschrieben. 
+Die Installation und Konfiguration ist im [Handbuch](https://github.com/mdzio/ccu-historian/wiki) ausführlich beschrieben. 
 
 # Entwicklungsumgebung
 
