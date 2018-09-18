@@ -31,28 +31,57 @@ private static final int NUM_STRING_ENTRIES = 50
 
 @Field
 private final static timeNavigations=[
-	[id:'fast-backward', icon:'glyphicon-backward', func: { b, e ->
-		def d=e-b; [b-d, e-d]
-	}],
-	[id:'backward', icon:'glyphicon-triangle-left', func: { b, e ->
-		def d=(e-b)/3; [b-d, e-d]
-	}],
-	[id:'zoom-in', icon:'glyphicon-zoom-in', func: { b, e ->
-		def d=(e-b)/3
-		// force min. time range of 10 seconds
-		if (d<10000) d=(e-b-10000)/2 
-		[b+d, e-d]
-	}],
-	[id:'refresh', icon:'glyphicon-refresh', func: null /* do nothing */],
-	[id:'zoom-out', icon:'glyphicon-zoom-out', func: { b, e ->
-		def d=e-b; [b-d, e+d]
-	}],
-	[id:'forward', icon:'glyphicon-triangle-right', func: { b, e ->
-		def d=(e-b)/3; [b+d, e+d]
-	}],
-	[id:'fast-forward', icon:'glyphicon glyphicon-forward', func: { b, e ->
-		def d=e-b; [b+d, e+d]
-	}],
+	[
+		id:'fast-backward', 
+		icon:'glyphicon-backward',
+		tooltip:'Eine komplette Zeitbereichslänge in die Vergangenheit.', 
+		func: { b, e ->
+			def d=e-b; [b-d, e-d]
+		}
+	], [
+		id:'backward', 
+		icon:'glyphicon-triangle-left',
+		tooltip:'1/3 Zeitbereichslänge in die Vergangenheit.', 
+		func: { b, e ->
+			def d=(e-b)/3; [b-d, e-d]
+		}
+	], [
+		id:'zoom-in', 
+		icon:'glyphicon-zoom-in',
+		tooltip:'Zeitbereich um Faktor 3 verkleinern.',
+		func: { b, e ->
+			def d=(e-b)/3
+			// force min. time range of 10 seconds
+			if (d<10000) d=(e-b-10000)/2 
+			[b+d, e-d]
+		}
+	], [
+		id:'refresh',
+		icon:'glyphicon-refresh',
+		tooltip:'Aktuellen Zeitbereich erneut anzeigen. Evtl. sind neue Daten vorhanden.',
+		func: null /* do nothing */
+	], [
+		id:'zoom-out', 
+		icon:'glyphicon-zoom-out',
+		tooltip:'Zeitbereich um Faktor 3 vergrößern.',
+		func: { b, e ->
+			def d=e-b; [b-d, e+d]
+		}
+	], [
+		id:'forward',
+		icon:'glyphicon-triangle-right',
+		tooltip:'1/3 Zeitbereichslänge in die Zukunft.',
+		func: { b, e ->
+			def d=(e-b)/3; [b+d, e+d]
+		}
+	], [
+		id:'fast-forward',
+		icon:'glyphicon glyphicon-forward', 
+		tooltip:'Eine komplette Zeitbereichslänge in die Zukunft.',
+		func: { b, e ->
+			def d=e-b; [b+d, e+d]
+		}
+	],
 ]
 
 @Field
@@ -114,8 +143,8 @@ renderer.content={
 			def forwardParams=trendParams.parameters.findAll { k, vs ->
 				k!='b' && k!='e'
 			}
-			buildHiddenInputs(html, forwardParams + stringDpParams)
-	
+			buildHiddenInputs(html, forwardParams, stringDpParams)
+
 			div(class:'col-sm-2') {
 				// presets
 				button(type:'button', class:'btn btn-default btn-block dropdown-toggle', 'data-toggle':'dropdown') {
@@ -128,35 +157,46 @@ renderer.content={
 					}
 				}
 			}
+			def tooltip=[
+				'data-toggle':'tooltip', 
+				title:'Absolut: DD.MM.YYYY HH:MM:SS oder YYYYMMDDHHMMSS (Bestandteile am Ende ' +
+					'können entfallen.); Relativ: Zahl mit Modifizierer (auch mehrfach) Y, M, D, ' + 
+					'h, m, s, =Y, =M, =D, =w (Wochentag), =W (Woche im Jahr), =h, =m, =s oder ' +
+					'z (Uhrzeit auf 0)'
+			]
 			div(class:'col-sm-3') {
 				div(class:'input-group') {
-					span class:'input-group-addon', 'Start'
-					input type:'text', id:'time-begin', name:'b', class:'form-control', placeholder:'Start', 
-						value:trendParams.timeRange.beginText
+					span(class:'input-group-addon', *:tooltip, 'Start')
+					input(type:'text', id:'time-begin', name:'b', class:'form-control', placeholder:'Start',
+						*:tooltip, value:trendParams.timeRange.beginText)
 				}
 			}
 			div(class:'col-sm-3') {
 				div(class:'input-group') {
-					span class:'input-group-addon', 'Ende'
-					input type:'text', id:'time-end', name:'e', class:'form-control', placeholder:'Ende',
-						value:trendParams.timeRange.endText
+					span(class:'input-group-addon', *:tooltip, 'Ende')
+					input(type:'text', id:'time-end', name:'e', class:'form-control', placeholder:'Ende',
+						*:tooltip, value:trendParams.timeRange.endText)
 				}
 			}
 			div(class:'col-sm-2') {
-				button class:'btn btn-primary btn-block', type:'submit', name:'update-timerange', value:1, 'Übernehmen'
+				button class:'btn btn-primary btn-block', type:'submit', name:'update-timerange', value:1, 
+					'data-toggle':'tooltip', title:'Den eingegebenen Zeitbereich übernehmen.',
+					'Übernehmen'
 			}
 		}
 		// change data points
 		div(class:'col-sm-2') {
-			a class:'btn btn-default btn-block', href:buildUrl('index.gy', trendParams.parameters + stringDpParams),
-				role:'button', 'Datenpunkte'
+			a class:'btn btn-default btn-block', href:buildUrl('index.gy', trendParams.parameters, stringDpParams),
+				'data-toggle':'tooltip', title:'Die Datenpunktauswahl anpassen. Die bereits ausgewählten Datenpunkte ' +
+				'bleiben selektiert.', role:'button', 'Datenpunkte'
 		}
 	}
 
 	// buttons for time navigation
 	div(class:'btn-group btn-group-justified', role:'group', style:'margin-top: 0.5em') {
 		timeNavigations.each { tn ->
-			a(class:'btn btn-default', href:buildUrl('trend.gy', trendParams.parameters + stringDpParams, [navigate:tn.id]), role:'button') {
+			a(class:'btn btn-default', href:buildUrl('trend.gy', trendParams.parameters, stringDpParams, [navigate:tn.id]),
+				role:'button', 'data-toggle':'tooltip', title:tn.tooltip) {
 				span class:'glyphicon '+tn.icon
 			}
 		}
@@ -197,7 +237,10 @@ renderer.content={
 			}
 			
 			// individual groups
-			button class:'btn btn-default', form:'individual-groups', type:'submit', 'Einzelne Gruppen'
+			button class:'btn btn-default', form:'individual-groups', type:'submit',
+				'data-toggle':'tooltip', title:'Jedem Datenpunkt wird eine eigene Gruppe zugewiesen. ' + 
+				'Sie werden dadurch getrennt übereinander dargestellt.', 
+				'Einzelne Gruppen'
 			form(id:'individual-groups') {
 				def fp=trendParams.clone()
 				def dps=trendParams.groups.values().dataPoints.flatten()
@@ -208,7 +251,7 @@ renderer.content={
 					gr.dataPoints << dp
 					fp.groups[idx+1]=gr  
 				}
-				buildHiddenInputs(html, fp.parameters + stringDpParams)
+				buildHiddenInputs(html, fp.parameters, stringDpParams)
 			}
 		}
 		
@@ -218,7 +261,7 @@ renderer.content={
 			def forwardParams=trendParams.parameters.findAll { k, vs ->
 				!k.startsWith('g') && !k.startsWith('gh') && k!='w' && k!='h'
 			}
-			buildHiddenInputs(html, forwardParams + stringDpParams)
+			buildHiddenInputs(html, forwardParams, stringDpParams)
 	
 			div(id:'options', class:'panel panel-default collapse') {
 				div(class:'panel-body') {
