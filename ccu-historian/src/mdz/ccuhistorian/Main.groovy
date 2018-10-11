@@ -38,9 +38,11 @@ class Main {
 
 	public static void main(String[] args) {
 		// set some properties for headless Java VMs, issue #82
-		System.setProperty('java.awt.headless', 'true')
-		System.setProperty('javax.accessibility.assistive_technologies', ' ')
-
+		if (System.getProperty('java.awt.headless')==null) {
+			System.setProperty('java.awt.headless', 'true')
+			System.setProperty('javax.accessibility.assistive_technologies', ' ')
+		}
+		
 		main=new Main()
 		main.run(args)
 	}
