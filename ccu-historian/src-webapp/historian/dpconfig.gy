@@ -146,7 +146,8 @@ renderer.content={
 						span class:'glyphicon glyphicon-filter'
 					}
 					input id:'filter-input', type:'text', class:'form-control', placeholder:'Filterausdruck',
-						'data-toggle':'tooltip', title:'Es wird nach allen Teilen des ' +
+						'data-toggle':'tooltip', disabled:'disabled', 
+						title:'Es wird nach allen Teilen des ' +
 						'Filterausdrucks in allen Eigenschaften des Datenpunktes gesucht.'
 					span(class:'input-group-btn') {
 						button(id:'reset-filter-btn', class:'btn btn-default', type:'button',
@@ -257,6 +258,8 @@ renderer.end={
 			});
 		};
 		$('#filter-input').on('keyup', _.debounce(filter, 500));
+		// enable filter
+		$('#filter-input').prop('disabled', false);
 	/$) }
 }
 

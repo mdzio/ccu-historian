@@ -46,8 +46,9 @@ renderer.content={
 						'Filterausdrucks in allen Eigenschaften des Datenpunktes gesucht.') {
 						span class:'glyphicon glyphicon-filter'
 					}
-					input id:'filter-input', type:'text', class:'form-control', placeholder:'Filterausdruck',
-						'data-toggle':'tooltip', title:'Es wird nach allen Teilen des Suchausdrucks in allen ' +
+					input id:'filter-input', type:'text', class:'form-control', disabled:'disabled', 
+						placeholder:'Filterausdruck', 'data-toggle':'tooltip', 
+						title:'Es wird nach allen Teilen des Suchausdrucks in allen ' +
 						'Eigenschaften des Datenpunktes gesucht.'
 				}
 			}
@@ -175,6 +176,8 @@ renderer.end={
 			});
 		};
 		$('#filter-input').on('keyup', _.debounce(filter, 500));
+		// enable filter
+		$('#filter-input').prop('disabled', false);
 		
 		// check/uncheck visible data points
 		$('#button-check-visible').on('click', function(e) {
