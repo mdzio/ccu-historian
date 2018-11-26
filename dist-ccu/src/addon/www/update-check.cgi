@@ -9,14 +9,16 @@ set infoError [catch {
 }]
 set downloadCmd [regexp {\mcmd=download\M} $env(QUERY_STRING)]
 if {$downloadCmd} {
+  puts -nonewline "Content-Type: text/html; charset=utf-8\r\n\r\n"
   if {$infoError} {
-    puts "<html><body>Error determining download link!</body></html>"
+    puts -nonewline "<html><body>Error determining download link!</body></html>"
   } else {
-    puts "<html><head><meta http-equiv='refresh' content='0; url=$downloadUrl' /></head></html>"
+    puts -nonewline "<html><head><meta http-equiv='refresh' content='0; url=$downloadUrl' /></head><body></body></html>"
   }
 } else {
+  puts -nonewline "Content-Type: text/plain; charset=utf-8\r\n\r\n"
   if {$infoError} {
-    puts "N/A"
+    puts "n/a"
   } else {
     puts $version
   }
