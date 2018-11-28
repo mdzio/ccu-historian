@@ -13,7 +13,10 @@ if {[info exists config]} {
   }
 }
 if {[info exists ip] && [info exists port]} {
+  puts -nonewline "Content-Type: text/html; charset=utf-8\r\n\r\n"
   puts "<html><head><meta http-equiv='refresh' content='0; url=http://$ip:$port/' /></head></html>"
 } else {
-  puts "<html><body>Error reading file ccu-historian.config!</body></html>"
+  puts -nonewline "Content-Type: text/html; charset=utf-8\r\n\r\n"
+  puts "<html><body>Error reading the CCU-Historian configuration file!<br>"
+  puts "Have you restarted the CCU after installing the CCU-Historian?</body></html>"
 }
