@@ -112,7 +112,7 @@ public class PageRenderer {
 			meta name:'viewport', content:'width=device-width, initial-scale=1'
 			
 			// bootstrap CSS
-			link href:'../external/bootstrap/css/bootstrap.css', rel:'stylesheet'
+			link href:'/external/bootstrap/css/bootstrap.css', rel:'stylesheet'
 
 			// historian CSS
 			link href:'historian.css', rel:'stylesheet'
@@ -139,11 +139,11 @@ public class PageRenderer {
 			}
 			
 			// jquery JS
-			script src:'../external/jquery/jquery.js'
+			script src:'/external/jquery/jquery.js'
 			// bootstrap JS
-			script src:'../external/bootstrap/js/bootstrap.js'
+			script src:'/external/bootstrap/js/bootstrap.js'
 			// underscore JS
-			script src:'../external/underscore/underscore.js'
+			script src:'/external/underscore/underscore.js'
 
 			// execute the page end closure
 			runSafe end
@@ -199,7 +199,7 @@ public class PageRenderer {
 				div(class:'collapse navbar-collapse', id:'navbar-collapse-id') {
 					ul(class:'nav navbar-nav') {
 						// datapoint list
-						li { a href:'index.gy', 'Datenpunktliste' }
+						li { a href:'/historian/index.gy', 'Datenpunktliste' }
 						
 						// tools
 						li(class:'dropdown') {
@@ -208,9 +208,9 @@ public class PageRenderer {
 								span class:'caret'
 							}
 							ul(class:'dropdown-menu') {
-								li { a href:'messages.gy', 'Meldungsanalyse' }
-								li { a href:'dpconfig.gy', 'Datenpunktkonfiguration' }
-								li { a href:'config.gy', 'Historian Konfiguration' }
+								li { a href:'/historian/messages.gy', 'Meldungsanalyse' }
+								li { a href:'/historian/dpconfig.gy', 'Datenpunktkonfiguration' }
+								li { a href:'/historian/config.gy', 'Historian Konfiguration' }
 								// TODO
 								/*
 								li { a href:'diagnosis.html', 'Diagnose' }
