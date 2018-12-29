@@ -45,7 +45,7 @@ import mdz.hc.DataPointIdentifier
 public class HmXmlRpcInterface extends BasicProducer<RawEvent> implements Interface, WriteSupport, Consumer<RawEvent>, HmReinitable {
 
 	public static final String PARAMSET_VALUES = 'VALUES'
-	public static final String UNKNOWN_DEVICE_ERROR_TEXT = 'Invalid device'
+	public static final String UNKNOWN_DEVICE_ERROR_TEXT = 'Unknown instance'
 	 
 	final String name
 	// name of the interface in the logic layer of the CCU
