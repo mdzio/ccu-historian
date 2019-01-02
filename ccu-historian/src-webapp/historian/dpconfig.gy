@@ -249,9 +249,10 @@ renderer.end={
 		var filter=function(e) {
 			var terms=$(this).val().toLowerCase().split(/\s+/);
 			$('#dp-table tbody tr').each(function() {
-				// search only in column 1 to 5
-				var val=$(this).children('td').slice(0, 6).text().toLowerCase();
-				if (terms.every(t => val.indexOf(t) >= 0))
+				// | separated cell contents
+				var content='|'+$(this).children('td').slice(0,6).map(function() {
+					return $(this).text() }).get().join('|').toLowerCase()+'|';
+				if (terms.every(t => content.indexOf(t) >= 0))
 					$(this).css('display', '');
 				else 
 					$(this).css('display', 'none');

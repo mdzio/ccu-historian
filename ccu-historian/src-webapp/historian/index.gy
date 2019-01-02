@@ -119,6 +119,8 @@ renderer.content={
 						'data-toggle':'tooltip', title:'Gewerk oder Funktion des Datenpunktes'
                     th class:'hidden-xs hidden-sm hidden-md', 'Adresse',
 						'data-toggle':'tooltip', title:'Bei HomeMatic-Geräten ist der Adressaufbau "Geräteseriennummer:Kanalnummer".'
+                    th class:'hidden-xs hidden-sm hidden-md', 'ID',
+						'data-toggle':'tooltip', title:'Eindeutige Historian-ID für URL-Parameter bzw. JSON-RPC.'
                 }
             }
             tbody {
@@ -141,6 +143,7 @@ renderer.content={
                         td class:'hidden-xs', dp.attributes.room
                         td class:'hidden-xs', dp.attributes.function
                         td class:'hidden-xs hidden-sm hidden-md', dp.id.address
+                        td class:'hidden-xs hidden-sm hidden-md text-right', dp.idx
                     }
                 }
             }
@@ -168,8 +171,10 @@ renderer.end={
 		var filter=function(e) {
 			var terms=$(this).val().toLowerCase().split(/\s+/);
 			$('#dp-table tbody tr').each(function() {
-				var val=$(this).children('td').text().toLowerCase();
-				if (terms.every(t => val.indexOf(t) >= 0))
+				// | separated cell contents
+				var content='|'+$(this).children('td').slice(1).map(function() { 
+					return $(this).text() }).get().join('|').toLowerCase()+'|';
+				if (terms.every(t => content.indexOf(t) >= 0))
 					$(this).css('display', '');
 				else 
 					$(this).css('display', 'none');
