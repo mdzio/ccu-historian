@@ -1,6 +1,6 @@
 /*
     CCU-Historian, a long term archive for the HomeMatic CCU
-    Copyright (C) 2011-2018 MDZ (info@ccu-historian.de)
+    Copyright (C) 2011-2019 MDZ (info@ccu-historian.de)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -141,14 +141,15 @@ renderer.content={
 			// filter input
 			div(class:'col-sm-4') {
 				div(class:'input-group') {
-					div(class:'input-group-addon', 'data-toggle':'tooltip', title:'Es wird nach allen Teilen des ' +
-						'Filterausdrucks in allen Eigenschaften des Datenpunktes gesucht.') {
+					String descr='Es wird nach allen Teilen des Filterausdrucks in allen Eigenschaften des ' +
+						'Datenpunktes gesucht. Wird ein Suchbegriff in | (Verkettungszeichen) eingeschlossen, ' +
+						'so wird nach exakt übereinstimmenden Eigenschaften gesucht. Die gesuchte Eigenschaft ' +
+						'darf dann keine Leerzeichen enthalten.'
+					div(class:'input-group-addon', 'data-toggle':'tooltip', title:descr) {
 						span class:'glyphicon glyphicon-filter'
 					}
 					input id:'filter-input', type:'text', class:'form-control', placeholder:'Filterausdruck',
-						'data-toggle':'tooltip', disabled:'disabled', 
-						title:'Es wird nach allen Teilen des ' +
-						'Filterausdrucks in allen Eigenschaften des Datenpunktes gesucht.'
+						'data-toggle':'tooltip', disabled:'disabled', title:descr
 					span(class:'input-group-btn') {
 						button(id:'reset-filter-btn', class:'btn btn-default', type:'button',
 							'data-toggle':'tooltip', title:'Alle Filter werden gelöscht.') {
