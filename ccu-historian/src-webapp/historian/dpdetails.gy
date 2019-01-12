@@ -148,13 +148,13 @@ renderer.content={
 					// show trends
 					h4 '48h-Trend'
 					p {
-						img alt:'24h-Trend', src:buildUrl('../query/trend', [dp1:dp.idx, b:'-48h'], apiKey), 
+						img alt:'48h-Trend', src:buildUrl('../query/trend', [dp1:dp.idx, b:'-48h'], apiKey), 
 							width:TrendParameters.DEFAULT_WIDTH, height:TrendParameters.DEFAULT_HEIGHT
 					}
 					a class:'btn btn-default', href:buildUrl('../query/csv', [dp1:dp.idx, b:'-48h'], apiKey), role:'button', 'Export CSV'
 					h4 'Monats-Trend'
 					p {
-						img alt:'Wochen-Trend', src:buildUrl('../query/trend', [dp1:dp.idx, b:'-1M'], apiKey),
+						img alt:'Monats-Trend', src:buildUrl('../query/trend', [dp1:dp.idx, b:'-1M'], apiKey),
 							width:TrendParameters.DEFAULT_WIDTH, height:TrendParameters.DEFAULT_HEIGHT
 					}
 					a class:'btn btn-default', href:buildUrl('../query/csv', [dp1:dp.idx, b:'-1M'], apiKey), role:'button', 'Export CSV'
