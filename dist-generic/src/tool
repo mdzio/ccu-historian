@@ -14,4 +14,4 @@ else
 fi
 
 # start java with GroovyMain
-${JAVA_BIN} -cp ccu-historian.jar:lib\*.jar groovy.ui.GroovyMain "$@"
+${JAVA_BIN} -cp ccu-historian.jar:lib/*.jar groovy.ui.GroovyMain "$@"
