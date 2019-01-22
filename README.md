@@ -33,13 +33,11 @@ Da der CCU-Historian nur eine [Java-Laufzeitumgebung](https://java.com/) zum Bet
 Für bestimmte Systeme existieren fertige Installationspakete:
 
 * CCU-Addon für folgende HomeMatic-Zentralen:
-  * CCU3 (Die neue Zentrale erscheint Q3 2018.)
+  * CCU3
   * [RaspberryMatic](https://github.com/jens-maus/RaspberryMatic)
-  * [piVCCU](https://github.com/alexreinert/piVCCU)
-  * [YAHM](https://github.com/leonsio/YAHM)
 * Synology-Paket
 
-**Hinweis:** Durch die geringen CPU- und RAM-Ressourcen einer CCU2 wird die Installation als CCU-Addon auf dieser Plattform nicht unterstützt. Es wird daher empfohlen den CCU-Historian auf einem weiteren System zu installieren und so zu konfigurieren, dass er sich über Netzwerk mit der CCU2 verbindet.
+**Hinweis:** Für den Betrieb als Addon auf einer CCU3 oder RaspberryMatic muss an der Zentrale ein USB-Stick angeschlossen sein!
 
 # Installation und Konfiguration
 
