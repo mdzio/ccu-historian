@@ -35,31 +35,15 @@ start() {
         sed -i "s/devices\.historianAddress=.*/devices.historianAddress='${ipaddress}'/g" ${ADDON_DIR}/ccu-historian.config
         sed -i "s/webServer\.historianAddress=.*/webServer.historianAddress='${ipaddress}'/g" ${ADDON_DIR}/ccu-historian.config
       fi
-
-      # lets set the data directory
-      sed -i '/database\.dir=.*/d' ${ADDON_DIR}/ccu-historian.config
-      if [ -d /usr/local/sdcard  ]; then
-        # we run on RaspberryMatic
-        echo "database.dir='/usr/local/sdcard/ccu-historian/'" >>${ADDON_DIR}/ccu-historian.config
-      else
-        # we run on CCU2
-        echo "database.dir='/media/sd-mmcblk0/ccu-historian/'" >>${ADDON_DIR}/ccu-historian.config
-      fi
     fi
 
     # check which java version and heap size to use.
     if [ -x "/opt/java/bin/java" ]; then
-      # we are on RaspberryMatic beta3+
+      # we are on CCU3/RaspberryMatic
       JAVA_BIN=/opt/java/bin/java
-      MAXHEAP=512m
-    elif [ -x "/opt/jre/bin/java" ]; then
-      # we are on RaspberryMatic beta1-2
-      JAVA_BIN=/opt/jre/bin/java
-      MAXHEAP=512m
-    elif [ -x "/opt/jre-1.8.0_121-compact3/bin/java" ]; then
-      # we run on CCU2/YAHM/LXCCU
-      JAVA_BIN=/opt/jre-1.8.0_121-compact3/bin/java
-      MAXHEAP=192m
+    elif which java > /dev/null; then
+      # java is on the search path 
+      JAVA_BIN=java      
     else
       echo "ERROR: Java binary not found"
       logger -t homematic -p user.error "ERROR: Java binary not found for CCU-Historian startup"
@@ -67,7 +51,7 @@ start() {
     fi
 
     # lets start ccu-historian
-    start-stop-daemon -S -q -b -m -p /var/run/ccu-historian.pid --exec ${JAVA_BIN} -- -Xmx${MAXHEAP} -Djava.util.prefs.userRoot=/usr/local/addons/ccu-historian -Djava.util.prefs.systemRoot=/usr/local/addons/ccu-historian -jar ${ADDON_DIR}/ccu-historian/ccu-historian.jar -config ${ADDON_DIR}/ccu-historian.config -loglevel off
+    start-stop-daemon -S -q -b -m -p /var/run/ccu-historian.pid --exec ${JAVA_BIN} -- -Xmx512m -Djava.util.prefs.userRoot=/usr/local/addons/ccu-historian -Djava.util.prefs.systemRoot=/usr/local/addons/ccu-historian -jar ${ADDON_DIR}/ccu-historian/ccu-historian.jar -config ${ADDON_DIR}/ccu-historian.config -loglevel off
     logger -t ccu-historian -p user.info "Started"
 }
 

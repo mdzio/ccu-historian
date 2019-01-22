@@ -3,14 +3,8 @@
 
 # check which java version to use
 if [ -x "/opt/java/bin/java" ]; then
-  # we are on RaspberryMatic beta3+
+  # we are on CCU3/RaspberryMatic
   JAVA_BIN=/opt/java/bin/java
-elif [ -x "/opt/jre/bin/java" ]; then
-  # we are on RaspberryMatic beta1-2
-  JAVA_BIN=/opt/jre/bin/java
-elif [ -x "/opt/jre-1.8.0_121-compact3/bin/java" ]; then
-  # we run on CCU2/YAHM/LXCCU
-  JAVA_BIN=/opt/jre-1.8.0_121-compact3/bin/java
 elif which java > /dev/null; then
   # java is on the search path 
   JAVA_BIN=java

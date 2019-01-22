@@ -37,7 +37,7 @@ set argError false
 if {![info exists id] || $id==""} {
     set argError true
 } elseif {$add} {
-    # for adding all remaining parameters are needed
+    # for -a all remaining parameters are needed
     foreach n {name url descr(de) descr(en)} {
         if {![info exists $n]} {
             set argError true

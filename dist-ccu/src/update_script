@@ -9,16 +9,15 @@ WWW_DIR=${CONFIG_DIR}/addons/www/${ADDONNAME}
 # Logging to syslog is currently not supported by the CCU during the install process.
 
 if [ "$1" = "" ]; then
-  echo "Add-On is not for CCU1"
+  echo "CCU-Historian Add-On is not for CCU1"
   lcdtool "Add-On is not for CCU1   "
   exit 1
 elif [ "$1" = "CCU2" ]; then
-  echo "Installing on CCU2"
-  if [ "`mount | grep ubi1:user | grep /usr/local | wc -l`" -eq 0 ]; then
-    mount -t ubifs ubi1:user /usr/local
-  fi
-elif [ "$1" == "HM-RASPBERRYMATIC" ]; then
-  echo "Installing on RaspberryMatic"
+  echo "CCU-Historian Add-On is not for CCU2"
+  exit 1
+# A CCU3 currently masquerades as RaspberryMatic. "CCU3" is currently not defined, but it can happen. 
+elif [ "$1" == "HM-RASPBERRYMATIC" -o "$1" == "CCU3" ]; then
+  echo "Installing on CCU3/RaspberryMatic"
   mount /usr/local
 fi
 
