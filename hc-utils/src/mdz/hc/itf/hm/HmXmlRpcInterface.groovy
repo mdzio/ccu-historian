@@ -45,7 +45,8 @@ import mdz.hc.DataPointIdentifier
 public class HmXmlRpcInterface extends BasicProducer<RawEvent> implements Interface, WriteSupport, Consumer<RawEvent>, HmReinitable {
 
 	public static final String PARAMSET_VALUES = 'VALUES'
-	public static final String UNKNOWN_DEVICE_ERROR_TEXT = 'Unknown instance'
+	public static final String UNKNOWN_DEVICE_ERROR_TEXT1 = 'Unknown instance'
+	public static final String UNKNOWN_DEVICE_ERROR_TEXT2 = 'Invalid device'
 	 
 	final String name
 	// name of the interface in the logic layer of the CCU
@@ -197,8 +198,9 @@ public class HmXmlRpcInterface extends BasicProducer<RawEvent> implements Interf
 					}
 					cachedProperties=devicePropCache[dp.id]
 				} catch (Exception e) {
-					// FIXME: test and narrow exception type
-					if (e.getMessage()!=null && e.getMessage().equals(UNKNOWN_DEVICE_ERROR_TEXT)) {
+					if (e.getMessage()!=null && 
+						(e.getMessage().equals(UNKNOWN_DEVICE_ERROR_TEXT1) || 
+						 e.getMessage().equals(UNKNOWN_DEVICE_ERROR_TEXT2)) ) {
 						log.warning "Device $dp.id does not exist"
 					} else {
 						log.warning "Communication error"
