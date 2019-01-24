@@ -15,19 +15,18 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-import groovy.time.TimeCategory
 import groovy.transform.Field
 import java.text.*
 import java.util.logging.Logger
 import javax.servlet.http.HttpServletResponse
 import mdz.ccuhistorian.Database
 import mdz.ccuhistorian.webapp.TrendParameters
+import mdz.hc.timeseries.CombineLatestIterator
 
 @Field
 private final static log = Logger.getLogger('mdz.ccuhistorian.webapp.Csv')
 
 // main function
-
 def ex=utils.catchToLog(log) {
 	def startTime=System.currentTimeMillis()
 	log.finer 'Web server: Exporting CSV'
@@ -43,45 +42,72 @@ def ex=utils.catchToLog(log) {
 	if (!parameters.groups) {
 		throw new IllegalArgumentException('Parameter dp... (data point id/s) not set')
 	}
-	def dataPoint=parameters.groups.firstEntry().value.dataPoints[0]
-	
-	// get time series
-	def timeSeries
-	if (dataPoint.historyString || dataPoint.attributes.type=='ACTION') {
-		// without boundary values
-		timeSeries=database.getTimeSeriesRaw(dataPoint, parameters.timeRange.begin, parameters.timeRange.end)
-	} else {
-		// with boundary values
-		timeSeries=database.getTimeSeries(dataPoint, parameters.timeRange.begin, parameters.timeRange.end)
+	def dataPoints=parameters.groups.values().dataPoints.flatten()
+
+	// get all time series
+	def timeSeries=dataPoints.collect { dataPoint ->
+		if (dataPoint.historyString || dataPoint.attributes.type=='ACTION') {
+			// without boundary values
+			database.getTimeSeriesRaw(dataPoint, parameters.timeRange.begin, parameters.timeRange.end)
+		} else {
+			// with boundary values
+			database.getTimeSeries(dataPoint, parameters.timeRange.begin, parameters.timeRange.end)
+		}
 	}
+	
+	// combine all time series into a single iterator
+	def combIt=new CombineLatestIterator(timeSeries*.iterator() as Iterator[])
 
 	// create CSV (uses german MS Excel CSV format)
 	def dateFormat=new SimpleDateFormat('dd.MM.yyyy HH:mm:ss,SSS')
-	def sb=new StringBuilder()
-	sb << dataPoint.displayName << ';;\n'
-	sb << 'Zeitstempel;Wert;Status\n'
-	def valueFormatter
-	if (dataPoint.historyString) {
-		valueFormatter={ '"'+it.tr('"', '""')+'"' }
-	} else {
-		def numberFormat=new DecimalFormat('#,##0.###')
-		valueFormatter={ numberFormat.format(it) }
-	}
-	timeSeries.each {
-		sb << dateFormat.format(it.timestamp) << ';' << valueFormatter(it.value) << ';' << it.state << '\n'
-	}
+	def strBuilder=new StringBuilder()
 	
+	// header lines
+	strBuilder << ';Datenpunkt;' << dataPoints.collect { dataPoint ->
+		dataPoint.displayName
+	}.join(';') << '\n'
+	strBuilder << ';Einheit;' << dataPoints.collect { dataPoint ->
+		dataPoint.attributes.unit?:''
+	}.join(';') << '\n'
+
+	strBuilder << 'Zeistempel;Status;' << dataPoints.collect { 'Wert' }.join(';') << '\n'
+	
+	// data lines
+	def numberFormat=new DecimalFormat('#,##0.###')
+	combIt.each { pv ->
+		strBuilder << dateFormat.format(pv.timestamp) << ';' << pv.state << ';'
+		strBuilder << pv.value.collect { v ->
+			if (v.is(null)) {
+				''
+			} else if (v in Number) {
+				numberFormat.format(v)
+			} else {
+				'"'+v.toString().tr('"', '""')+'"'
+			}
+		}.join(';')
+		strBuilder << '\n'
+	}
+
 	// send CSV file
-	def fileName=dataPoint.displayName.replaceAll(/[^a-zA-Z0-9_]/, '_')+'.csv'
-	response.contentType='text/csv'
+	def fileName
+	if (dataPoints.size()==1) {
+		fileName=dataPoints[0].displayName.replaceAll(/[^a-zA-Z0-9_]/, '_')+'.csv'
+	} else {
+		fileName='historian.csv'
+	}
+	response.contentType='text/csv; charset=windows-1252'
 	response.setHeader 'Content-disposition', "attachment; filename=$fileName"
-	out << sb
+	def outWriter=new OutputStreamWriter(sout, 'windows-1252')
+	try {
+		outWriter << strBuilder
+	} finally {
+		outWriter.close()
+	}
 	
 	log.finer "Web server: CSV export generated in ${System.currentTimeMillis()-startTime}ms"
 }
 
 // signal error
-
 if (ex) {
 	utils.catchToLog(log) {
 		response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.message?:ex.class.name)

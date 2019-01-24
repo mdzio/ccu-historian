@@ -236,6 +236,9 @@ renderer.content={
 				span class:'caret'
 			}
 			
+			// CSV export
+			a class:'btn btn-default', href:buildUrl('/query/csv.gy', trendParams.parameters, stringDpParams), 'CSV-Export'
+			
 			// individual groups
 			button class:'btn btn-default', form:'individual-groups', type:'submit',
 				'data-toggle':'tooltip', title:'Jedem Datenpunkt wird eine eigene Gruppe zugewiesen. ' + 
@@ -253,6 +256,7 @@ renderer.content={
 				}
 				buildHiddenInputs(html, fp.parameters, stringDpParams)
 			}
+			
 		}
 		
 		// trend options
@@ -357,7 +361,7 @@ renderer.content={
 		def timeSeries=database.getTimeSeriesRaw(dp, trendParams.timeRange.begin, trendParams.timeRange.end)
 		def toMany=timeSeries.size()>NUM_STRING_ENTRIES
 		if (toMany) {
-			timeSeries=timeSeries.takeRight(NUM_STRING_ENTRIES).reverse() //sort { a, b -> b.timestamp <=> a.timestamp}
+			timeSeries=timeSeries.takeRight(NUM_STRING_ENTRIES).reverse()
 		} else {
 			timeSeries=timeSeries.iterator().reverse()
 		}
