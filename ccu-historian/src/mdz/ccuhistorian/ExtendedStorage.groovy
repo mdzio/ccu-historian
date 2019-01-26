@@ -28,8 +28,8 @@ import mdz.hc.DataPoint
 import mdz.hc.DataPointIdentifier
 import mdz.hc.Event
 import mdz.hc.ProcessValue
-import mdz.hc.TimeSeries
 import mdz.hc.persistence.Storage
+import mdz.hc.timeseries.TimeSeries
 
 class ExtendedStorage implements Storage {
 

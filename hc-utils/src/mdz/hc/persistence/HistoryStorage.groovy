@@ -21,7 +21,7 @@ import mdz.eventprocessing.Consumer
 import mdz.hc.DataPoint
 import mdz.hc.Event
 import mdz.hc.ProcessValue
-import mdz.hc.TimeSeries
+import mdz.hc.timeseries.TimeSeries
 
 public interface HistoryStorage extends Consumer<Event> {
 

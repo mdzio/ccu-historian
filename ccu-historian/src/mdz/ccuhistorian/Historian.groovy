@@ -22,7 +22,6 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.ScheduledFuture
 import groovy.transform.CompileStatic
 import groovy.util.logging.Log
-import mdz.hc.TimeSeries
 import mdz.eventprocessing.Buffer
 import mdz.eventprocessing.Consumer
 import mdz.hc.Event
@@ -33,6 +32,7 @@ import mdz.hc.itf.Interface
 import mdz.hc.itf.SubscriptionSupport
 import mdz.hc.itf.Manager
 import mdz.hc.persistence.Storage
+import mdz.hc.timeseries.TimeSeries
 import mdz.Exceptions
 import mdz.ccuhistorian.eventprocessing.DataPointStorageUpdater
 import mdz.ccuhistorian.eventprocessing.FirstArchived

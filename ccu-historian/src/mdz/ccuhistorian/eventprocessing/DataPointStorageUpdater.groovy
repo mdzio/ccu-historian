@@ -25,8 +25,8 @@ import mdz.eventprocessing.Processor
 import mdz.hc.DataPoint
 import mdz.hc.Event
 import mdz.hc.RawEvent
-import mdz.hc.TimeSeries
 import mdz.hc.persistence.DataPointStorage
+import mdz.hc.timeseries.TimeSeries
 import mdz.ccuhistorian.Main
 import mdz.Exceptions
 

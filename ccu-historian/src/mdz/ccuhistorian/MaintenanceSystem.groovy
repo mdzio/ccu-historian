@@ -31,8 +31,8 @@ import mdz.eventprocessing.Transformer
 import mdz.hc.DataPoint
 import mdz.hc.Event
 import mdz.hc.ProcessValue
-import mdz.hc.TimeSeries
-import mdz.hc.TimeSeriesBulkIterator
+import mdz.hc.timeseries.TimeSeries
+import mdz.hc.timeseries.ChunkIterator
 
 @Log
 @CompileStatic
@@ -88,7 +88,7 @@ class MaintenanceSystem extends DatabaseSystem {
 			Date beginTime=database.getFirstTimestamp(dp)
 			if (beginTime!=null) {
 				Date endTime=new Date(database.getLast(dp).timestamp.time+1)
-				Iterator<ProcessValue> srcIterator=new TimeSeriesBulkIterator(dp, database, beginTime, endTime)
+				Iterator<ProcessValue> srcIterator=new ChunkIterator(dp, database, beginTime, endTime)
 				Producer<ProcessValue> producer=new IteratorProducerAdapter<ProcessValue>(srcIterator)
 				Processor<ProcessValue, Event> transformPv=new Transformer<ProcessValue, Event>({ 
 					ProcessValue pv -> new Event(dataPoint: dp, pv:pv) 
