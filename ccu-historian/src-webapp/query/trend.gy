@@ -31,7 +31,7 @@ import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer
 import org.jfree.chart.plot.XYPlot
 import org.jfree.chart.plot.CombinedDomainXYPlot
 import org.jfree.chart.plot.PlotOrientation
-import mdz.hc.TimeSeries
+import mdz.hc.timeseries.TimeSeries
 import mdz.hc.DataPoint
 import mdz.ccuhistorian.TrendDesign
 import mdz.ccuhistorian.webapp.TrendParameters
