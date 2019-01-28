@@ -211,6 +211,7 @@ public class PageRenderer {
 								li { a href:'/historian/messages.gy', 'Meldungsanalyse' }
 								li { a href:'/historian/dpconfig.gy', 'Datenpunktkonfiguration' }
 								li { a href:'/historian/config.gy', 'Historian Konfiguration' }
+								li { a href:'/historian/script.gy', 'Skriptumgebung' }
 								// TODO
 								/*
 								li { a href:'diagnosis.html', 'Diagnose' }
