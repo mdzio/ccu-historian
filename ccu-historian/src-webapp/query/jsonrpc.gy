@@ -15,7 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-import mdz.hc.TimeSeries.CompactTimeSeries
+import mdz.hc.timeseries.TimeSeries.CompactTimeSeries
 import mdz.Exceptions
 import groovy.json.JsonSlurper
 import groovy.json.StreamingJsonBuilder

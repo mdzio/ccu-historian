@@ -33,9 +33,9 @@ import org.h2.tools.Server
 import mdz.hc.DataPoint
 import mdz.hc.DataPointIdentifier
 import mdz.hc.Event
-import mdz.hc.TimeSeries
 import mdz.hc.ProcessValue
 import mdz.hc.persistence.Storage
+import mdz.hc.timeseries.TimeSeries
 import mdz.Exceptions
 
 @Log

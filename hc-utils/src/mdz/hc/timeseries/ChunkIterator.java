@@ -15,26 +15,28 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package mdz.hc;
+package mdz.hc.timeseries;
 
 import java.util.Date;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import mdz.hc.DataPoint;
+import mdz.hc.ProcessValue;
 import mdz.hc.persistence.HistoryStorage;
 
-public class TimeSeriesBulkIterator implements Iterator<ProcessValue> {
+public class ChunkIterator implements Iterator<ProcessValue> {
 
-	private static final long DEFAULT_BULK_LENGTH = 30l * 24 * 60 * 60 * 1000; // 30 Tage [Millisekunden]
+	private static final long DEFAULT_CHUNK_LENGTH = 30l * 24 * 60 * 60 * 1000; // 30 days in milliseconds
 
 	private final DataPoint dataPoint;
 	private final HistoryStorage historyStorage;
 	private final Date end;
 	private Date begin;
 	private Iterator<ProcessValue> chunkIterator;
-	private long bulkLength = DEFAULT_BULK_LENGTH;
+	private long chunkLength = DEFAULT_CHUNK_LENGTH;
 
-	public TimeSeriesBulkIterator(DataPoint dataPoint, HistoryStorage historyStorage, Date begin, Date end)
+	public ChunkIterator(DataPoint dataPoint, HistoryStorage historyStorage, Date begin, Date end)
 			throws Exception {
 		this.dataPoint = dataPoint;
 		this.historyStorage = historyStorage;
@@ -43,12 +45,12 @@ public class TimeSeriesBulkIterator implements Iterator<ProcessValue> {
 		nextChunk();
 	}
 
-	public void setBulkLength(long bulkLength) {
-		this.bulkLength = bulkLength;
+	public void setChunkLength(long chunkLength) {
+		this.chunkLength = chunkLength;
 	}
 
 	private void nextChunk() {
-		Date chunkEnd = new Date(begin.getTime() + bulkLength);
+		Date chunkEnd = new Date(begin.getTime() + chunkLength);
 		if (chunkEnd.after(end))
 			chunkEnd = end;
 		try {

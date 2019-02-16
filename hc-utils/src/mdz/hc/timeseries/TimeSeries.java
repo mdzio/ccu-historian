@@ -15,7 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package mdz.hc;
+package mdz.hc.timeseries;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import mdz.hc.DataPoint;
+import mdz.hc.ProcessValue;
 
 /**
  * The TimeSeries class was implemented in Java for performance reasons.
