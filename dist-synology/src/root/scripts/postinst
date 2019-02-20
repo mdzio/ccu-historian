@@ -30,6 +30,8 @@ if [ "$pkgwizard_create_initial_configuration_YES" = "true" ]; then
 	printf "webServer.historianAddress='$pkgwizard_synology_ip'\n" >> ./ccu-historian.config
 	printf "webServer.port=$pkgwizard_ccu_webport\n" >> ./ccu-historian.config
 	printf "database.webAllowOthers=true\n" >> ./ccu-historian.config
+	printf "webServer.menuLinks.link1.text='H2-HighChart'\n" >> ./ccu-historian.config
+	printf "webServer.menuLinks.link1.address='/custom/h2-highchart/H2-HighChart.gy'\n" >> ./ccu-historian.config
 	sed -i "/port/ s/8080/$pkgwizard_ccu_webport/" ./ui/config
 	sed -i "/adminport/ s/8080/$pkgwizard_ccu_webport/" /var/packages/ccu-historian/INFO
 	if [ "$pkgwizard_enable_cuxd" = "true" ]; then
