@@ -1,0 +1,13 @@
+Highstock JS v7.0.2 (2019-01-17)
+(c) 2009-2018 Torstein Honsi
+License: www.highcharts.com/license
+
+Highcharts JS v7.0.2 (2019-01-17)
+Exporting module
+(c) 2010-2019 Torstein Honsi
+License: www.highcharts.com/license
+
+Highcharts JS v7.0.2 (2019-01-17)
+Client side exporting module
+(c) 2015-2019 Torstein Honsi / Oystein Moseng
+License: www.highcharts.com/license
