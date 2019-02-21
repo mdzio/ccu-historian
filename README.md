@@ -50,7 +50,10 @@ Alle Beiträge zum Projekt müssen unter die [GNU General Public License V3](LIC
 
 # Lizenz und Haftungsausschluss
 
-Dieses Projekt steht unter der [GNU General Public License V3](LICENSE.txt).
+Dieses Projekt steht unter der [GNU General Public License V3](LICENSE.txt) mit folgenden Ausnahmen:
+* Highstock/Highcharts JS: [Creative Commons (CC) Attribution-NonCommercial licence](http://creativecommons.org/licenses/by-nc/3.0/)
+
+Bei einer kommerziellen Verwendung des CCU-Historians muss also auf die Erweiterung H2-Highcharts verzichtet werden, oder eine entsprechende Lizenz erworben werden.
 
 # Autoren
 

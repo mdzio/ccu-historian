@@ -1,0 +1,50 @@
+
+//import mdz.ccuhistorian.webapp.TrendParameters
+import mdz.ccuhistorian.webapp.WebUtilities
+
+// setup page
+def renderer=new mdz.ccuhistorian.webapp.PageRenderer(servlet: this)
+
+renderer.head={
+	title 'CCU-historian: HighChart'
+}
+
+renderer.content={
+
+	div(id:'filter') {
+		div(class:'btn-group', role:'group') {
+			button id:'button1', class:'btn btn-default', 'Tag'
+			button id:'button2', class:'btn btn-default', 'Woche'
+			button id:'button3', class:'btn btn-default', 'Monat'
+			button id:'button4', class:'btn btn-default', 'Alles'
+      }    
+					
+      select(id: "Select-Raum", class:"form-select-h2")  { }
+      select(id: "Select-Gewerk", class:"form-select-h2" )  { }
+      input id:"filterFeld", class:"form-select-h2", type:"text", placeholder:"Suchen.."
+      div(class:'btn-group', role:'group') {
+          button id:'refresh', class:'btn btn-default', 'Refresh'
+          button id:'createLink', class:'btn btn-default', 'Link erzeugen'
+      }
+   }
+
+   div(id:'container') { style: "min-height: 400px; height: auto; min-width: 310px"
+
+   }
+
+	span id: "count_val", ""
+	span id: "count_text", ""
+	span id: "aggr_text", ""
+
+}
+
+renderer.end={
+   script src:'highstock.js'
+   script src:'exporting.js'
+   script src:'offline-exporting.js'
+   script src:'language.js'
+   script src:'H2-HighChart.js'
+}
+
+// render page
+renderer.render()
