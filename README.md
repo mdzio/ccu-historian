@@ -57,8 +57,9 @@ Bei einer kommerziellen Verwendung des CCU-Historians muss also auf die Erweiter
 
 # Autoren
 
-Copyright (c) 2011-2018
+Copyright (c) 2011-2019
 
 * Mathias Dzionsko
 * Jens Maus (CCU/RaspberryMatic-Distribution)
 * Yannick Rocks, Thomas Zahari (Synology-Distribution)
+* wak (Erweiterung H2-Highcharts)
