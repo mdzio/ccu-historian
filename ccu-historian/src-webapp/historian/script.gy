@@ -21,22 +21,81 @@ import java.util.logging.Logger
 @Field
 private final static Logger log = Logger.getLogger('mdz.ccuhistorian.webapp.Script')
 
+// css source
+def css=$/
+.script-editor {
+	resize: vertical;
+	font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+	font-size: 13px;
+	color: rgb(51, 51, 51);
+}
+/$
+
+// javascript source
+def js=$/
+
+var scriptOutput=""
+
+// script pane component
+function ScriptPane(initialVnode) {
+	var script='println "Hello World!"\n'
+	
+	function run() {
+		scriptOutput=script
+	}
+
+	return {
+		view: function() {
+			return m("div", [
+				m("h4", "Skript"),
+				m(".input-group", [
+					m("span.input-group-addon", m("input[type=checkbox]")),
+					m("span.input-group-addon", "Schreibzugriff auf die Datenbank"),
+				]),
+				m("button.btn.btn-primary[type=button]", {onclick: run}, "AusfÃ¼hren"),
+				m("textarea.form-control.script-editor[rows=20]", {
+					oninput: function (e) { script=e.target.value }, 
+				}, script),
+			])
+		}
+	}
+}
+
+// output pane component
+function OutputPane(initialVnode) {
+	return {
+		view: function() {
+			return m("div", [
+				m("h4", "Ausgabe") ,
+				m("pre", scriptOutput)
+			])
+		}
+	}
+}
+
+// mount components
+m.mount(document.getElementById("scriptPane"), ScriptPane)
+m.mount(document.getElementById("outputPane"), OutputPane)
+/$
+
 // setup page
 def renderer=new mdz.ccuhistorian.webapp.PageRenderer(servlet: this)
 
 renderer.head={
 	title 'CCU-historian: Skriptumgebung'
+	style { mkp.yieldUnescaped css }
 }
 
 renderer.content={
-	// FIXME:
-	
+	// content is rendered by mithril
+	div id:'scriptPane', class:'col-md-6'
+	div id:'outputPane', class:'col-md-6'
 }
 
+
 renderer.end={
-    script {
-		// FIXME:
-	}
+	script src:'/external/mithril/mithril.js'
+    script { mkp.yieldUnescaped js }
 }
 
 // render page
