@@ -133,6 +133,11 @@ def convertValue(v) {
 	[timestamp: v.timestamp.time, value: v.value, state: v.state]	
 }
 
+def executeScript(script, writeAccess) {
+	// TODO
+	"writeAccess: $writeAccess\nscript: $script\n"
+}
+
 @Field 
 private static rpcFunctions=[
 	getDataPoint:{ params ->
@@ -170,5 +175,16 @@ private static rpcFunctions=[
 	setValue:{ params ->
 		interfaceManager.writeValue(utils.parseDataPoint(params[0] as String, database), params[1])
 		null
-	}
+	},
+	executeScript:{ params ->
+		if (params.size()==0) {
+			throw new RpcException("Missing parameter(s) for executeScript", RpcException.INVALID_PARAMS)
+		}
+		def script=params[0]
+		def writeAccess=false
+		if (params.size()==2 && params[1].toBoolean()) {
+			writeAccess=true
+		}
+		executeScript(script, writeAccess)
+	},
 ]

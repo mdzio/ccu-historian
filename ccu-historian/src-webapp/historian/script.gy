@@ -21,52 +21,88 @@ import java.util.logging.Logger
 @Field
 private final static Logger log = Logger.getLogger('mdz.ccuhistorian.webapp.Script')
 
-// css source
+// get api key
+def apiKey
+if (webServer.config.apiKeys) {
+	apiKey="?k="+webServer.config.apiKeys[0]
+} else {
+	apiKey=""
+}
+
+// *** css ***
 def css=$/
-.script-editor {
+.textpane {
 	resize: vertical;
 	font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
 	font-size: 13px;
-	color: rgb(51, 51, 51);
+	color: black;
 }
 /$
 
-// javascript source
+// *** javascript ***
 def js=$/
+
+// api key (transfer from groovy variable)
+var apiKey="$apiKey"
 
 // global state
 var scriptOutput=""
+var scriptError=false
 
 // script pane component
 function ScriptPane(initialVnode) {
+	// model
 	var script='println "Hello World!"\n'
 	var writeAccess=false
-	function run() {
-		// TODO:
-		scriptOutput=script
+
+	// control
+	function onScript(e) {
+		script=e.target.value
 	}
+	function onWriteAccess(e) {
+		writeAccess=e.target.checked
+	}
+	function onRun() {
+		m.request({
+			method:"POST",
+			url: "/query/jsonrpc.gy"+apiKey,
+			data: {
+				method: 'executeScript',
+				params: [script, writeAccess],
+			},
+		}).then(function(data) {
+			if (data.error!==undefined) {
+				scriptError=true
+				scriptOutput=data.error.message
+			} else {
+				scriptError=false
+				scriptOutput=data.result
+			}
+		}).catch(function(err) {
+			scriptError=true
+			scriptOutput=err.message
+		})
+	}
+
 	return {
 		view: function() {
 			return m("div",
 				m("h4", "Skript"),
 				m(".row",
-					m(".col-sm-6",
+					m(".col-xs-7",
 						m(".checkbox", 
 							m("label",
-								m("input[type=checkbox]", {
-									onchange: function (e) { writeAccess=e.target.checked }
-								}),
-								"Schreibzugriff"
+								m("input[type=checkbox]", {onchange: onWriteAccess}),
+								"Schreibzugriff auf Datenbank ",
+								m("span.glyphicon.glyphicon-alert")
 							),
 						),
 					),
-					m(".col-sm-6 ",
-						m("button.btn.btn-primary.btn-block", {onclick: run}, "Ausführen"),
+					m(".col-xs-5",
+						m("button.btn.btn-primary.btn-block", {onclick: onRun}, "Ausführen")
 					)
 				),
-				m("textarea.form-control.script-editor[rows=20]", {
-					oninput: function (e) { script=e.target.value }, 
-				}, script),
+				m("textarea.form-control.textpane[rows=25][placeholder=Skript]", {oninput: onScript}, script)
 			)
 		}
 	}
@@ -76,10 +112,13 @@ function ScriptPane(initialVnode) {
 function OutputPane(initialVnode) {
 	return {
 		view: function() {
-			return m("div", [
-				m("h4", "Ausgabe") ,
-				m("pre", scriptOutput)
-			])
+			return m("div",
+				m("h4", "Ausgabe"),
+				m("textarea.form-control.textpane[rows=27][readonly]", 
+					scriptError?{style: "background-color:#ff6262"}:null, 
+					scriptOutput
+				)
+			)
 		}
 	}
 }
