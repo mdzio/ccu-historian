@@ -16,12 +16,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 import mdz.hc.timeseries.TimeSeries.CompactTimeSeries
+import mdz.hc.persistence.ReadOnlyDecorator
 import mdz.Exceptions
 import groovy.json.JsonSlurper
 import groovy.json.StreamingJsonBuilder
 import groovy.transform.Field
 import java.util.logging.Logger
 import java.util.logging.Level
+import org.codehaus.groovy.control.CompilerConfiguration
+import org.codehaus.groovy.control.customizers.ImportCustomizer
+import org.codehaus.groovy.control.customizers.SecureASTCustomizer
+import org.codehaus.groovy.control.customizers.ASTTransformationCustomizer
 
 @Field
 private final static log = Logger.getLogger('mdz.ccuhistorian.webapp.JsonRpc')
@@ -134,8 +139,32 @@ def convertValue(v) {
 }
 
 def executeScript(script, writeAccess) {
-	// TODO
-	"writeAccess: $writeAccess\nscript: $script\n"
+	// configure script compiler
+	CompilerConfiguration config=[]
+	// default imports
+	ImportCustomizer importCustomizer=[]
+	importCustomizer.addStaticStars 'java.lang.Math'
+	config.addCompilationCustomizers importCustomizer
+	// security
+	SecureASTCustomizer secureCustomizer=[]
+	secureCustomizer.with {
+		importsWhitelist=[]
+		staticImportsWhitelist=[]
+		staticStarImportsWhitelist=['java.lang.Math']
+		receiversBlackList=['java.lang.System']
+	}
+	config.addCompilationCustomizers secureCustomizer
+	
+	// configure binding	
+	Binding binding=[]
+	output=new StringWriter()
+	binding.out=new PrintWriter(output)
+	binding.database=writeAccess ? database : new ReadOnlyDecorator(database)
+	
+	// create shell and execute script
+	GroovyShell shell=[binding, config]
+	shell.evaluate script, 'UserScript'
+	output.toString()
 }
 
 @Field 

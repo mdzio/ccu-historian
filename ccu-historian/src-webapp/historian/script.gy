@@ -48,11 +48,15 @@ var apiKey="$apiKey"
 // global state
 var scriptOutput=""
 var scriptError=false
+var scriptRunning=false
 
 // script pane component
 function ScriptPane(initialVnode) {
 	// model
-	var script='println "Hello World!"\n'
+	var script='println "Datenpunktliste:"\n'+
+		'database.dataPoints.each { dp ->\n'+
+  		'    println dp.displayName\n'+
+		'}'
 	var writeAccess=false
 
 	// control
@@ -63,6 +67,9 @@ function ScriptPane(initialVnode) {
 		writeAccess=e.target.checked
 	}
 	function onRun() {
+		scriptOutput="Skript wird ausgeführt! Bitte warten!"
+		scriptError=false
+		scriptRunning=true
 		m.request({
 			method:"POST",
 			url: "/query/jsonrpc.gy"+apiKey,
@@ -70,17 +77,26 @@ function ScriptPane(initialVnode) {
 				method: 'executeScript',
 				params: [script, writeAccess],
 			},
+			deserialize: function(response) {
+				// only try to parse json. return the string unchanged if an error occurs.
+				// this overrides mithril behaviour.
+				try {response=response?JSON.parse(response):null} catch (e) {}
+				return response
+			}
 		}).then(function(data) {
 			if (data.error!==undefined) {
 				scriptError=true
-				scriptOutput=data.error.message
+				scriptOutput="Bei der Skriptausführung ist ein Fehler aufgetreten:\n"+data.error.message
 			} else {
 				scriptError=false
 				scriptOutput=data.result
 			}
-		}).catch(function(err) {
+			scriptRunning=false
+		}, function(err) {
 			scriptError=true
-			scriptOutput=err.message
+			scriptOutput="Bei dem JSON-RPC-Aufruf ist ein Fehler aufgetreten:\nHTTP-Status: "+err.code+"\n"+
+				"Meldung: "+err.message
+			scriptRunning=false
 		})
 	}
 
@@ -99,7 +115,9 @@ function ScriptPane(initialVnode) {
 						),
 					),
 					m(".col-xs-5",
-						m("button.btn.btn-primary.btn-block", {onclick: onRun}, "Ausführen")
+						m("button.btn.btn-primary.btn-block", 
+							{onclick: onRun, disabled: scriptRunning?"disabled":null}, 
+							"Ausführen")
 					)
 				),
 				m("textarea.form-control.textpane[rows=25][placeholder=Skript]", {oninput: onScript}, script)
@@ -137,6 +155,13 @@ renderer.head={
 }
 
 renderer.content={
+	// backup warning
+	div(class:'alert alert-warning', role:'alert') {
+		span class:'glyphicon glyphicon-exclamation-sign'
+		mkp.yield ' Mit dieser Funktion können Daten unwiderruflich gelöscht werden! Es sollte immer vorab eine Sicherungskopie der '
+		mkp.yield 'Datenbank erstellt werden.'
+	}
+	
 	// content is rendered by mithril
 	div id:'scriptPane', class:'col-md-6'
 	div id:'outputPane', class:'col-md-6'
