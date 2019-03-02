@@ -51,6 +51,23 @@
 	vertical-align: middle;
 }
 
+.form-input-h2 {
+	padding: 7px;
+	border-color: #ccc;
+	border-width: 1px;
+	border-style: solid;
+	position: relative;
+	border-radius: 4px;
+	line-height: 18px;
+	font-size: 14px;
+	vertical-align: middle;
+}
+
 .navbar {
 	margin-bottom: 7px;
+}
+
+.LinePopup-text {
+   float: left;
+   width: 150px;
 }

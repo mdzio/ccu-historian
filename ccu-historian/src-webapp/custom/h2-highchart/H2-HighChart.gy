@@ -31,18 +31,89 @@ renderer.content={
    div(id:'container') { style: "min-height: 400px; height: auto; min-width: 310px"
 
    }
+   div(id:'message') {
+      span id: "count_val", ""
+      span id: "count_text", ""
+      span id: "aggr_text", ""
+      span id: "autorefresh", ""
+   }
 
-	span id: "count_val", ""
-	span id: "count_text", ""
-	span id: "aggr_text", ""
+   div(id:"LinePopup", class:"modal fade", role:"dialog") {
+    div(class:"modal-dialog") {
+      div(class:"modal-content") {
+
+        div(class:"modal-header") {
+          button type:"button", class:"close", id:"DialogBtnClose", "x"
+          h4 class:"modal-title", "Modal Header"
+        }
+        div(class:"modal-body") {
+         div(id:"yasix") {
+           span id: "Text-Yaxis", class:"LinePopup-text", "Y-Axis" 
+           select(id: "Select-Yaxis", class:"form-select-h2")  { }
+         }
+         div(id:"aggregation") {
+           span id: "Text-Aggregation", class:"LinePopup-text", "Aggregation" 
+           select(id: "Select-Aggregation", class:"form-select-h2")  { }
+         }
+         div(id:"aggrtime") {
+           span id: "Text-AggrTime", class:"LinePopup-text", "Aggr.Zeitraum" 
+           select(id: "Select-AggrTime", class:"form-select-h2")  { }
+         }
+         div(id:"compare") {
+           span id: "Text-Compare", class:"LinePopup-text", "Compare" 
+           select(id: "Select-Compare", class:"form-select-h2")  { }
+         }
+         div(id:"color") {
+           span id: "Text-Color", class:"LinePopup-text", "Color" 
+           select(id: "Select-Color", class:"form-select-h2")  { }
+         }
+         div(id:"linetype") {
+           span id: "Text-Line", class:"LinePopup-text", "Line-Type" 
+           select(id: "Select-Line", class:"form-select-h2")  { }
+         }
+         div(id:"marker") {
+           span id: "Text-Marker", class:"LinePopup-text", "Marker" 
+           select(id: "Select-Marker", class:"form-select-h2")  { }
+         }
+         div(id:"dashtype") {
+           span id: "Text-DashType", class:"LinePopup-text", "Line-Art" 
+           select(id: "Select-DashType", class:"form-select-h2")  { }
+         }
+         div(id:"linewidth") {
+           span id: "Text-LineWidth", class:"LinePopup-text", "Line-Width" 
+           select(id: "Select-LineWidth", class:"form-select-h2")  { }
+         }
+         div(id:"linefactor") {
+           span id: "Text-LineFactor", class:"LinePopup-text", "Faktor" 
+           input(id: "Line-Factor", type:"number", step: "any", class:"form-input-h2") 
+         }
+         div(id:"lineoffset") {
+           span id: "Text-LineOffSet", class:"LinePopup-text", "Offset" 
+           input(id: "Line-OffSet", type:"number", step: "any", class:"form-input-h2") 
+         }
+         div(id:"lineunit") {
+           span id: "Text-LineUnit", class:"LinePopup-text", "Einheit" 
+           input(id: "Line-Unit", class:"form-input-h2") 
+         }
+        }
+        div(class:"modal-footer") {
+          button type:"button", class:"btn btn-default", id:"DialogBtnOK", "Ok"
+        }
+
+
+      }      
+    }
+  }
 
 }
 
 renderer.end={
    script src:'highstock.js'
+   script src:'highcharts-more.js'
    script src:'exporting.js'
    script src:'offline-exporting.js'
    script src:'language.js'
+   script src:'themes.js'
    script src:'H2-HighChart.js'
 }
 
