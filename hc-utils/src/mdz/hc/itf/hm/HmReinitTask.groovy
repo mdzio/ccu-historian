@@ -29,7 +29,7 @@ import groovy.transform.CompileStatic
 public class HmReinitTask {
 
 	private final static long DEFAULT_TIMEOUT = 5*60*1000
-	private final static long DEFAULT_CHECKTIME = 10*1000
+	private final static long DEFAULT_CHECKTIME = 30*1000
 	
 	long timeout
 	long checkTime
@@ -49,7 +49,7 @@ public class HmReinitTask {
 			if (checkInterfacesFuture==null) {
 				log.fine 'Starting re-init task'
 				checkInterfacesFuture=executor.scheduleWithFixedDelay(
-					this.&checkInterfaces, checkTime, checkTime, TimeUnit.MILLISECONDS
+					this.&checkInterfaces, timeout, checkTime, TimeUnit.MILLISECONDS
 				)
 			}
 			interfaces << itf
@@ -74,7 +74,10 @@ public class HmReinitTask {
 				log.finer 'Checking timeouts'
 				Date now=[]
 				// find all timed out interfaces
-				interfaces.findAll { now.time-it.lastCommTime.time>timeout }.each { ri ->
+				interfaces.findAll {
+					it.lastCommTime==null || 
+					now.time-it.lastCommTime.time>timeout 
+				}.each { ri ->
 					log.fine "Timeout on interface $ri.name: reinitializing callback"
 					Exceptions.catchToLog(log) { 
 						ri.init()

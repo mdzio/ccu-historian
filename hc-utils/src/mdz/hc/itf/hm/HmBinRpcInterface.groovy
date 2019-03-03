@@ -77,7 +77,7 @@ public class HmBinRpcInterface extends BasicProducer<RawEvent> implements Interf
 			if (timeout!=null)
 				client.timeout=timeout
 			if (!disableRegistration) {
-				init()
+				Exceptions.catchToLog(log) { init() }
 				reinitTask.add this
 			}
 		} catch (Exception e) {
@@ -98,6 +98,10 @@ public class HmBinRpcInterface extends BasicProducer<RawEvent> implements Interf
 		lastCommTime=null
 	}
 	
+	public boolean isRegistered() {
+		registered
+	}
+
 	@Override
 	public void consume(RawEvent event) {
 		if (event.id.interfaceId==name) {

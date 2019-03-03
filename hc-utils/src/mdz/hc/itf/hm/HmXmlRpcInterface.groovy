@@ -71,7 +71,7 @@ public class HmXmlRpcInterface extends BasicProducer<RawEvent> implements Interf
 			client.host=host
 			client.port=port
 			if (!disableRegistration) {
-				init()
+				Exceptions.catchToLog(log) { init() }
 				reinitTask.add this
 			}
 		} catch (Exception e) {
@@ -89,6 +89,10 @@ public class HmXmlRpcInterface extends BasicProducer<RawEvent> implements Interf
 		server.removeConsumer(this)
 		devicePropCache.clear()
 		lastCommTime=null
+	}
+	
+	public boolean isRegistered() {
+		registered
 	}
 	
 	@Override
