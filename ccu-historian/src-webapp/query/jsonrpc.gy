@@ -145,12 +145,22 @@ def executeScript(script, writeAccess) {
 	ImportCustomizer importCustomizer=[]
 	importCustomizer.addStaticStars 'java.lang.Math'
 	importCustomizer.addImport 'PreprocType', 'mdz.ccuhistorian.eventprocessing.Preprocessor.Type'
+	importCustomizer.addImports 'mdz.hc.DataPoint',
+		'mdz.hc.DataPointIdentifier',
+		'mdz.hc.Event',
+		'mdz.hc.ProcessValue',
+		'mdz.hc.RawEvent'
 	config.addCompilationCustomizers importCustomizer
 	// security
 	SecureASTCustomizer secureCustomizer=[]
 	secureCustomizer.with {
 		importsWhitelist=[
 			'mdz.ccuhistorian.eventprocessing.Preprocessor$Type',
+			'mdz.hc.DataPoint',
+			'mdz.hc.DataPointIdentifier',
+			'mdz.hc.Event',
+			'mdz.hc.ProcessValue',
+			'mdz.hc.RawEvent',
 		]
 		staticImportsWhitelist=[]
 		staticStarImportsWhitelist=[
