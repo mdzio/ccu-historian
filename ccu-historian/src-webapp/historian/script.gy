@@ -79,10 +79,9 @@ function ScriptPane(initialVnode) {
 			},
 			deserialize: function(response) {
 				// only try to parse json. return the string unchanged if an error occurs.
-				// this overrides mithril behaviour.
 				try {response=response?JSON.parse(response):null} catch (e) {}
 				return response
-			}
+			},
 		}).then(function(data) {
 			if (data.error!==undefined) {
 				scriptError=true
@@ -94,8 +93,7 @@ function ScriptPane(initialVnode) {
 			scriptRunning=false
 		}, function(err) {
 			scriptError=true
-			scriptOutput="Bei dem JSON-RPC-Aufruf ist ein Fehler aufgetreten:\nHTTP-Status: "+err.code+"\n"+
-				"Meldung: "+err.message
+			scriptOutput="Bei dem JSON-RPC-Aufruf ist ein Fehler aufgetreten:\n"+err.message
 			scriptRunning=false
 		})
 	}
