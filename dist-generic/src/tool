@@ -13,5 +13,8 @@ else
   exit 1
 fi
 
+# get dir of shell script
+DIR=`dirname "$0"`
+
 # start java with GroovyMain
-${JAVA_BIN} -cp ccu-historian.jar:lib/*.jar groovy.ui.GroovyMain "$@"
+${JAVA_BIN} -cp $DIR/ccu-historian.jar:$DIR/lib/*.jar groovy.ui.GroovyMain "$@"
