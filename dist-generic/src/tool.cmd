@@ -1,3 +1,4 @@
 @echo off
 rem Executes groovy scripts.
-java -cp ccu-historian.jar;lib\*.jar groovy.ui.GroovyMain %*
+set "SCRIPT_DIR=%~dp0"
+java -cp "%SCRIPT_DIR%ccu-historian.jar;%SCRIPT_DIR%lib\*.jar" groovy.ui.GroovyMain %*
