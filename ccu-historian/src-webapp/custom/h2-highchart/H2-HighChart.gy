@@ -28,83 +28,180 @@ renderer.content={
       }
    }
 
-   div(id:'container') { style: "min-height: 400px; height: auto; min-width: 310px"
-
+   div(id:'container') { 
+      style: "min-height: 400px; height: auto; min-width: 310px"
    }
+
    div(id:'message') {
       span id: "count_val", ""
       span id: "count_text", ""
       span id: "aggr_text", ""
       span id: "autorefresh", ""
+      span id: "loading", ""
    }
 
    div(id:"LinePopup", class:"modal fade", role:"dialog") {
-    div(class:"modal-dialog") {
-      div(class:"modal-content") {
+      div(class:"modal-dialog") {
+         div(class:"modal-content") {
+            div(class:"modal-header") {
+               button type:"button", class:"close", id:"DialogBtnClose", "x"
+               h4 class:"modal-title", "Modal Header"
+            }
+            div(class:"modal-body") {
+               div(id:"yasix") {
+                  span id: "Text-Yaxis", class:"LinePopup-text", "Y-Axis" 
+                  select(id: "Select-Yaxis", class:"form-select-h2")  { }
+               }
+               div(id:"aggregation") {
+                  span id: "Text-Aggregation", class:"LinePopup-text", "Aggregation" 
+                  select(id: "Select-Aggregation", class:"form-select-h2")  { }
+               }
+               div(id:"aggrtime") {
+                  span id: "Text-AggrTime", class:"LinePopup-text", "Aggr.Zeitraum" 
+                  select(id: "Select-AggrTime", class:"form-select-h2")  { }
+               }
+               div(id:"compare") {
+                  span id: "Text-Compare", class:"LinePopup-text", "Compare" 
+                  select(id: "Select-Compare", class:"form-select-h2")  { }
+               }
+               div(id:"color") {
+                  span id: "Text-Color", class:"LinePopup-text", "Color" 
+                  select(id: "Select-Color", class:"form-select-h2")  { }
+               }
+               div(id:"linetype") {
+                  span id: "Text-Line", class:"LinePopup-text", "Line-Type" 
+                  select(id: "Select-Line", class:"form-select-h2")  { }
+               }
+               div(id:"marker") {
+                  span id: "Text-Marker", class:"LinePopup-text", "Marker" 
+                  select(id: "Select-Marker", class:"form-select-h2")  { }
+               }
+               div(id:"dashtype") {
+                  span id: "Text-DashType", class:"LinePopup-text", "Line-Art" 
+                  select(id: "Select-DashType", class:"form-select-h2")  { }
+               }
+               div(id:"linewidth") {
+                  span id: "Text-LineWidth", class:"LinePopup-text", "Line-Width" 
+                  select(id: "Select-LineWidth", class:"form-select-h2")  { }
+               }
+               div(id:"linefactor") {
+                  span id: "Text-LineFactor", class:"LinePopup-text", "Faktor" 
+                  input(id: "Line-Factor", type:"number", step: "any", class:"form-input-h2") 
+               }
+               div(id:"lineoffset") {
+                  span id: "Text-LineOffSet", class:"LinePopup-text", "Offset" 
+                  input(id: "Line-OffSet", type:"number", step: "any", class:"form-input-h2") 
+               }
+               div(id:"lineunit") {
+                  span id: "Text-LineUnit", class:"LinePopup-text", "Einheit" 
+                  input(id: "Line-Unit", class:"form-input-h2") 
+               }
+            }
+            div(class:"modal-footer") {
+               button type:"button", class:"btn btn-default", id:"DialogBtnOK", "Ok"
+            }
+         }      
+      }
+   }
 
-        div(class:"modal-header") {
-          button type:"button", class:"close", id:"DialogBtnClose", "x"
-          h4 class:"modal-title", "Modal Header"
-        }
-        div(class:"modal-body") {
-         div(id:"yasix") {
-           span id: "Text-Yaxis", class:"LinePopup-text", "Y-Axis" 
-           select(id: "Select-Yaxis", class:"form-select-h2")  { }
-         }
-         div(id:"aggregation") {
-           span id: "Text-Aggregation", class:"LinePopup-text", "Aggregation" 
-           select(id: "Select-Aggregation", class:"form-select-h2")  { }
-         }
-         div(id:"aggrtime") {
-           span id: "Text-AggrTime", class:"LinePopup-text", "Aggr.Zeitraum" 
-           select(id: "Select-AggrTime", class:"form-select-h2")  { }
-         }
-         div(id:"compare") {
-           span id: "Text-Compare", class:"LinePopup-text", "Compare" 
-           select(id: "Select-Compare", class:"form-select-h2")  { }
-         }
-         div(id:"color") {
-           span id: "Text-Color", class:"LinePopup-text", "Color" 
-           select(id: "Select-Color", class:"form-select-h2")  { }
-         }
-         div(id:"linetype") {
-           span id: "Text-Line", class:"LinePopup-text", "Line-Type" 
-           select(id: "Select-Line", class:"form-select-h2")  { }
-         }
-         div(id:"marker") {
-           span id: "Text-Marker", class:"LinePopup-text", "Marker" 
-           select(id: "Select-Marker", class:"form-select-h2")  { }
-         }
-         div(id:"dashtype") {
-           span id: "Text-DashType", class:"LinePopup-text", "Line-Art" 
-           select(id: "Select-DashType", class:"form-select-h2")  { }
-         }
-         div(id:"linewidth") {
-           span id: "Text-LineWidth", class:"LinePopup-text", "Line-Width" 
-           select(id: "Select-LineWidth", class:"form-select-h2")  { }
-         }
-         div(id:"linefactor") {
-           span id: "Text-LineFactor", class:"LinePopup-text", "Faktor" 
-           input(id: "Line-Factor", type:"number", step: "any", class:"form-input-h2") 
-         }
-         div(id:"lineoffset") {
-           span id: "Text-LineOffSet", class:"LinePopup-text", "Offset" 
-           input(id: "Line-OffSet", type:"number", step: "any", class:"form-input-h2") 
-         }
-         div(id:"lineunit") {
-           span id: "Text-LineUnit", class:"LinePopup-text", "Einheit" 
-           input(id: "Line-Unit", class:"form-input-h2") 
-         }
-        }
-        div(class:"modal-footer") {
-          button type:"button", class:"btn btn-default", id:"DialogBtnOK", "Ok"
-        }
-
-
-      }      
-    }
-  }
-
+   div(id:"SettingPopup", class:"modal fade", role:"dialog") {
+      div(class:"modal-dialog") {
+         div(class:"modal-content") {
+            div(class:"modal-header") {
+               button type:"button", class:"close", id:"Dialog2BtnClose", "x"
+               h4 class:"modal-title2", "Modal Header"
+            }
+            div(class:"modal-body") {
+               div(id:"legend") {
+                  span id: "Text-Legend", class:"LinePopup-text", "Legende" 
+                  select(id: "Select-Legend", class:"form-select-h2")  { }
+               }
+              div(id:"navigator") {
+                  span id: "Text-Navigator", class:"LinePopup-text", "Navigator" 
+                   select(id: "Select-Navigator", class:"form-select-h2")  { }
+               }
+               div(id:"labels") {
+                  span id: "Text-Label", class:"LinePopup-text", "Point-Labels" 
+                 select(id: "Select-Label", class:"form-select-h2")  { }
+               }
+               div(id:"layout") {
+                  span id: "Text-Layout", class:"LinePopup-text", "Layout" 
+                  select(id: "Select-Layout", class:"form-select-h2")  { }
+               }
+               div(id:"content") {
+                  span id: "Text-Content", class:"LinePopup-text", "Content"
+                  select(id: "Select-Content", class:"form-select-h2")  { }
+               }
+               div(id:"theme") {
+                  span id: "Text-Theme", class:"LinePopup-text", "Theme"
+                  select(id: "Select-Theme", class:"form-select-h2")  { }
+               }
+               div(id:"refresh") {
+                   span id: "Text-Refresh", class:"LinePopup-text", "Refresh in Sec." 
+                   input(id: "Line-Refresh", type:"number", step: "0", class:"form-input-h2") 
+               }
+               div(id:"title") {
+                   span id: "Text-Refresh", class:"LinePopup-text", "Title" 
+                   input(id: "Line-Title", class:"form-input-h2") 
+               }
+               div(id:"subtitle") {
+                   span id: "Text-Refresh", class:"LinePopup-text", "Subtitle" 
+                   input(id: "Line-Subtitle", class:"form-input-h2") 
+               }
+            }
+            div(class:"modal-footer") {
+               button type:"button", class:"btn btn-default", id:"Dialog2BtnOK", "Ok"
+            }
+         }      
+      }
+   }
+   div(id:"AxisPopup", class:"modal fade", role:"dialog") {
+      div(class:"modal-dialog") {
+         div(class:"modal-content") {
+            div(class:"modal-header") {
+               button type:"button", class:"close", id:"Dialog3BtnClose", "x"
+               h4 class:"modal-title3", "Modal Header"
+            }
+            div(class:"modal-body") {
+               div(id:"title") {
+                   span id: "Text-Refresh", class:"LinePopup-text", "Title" 
+                   input(id: "Line-Title3", class:"form-input-h2") 
+               }
+               div(id:"position") {
+                  span id: "Text-Position", class:"LinePopup-text", "Position" 
+                  select(id: "Select-Position", class:"form-select-h2")  { }
+               }
+               div(id:"axiscolor") {
+                  span id: "Text-AxisColor", class:"LinePopup-text", "Farbe" 
+                  select(id: "Select-AxisColor", class:"form-select-h2")  { }
+               }
+               div(id:"type") {
+                  span id: "Text-AxisType", class:"LinePopup-text", "Type" 
+                  select(id: "Select-AxisType", class:"form-select-h2")  { }
+               }
+               div(id:"limit") {
+                  span id: "Text-Limit", class:"LinePopup-text", "Limit" 
+                  select(id: "Select-Limit", class:"form-select-h2")  { }
+               }
+               div(id:"min") {
+                  span id: "Text-Min", class:"LinePopup-text", "Minimum" 
+                  input(id: "Line-Min", type:"number", step: "any", class:"form-input-h2") 
+               }
+               div(id:"max") {
+                  span id: "Text-Max", class:"LinePopup-text", "Maximum" 
+                  input(id: "Line-Max", type:"number", step: "any", class:"form-input-h2") 
+               }
+               div(id:"tickamount") {
+                  span id: "Text-TickAmount", class:"LinePopup-text", "Teilung" 
+                  input(id: "Line-TickAmount", type:"number", step: "0", class:"form-input-h2") 
+               }
+            }
+            div(class:"modal-footer") {
+               button type:"button", class:"btn btn-default", id:"Dialog3BtnOK", "Ok"
+            }
+         }      
+      }
+   }
 }
 
 renderer.end={
