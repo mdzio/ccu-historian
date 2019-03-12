@@ -3,6 +3,8 @@
 // devices.device1.type=SIMULATION
 // devices.device1.writeAccess=true
 
+// FIXME: tests out of date
+
 @Grab(group='org.codehaus.groovy.modules.http-builder', module='http-builder', version='0.7.2')
 
 import groovyx.net.http.*
@@ -117,16 +119,16 @@ res=POSTwithJsonAsJson([method:'getTimeSeriesRaw', params:[9999999, 0, 0], id:12
 assert res.result==null
 assert res.error.message=='Unknown data point: 9999999'
 
-begin=Date.parse('yyyy-MM-dd HH:mm:ss', '2016-07-21 10:38:38')
-end=Date.parse('yyyy-MM-dd HH:mm:ss', '2016-07-21 10:38:56')
+begin=Date.parse('yyyy-MM-dd HH:mm:ss', '2016-07-21 20:38:38')
+end=Date.parse('yyyy-MM-dd HH:mm:ss', '2016-07-21 20:38:56')
 res=POSTwithJsonAsJson([method:'getTimeSeriesRaw', params:[4, begin.time, end.time], id:123])
 assert res.result!=null
 assert res.result.values==[4.067366429801342, 3.090169943749475, 2.079116909201907, 1.0452846316350761]
-assert res.result.timestamps[0]==Date.parse('yyyy-MM-dd HH:mm:ss.SSS', '2016-07-21 10:38:38.162').time
-assert res.result.timestamps==[1469090318162, 1469090320174, 1469090322187, 1469090324199]
+assert res.result.timestamps[0]==Date.parse('yyyy-MM-dd HH:mm:ss.SSS', '2016-07-21 20:38:38.162').time
+assert res.result.timestamps==[123, 123, 123, 123]
 assert res.result.states==[2]*4
 
-end=Date.parse('yyyy-MM-dd HH:mm:ss', '2016-07-21 10:38:44')
+end=Date.parse('yyyy-MM-dd HH:mm:ss', '2016-07-21 20:38:44')
 savedGetTimeSeriesRawBegin=begin
 savedGetTimeSeriesRawEnd=end
 res=POSTwithJsonAsJson([method:'getTimeSeriesRaw', params:[4, begin.time, end.time], id:123])
@@ -145,8 +147,8 @@ res=POSTwithJsonAsJson([method:'getTimeSeries', params:[4, begin.time, end.time]
 savedGetTimeSeries=res
 assert res.result!=null
 assert res.result.values==[5.0000000009069, 4.067366429801342, 3.090169943749475, 2.079116909201907, 2.079116909201907]
-assert res.result.timestamps[0]==Date.parse('yyyy-MM-dd HH:mm:ss.SSS', '2016-07-21 10:38:38.000').time
-assert res.result.timestamps==[1469090318000, 1469090318162, 1469090320174, 1469090322187, 1469090324000]
+assert res.result.timestamps[0]==Date.parse('yyyy-MM-dd HH:mm:ss.SSS', '2016-07-21 20:38:38.000').time
+assert res.result.timestamps==[123, 123, 123, 123, 123]
 assert res.result.states==[2]*5
 
 println '#######################'
@@ -156,7 +158,7 @@ res=POSTwithJsonAsJson([method:'getValue', params:[1], id:123])
 savedGetValue1=res    
 assert res.result?.value==1.0
 assert res.result?.state==2
-assert res.result?.timestamp==1469098920170
+assert res.result?.timestamp==123
 
 res=POSTwithJsonAsJson([method:'getValue', params:[[2, 3, 4]], id:123])
 savedGetValue2=res    
