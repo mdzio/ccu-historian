@@ -57,6 +57,10 @@ public class DataPoint {
 	static public final String ATTR_FUNCTION		= 'function'
 	static public final String ATTR_COMMENT 		= 'comment'
 	
+	// Custom attribute
+	// A free to use attribute with JSON encoded content.
+	static public final String ATTR_CUSTOM	 		= 'custom'
+	
 	// Attributes from the HomeMatic XML-RPC interface (from device)
 	static public final String ATTR_PARAM_SET 		= 'paramSet'
 	static public final String ATTR_TAB_ORDER 		= 'tabOrder'

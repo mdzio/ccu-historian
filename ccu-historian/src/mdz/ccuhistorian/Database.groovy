@@ -23,7 +23,8 @@ import java.util.logging.Logger
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 import java.sql.ResultSet
-
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import groovy.sql.Sql
 import groovy.transform.CompileStatic
 import groovy.util.logging.Log
@@ -50,7 +51,7 @@ public class Database implements Storage {
 	private String backupLast
 	private ScheduledFuture backupFuture
 	
-	// Prefixes of history tables from V0.6.0-dev5 and above
+	// Prefixes of history tables
 	private final static String TABLE_PREFIX_DOUBLE='D_' // VALUE columns is of type DOUBLE
 	private final static String TABLE_PREFIX_STRING='C_' // VALUE column is of type VARCHAR
 	
@@ -276,6 +277,10 @@ public class Database implements Storage {
 			createDataPointTable(dp)
 		}
 		log.fine "Database: Updating data point description: $dp"
+		
+		// create JSON for custom attribute
+		String custom=JsonOutput.toJson(dp.attributes.custom)
+
 		if (db.executeUpdate("""UPDATE DATA_POINTS SET
 			TABLE_NAME=$dp.historyTableName, STATE=$dp.managementFlags,
 			
@@ -286,6 +291,7 @@ public class Database implements Storage {
 	
 			DISPLAY_NAME=$dp.attributes.displayName, ROOM=$dp.attributes.room, 
 			FUNCTION=$dp.attributes.function, COMMENT=$dp.attributes.comment,
+			CUSTOM=$custom,
 			
 			PARAM_SET=$dp.attributes.paramSet,	TAB_ORDER=$dp.attributes.tabOrder,
 			MAXIMUM=$dp.attributes.maximum, UNIT=$dp.attributes.unit,
@@ -514,6 +520,15 @@ public class Database implements Storage {
 	}
 
 	private DataPoint getRowAsDataPoint(def row) {
+		// decode custom attribute
+		def custom=[:]
+		try {
+			custom=new JsonSlurper().parseText(row.CUSTOM)
+		} catch (e) {
+			log.warning "Invalid content in table DATA_POINTS field CUSTOM (expected JSON): $row"
+		}
+		
+		// create DataPoint
 		new DataPoint(
 			idx:row.DP_ID, historyTableName:row.TABLE_NAME,
 			managementFlags:(row.STATE?:0),
@@ -525,6 +540,7 @@ public class Database implements Storage {
 				
 				displayName:row.DISPLAY_NAME, room:row.ROOM,
 				function:row.FUNCTION, comment:row.COMMENT,
+				custom:custom,
 			
 				paramSet:row.PARAM_SET,	tabOrder:row.TAB_ORDER,
 				maximum:row.MAXIMUM, unit:row.UNIT,
@@ -555,18 +571,22 @@ public class Database implements Storage {
 	private void createDataPointEntry(DataPoint dp) {
 		normalizeDataPoint(dp)
 		log.fine "Database: Inserting into DATA_POINTS: $dp"
+		
+		// create JSON for custom attribute
+		String custom=JsonOutput.toJson(dp.attributes.custom)
+		
 		db.executeInsert """INSERT INTO DATA_POINTS (
 				DP_ID, TABLE_NAME, STATE,
 				INTERFACE, ADDRESS, IDENTIFIER,
 				PREPROC_TYPE, PREPROC_PARAM,
-				DISPLAY_NAME, COMMENT,
+				DISPLAY_NAME, COMMENT, CUSTOM,
 				PARAM_SET, TAB_ORDER, MAXIMUM, UNIT, MINIMUM, CONTROL,
 				OPERATIONS, FLAGS, TYPE, DEFAULT_VALUE
 			) VALUES (
 				$dp.idx, $dp.historyTableName, $dp.managementFlags,
 				$dp.id.interfaceId, $dp.id.address, $dp.id.identifier,
 				$dp.attributes.preprocType, $dp.attributes.preprocParam,
-				$dp.attributes.displayName, $dp.attributes.comment,
+				$dp.attributes.displayName, $dp.attributes.comment, $custom,
 				$dp.attributes.paramSet, $dp.attributes.tabOrder, 
 				$dp.attributes.maximum, $dp.attributes.unit, $dp.attributes.minimum, 
 				$dp.attributes.control,	$dp.attributes.operations, 
@@ -643,58 +663,54 @@ public class Database implements Storage {
 	@CompileStatic
 	private void prepareDatabase() {
 		log.fine 'Preparing database'
-		
-		// from V0.7.6 upwards
-		db.execute '''CREATE TABLE IF NOT EXISTS DATA_POINTS (
-			DP_ID INT IDENTITY,	TABLE_NAME VARCHAR NOT NULL,
-			STATE INT,
-			
-			INTERFACE VARCHAR NOT NULL, ADDRESS VARCHAR NOT NULL,
-			IDENTIFIER VARCHAR NOT NULL,
 
-			PREPROC_TYPE INT, PREPROC_PARAM DOUBLE,
-
-			DISPLAY_NAME VARCHAR, ROOM VARCHAR, FUNCTION VARCHAR, COMMENT VARCHAR,
-			
-			PARAM_SET VARCHAR, TAB_ORDER INT,
-			MAXIMUM DOUBLE, UNIT VARCHAR,
-			MINIMUM DOUBLE, CONTROL VARCHAR,
-			OPERATIONS INT, FLAGS INT,
-			TYPE VARCHAR, DEFAULT_VALUE DOUBLE
-		); CREATE UNIQUE INDEX IF NOT EXISTS DATA_POINTS_IDX
-			ON DATA_POINTS (INTERFACE, ADDRESS, IDENTIFIER)'''
-		
-		// -> V0.7.5
-		db.executeUpdate "UPDATE DATA_POINTS SET STATE=BITOR(STATE, 0x40) WHERE TABLE_NAME REGEXP '(?i)^(C_|VS_|SS_)'" as String
-		
-		// -> V0.7.6
-		db.execute 'ALTER TABLE DATA_POINTS ADD IF NOT EXISTS PREPROC_TYPE INT BEFORE DISPLAY_NAME'
-		db.execute 'ALTER TABLE DATA_POINTS ADD IF NOT EXISTS PREPROC_PARAM DOUBLE BEFORE DISPLAY_NAME'
-		
-		// -> V0.7.7
-		// delete STATE bits 0..3 for later usage
-		db.executeUpdate 'UPDATE DATA_POINTS SET STATE=BITAND(STATE, 0xFFFFFFF0)'
-		// add ROOM and FUNCTION
-		db.execute 'ALTER TABLE DATA_POINTS ADD IF NOT EXISTS ROOM VARCHAR BEFORE COMMENT'
-		db.execute 'ALTER TABLE DATA_POINTS ADD IF NOT EXISTS FUNCTION VARCHAR BEFORE COMMENT'
-		
-		// -> V2.0.0
-		// add database functions
-		db.execute 'CREATE ALIAS IF NOT EXISTS TS_TO_UNIX DETERMINISTIC FOR "mdz.ccuhistorian.DatabaseExtensions.TS_TO_UNIX"'
-		db.execute 'CREATE ALIAS IF NOT EXISTS UNIX_TO_TS DETERMINISTIC FOR "mdz.ccuhistorian.DatabaseExtensions.UNIX_TO_TS"'
-		// add configuration table
+		// create configuration table
 		db.execute 'CREATE TABLE IF NOT EXISTS CONFIG (NAME VARCHAR(128) NOT NULL, VALUE VARCHAR(8192))'
-		// introduce database version
-		if (getConfig(CONFIG_DATABASE_VERSION)==null)
-			setConfig(CONFIG_DATABASE_VERSION, '0')
+		
+		// check database version
+		if (getConfig(CONFIG_DATABASE_VERSION)==null) {
 			
-		// migrate database
-		// initialize continuous flag for existing data points
-		migrateTo(1, '''UPDATE DATA_POINTS SET STATE=BITOR(STATE, 0x80) WHERE IDENTIFIER IN (
+			// new database detected
+			db.execute '''CREATE TABLE DATA_POINTS (
+				DP_ID INT IDENTITY,	TABLE_NAME VARCHAR NOT NULL,
+				STATE INT,
+				
+				INTERFACE VARCHAR NOT NULL, ADDRESS VARCHAR NOT NULL,
+				IDENTIFIER VARCHAR NOT NULL,
+	
+				PREPROC_TYPE INT, PREPROC_PARAM DOUBLE,
+	
+				DISPLAY_NAME VARCHAR, ROOM VARCHAR, FUNCTION VARCHAR, COMMENT VARCHAR,
+				CUSTOM VARCHAR DEFAULT '{}',
+				
+				PARAM_SET VARCHAR, TAB_ORDER INT,
+				MAXIMUM DOUBLE, UNIT VARCHAR,
+				MINIMUM DOUBLE, CONTROL VARCHAR,
+				OPERATIONS INT, FLAGS INT,
+				TYPE VARCHAR, DEFAULT_VALUE DOUBLE
+			); CREATE UNIQUE INDEX IF NOT EXISTS DATA_POINTS_IDX
+				ON DATA_POINTS (INTERFACE, ADDRESS, IDENTIFIER)'''
+
+			// add database functions
+			db.execute 'CREATE ALIAS TS_TO_UNIX DETERMINISTIC FOR "mdz.ccuhistorian.DatabaseExtensions.TS_TO_UNIX"'
+			db.execute 'CREATE ALIAS UNIX_TO_TS DETERMINISTIC FOR "mdz.ccuhistorian.DatabaseExtensions.UNIX_TO_TS"'
+			
+			// set current version (keep aligned with database migration)
+			setConfig(CONFIG_DATABASE_VERSION, '2')
+			
+		} else {
+			// migrate database
+			
+			// initialize continuous flag for existing data points
+			migrateTo(1, '''UPDATE DATA_POINTS SET STATE=BITOR(STATE, 0x80) WHERE IDENTIFIER IN (
 			'ACTUAL_HUMIDITY', 'ACTUAL_TEMPERATURE', 'AIR_PRESSURE', 'BRIGHTNESS',
 			'CURRENT', 'ENERGY_COUNTER', 'FREQUENCY', 'HUMIDITY', 'ILLUMINATION',
 			'LUX', 'POWER', 'RAIN_COUNTER', 'SUNSHINEDURATION', 'TEMPERATURE',
 			'VOLTAGE', 'WIND_SPEED')''')
+			
+			// add attribute 'custom'
+			migrateTo(2, '''ALTER TABLE DATA_POINTS ADD IF NOT EXISTS CUSTOM VARCHAR DEFAULT '{}' AFTER COMMENT''')
+		}
 	}
 	
 	@CompileStatic 

@@ -17,6 +17,7 @@
 */
 import mdz.hc.timeseries.TimeSeries.CompactTimeSeries
 import mdz.hc.persistence.ReadOnlyDecorator
+import mdz.hc.DataPointIdentifier
 import mdz.Exceptions
 import groovy.json.JsonSlurper
 import groovy.json.StreamingJsonBuilder
@@ -191,6 +192,33 @@ private static rpcFunctions=[
 			params[0].collect { utils.parseDataPoint(it as String, database) }
 		else
 			utils.parseDataPoint(params[0] as String, database)
+	},
+	updateDataPoint:{ params ->
+		if (params.size()!=1) {
+			throw new RpcException("Invalid number of parameters for updateDataPoint", RpcException.INVALID_PARAMS)
+		}
+		def updateDp=params[0]
+		def ident=new DataPointIdentifier(updateDp?.id?.interfaceId, updateDp?.id?.address, updateDp?.id?.identifier)
+		if (ident.interfaceId==null || ident.address==null || ident.identifier==null) {
+			throw new RpcException("Invalid field id (no interfaceId, address or identifier)", RpcException.INVALID_PARAMS)
+		}
+		def dbDp=database.getDataPoint(ident)
+		if (dbDp==null) {
+			throw new RpcException("Data point not found: $ident", RpcException.INVALID_PARAMS)
+		}
+		// merge custom fields
+		def custom=updateDp.attributes?.custom
+		if (!(custom instanceof Map)) {
+			throw new RpcException("Custom attribute is not a JSON object: $custom", RpcException.INVALID_PARAMS)
+		}
+		custom.each { k, v ->
+            if (v!=null) {
+                dbDp.attributes.custom[k]=v
+            } else {
+                dbDp.attributes.custom.remove(k)
+            }
+		}
+		database.updateDataPoint(dbDp)
 	},
 	getValue:{ params ->
 		if (params[0] instanceof List)
