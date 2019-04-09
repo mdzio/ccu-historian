@@ -259,4 +259,17 @@ private static rpcFunctions=[
 		}
 		executeScript(script, writeAccess)
 	},
+	getConfig:{ params ->
+		if (params.size()!=1) {
+			throw new RpcException("Invalid number of parameters for getConfig", RpcException.INVALID_PARAMS)
+		}
+		database.getConfig(params[0] as String)
+	},
+	setConfig:{ params ->
+		if (params.size()!=2) {
+			throw new RpcException("Invalid number of parameters for setConfig", RpcException.INVALID_PARAMS)
+		}
+		database.setConfig(params[0] as String, params[1] as String)
+        null
+	},
 ]
