@@ -165,8 +165,7 @@ public class Manager extends BasicProducer<RawEvent> implements Consumer<RawEven
 	public void consume(RawEvent event) {
 		log.finer "Event received: $event"
 		if (event.id.identifier=='PONG' &&
-			event.id.interfaceId=='BidCoS-RF' &&
-			event.id.address=='CENTRAL') {
+			event.id.address.startsWith('CENTRAL')) {
 			log.fine 'Discarding ping response'
 		} else {
 			eventQueue.offer event
