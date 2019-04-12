@@ -9,10 +9,14 @@ var H2_refreshSec = 60;
 // Refresh Time is enabled
 
 // declare global Variables
-var H2_version = 'v2.9';
+var H2_version = 'v3.4';
 var chart;
 var filter_feld = '';
 var DP_point = [];
+var DP_settings = {};
+var DP_settings_old = {};
+var DP_ApiKey = "";
+var DP_DataPointFilter = 0; 
 var Zeitraum_Ende = new Date(Date.now());
 var Zeitraum_Start = new Date(Zeitraum_Ende - (new Date(86400000 * 1)));
 var Scroll_Legend = true;
@@ -151,6 +155,69 @@ var DP_yAxis = [{
     text: ChhLanguage.default.highcharts.yaxis12,
     color: 1,
     type: 1
+}, {
+    position: false,
+    limit: 0,
+    min: 0,
+    max: 0,
+    tick: 11,
+    text: ChhLanguage.default.highcharts.yaxis13,
+    color: 1,
+    type: 0
+}, {
+    position: false,
+    limit: 0,
+    min: 0,
+    max: 0,
+    tick: 11,
+    text: ChhLanguage.default.highcharts.yaxis14,
+    color: 1,
+    type: 0
+}, {
+    position: false,
+    limit: 0,
+    min: 0,
+    max: 0,
+    tick: 11,
+    text: ChhLanguage.default.highcharts.yaxis15,
+    color: 1,
+    type: 0
+}, {
+    position: false,
+    limit: 0,
+    min: 0,
+    max: 0,
+    tick: 11,
+    text: ChhLanguage.default.highcharts.yaxis16,
+    color: 1,
+    type: 0
+}, {
+    position: false,
+    limit: 0,
+    min: 0,
+    max: 0,
+    tick: 11,
+    text: ChhLanguage.default.highcharts.yaxis17,
+    color: 1,
+    type: 0
+}, {
+    position: false,
+    limit: 0,
+    min: 0,
+    max: 0,
+    tick: 11,
+    text: ChhLanguage.default.highcharts.yaxis18,
+    color: 1,
+    type: 0
+}, {
+    position: false,
+    limit: 0,
+    min: 0,
+    max: 0,
+    tick: 11,
+    text: ChhLanguage.default.highcharts.yaxis19,
+    color: 1,
+    type: 0
 }];
 var DP_yAxis_default = JSON.parse(JSON.stringify(DP_yAxis));
 
@@ -182,6 +249,7 @@ function addSerie(DP, DP_type) {
     var lineType = 0;
     var aggrType = 0;
     var aggrTime = 1;
+    var stacking = 0;
     var dptype = DP.id.identifier;
     var dashtype = DP_DashType[0];
     var linewidth = 2;
@@ -290,6 +358,8 @@ function addSerie(DP, DP_type) {
         dp_vis = DP_attribute[attr].visible;
         unit = DP_attribute[attr].unit;
 
+        stacking = DP_attribute[attr].stack;
+
         var dashID = parseInt(DP_attribute[attr].dash.substr(1, 2));
         if (dashID > 0) {
             dashtype = DP_DashType[dashID];
@@ -376,6 +446,18 @@ function addSerie(DP, DP_type) {
         groupforced = true;
     } else if (aggrTime === 8) {
         groupUnits = [['year', [1]], ];
+        groupforced = true;
+    } else if (aggrTime === 9) {
+        groupUnits = [['hour', [3]], ];
+        groupforced = true;
+    } else if (aggrTime === 10) {
+        groupUnits = [['hour', [6]], ];
+        groupforced = true;
+    } else if (aggrTime === 11) {
+        groupUnits = [['hour', [8]], ];
+        groupforced = true;
+    } else if (aggrTime === 12) {
+        groupUnits = [['hour', [12]], ];
         groupforced = true;
     }
 
@@ -545,6 +627,8 @@ function addSerie(DP, DP_type) {
         fillOpacity: 0.4,
         borderColor: color,
         borderWidth: 2,
+        stacking: (stacking == 0)?null:'normal',
+        stack: (stacking == 0)?null:('group'+stacking),
         data: [],
         tooltip: {
             valueDecimals: valueDecimals,
@@ -574,6 +658,7 @@ function addSerie(DP, DP_type) {
             dash: 'D0',
             width: 'W2',
             factor: 1,
+            stack: 0,
             offset: 0,
             unit: unit,
             buffer_data: {
@@ -1082,6 +1167,7 @@ function getDataH2(p_series, p_attrID, p_attr, datStart, datEnd) {
     url += '/query/jsonrpc.gy?j={%22id%22:%22' + key + '%22';
     url += ',%22method%22:%22getTimeSeriesRaw%22';
     url += ',%22params%22:[' + p_id + ',' + datStart + ',' + datEnd + ']}';
+    url += DP_ApiKey 
 
     // get serien data from H2 database
     $.ajax({
@@ -1120,6 +1206,7 @@ function requestData() {
 
     var url = 'http://' + H2_server + ':' + H2_port
     url += '/query/jsonrpc.gy?j={%22method%22:%22getDataPoint%22,%22params%22:%20[]}'
+    url += DP_ApiKey 
 
     $.ajax({
         type: "GET",
@@ -1143,6 +1230,213 @@ function requestData() {
 * Request data from the server, add it to the graph and set a timeout 
 * to request again
 */
+function requestSettings() {
+
+    var url = 'http://' + H2_server + ':' + H2_port
+    url += '/query/jsonrpc.gy?j={%22method%22:%22getConfig%22,%22params%22:[%22HighChart%22],%22id%22:%22Einstellung%22}'
+    url += DP_ApiKey 
+
+    $.ajax({
+        type: "GET",
+        url: url,
+        dataType: "json",
+        async: true,
+        cache: false,
+        error: function(xhr, status, error) {
+            console.log('AXAJ-error:');
+            console.log(xhr);
+            console.log(status);
+            console.log(error);
+            readLinkData();
+        },
+        success: function(result) {
+        	
+        	// Get Settings from H2 database as String
+        	if (result.result) {
+        	    try {
+        	    	var strSetNew = result.result.replace(new RegExp("'", 'g'),'"' );
+
+	        	    DP_settings = JSON.parse(strSetNew);
+	        	    DP_settings_old = JSON.parse(strSetNew);
+	                console.log(DP_settings);
+        	    }
+        	    catch (e) {
+        	        console.log(e);
+        	    }
+            }           
+            
+            // read default from YAXIS
+            // take default values from database
+            if (DP_settings) {
+                for (var x = 0; x < DP_yAxis.length; x++) {
+                	if (DP_settings['YAXIS'+x]) {
+                        var text2 = DP_settings['YAXIS'+x].split('|');
+                        var axis_id = x;
+                        for (var k = 0; k < text2.length; k++) {
+                            if (text2[k].substr(0, 1) === 'P') {
+                                if (text2[k].substr(1, 1) === '0')
+                                    DP_yAxis[axis_id].position = false;
+                                if (text2[k].substr(1, 1) === '1')
+                                    DP_yAxis[axis_id].position = true;
+                            } else if (text2[k].substr(0, 1) === 'C') {
+                                if (text2[k].substr(1, 1) === '0')
+                                    DP_yAxis[axis_id].type = 0;
+                                if (text2[k].substr(1, 1) === '1')
+                                    DP_yAxis[axis_id].type = 1;
+                            } else if (text2[k].substr(0, 1) === 'A') {
+                                if (text2[k].substr(1, 1) === '0')
+                                    DP_yAxis[axis_id].limit = 0;
+                                if (text2[k].substr(1, 1) === '1')
+                                    DP_yAxis[axis_id].limit = 1;
+                                if (text2[k].substr(1, 1) === '2')
+                                    DP_yAxis[axis_id].limit = 2;
+                            } else if (text2[k].substr(0, 1) === 'L') {
+                                DP_yAxis[axis_id].min = parseFloat(text2[k].substr(1, 15));
+                            } else if (text2[k].substr(0, 1) === 'H') {
+                                DP_yAxis[axis_id].max = parseFloat(text2[k].substr(1, 15));
+                            } else if (text2[k].substr(0, 1) === 'G') {
+                                DP_yAxis[axis_id].tick = parseInt(text2[k].substr(1, 15));
+                            } else if (text2[k].substr(0, 1) === 'F') {
+                                DP_yAxis[axis_id].color = parseInt(text2[k].substr(1, 2));
+                            } else if (text2[k].substr(0, 1) === 'T') {
+                                DP_yAxis[axis_id].text = text2[k].substr(1, 50);
+                            }
+                        }
+                        
+                	}
+                }
+                // Read default Settings
+            	if (DP_settings['Setting']) {
+                    var text2 = DP_settings['Setting'].split('|');
+                    for (var k = 0; k < text2.length; k++) {
+                        if (text2[k].substr(0, 1) === 'L') {
+                        	DP_Legend = parseInt(text2[k].substr(1, 2));
+                        } else if (text2[k].substr(0, 1) === 'N') {
+                        	DP_Navigator = parseInt(text2[k].substr(1, 2));
+                        } else if (text2[k].substr(0, 1) === 'P') {
+                        	DP_Labels = parseInt(text2[k].substr(1, 2));
+                        } else if (text2[k].substr(0, 1) === 'D') {
+                        	DP_DayLight = parseInt(text2[k].substr(1, 2));
+                        } else if (text2[k].substr(0, 1) === 'F') {
+                        	DP_ShowFilter = parseInt(text2[k].substr(1, 2));
+                        } else if (text2[k].substr(0, 1) === 'I') {
+                        	DP_DataPointFilter = parseInt(text2[k].substr(1, 2));
+                        } else if (text2[k].substr(0, 1) === 'B') {
+                        	DP_Theme = text2[k].substr(1,30);
+                        } else if (text2[k].substr(0, 1) === 'R') {
+                        	H2_refreshSec = parseInt(text2[k].substr(1, 2));
+                        } else if (text2[k].substr(0, 1) === 'T') {
+                        	DP_Title = text2[k].substr(1,50);
+                        } else if (text2[k].substr(0, 1) === 'S') {
+                        	DP_Subtitle = text2[k].substr(1,60);
+                        }
+                    }
+            	}
+            } else {
+            	DP_settings = {};
+            }
+            readLinkData();
+
+        },
+    });
+}
+
+
+function readLinkData() {
+    // check parameter from get-link
+    if (location.search) {
+        var parts = location.search.substring(1).split('&');
+        for (var i = 0; i < parts.length; i++) {
+            var nv = parts[i].split('=');
+            if (!nv[0])
+                continue;
+
+            if (nv[0].toLowerCase() === 'dp') {
+                DP_Limit = true;
+                // parameter Periode (Stunden)
+            } else if (nv[0].toLowerCase() === 'periode') {
+                Zeitraum_Start = new Date(Zeitraum_Ende - (new Date(3600 * 1000 * parseInt(nv[1]))));
+                // parameter Data Point
+            } else if (nv[0].toLowerCase() === 'filterkey') {
+                filter_feld = decodeURIComponent(nv[1].toLowerCase());
+            } else if (nv[0].toLowerCase() === 'title') {
+                DP_Title = decodeURIComponent(nv[1]);
+            } else if (nv[0].toLowerCase() === 'subtitle') {
+                DP_Subtitle = decodeURIComponent(nv[1]);
+            } else if (nv[0].toLowerCase() === 'legend') {
+                if (decodeURIComponent(nv[1].toLowerCase()) === 'false') {
+                    DP_Legend = 0;
+                }
+                if (parseInt(decodeURIComponent(nv[1])) >= 0 && parseInt(decodeURIComponent(nv[1])) < 7) {
+                    DP_Legend = parseInt(decodeURIComponent(nv[1]));
+                }
+            } else if (nv[0].toLowerCase() === 'navigator') {
+                if (decodeURIComponent(nv[1].toLowerCase()) === 'false') {
+                    DP_Navigator = 0;
+                }
+                if (decodeURIComponent(nv[1].toLowerCase()) === '0') {
+                    DP_Navigator = 0;
+                }
+                if (decodeURIComponent(nv[1].toLowerCase()) === '1') {
+                    DP_Navigator = 1;
+                }
+            } else if (nv[0].toLowerCase() === 'theme') {
+                DP_Theme = decodeURIComponent(nv[1].toLowerCase());
+            } else if (nv[0].toLowerCase() === 'dpfilter') {
+            	DP_DataPointFilter = parseInt(decodeURIComponent(nv[1]));
+            } else if (nv[0].toLowerCase() === 'labels') {
+                if (decodeURIComponent(nv[1].toLowerCase()) === 'true') {
+                    DP_Labels = 1;
+                }
+                if (decodeURIComponent(nv[1].toLowerCase()) === '0') {
+                    DP_Labels = 0;
+                }
+                if (decodeURIComponent(nv[1].toLowerCase()) === '1') {
+                    DP_Labels = 1;
+                }
+                if (decodeURIComponent(nv[1].toLowerCase()) === '2') {
+                    DP_Labels = 2;
+                }
+            } else if (nv[0].toLowerCase() === 'daylight') {
+                if (decodeURIComponent(nv[1].toLowerCase()) === 'false') {
+                    DP_DayLight = 0;
+                }
+                if (decodeURIComponent(nv[1].toLowerCase()) === '0') {
+                    DP_DayLight = 0;
+                }
+                if (decodeURIComponent(nv[1].toLowerCase()) === '1') {
+                    DP_DayLight = 1;
+                }
+                if (decodeURIComponent(nv[1].toLowerCase()) === '2') {
+                    DP_DayLight = 2;
+                }
+                if (decodeURIComponent(nv[1].toLowerCase()) === '3') {
+                    DP_DayLight = 3;
+                }
+            } else if (nv[0].toLowerCase() === 'refresh') {
+                if (parseInt(decodeURIComponent(nv[1])) > 0) {
+                    H2_refreshSec = parseInt(decodeURIComponent(nv[1]));
+                } else if (decodeURIComponent(nv[1].toLowerCase()) === 'true') {
+                	H2_refreshSec = 60;
+                }
+            }
+        }
+    }
+    if (H2_refreshSec > 0) {
+        DP_AutoRefresh = H2_refreshSec;
+        AutoRefreshCount = DP_AutoRefresh;
+        setTimeout(AutoRefresh, 1000);
+    } 
+    
+    createChart();
+	
+}
+
+
+/**
+* Request data from the server, add it to the graph and set a timeout 
+* to request again
+*/
 function requestData2(TXT_JSON) {
 
     var DP_rooms = [];
@@ -1156,9 +1450,7 @@ function requestData2(TXT_JSON) {
     // DP_point = TXT_JSON.result;
     DP_point = [];
     for (i = 0; i < TXT_JSON.result.length; i++) {
-        if (!TXT_JSON.result[i].historyDisabled && !TXT_JSON.result[i].historyHidden) {
-            DP_point.push(TXT_JSON.result[i]);
-        }
+        DP_point.push(TXT_JSON.result[i]);
     }
 
     // Sort data points on DisplayName
@@ -1178,33 +1470,94 @@ function requestData2(TXT_JSON) {
 
     // Alle Serien aufbauen und Räume & Gewerke sammeln nur für anzeigbare
     for (i = 0; i < DP_point.length; i++) {
-        if (!DP_point[i].historyDisabled && !DP_point[i].historyHidden) {
 
-            // Räme sammeln
-            if (DP_point[i].attributes.room != null) {
-                var t = DP_point[i].attributes.room.split(',');
-                for (c = 0; c < t.length; c++) {
-                    if (t[c] != '') {
-                        if (DP_rooms.indexOf(t[c].trim()) === -1) {
-                            DP_rooms.push(t[c].trim());
-                        }
-                    }
-                }
-            }
-            // Gewerke sammeln
-            if (DP_point[i].attributes.function != null) {
-                var t = DP_point[i].attributes.function.split(',');
-                for (c = 0; c < t.length; c++) {
-                    if (t[c] != '') {
-                        if (DP_gewerk.indexOf(t[c].trim()) === -1) {
-                            DP_gewerk.push(t[c].trim());
-                        }
+        // Räme sammeln
+        if (DP_point[i].attributes.room != null) {
+            var t = DP_point[i].attributes.room.split(',');
+            for (c = 0; c < t.length; c++) {
+                if (t[c] != '') {
+                    if (DP_rooms.indexOf(t[c].trim()) === -1) {
+                        DP_rooms.push(t[c].trim());
                     }
                 }
             }
         }
+        // Gewerke sammeln
+        if (DP_point[i].attributes.function != null) {
+            var t = DP_point[i].attributes.function.split(',');
+            for (c = 0; c < t.length; c++) {
+                if (t[c] != '') {
+                    if (DP_gewerk.indexOf(t[c].trim()) === -1) {
+                        DP_gewerk.push(t[c].trim());
+                    }
+                }
+            }
+        }
+        
+        
+        // take default values from database
+        if (DP_point[i].attributes.custom && DP_point[i].attributes.custom.HighChart) {
+            var text2 = DP_point[i].attributes.custom.HighChart.split('|');
+            if (text2.length > 0) {
+                var attr = {
+                            id: DP_point[i].idx.toString(),
+                            aggr: 'A0',
+                            atime: 'T1',
+                            yaxis: 'Y0',
+                            comp: 'C0',
+                            line: 'L0',
+                            mark: 'M0',
+                            color: 'F0',
+                            visible: 0,
+                            dash: 'D0',
+                            width: 'W2',
+                            stack: 0,
+                            factor: 1,            
+                            offset: 0,
+                            unit: DP_point[i].attributes.unit,
+                            buffer_data: {
+                                timestamps: [],
+                                values: [],
+                                buffer_start: 0,
+                                buffer_end: 0
+                            },
+                };
+                for (var k = 0; k < text2.length; k++) {
+                    if (text2[k].substr(0, 1) === 'A') {
+                    	attr.aggr = text2[k];
+                    } else if (text2[k].substr(0, 1) === 'Y') {
+                    	attr.yaxis = text2[k];
+                    } else if (text2[k].substr(0, 1) === 'T') {
+                    	attr.atime = text2[k];
+                    } else if (text2[k].substr(0, 1) === 'F') {
+                    	attr.color = text2[k];
+                    } else if (text2[k].substr(0, 1) === 'C') {
+                    	attr.comp = text2[k];
+                    } else if (text2[k].substr(0, 1) === 'L') {
+                    	attr.line = text2[k];
+                    } else if (text2[k].substr(0, 1) === 'M') {
+                    	attr.mark = text2[k];
+                    } else if (text2[k].substr(0, 1) === 'D') {
+                    	attr.dash = text2[k];
+                    } else if (text2[k].substr(0, 1) === 'W') {
+                    	attr.width = text2[k];
+                    } else if (text2[k].substr(0, 1) === 'V') {
+                    	attr.visible = parseInt(text2[k].substr(1, 1));
+                    } else if (text2[k].substr(0, 1) === 'S') {
+                    	attr.stack = parseInt(text2[k].substr(1, 2));
+                    } else if (text2[k].substr(0, 1) === 'U') {
+                    	attr.unit = text2[k].substr(1, 20);
+                    } else if (text2[k].substr(0, 1) === 'X') {
+                    	attr.factor = parseFloat(text2[k].substr(1, 10));
+                    } else if (text2[k].substr(0, 1) === 'O') {
+                    	attr.offset = parseFloat(text2[k].substr(1, 10));
+                    }
+                }
+                DP_attribute.push(attr);
+            }
+        }
     }
-
+    
     // Sort on Rooms
     DP_rooms.sort(function(a, b) {
         var x = a.toLowerCase();
@@ -1295,6 +1648,7 @@ function requestData2(TXT_JSON) {
                                 visible: 2,
                                 dash: 'D0',
                                 width: 'W2',
+                                stack: 0,
                                 factor: 1,
                                 offset: 0,
                                 unit: default_unit,
@@ -1308,6 +1662,7 @@ function requestData2(TXT_JSON) {
                             DP_attribute.push(attr);
                             attrpos = DP_attribute.findIndex(obj=>obj.id === dp_id);
                         }
+                        DP_attribute[attrpos].visible = 2;
                         for (var k = 1; k < text2.length; k++) {
                             if (text2[k].substr(0, 1) === 'A') {
                                 DP_attribute[attrpos].aggr = text2[k];
@@ -1327,6 +1682,8 @@ function requestData2(TXT_JSON) {
                                 DP_attribute[attrpos].dash = text2[k];
                             } else if (text2[k].substr(0, 1) === 'W') {
                                 DP_attribute[attrpos].width = text2[k];
+                            } else if (text2[k].substr(0, 1) === 'S') {
+                            	DP_attribute[attrpos].stack = parseInt(text2[k].substr(1, 2));
                             } else if (text2[k].substr(0, 1) === 'V') {
                                 DP_attribute[attrpos].visible = parseInt(text2[k].substr(1, 1));
                             } else if (text2[k].substr(0, 1) === 'U') {
@@ -1340,7 +1697,48 @@ function requestData2(TXT_JSON) {
                     }
                 }
 
-                // parameter Raum
+            // parameter YAXIS
+            } else if (nv[0].toLowerCase() === 'yaxis') {
+                var text = decodeURIComponent(nv[1]).toLowerCase().split(',');
+                for (var j = 0; j < text.length; j++) {
+                    var text2 = text[j].toUpperCase().split('|');
+                    var axis_id = parseInt(text2[0].substr(1, 2));
+                    if (axis_id >= 0 && axis_id < DP_yAxis.length) {
+                        if (text2.length > 0) {
+                            for (var k = 1; k < text2.length; k++) {
+                                if (text2[k].substr(0, 1) === 'P') {
+                                    if (text2[k].substr(1, 1) === '0')
+                                        DP_yAxis[axis_id].position = false;
+                                    if (text2[k].substr(1, 1) === '1')
+                                        DP_yAxis[axis_id].position = true;
+                                } else if (text2[k].substr(0, 1) === 'C') {
+                                    if (text2[k].substr(1, 1) === '0')
+                                        DP_yAxis[axis_id].type = 0;
+                                    if (text2[k].substr(1, 1) === '1')
+                                        DP_yAxis[axis_id].type = 1;
+                                } else if (text2[k].substr(0, 1) === 'A') {
+                                    if (text2[k].substr(1, 1) === '0')
+                                        DP_yAxis[axis_id].limit = 0;
+                                    if (text2[k].substr(1, 1) === '1')
+                                        DP_yAxis[axis_id].limit = 1;
+                                    if (text2[k].substr(1, 1) === '2')
+                                        DP_yAxis[axis_id].limit = 2;
+                                } else if (text2[k].substr(0, 1) === 'L') {
+                                    DP_yAxis[axis_id].min = parseFloat(text2[k].substr(1, 15));
+                                } else if (text2[k].substr(0, 1) === 'H') {
+                                    DP_yAxis[axis_id].max = parseFloat(text2[k].substr(1, 15));
+                                } else if (text2[k].substr(0, 1) === 'G') {
+                                    DP_yAxis[axis_id].tick = parseInt(text2[k].substr(1, 15));
+                                } else if (text2[k].substr(0, 1) === 'F') {
+                                    DP_yAxis[axis_id].color = parseInt(text2[k].substr(1, 2));
+                                } else if (text2[k].substr(0, 1) === 'T') {
+                                    DP_yAxis[axis_id].text = decodeURIComponent(nv[1]).split(',')[j].split('|')[k].substr(1, 50);
+                                }
+                            }
+                        }
+                    }
+                }
+            // parameter Raum
             } else if (nv[0].toLowerCase() === 'room') {
                 var DP_start_room = decodeURIComponent(nv[1].toLowerCase());
                 var select = document.getElementById("Select-Raum");
@@ -1350,7 +1748,7 @@ function requestData2(TXT_JSON) {
                         break;
                     }
                 }
-                // parameter Gewerk
+            // parameter Gewerk
             } else if (nv[0].toLowerCase() === 'function') {
                 var DP_start_func = decodeURIComponent(nv[1].toLowerCase());
                 var select = document.getElementById("Select-Gewerk");
@@ -1361,25 +1759,42 @@ function requestData2(TXT_JSON) {
                     }
                 }
 
-                // FilterLine
+            // FilterLine
             } else if (nv[0].toLowerCase() === 'filterline') {
                 if (decodeURIComponent(nv[1].toLowerCase()) === 'false' || decodeURIComponent(nv[1].toLowerCase()) === '0') {
                     DP_ShowFilter = 0;
-                    showFilterLine();
                 }
                 // only filterline without menue
                 if (decodeURIComponent(nv[1].toLowerCase()) === '2') {
                     DP_ShowFilter = 2;
-                    showFilterLine();
                 }
                 // only menue without filterline
                 if (decodeURIComponent(nv[1].toLowerCase()) === '3') {
                     DP_ShowFilter = 3;
-                    showFilterLine();
                 }
             }
         }
     }
+    
+    // Update Chart
+    chart.update({ yAxis: defineYAxis() },false,false);
+
+    // Yaxis options
+    $("#Select-Yaxis").empty();
+    var select = document.getElementById("Select-Yaxis");
+    for (var i = 0; i < DP_yAxis.length; i++) {
+        var option = document.createElement("option");
+        if (DP_yAxis[i].text != "" && DP_yAxis[i].text != null) {
+            option.text = DP_yAxis[i].text;
+        } else {
+            option.text = ChhLanguage.default.historian['yaxis' + i];
+        }
+        option.value = 'Y' + i;
+        select.add(option);
+    }
+    
+    // show menü & filter if wanted
+    showFilterLine();
 
     // Display data
     ChangeEventRaumFilter();
@@ -1406,13 +1821,21 @@ function requestData2(TXT_JSON) {
 */
 $(document).ready(function() {
 
+	DP_ApiKey = "";
+	if (apiKey != "") {
+		DP_ApiKey = "&" + apiKey.substring(1,apiKey.length);	
+	}
+
+	requestSettings();
+
     document.getElementById("container").setAttribute("style", "height:" + ($(document).height() - 160) + "px");
 
     // Translate to Language Set
     document.getElementById('button1').innerHTML = ChhLanguage.default.historian.buttonDay;
     document.getElementById('button2').innerHTML = ChhLanguage.default.historian.buttonWeek;
     document.getElementById('button3').innerHTML = ChhLanguage.default.historian.buttonMonth;
-    document.getElementById('button4').innerHTML = ChhLanguage.default.historian.buttonALL;
+    document.getElementById('button4').innerHTML = ChhLanguage.default.historian.buttonYear;
+    document.getElementById('button5').innerHTML = ChhLanguage.default.historian.buttonALL;
     document.getElementById('refresh').innerHTML = ChhLanguage.default.historian.buttonRefresh;
     document.getElementById('createLink').innerHTML = ChhLanguage.default.historian.buttonLink;
     document.getElementById('count_text').innerHTML = ChhLanguage.default.historian.labelValues;
@@ -1502,21 +1925,10 @@ $(document).ready(function() {
 
     // aggrtime options
     var select = document.getElementById("Select-AggrTime");
-    for (var i = 0; i < 9; i++) {
+    for (var i = 0; i < 13; i++) {
         var option = document.createElement("option");
         option.text = ChhLanguage.default.historian['atimetxt' + i];
         option.value = 'T' + i;
-        select.add(option);
-    }
-
-    // Yaxis options
-    $("#Select-Yaxis").empty();
-    var select = document.getElementById("Select-Yaxis");
-    for (var i = 0; i < DP_yAxis.length; i++) {
-        var option = document.createElement("option");
-        option.text = ChhLanguage.default.historian['yaxis' + i];
-        //   option.text = DP_yAxis[i].text;
-        option.value = 'Y' + i;
         select.add(option);
     }
 
@@ -1605,6 +2017,15 @@ $(document).ready(function() {
         select.add(option);
     }
 
+    // DataPoint options
+    var select = document.getElementById("Select-DataPoint");
+    for (var i = 0; i < 4; i++) {
+        var option = document.createElement("option");
+        option.text = ChhLanguage.default.historian['datapoint' + i];
+        option.value = i;
+        select.add(option);
+    }
+    
     // themes
     var select = document.getElementById("Select-Theme");
     for (var key in DP_Themes) {
@@ -1613,7 +2034,7 @@ $(document).ready(function() {
         option.value = key;
         select.add(option);
     }
-
+    
     // Axis Type
     var select = document.getElementById("Select-AxisType");
     var option = document.createElement("option");
@@ -1651,6 +2072,15 @@ $(document).ready(function() {
     option.value = '2';
     select.add(option);
     
+    // Stacking
+    var select = document.getElementById("Select-Stacking");
+    for (var i = 0; i < 6; i++) {
+        var option = document.createElement("option");
+        option.text = ChhLanguage.default.historian['Stacking' + i];
+        option.value = i;
+        select.add(option);
+    }
+    
     // Add mouse wheel for legend
     (function(H) {
         H.wrap(H.Legend.prototype, 'render', function(proceed) {
@@ -1676,133 +2106,6 @@ $(document).ready(function() {
         },
         lang: ChhLanguage.default.highcharts,
     });
-
-    // check parameter from get-link
-    if (location.search) {
-        var parts = location.search.substring(1).split('&');
-        for (var i = 0; i < parts.length; i++) {
-            var nv = parts[i].split('=');
-            if (!nv[0])
-                continue;
-
-            if (nv[0].toLowerCase() === 'dp') {
-                DP_Limit = true;
-            } else if (nv[0].toLowerCase() === 'yaxis') {
-                var text = decodeURIComponent(nv[1]).toLowerCase().split(',');
-                for (var j = 0; j < text.length; j++) {
-                    var text2 = text[j].toUpperCase().split('|');
-                    var axis_id = parseInt(text2[0].substr(1, 2));
-                    if (axis_id >= 0 && axis_id < DP_yAxis.length) {
-                        if (text2.length > 0) {
-                            for (var k = 1; k < text2.length; k++) {
-                                if (text2[k].substr(0, 1) === 'P') {
-                                    if (text2[k].substr(1, 1) === '0')
-                                        DP_yAxis[axis_id].position = false;
-                                    if (text2[k].substr(1, 1) === '1')
-                                        DP_yAxis[axis_id].position = true;
-                                } else if (text2[k].substr(0, 1) === 'C') {
-                                    if (text2[k].substr(1, 1) === '0')
-                                        DP_yAxis[axis_id].type = 0;
-                                    if (text2[k].substr(1, 1) === '1')
-                                        DP_yAxis[axis_id].type = 1;
-                                } else if (text2[k].substr(0, 1) === 'A') {
-                                    if (text2[k].substr(1, 1) === '0')
-                                        DP_yAxis[axis_id].limit = 0;
-                                    if (text2[k].substr(1, 1) === '1')
-                                        DP_yAxis[axis_id].limit = 1;
-                                    if (text2[k].substr(1, 1) === '2')
-                                        DP_yAxis[axis_id].limit = 2;
-                                } else if (text2[k].substr(0, 1) === 'L') {
-                                    DP_yAxis[axis_id].min = parseFloat(text2[k].substr(1, 15));
-                                } else if (text2[k].substr(0, 1) === 'H') {
-                                    DP_yAxis[axis_id].max = parseFloat(text2[k].substr(1, 15));
-                                } else if (text2[k].substr(0, 1) === 'G') {
-                                    DP_yAxis[axis_id].tick = parseInt(text2[k].substr(1, 15));
-                                } else if (text2[k].substr(0, 1) === 'F') {
-                                    DP_yAxis[axis_id].color = parseInt(text2[k].substr(1, 2));
-                                } else if (text2[k].substr(0, 1) === 'T') {
-                                    DP_yAxis[axis_id].text = decodeURIComponent(nv[1]).split(',')[j].split('|')[k].substr(1, 50);
-                                }
-                            }
-                        }
-                    }
-                }
-                // parameter Periode (Stunden)
-            } else if (nv[0].toLowerCase() === 'periode') {
-                Zeitraum_Start = new Date(Zeitraum_Ende - (new Date(3600 * 1000 * parseInt(nv[1]))));
-                // parameter Data Point
-            } else if (nv[0].toLowerCase() === 'filterkey') {
-                filter_feld = decodeURIComponent(nv[1].toLowerCase());
-            } else if (nv[0].toLowerCase() === 'title') {
-                DP_Title = decodeURIComponent(nv[1]);
-            } else if (nv[0].toLowerCase() === 'subtitle') {
-                DP_Subtitle = decodeURIComponent(nv[1]);
-            } else if (nv[0].toLowerCase() === 'legend') {
-                if (decodeURIComponent(nv[1].toLowerCase()) === 'false') {
-                    DP_Legend = 0;
-                }
-                if (parseInt(decodeURIComponent(nv[1])) >= 0 && parseInt(decodeURIComponent(nv[1])) < 7) {
-                    DP_Legend = parseInt(decodeURIComponent(nv[1]));
-                }
-            } else if (nv[0].toLowerCase() === 'navigator') {
-                if (decodeURIComponent(nv[1].toLowerCase()) === 'false') {
-                    DP_Navigator = 0;
-                }
-                if (decodeURIComponent(nv[1].toLowerCase()) === '0') {
-                    DP_Navigator = 0;
-                }
-                if (decodeURIComponent(nv[1].toLowerCase()) === '1') {
-                    DP_Navigator = 1;
-                }
-            } else if (nv[0].toLowerCase() === 'theme') {
-                DP_Theme = decodeURIComponent(nv[1].toLowerCase());
-            } else if (nv[0].toLowerCase() === 'labels') {
-                if (decodeURIComponent(nv[1].toLowerCase()) === 'true') {
-                    DP_Labels = 1;
-                }
-                if (decodeURIComponent(nv[1].toLowerCase()) === '0') {
-                    DP_Labels = 0;
-                }
-                if (decodeURIComponent(nv[1].toLowerCase()) === '1') {
-                    DP_Labels = 1;
-                }
-                if (decodeURIComponent(nv[1].toLowerCase()) === '2') {
-                    DP_Labels = 2;
-                }
-            } else if (nv[0].toLowerCase() === 'daylight') {
-                if (decodeURIComponent(nv[1].toLowerCase()) === 'false') {
-                    DP_DayLight = 0;
-                }
-                if (decodeURIComponent(nv[1].toLowerCase()) === '0') {
-                    DP_DayLight = 0;
-                }
-                if (decodeURIComponent(nv[1].toLowerCase()) === '1') {
-                    DP_DayLight = 1;
-                }
-                if (decodeURIComponent(nv[1].toLowerCase()) === '2') {
-                    DP_DayLight = 2;
-                }
-                if (decodeURIComponent(nv[1].toLowerCase()) === '3') {
-                    DP_DayLight = 3;
-                }
-            } else if (nv[0].toLowerCase() === 'refresh') {
-                if (parseInt(decodeURIComponent(nv[1])) > 0) {
-                    H2_refreshSec = parseInt(decodeURIComponent(nv[1]));
-                    DP_AutoRefresh = H2_refreshSec;
-                    AutoRefreshCount = DP_AutoRefresh;
-                    setTimeout(AutoRefresh, 1000);
-                } else if (decodeURIComponent(nv[1].toLowerCase()) === 'true') {
-                    DP_AutoRefresh = H2_refreshSec;
-                    AutoRefreshCount = DP_AutoRefresh;
-                    setTimeout(AutoRefresh, 1000);
-                }
-            }
-        }
-    }
-
-    //    if (DP_attribute.length >0) DP_Limit = true;
-
-    createChart();
 
 });
 
@@ -1858,6 +2161,7 @@ function ChangeEventRaumFilter() {
                             visible: DP_attribute[attr].visible,
                             dash: 'D1',
                             width: DP_attribute[attr].width,
+                            stack: DP_attribute[attr].stack,
                             factor: DP_attribute[attr].factor,
                             offset: DP_attribute[attr].offset,
                             unit: DP_attribute[attr].unit,
@@ -1892,8 +2196,10 @@ function ChangeEventRaumFilter() {
 
     if (save_active_found) {
         loadNewSerienData();
+        loadNewAxisInfo();
     } else {
         loadNewPlotBand();
+        loadNewAxisInfo();
         chart.redraw();
     }
 }
@@ -1902,7 +2208,11 @@ function ChangeEventRaumFilter() {
 function check_filter(p_raum, p_gewerk, p_dp) {
 
     // Generell Filter
-    if (p_dp.historyDisabled || p_dp.historyHidden)
+    if (p_dp.historyDisabled && ( DP_DataPointFilter == 0 || DP_DataPointFilter == 2 ) )
+        return false;
+
+    // Generell Filter
+    if (p_dp.historyHidden && ( DP_DataPointFilter == 0 || DP_DataPointFilter == 1 ) )
         return false;
 
     // Room Filter
@@ -1960,7 +2270,16 @@ function loadNewSerienData() {
 function loadNewAxisInfo() {
 
     for (var axispos = 0; axispos < DP_yAxis.length; axispos++) {
-        if (chart.yAxis[axispos].visible && chart.yAxis[axispos].hasVisibleSeries) {
+    	var axVisible = false;
+        for (var serie = 0; serie < chart.yAxis[axispos].series.length; serie++) {
+            if (chart.yAxis[axispos].series[serie].visible) {
+            	axVisible = true;
+            	break;
+            }
+        }   	
+        
+//         if (chart.yAxis[axispos].hasVisibleSeries) {
+        if (axVisible) {
 
             var axiscolor = null;
             if (DP_yAxis[axispos].color == 0) {
@@ -1989,13 +2308,23 @@ function loadNewAxisInfo() {
                             "color": axiscolor
                         }
                     },
+                    visible: true
                 }, false);
+            } else {
+                chart.yAxis[axispos].update({
+                    visible: true
+                }, false);
+
             }
 
             // set extrem if config HARD
             if (DP_yAxis[axispos].limit == '2') {
                 chart.yAxis[axispos].setExtremes(parseFloat(DP_yAxis[axispos].min), parseFloat(DP_yAxis[axispos].max));
             }
+        } else {
+            chart.yAxis[axispos].update({
+                visible: false
+            }, false);
         }
     }
     chart.redraw();
@@ -2130,6 +2459,7 @@ function createUrl() {
                     url2 += (DP_attribute[attr].mark === 'M0') ? '' : '|' + DP_attribute[attr].mark;
                     url2 += (DP_attribute[attr].dash === 'D0') ? '' : '|' + DP_attribute[attr].dash;
                     url2 += (DP_attribute[attr].width === 'W2') ? '' : '|' + DP_attribute[attr].width;
+                    url2 += (DP_attribute[attr].stack === 0) ? '' : '|S' + DP_attribute[attr].stack;
                     url2 += (DP_attribute[attr].factor === 1) ? '' : '|X' + DP_attribute[attr].factor;
                     url2 += (DP_attribute[attr].offset === 0) ? '' : '|O' + DP_attribute[attr].offset;
 
@@ -2229,6 +2559,11 @@ function createUrl() {
         url += '&filterline=false';
     } else if (DP_ShowFilter != 1) {
         url += '&filterline=' + DP_ShowFilter;
+    }
+
+    // showFilterLine()    
+    if (DP_DataPointFilter != 0) {
+        url += '&dpfilter='+DP_DataPointFilter;
     }
 
     // Theme    
@@ -2344,6 +2679,7 @@ function showDialogLine(serieObj) {
                 visible: 2,
                 dash: 'D0',
                 width: 'W2',
+                stack: 0,
                 factor: 1,
                 offset: 0,
                 unit: '',
@@ -2385,6 +2721,7 @@ function showDialogLine(serieObj) {
         document.getElementById("Select-AggrTime").value = DP_attribute[attr].atime;
         document.getElementById("Select-Yaxis").value = DP_attribute[attr].yaxis;
         document.getElementById("Select-Compare").value = DP_attribute[attr].comp;
+        document.getElementById("Select-Stacking").value = DP_attribute[attr].stack;
         document.getElementById("Select-Line").value = DP_attribute[attr].line;
         document.getElementById("Select-Color").value = DP_attribute[attr].color;
         document.getElementById("Select-Marker").value = DP_attribute[attr].mark;
@@ -2402,7 +2739,83 @@ function showDialogLine(serieObj) {
 
 // Close Dialog
 $("#DialogBtnOK").click(function() {
+	getDialogLine();
+});
 
+//Close Dialog and save as default
+$("#LineDefault").click(function() {
+	saveLine();
+});
+
+function saveLine() {	
+
+	getDialogLine();
+
+	var attr = DP_attribute.findIndex(obj=>obj.id === DP_PopupID);
+    if (attr == -1) {
+    	return
+    }
+    var strCustom = '';
+    strCustom +=       DP_attribute[attr].aggr;
+    strCustom += '|' + DP_attribute[attr].atime;
+    strCustom += '|' + DP_attribute[attr].yaxis;
+    strCustom += '|' + DP_attribute[attr].line;
+    strCustom += '|' + DP_attribute[attr].color;
+    strCustom += '|' + DP_attribute[attr].comp;
+    strCustom += '|' + DP_attribute[attr].mark;
+    strCustom += '|' + DP_attribute[attr].dash;
+    strCustom += '|' + DP_attribute[attr].width;
+    strCustom += '|S' + DP_attribute[attr].stack;
+    strCustom += '|X' + DP_attribute[attr].factor;
+    strCustom += '|O' + DP_attribute[attr].offset;
+    strCustom += '|U' + DP_attribute[attr].unit;
+
+    var DP_pos = DP_point.findIndex(obj=>obj.idx.toString() === DP_PopupID);
+    var key = 'YAXIS';
+    
+    if (!DP_point[DP_pos].attributes.custom.HighChart || DP_point[DP_pos].attributes.custom.HighChart != strCustom ) {
+    	
+    	DP_point[DP_pos].attributes.custom.HighChart = strCustom;
+
+	    var url = 'http://' + H2_server + ':' + H2_port;
+	    url += '/query/jsonrpc.gy?j={%22method%22:%22updateDataPoint%22';
+	    url += ',%22id%22:%22' + key + '%22';
+	    url += ',%22params%22:[{%22id%22:{%22interfaceId%22:%22' + DP_point[DP_pos].id.interfaceId ; 
+	    url += '%22,%22address%22:%22' + DP_point[DP_pos].id.address; 
+	    url += '%22,%22identifier%22:%22' + DP_point[DP_pos].id.identifier+ '%22}'; 
+	    url += ',%22attributes%22:{%22custom%22:{%22HighChart%22:%22' + strCustom + '%22}}}]}'; 
+	    url += DP_ApiKey 
+	    
+	    // get serien data from H2 database
+	    $.ajax({
+	        type: "GET",
+	        url: url,
+	        dataType: "json",
+	        async: true,
+	        cache: false,
+	        error: function(xhr, status, error) {
+	            console.log('AXAJ-error:');
+	            console.log(xhr);
+	            console.log(status);
+	            console.log(error);
+	        },
+	        success: function(result) {
+	            console.log(result);
+	        }
+	    });
+	    
+    }
+    return;	
+	
+}
+
+// Close Dialog Line
+$("#DialogBtnClose").click(function() {
+    $("#LinePopup").modal('hide');
+});
+
+//Show Dialog
+function getDialogLine() {
     var attr = DP_attribute.findIndex(obj=>obj.id === DP_PopupID);
 
     if (DP_attribute[attr].comp != document.getElementById("Select-Compare").value && document.getElementById("Select-Compare").value != 'C0' && DP_attribute[attr].comp != 'C0') {
@@ -2418,6 +2831,7 @@ $("#DialogBtnOK").click(function() {
     DP_attribute[attr].atime = document.getElementById("Select-AggrTime").value;
     DP_attribute[attr].yaxis = document.getElementById("Select-Yaxis").value;
     DP_attribute[attr].comp = document.getElementById("Select-Compare").value;
+    DP_attribute[attr].stack = parseInt(document.getElementById("Select-Stacking").value);
     DP_attribute[attr].line = document.getElementById("Select-Line").value;
     DP_attribute[attr].color = document.getElementById("Select-Color").value;
     DP_attribute[attr].mark = document.getElementById("Select-Marker").value;
@@ -2433,13 +2847,8 @@ $("#DialogBtnOK").click(function() {
 
     $("#LinePopup").modal('hide');
 
-    ChangeEventRaumFilter();
-});
-
-// Close Dialog Line
-$("#DialogBtnClose").click(function() {
-    $("#LinePopup").modal('hide');
-});
+    ChangeEventRaumFilter();	
+}
 
 // Show Dialog
 function showDialogSettings() {
@@ -2451,6 +2860,7 @@ function showDialogSettings() {
     document.getElementById("Select-Label").value = DP_Labels.toString();
     document.getElementById("Select-Layout").value = DP_DayLight.toString();
     document.getElementById("Select-Content").value = DP_ShowFilter.toString();
+    document.getElementById("Select-DataPoint").value = DP_DataPointFilter.toString();
     document.getElementById("Select-Theme").value = DP_Theme;
     document.getElementById("Line-Refresh").value = DP_AutoRefresh;
     document.getElementById("Line-Title").value = DP_Title;
@@ -2461,8 +2871,86 @@ function showDialogSettings() {
 
 // Close Dialog Settings
 $("#Dialog2BtnOK").click(function() {
+	getDialogSetting();
+});
 
-    $("#SettingPopup").modal('hide');
+	
+//Close Dialog and save as default
+$("#SettingDefault").click(function() {
+	saveSetting();
+});
+	
+function saveSetting() {
+	
+	getDialogSetting();
+	
+	
+//  var text2 = DP_settings['HighChart_YAXIS'+x].split('|');
+//  var text2 = DP_settings['HighChart_Setting'].split('|');	
+	
+	
+    var strCustom = '';
+    strCustom += 'L' + DP_Legend.toString();
+    strCustom += '|N' + DP_Navigator.toString();
+    strCustom += '|P' + DP_Labels.toString();
+    strCustom += '|D' + DP_DayLight.toString();
+    strCustom += '|F' + DP_ShowFilter.toString();
+    strCustom += '|I' + DP_DataPointFilter.toString();
+    strCustom += '|B' + DP_Theme;
+    strCustom += '|R' + DP_AutoRefresh;
+    strCustom += '|T' + DP_Title;
+    strCustom += '|S' + DP_Subtitle;
+
+// Save to Global Settings    
+    DP_settings.Setting = strCustom;
+    
+    saveSettingsH2();
+}
+
+function saveSettingsH2() {
+    	
+    var key = 'SETTING';
+	var strSetNew = JSON.stringify(DP_settings);
+    var strSetOld = JSON.stringify(DP_settings_old);
+	
+    if (strSetNew != strSetOld) {
+    	
+    	DP_settings_old = JSON.parse(strSetNew);
+    	
+    	strSetNew = strSetNew.replace(new RegExp('"', 'g'), "'");
+    	
+	    var url = 'http://' + H2_server + ':' + H2_port;
+	    url += '/query/jsonrpc.gy?j={%22method%22:%22setConfig%22';
+	    url += ',%22params%22:[%22HighChart%22,%22' + strSetNew +'%22]' ; 
+	    url += ',%22id%22:%22' + key + '%22}';
+	    url += DP_ApiKey 
+
+	    // update setting data to H2 database
+	    $.ajax({
+	        type: "GET",
+	        url: url,
+	        dataType: "json",
+	        async: true,
+	        cache: false,
+	        error: function(xhr, status, error) {
+	            console.log('AXAJ-error:');
+	            console.log(xhr);
+	            console.log(status);
+	            console.log(error);
+	        },
+	        success: function(result) {
+	            console.log(result);
+	        }
+	    });
+	    
+    }
+    return;	
+	
+}
+
+function getDialogSetting() {
+
+	$("#SettingPopup").modal('hide');
 
     var filterrefresh = false;
 
@@ -2474,6 +2962,7 @@ $("#Dialog2BtnOK").click(function() {
             if (!DP_Limit) {
                 DP_Limit = true;
                 filterrefresh = true;
+                $('.highcharts-contextmenu')[0].children[0].children[1].innerHTML = ChhLanguage.default.highcharts.limitactive;
             }
         }
     }
@@ -2528,6 +3017,13 @@ $("#Dialog2BtnOK").click(function() {
         showFilterLine();
         filterrefresh = true;
     }
+    
+    // DataPointFilter
+    if (DP_DataPointFilter.toString() != document.getElementById("Select-DataPoint").value) {
+    	DP_DataPointFilter = parseInt(document.getElementById("Select-DataPoint").value);
+        filterrefresh = true;
+    }
+
 
     // Theme
     if (DP_Theme != document.getElementById("Select-Theme").value) {
@@ -2562,7 +3058,7 @@ $("#Dialog2BtnOK").click(function() {
         ChangeEventRaumFilter();
     }
 
-});
+};
 
 // Close Dialog Settings
 $("#Dialog2BtnClose").click(function() {
@@ -2577,16 +3073,16 @@ function showFilterLine() {
         $('nav.navbar.navbar-default')[0].style.display = "none";
     } else if (DP_ShowFilter === 1) {
         document.getElementById("container").setAttribute("style", "height:" + ($(document).height() - 160) + "px");
-        document.getElementById("filter").style.display = "";
-        $('nav.navbar.navbar-default')[0].style.display = "";
+        document.getElementById("filter").style.display = "block";
+        $('nav.navbar.navbar-default')[0].style.display = "block";
     } else if (DP_ShowFilter === 2) {
         document.getElementById("container").setAttribute("style", "height:" + ($(document).height() - 90) + "px");
-        document.getElementById("filter").style.display = "";
+        document.getElementById("filter").style.display = "block";
         $('nav.navbar.navbar-default')[0].style.display = "none";
     } else if (DP_ShowFilter === 3) {
         document.getElementById("container").setAttribute("style", "height:" + ($(document).height() - 125) + "px");
         document.getElementById("filter").style.display = "none";
-        $('nav.navbar.navbar-default')[0].style.display = "";
+        $('nav.navbar.navbar-default')[0].style.display = "block";
     }
     if (chart) {
         chart.setSize(null, null, false);
@@ -2703,6 +3199,34 @@ function showDialogYAxis(id) {
 
 // Close Dialog Settings
 $("#Dialog3BtnOK").click(function() {
+	getDialogAxis();
+});
+
+//Close Dialog and save as default
+$("#AxisDefault").click(function() {
+	getDialogAxis();
+
+    var strCustom = '';
+    strCustom += 'P' + ((DP_yAxis[DP_PopupAxisPos].position) ? '1' : '0');
+    strCustom += '|C' + DP_yAxis[DP_PopupAxisPos].type;
+    strCustom += '|A' + DP_yAxis[DP_PopupAxisPos].limit;
+    strCustom += '|L' + DP_yAxis[DP_PopupAxisPos].min;
+    strCustom += '|H' + DP_yAxis[DP_PopupAxisPos].max;
+    strCustom += '|G' + DP_yAxis[DP_PopupAxisPos].tick;
+    strCustom += '|F' + DP_yAxis[DP_PopupAxisPos].color;
+    strCustom += '|T' + DP_yAxis[DP_PopupAxisPos].text;
+    
+// Save to global Settings    
+    DP_settings['YAXIS'+DP_PopupAxisPos] = strCustom; 
+    
+    saveSettingsH2();
+    
+    return;	
+	
+});
+
+function getDialogAxis() {
+	
     $("#AxisPopup").modal('hide');
 
     // Update YAxis parameter
@@ -2748,7 +3272,8 @@ $("#Dialog3BtnOK").click(function() {
     
     loadNewAxisInfo();
 
-});
+};
+
 
 // Close Dialog Settings
 $("#Dialog3BtnClose").click(function() {
@@ -2767,7 +3292,7 @@ function defineYAxis() {
                 text: DP_yAxis[y].text
             },
             lineWidth: 2,
-            showEmpty: false,
+            // showEmpty: false,
             opposite: (DP_yAxis[y].position == 1) ? true : false,
             tickAmount: DP_yAxis[y].tick,
             min: (DP_yAxis[y].limit == 2) ? DP_yAxis[y].min : null,
@@ -2776,7 +3301,8 @@ function defineYAxis() {
             softMax: (DP_yAxis[y].limit == 1) ? DP_yAxis[y].max : null,
             startOnTick: (DP_yAxis[y].limit == 2) ? true : false,
             endOnTick: (DP_yAxis[y].limit == 2) ? true : false,
-            allowDecimals: true
+            allowDecimals: true,
+            visible: false,
         });
     }
     return arr;
@@ -2841,6 +3367,8 @@ function ChartSetOptions() {
             events: {
                 load: requestData,
             },
+            panning: true,
+            panKey: 'shift',
             zoomType: 'xy',
             resetZoomButton: {
                 position: {
@@ -2921,10 +3449,10 @@ function ChartSetOptions() {
                         text: (DP_Limit) ? ChhLanguage.default.highcharts.limitactive : ChhLanguage.default.highcharts.limitdeactive,
                         onclick: function() {
                             if (DP_Limit) {
-                                $('.highcharts-contextmenu')[0].children[0].children[4].innerHTML = ChhLanguage.default.highcharts.limitdeactive;
+                                $('.highcharts-contextmenu')[0].children[0].children[1].innerHTML = ChhLanguage.default.highcharts.limitdeactive;
                                 DP_Limit = false;
                             } else {
-                                $('.highcharts-contextmenu')[0].children[0].children[4].innerHTML = ChhLanguage.default.highcharts.limitactive;
+                                $('.highcharts-contextmenu')[0].children[0].children[1].innerHTML = ChhLanguage.default.highcharts.limitactive;
                                 DP_Limit = true;
                             }
                             ChangeEventRaumFilter();
@@ -3006,6 +3534,12 @@ function ChartSetOptions() {
                             }
                             return true;
                         }
+                    },
+                    show: function() {
+                        loadNewAxisInfo();
+                    },
+                    hide: function() {
+                    	loadNewAxisInfo();
                     },
                     click: function() {
                         showDialogLine(this);
@@ -3191,6 +3725,12 @@ function chartSetElements() {
 
     // **********************
     $('#button4').click(function() {
+        Zeitraum_Start = new Date(Zeitraum_Ende - (new Date(86400000 * 1 * 365)));
+        loadNewSerienData();
+    });
+
+    // **********************
+    $('#button5').click(function() {
         Zeitraum_Start = new Date(Zeitraum_Ende - (new Date(86400000 * 5 * 365)));
         loadNewSerienData();
     });

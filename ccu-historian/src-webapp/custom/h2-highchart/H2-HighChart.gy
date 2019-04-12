@@ -1,12 +1,23 @@
-
 //import mdz.ccuhistorian.webapp.TrendParameters
 import mdz.ccuhistorian.webapp.WebUtilities
+
+// get api key
+def apiKey
+if (webServer.config.apiKeys) {
+	apiKey="?k="+webServer.config.apiKeys[0]
+} else {
+	apiKey=""
+}
 
 // setup page
 def renderer=new mdz.ccuhistorian.webapp.PageRenderer(servlet: this)
 
+// ApiKey
+def js=$/ var apiKey="$apiKey"/$
+
 renderer.head={
 	title 'CCU-historian: HighChart'
+	script { mkp.yieldUnescaped js }
 }
 
 renderer.content={
@@ -16,7 +27,8 @@ renderer.content={
 			button id:'button1', class:'btn btn-default', 'Tag'
 			button id:'button2', class:'btn btn-default', 'Woche'
 			button id:'button3', class:'btn btn-default', 'Monat'
-			button id:'button4', class:'btn btn-default', 'Alles'
+			button id:'button4', class:'btn btn-default', 'Jahr'
+			button id:'button5', class:'btn btn-default', 'Alles'
       }    
 					
       select(id: "Select-Raum", class:"form-select-h2")  { }
@@ -64,6 +76,10 @@ renderer.content={
                   span id: "Text-Compare", class:"LinePopup-text", "Compare" 
                   select(id: "Select-Compare", class:"form-select-h2")  { }
                }
+               div(id:"stacking") {
+                  span id: "Text-Stacking", class:"LinePopup-text", "Stacking" 
+                  select(id: "Select-Stacking", class:"form-select-h2")  { }
+               }
                div(id:"color") {
                   span id: "Text-Color", class:"LinePopup-text", "Color" 
                   select(id: "Select-Color", class:"form-select-h2")  { }
@@ -98,6 +114,7 @@ renderer.content={
                }
             }
             div(class:"modal-footer") {
+               button type:"button", class:"btn btn-default", id:"LineDefault", "Default"
                button type:"button", class:"btn btn-default", id:"DialogBtnOK", "Ok"
             }
          }      
@@ -132,6 +149,10 @@ renderer.content={
                   span id: "Text-Content", class:"LinePopup-text", "Content"
                   select(id: "Select-Content", class:"form-select-h2")  { }
                }
+               div(id:"datapoint") {
+                  span id: "Text-DataPoint", class:"LinePopup-text", "DataPoint"
+                  select(id: "Select-DataPoint", class:"form-select-h2")  { }
+               }
                div(id:"theme") {
                   span id: "Text-Theme", class:"LinePopup-text", "Theme"
                   select(id: "Select-Theme", class:"form-select-h2")  { }
@@ -150,6 +171,7 @@ renderer.content={
                }
             }
             div(class:"modal-footer") {
+               button type:"button", class:"btn btn-default", id:"SettingDefault", "Default"
                button type:"button", class:"btn btn-default", id:"Dialog2BtnOK", "Ok"
             }
          }      
@@ -197,6 +219,7 @@ renderer.content={
                }
             }
             div(class:"modal-footer") {
+               button type:"button", class:"btn btn-default", id:"AxisDefault", "Default"
                button type:"button", class:"btn btn-default", id:"Dialog3BtnOK", "Ok"
             }
          }      
