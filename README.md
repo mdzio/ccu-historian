@@ -1,7 +1,7 @@
 [![Release](https://img.shields.io/github/release/mdzio/ccu-historian.svg)](https://github.com/mdzio/ccu-historian/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/mdzio/ccu-historian/latest/total.svg)](https://github.com/mdzio/ccu-historian/releases/latest)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=SF4BR9ZE2JUBS)
-[![Github Issues](http://githubbadges.herokuapp.com/mdzio/ccu-historian/issues.svg)](https://github.com/mdzio/ccu-historian/issues)
+[![Github Issues](https://img.shields.io/github/issues/mdzio/ccu-historian.svg)](https://github.com/mdzio/ccu-historian/issues)
 
 # CCU-Historian
 
