@@ -17,6 +17,6 @@
 	<classpathentry kind="lib" path="/external-libs/jcommon-1.0.23/jcommon-1.0.23.jar"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
 	<classpathentry kind="lib" path="/external-libs/servlet-api-2.4/servlet-api-2.4.jar"/>
-	<classpathentry kind="lib" path="/external-libs/h2-1.4.197/h2-1.4.197.jar"/>
+	<classpathentry kind="lib" path="/external-libs/h2-1.4.199/h2-1.4.199.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
