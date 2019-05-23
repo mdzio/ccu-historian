@@ -2,6 +2,7 @@
 
 ADDONNAME=ccu-historian
 ADDON_DIR=/usr/local/addons/${ADDONNAME}
+ETC_DIR=/usr/local/etc
 RCD_DIR=/usr/local/etc/config/rc.d
 CONFIG_DIR=/usr/local/etc/config
 WWW_DIR=${CONFIG_DIR}/addons/www/${ADDONNAME}
@@ -70,6 +71,7 @@ uninstall() {
     ${ADDON_DIR}/update_hm_addons.tcl -d ccu-historian
     rm -rf ${ADDON_DIR}
     rm ${RCD_DIR}/ccu-historian
+    rm ${ETC_DIR}/monitCCUHistorian.cfg
     rm -rf ${WWW_DIR}
     logger -t ccu-historian -p user.info "Uninstalled"
 }

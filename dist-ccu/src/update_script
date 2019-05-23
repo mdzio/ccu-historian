@@ -1,10 +1,16 @@
 #!/bin/sh
 
-ADDONNAME=ccu-historian
-ADDON_DIR=/usr/local/addons/${ADDONNAME}
+# Add-on information
+ADDON_ID=ccu-historian
+ADDON_NAME="CCU-Historian"
+ADDON_DESCR_EN="Operating data acquisition for the CCU"
+ADDON_DESCR_DE="Betriebsdatenerfassung f&uuml;r die CCU"
+
+# directories
+ADDON_DIR=/usr/local/addons/${ADDON_ID}
+ETC_DIR=/usr/local/etc
 RCD_DIR=/usr/local/etc/config/rc.d
-CONFIG_DIR=/usr/local/etc/config
-WWW_DIR=${CONFIG_DIR}/addons/www/${ADDONNAME}
+WWW_DIR=/usr/local/etc/config/addons/www/${ADDON_ID}
 
 # Logging to syslog is currently not supported by the CCU during the install process.
 
@@ -22,9 +28,9 @@ elif [ "$1" == "HM-RASPBERRYMATIC" -o "$1" == "CCU3" ]; then
 fi
 
 # stop ccu-historian, if already installed
-if [ -f $CONFIG_DIR/rc.d/ccu-historian ]; then
+if [ -f $RCD_DIR/ccu-historian ]; then
   echo "Previous installation detected"
-  $CONFIG_DIR/rc.d/ccu-historian stop
+  $RCD_DIR/ccu-historian stop
 fi
 
 # create directories
@@ -46,12 +52,13 @@ cp -af addon/rc.d/* ${RCD_DIR}/
 # copy www directory
 cp -af addon/www/* ${WWW_DIR}/
 
+# copy config files
+cp -af addon/etc/* ${ETC_DIR}/
+
 # add menu entry
 cp -af addon/update_hm_addons.tcl ${ADDON_DIR}/
-${ADDON_DIR}/update_hm_addons.tcl -a ccu-historian -name CCU-Historian -url /addons/ccu-historian/config.cgi -de "Betriebsdatenerfassung f&uuml;r die CCU" -en "Operating data acquisition for the CCU"
+${ADDON_DIR}/update_hm_addons.tcl -a ${ADDON_ID} -name "${ADDON_NAME}" -url /addons/${ADDON_ID}/config.cgi -de "${ADDON_DESCR_DE}" -en "${ADDON_DESCR_EN}"
 
 sync
-
 echo "Installed"
-
 exit 0
