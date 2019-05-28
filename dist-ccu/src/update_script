@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Add-on information
+# add-on information
 ADDON_ID=ccu-historian
 ADDON_NAME="CCU-Historian"
 ADDON_DESCR_EN="Operating data acquisition for the CCU"
@@ -12,7 +12,7 @@ ETC_DIR=/usr/local/etc
 RCD_DIR=/usr/local/etc/config/rc.d
 WWW_DIR=/usr/local/etc/config/addons/www/${ADDON_ID}
 
-# Logging to syslog is currently not supported by the CCU during the install process.
+# logging to syslog is currently not supported by the CCU during the install process
 
 if [ "$1" = "" ]; then
   echo "CCU-Historian Add-On is not for CCU1"
@@ -21,10 +21,10 @@ if [ "$1" = "" ]; then
 elif [ "$1" = "CCU2" ]; then
   echo "CCU-Historian Add-On is not for CCU2"
   exit 1
-# A CCU3 currently masquerades as RaspberryMatic. "CCU3" is currently not defined, but it can happen. 
+# a CCU3 currently masquerades as "RaspberryMatic". "CCU3" is currently not defined, but it can happen. 
 elif [ "$1" == "HM-RASPBERRYMATIC" -o "$1" == "CCU3" ]; then
   echo "Installing on CCU3/RaspberryMatic"
-  mount /usr/local
+  mount /usr/local 2> /dev/null
 fi
 
 # stop ccu-historian, if already installed
