@@ -17,14 +17,16 @@
 */
 package mdz.hc.itf.hm
 
-import groovy.util.GroovyTestCase
+import org.junit.Test
+
 import mdz.hc.DataPoint
 import mdz.hc.DataPointIdentifier
 import mdz.hc.itf.Manager
 import mdz.hc.TestConfiguration
 
-class HmBinRpcInterfaceTest extends GroovyTestCase {
+class HmBinRpcInterfaceTest {
 
+	@Test
 	void test() {
 		Manager mngr=new Manager()
 		try {

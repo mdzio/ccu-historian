@@ -17,14 +17,16 @@
 */
 package mdz.hc.itf.hm
 
-import groovy.util.GroovyTestCase
+import org.junit.Test
+
 import mdz.hc.DataPoint
 import mdz.hc.DataPointIdentifier
 import mdz.hc.itf.*
 import mdz.hc.TestConfiguration
 
-class HmSysVarInterfaceTest extends GroovyTestCase {
+class HmSysVarInterfaceTest {
 	
+	@Test
 	void test() {
 		Manager mngr=new Manager()
 		addShutdownHook { mngr.stop() }

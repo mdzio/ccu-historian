@@ -17,10 +17,11 @@
 */
 package mdz.hc.itf.hm;
 
-import groovy.util.GroovyTestCase;
+import org.junit.Test
 
-class HmModelTest extends GroovyTestCase {
+class HmModelTest {
 
+	@Test
 	void test() {
 		HmModel m=[]
 		

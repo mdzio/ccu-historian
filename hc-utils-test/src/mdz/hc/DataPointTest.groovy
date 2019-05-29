@@ -19,10 +19,12 @@ package mdz.hc
 
 import mdz.hc.DataPoint
 import mdz.hc.DataPointIdentifier
-import groovy.util.GroovyTestCase
 
-class DataPointTest extends GroovyTestCase {
+import org.junit.Test
 
+class DataPointTest {
+
+	@Test
 	public void testDataPoint() {
 		DataPoint dp=new DataPoint(
 			idx:123, 

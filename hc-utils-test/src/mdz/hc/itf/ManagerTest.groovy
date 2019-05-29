@@ -17,16 +17,18 @@
 */
 package mdz.hc.itf;
 
+import org.junit.Test
+
 import mdz.hc.TestConfiguration
 import mdz.hc.itf.Manager
 import mdz.hc.itf.hm.HmBinRpcInterface
 import mdz.hc.itf.hm.HmReinitTask
 import mdz.hc.itf.hm.HmScriptClient
 import mdz.hc.itf.hm.HmSysVarInterface
-import groovy.util.GroovyTestCase
 
-class ManagerTest extends GroovyTestCase {
+class ManagerTest {
 
+	@Test
 	void test() {
 		Manager mngr=new Manager()
 		addShutdownHook { mngr.stop() }

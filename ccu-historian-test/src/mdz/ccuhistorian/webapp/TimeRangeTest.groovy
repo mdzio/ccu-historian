@@ -1,10 +1,12 @@
 package mdz.ccuhistorian.webapp
 
-import groovy.util.GroovyTestCase
 import javax.servlet.http.HttpServletRequest
 
-class TimeRangeTest extends GroovyTestCase {
+import org.junit.Test
 
+class TimeRangeTest {
+
+	@Test	
 	public void testEmpty() {
 		def now=new Date()
 		def r=new TimeRange('', '')
@@ -12,6 +14,7 @@ class TimeRangeTest extends GroovyTestCase {
 		assert Math.abs(r.end.time-now.time)<1000
 	}
 	
+	@Test	
 	public void testRelativeBegin() {
 		def now=new Date()
 		def r=new TimeRange('-24h', '')
@@ -19,6 +22,7 @@ class TimeRangeTest extends GroovyTestCase {
 		assert Math.abs(r.end.time-now.time)<1000
 	}
 
+	@Test	
 	public void testRelativeBeginRelativeEnd() {
 		def now=new Date()
 		def r=new TimeRange('-24h', '12h')
@@ -26,6 +30,7 @@ class TimeRangeTest extends GroovyTestCase {
 		assert Math.abs(now.time-24*60*60*1000-r.begin.time)<1000
 	}
 
+	@Test	
 	public void testAbsoluteBegin() {
 		def now=new Date()
 		def r=new TimeRange('2016', '')
@@ -33,12 +38,14 @@ class TimeRangeTest extends GroovyTestCase {
 		assert Math.abs(r.end.time-now.time)<1000
 	}
 	
+	@Test	
 	public void testAbsoluteBeginEnd() {
 		def r=new TimeRange('1.4.2016', '9.11.2017')
 		assert r.begin==Date.parse('yyyy-MM-dd', '2016-04-01')
 		assert r.end==Date.parse('yyyy-MM-dd', '2017-11-09')
 	}
 
+	@Test	
 	public void testAbsoluteBeginRelativeEnd() {
 		def r=new TimeRange('1.4.2016 1:2:3', '1M -3D +2h -3m +11s')
 		assert r.begin==Date.parse('yyyy-MM-dd HH:mm:ss', '2016-04-01 01:02:03')
@@ -49,6 +56,7 @@ class TimeRangeTest extends GroovyTestCase {
 		{ name -> name=='b'?b:(name=='e'?e:null) } as HttpServletRequest	
 	}
 	
+	@Test	
 	public void testRequestParameters() {
 		def r=new TimeRange(buildRequest(null, null))
 		assert r.beginText==null
@@ -61,6 +69,7 @@ class TimeRangeTest extends GroovyTestCase {
 		assert r.end==Date.parse('yyyy-MM-dd HH:mm:ss', '2018-01-08 00:00:00')
 	}
 	
+	@Test	
 	public void testAddParameters() {
 		def r=new TimeRange(buildRequest(null, null))
 		def p=r.parameters

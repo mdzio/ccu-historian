@@ -2,10 +2,13 @@ package mdz.ccuhistorian.webapp
 
 import static WebUtilities.*
 
+import org.junit.Test
+
 import groovy.xml.MarkupBuilder
 
-class WebUtilitiesTest extends GroovyTestCase {
+class WebUtilitiesTest {
 
+	@Test
 	public void testFormatString() {
 		WebUtilities wu=[]
 		
@@ -13,6 +16,7 @@ class WebUtilitiesTest extends GroovyTestCase {
 		assert wu.format('123456789012345678901')=='12345678901234567890...'
 	}
 	
+	@Test
 	public void testBuildUrl() {
 		assert ''==buildUrl(null)
 		
@@ -34,6 +38,7 @@ class WebUtilitiesTest extends GroovyTestCase {
 		assert 'x?%C3%A4=%C3%9F'==buildUrl('x', ['ä':'ß'])
 	}
 	
+	@Test
 	public void testInsertHiddenInputs() {
 		def writer=new StringWriter()
 		def html=new MarkupBuilder(writer)

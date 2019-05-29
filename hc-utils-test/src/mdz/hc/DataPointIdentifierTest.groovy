@@ -18,10 +18,12 @@
 package mdz.hc;
 
 import mdz.hc.DataPointIdentifier;
-import groovy.util.GroovyTestCase
 
-class DataPointIdentifierTest extends GroovyTestCase {
+import org.junit.Test
+
+class DataPointIdentifierTest {
 	
+	@Test
 	public void testDataPointIdentifier() {
 		DataPointIdentifier dpid=new DataPointIdentifier('itf', 'addr', 'ident')
 		assert dpid.toString()=='itf.addr.ident'

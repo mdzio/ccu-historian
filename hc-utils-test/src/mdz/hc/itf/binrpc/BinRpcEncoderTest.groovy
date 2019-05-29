@@ -17,11 +17,13 @@
 */
 package mdz.hc.itf.binrpc;
 
+import org.junit.Test
+
 import mdz.hc.itf.binrpc.BinRpcEncoder;
-import groovy.util.GroovyTestCase;
 
-class BinRpcEncoderTest extends GroovyTestCase {
+class BinRpcEncoderTest {
 
+	@Test
 	void testRaw() {
 		BinRpcEncoder enc=[]
 		
@@ -32,6 +34,7 @@ class BinRpcEncoderTest extends GroovyTestCase {
 		assert enc.raw(Integer.MIN_VALUE)==[0x80, 0x00, 0x00, 0x00] as byte[]
 	}
 	
+	@Test
 	void testWrite() {
 		BinRpcEncoder enc=[]
 		
@@ -44,6 +47,7 @@ class BinRpcEncoderTest extends GroovyTestCase {
 		]
 	}
 	
+	@Test
 	void testEncodeIntBoolStr() {
 		BinRpcEncoder enc=[]
 		
@@ -65,6 +69,7 @@ class BinRpcEncoderTest extends GroovyTestCase {
 		]
 	}
 	
+	@Test
 	void testEncodeDouble() {
 		BinRpcEncoder enc=[]
 		
@@ -85,6 +90,7 @@ class BinRpcEncoderTest extends GroovyTestCase {
 		] as byte[]
 	}
 	
+	@Test
 	void testEncodeDate() {
 		BinRpcEncoder enc=[]
 		
@@ -99,6 +105,7 @@ class BinRpcEncoderTest extends GroovyTestCase {
 		]
 	}
 
+	@Test
 	void testEncodeBinary() {
 		BinRpcEncoder enc=[]
 		
@@ -114,6 +121,7 @@ class BinRpcEncoderTest extends GroovyTestCase {
 		]
 	}
 
+	@Test
 	void testEncodeList() {
 		BinRpcEncoder enc=[]
 		
@@ -134,6 +142,7 @@ class BinRpcEncoderTest extends GroovyTestCase {
 		]
 	}
 	
+	@Test
 	void testEncodeMap() {
 		BinRpcEncoder enc=[]
 		
@@ -157,6 +166,7 @@ class BinRpcEncoderTest extends GroovyTestCase {
 		]
 	}
 	
+	@Test
 	void testEncodeComplex() {
 		BinRpcEncoder enc=[]
 		
@@ -182,6 +192,7 @@ class BinRpcEncoderTest extends GroovyTestCase {
 		]
 	}
 	
+	@Test
 	void testRequest() {
 		BinRpcEncoder enc=[]
 		byte[] res=enc.encodeRequest('system.multicall', [[]])
@@ -196,6 +207,7 @@ class BinRpcEncoderTest extends GroovyTestCase {
 		assert res==data
 	}
 	
+	@Test
 	void testResponse() {
 		BinRpcEncoder enc=[]
 		byte[] res=enc.encodeResponse([])
@@ -207,6 +219,7 @@ class BinRpcEncoderTest extends GroovyTestCase {
 		assert res==data
 	}
 	
+	@Test
 	void testFault() {
 		BinRpcEncoder enc=[]
 		byte[] res=enc.encodeFault(-1, 'xyz: unknown method name')

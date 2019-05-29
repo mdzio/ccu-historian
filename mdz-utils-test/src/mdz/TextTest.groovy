@@ -17,8 +17,11 @@
 */
 package mdz
 
-class TextTest extends GroovyTestCase {
+import org.junit.Test
 
+class TextTest {
+
+	@Test
 	public void testForEachMatch() {
 		def m = []
 		Text.forEachMatch('abc123def', ~/\d+/, { g -> m << g })
@@ -33,6 +36,7 @@ class TextTest extends GroovyTestCase {
 		assert m == [['123def', '123', 'def'], ['678ghi', '678', 'ghi']]
 	}
 	
+	@Test
 	public void testUnescapeXml() {
 		assert Text.unescapeXml('') == ''
 		assert Text.unescapeXml(' abc def 123 \0x03b1') == ' abc def 123 \0x03b1'
@@ -49,6 +53,7 @@ class TextTest extends GroovyTestCase {
 		assert Text.unescapeXml('&#x;') == '&#x;'
 	}
 	
+	@Test
 	public void testEscapeXml() {
 		assert Text.escapeXml('') == ''
 		assert Text.escapeXml('abc def 123 +~#ä') == 'abc def 123 +~#ä'
@@ -60,6 +65,7 @@ class TextTest extends GroovyTestCase {
 		assert Text.escapeXml("'<&>\"") == '&apos;&lt;&amp;&gt;&quot;'
 	}
 	
+	@Test
 	public void testAsBoolean() {
 		assert Text.asBoolean(true)
 		assert !Text.asBoolean(false)
@@ -76,6 +82,7 @@ class TextTest extends GroovyTestCase {
 		}
 	}
 	
+	@Test
 	public void testPrettyPrint() {
 		assert Text.prettyPrint([0, 1, (byte)'1', (byte)'a'] as byte[]) == 
 			'0000: ..1a                              00 01 31 61 '
