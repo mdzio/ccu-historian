@@ -26,7 +26,6 @@ import java.sql.ResultSet
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.sql.Sql
-import groovy.transform.CompileStatic
 import groovy.util.logging.Log
 
 import org.h2.tools.Server
@@ -113,7 +112,6 @@ public class Database implements Storage {
 		}
 	}
 	
-	@CompileStatic
 	protected synchronized stop() {
 		if (db) {
 			log.info 'Stopping database'
@@ -125,7 +123,6 @@ public class Database implements Storage {
 		}
 	}
 	
-	@CompileStatic
 	public synchronized transactional(Closure cl) {
 		cl=(Closure) cl.clone()
 		cl.delegate=this
@@ -146,7 +143,6 @@ public class Database implements Storage {
 	}
 
 	@Override
-	@CompileStatic
 	public synchronized Date getFirstTimestamp(DataPoint dp) {
 		if (!dp.historyTableName)
 			throw new Exception('Table name of data point is not set')
@@ -155,7 +151,6 @@ public class Database implements Storage {
 	}
 
 	@Override
-	@CompileStatic
 	public synchronized ProcessValue getLast(DataPoint dp) {
 		if (!dp.historyTableName)
 			throw new Exception('Table name of data point is not set')
@@ -164,7 +159,6 @@ public class Database implements Storage {
 	}
 	
 	@Override
-	@CompileStatic
 	public synchronized TimeSeries getTimeSeriesRaw(DataPoint dp, Date begin, Date end) {
 		log.finer "Database: Retrieving raw time series for ${dp.id}, begin: $begin, end: $end"
 		if (!dp.historyTableName)
@@ -179,7 +173,6 @@ public class Database implements Storage {
 	}
 	
 	@Override
-	@CompileStatic
 	public synchronized TimeSeries getTimeSeries(DataPoint dp, Date begin, Date end) {
 		log.finer "Database: Retrieving time series for ${dp.id}, begin: $begin, end: $end"
 		if (!dp.historyTableName)
@@ -208,7 +201,6 @@ public class Database implements Storage {
 	}
 
 	@Override
-	@CompileStatic
 	public synchronized int getCount(DataPoint dp, Date startTime, Date endTime) {
 		if (!dp.historyTableName)
 			throw new Exception('Table name of data point is not set')
@@ -226,14 +218,12 @@ public class Database implements Storage {
 	}
 		
 	@Override
-	@CompileStatic
 	public synchronized List<DataPoint> getDataPoints() {
 		log.finer 'Database: Getting data points'
 		db.rows('SELECT * FROM DATA_POINTS ORDER BY INTERFACE, DISPLAY_NAME, ADDRESS, IDENTIFIER').collect { getRowAsDataPoint(it) }
 	}
 
 	@Override
-	@CompileStatic
 	public synchronized List<DataPoint> getDataPointsOfInterface(String itfName) {
 		db.rows(
 			"""SELECT * FROM DATA_POINTS WHERE INTERFACE=$itfName
@@ -242,7 +232,6 @@ public class Database implements Storage {
 	}
 
 	@Override
-	@CompileStatic
 	public synchronized DataPoint getDataPoint(int idx) {
 		log.finer "Database: Getting data point with index $idx"
 		def row=db.firstRow("SELECT * FROM DATA_POINTS WHERE DP_ID=$idx")
@@ -250,7 +239,6 @@ public class Database implements Storage {
 	}
 	
 	@Override
-	@CompileStatic
 	public synchronized DataPoint getDataPoint(DataPointIdentifier id) {
 		log.finer "Database: Getting data point with id $id"
 		def row=db.firstRow("""SELECT * FROM DATA_POINTS WHERE
@@ -259,7 +247,6 @@ public class Database implements Storage {
 	}
 
 	@Override
-	@CompileStatic
 	public synchronized void createDataPoint(DataPoint dp) throws Exception {
 		normalizeDataPoint(dp)
 		dp.historyTableName=getDataPointTableName(dp)
@@ -268,7 +255,6 @@ public class Database implements Storage {
 	}
 
 	@Override
-	@CompileStatic
 	public synchronized void updateDataPoint(DataPoint dp) {
 		normalizeDataPoint(dp)
 		if (isStringTable(dp.historyTableName)!=dp.historyString) {
@@ -304,7 +290,6 @@ public class Database implements Storage {
 	}
 
 	@Override
-	@CompileStatic
 	public synchronized void deleteDataPoint(DataPoint dp) {
 		log.fine "Database: Deleting data point ${dp.id}"
 		if (!dp.historyTableName)
@@ -322,7 +307,6 @@ public class Database implements Storage {
 	 
 	// not synchronized, the deletion may take longer 
 	@Override
-	@CompileStatic
 	public int deleteTimeSeries(DataPoint dp, Date startTime, Date endTime) {
 		log.fine "Database: Deleting timeseries of data point ${dp.id} (start time: $startTime, end time: $endTime)"
 		if (!dp.historyTableName)
@@ -345,7 +329,6 @@ public class Database implements Storage {
 	
 	// not synchronized, the copy may take longer 
 	@Override
-	@CompileStatic
 	public int copyTimeSeries(DataPoint dstDp, DataPoint srcDp, Date startTime, Date endTime, Date newStartTime) {
 		log.fine "Database: Copying timeseries of data point ${srcDp.id} to data point "+
 			"${dstDp.id} (start time: $startTime, end time: $endTime, new start time: $newStartTime)"
@@ -378,7 +361,6 @@ public class Database implements Storage {
 	}
 	
 	@Override
-	@CompileStatic
 	public int replaceTimeSeries(DataPoint dstDp, Iterable<ProcessValue> srcSeries, Date startTime, Date endTime) throws Exception {
 		log.fine "Database: Replacing timeseries of data point ${dstDp.id} (start time: $startTime, end time: $endTime)"
 		// store all entries in temporary table
@@ -402,7 +384,6 @@ public class Database implements Storage {
 		counter
 	}
 
-	@CompileStatic
 	public void normalizeDataPoint(DataPoint dp) {
 		def a=dp.attributes
 		if (a.containsKey('minimum'))
@@ -413,7 +394,6 @@ public class Database implements Storage {
 			a.defaultValue=asDoubleOrNull(a.defaultValue)
 	}
 
-	@CompileStatic
 	public synchronized DataPoint prepareDataPoint(DataPoint dataPoint) {
 		boolean valueIsString=dataPoint.historyString
 		// exists the data point
@@ -438,7 +418,6 @@ public class Database implements Storage {
 	}
 	
 	@Override
-	@CompileStatic
 	public synchronized void consume(Event e) throws Exception {
 		log.fine "Database: Inserting ($e.pv.timestamp, $e.pv.value, $e.pv.state) into $e.dataPoint.historyTableName"
 		if (!e.dataPoint.historyTableName)
@@ -448,7 +427,6 @@ public class Database implements Storage {
 			[e.pv.timestamp, value, e.pv.state]
 	}
 
-	@CompileStatic
 	public static void compact(DatabaseConfig config) {	
 		log.info 'Starting compaction of database'
 		config.logDebug()
@@ -466,7 +444,6 @@ public class Database implements Storage {
 		log.info 'Compaction of database completed'
 	}
 
-	@CompileStatic
 	public static void dump(DatabaseConfig config, String fileName) {
 		log.info 'Starting dump of database'
 		config.logDebug()
@@ -476,7 +453,6 @@ public class Database implements Storage {
 		log.info 'Dump of database completed'
 	}
 	
-	@CompileStatic
 	public static void runScript(DatabaseConfig config, String fileName) {
 		log.info "Running script $fileName on database"
 		config.logDebug()
@@ -485,7 +461,6 @@ public class Database implements Storage {
 		log.info 'Script run completed'
 	}
 
-	@CompileStatic
 	private ProcessValue getFirstBefore(DataPoint dp, Date ts, boolean incBoundary=false) {
 		if (!dp.historyTableName)
 			throw new Exception('Table name of data point is not set')
@@ -494,7 +469,6 @@ public class Database implements Storage {
 		row?new ProcessValue((Date)row[0], row[1], (int)row[2]):null
 	}
 
-	@CompileStatic
 	private ProcessValue getFirstAfter(DataPoint dp, Date ts, boolean incBoundary=true) {
 		if (!dp.historyTableName)
 			throw new Exception('Table name of data point is not set')
@@ -503,7 +477,6 @@ public class Database implements Storage {
 		row?new ProcessValue((Date)row[0], row[1], (int)row[2]):null
 	}
 
-	@CompileStatic
 	private static Double asDoubleOrNull(value) {
 		if (value instanceof Boolean)
 			((Boolean) value).booleanValue() ? 1.0D : 0.0D;
@@ -513,7 +486,6 @@ public class Database implements Storage {
 			null
 	}
 
-	@CompileStatic
 	private boolean tableExists(String tableName) {
 		def row=db.firstRow("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='$tableName'" as String)
 		row[0]!=0
@@ -551,7 +523,6 @@ public class Database implements Storage {
 		)
 	}
 
-	@CompileStatic
 	private void createDataPointTable(DataPoint dp) {
 		log.fine "Database: Creating table $dp.historyTableName"
 		String valueType=dp.historyString?'VARCHAR':'DOUBLE'
@@ -559,7 +530,6 @@ public class Database implements Storage {
 			CREATE INDEX IF NOT EXISTS ${dp.historyTableName}_IDX ON $dp.historyTableName (TS)""" as String
 	}
 
-	@CompileStatic
 	private void createTemporaryTable(String tableName, boolean historyString) {
 		log.fine "Database: Creating temporary table $tableName"
 		String valueType=historyString?'VARCHAR':'DOUBLE'
@@ -567,7 +537,6 @@ public class Database implements Storage {
 			CREATE INDEX ${tableName}_IDX ON $tableName (TS)""" as String
 	}
 
-	@CompileStatic
 	private void createDataPointEntry(DataPoint dp) {
 		normalizeDataPoint(dp)
 		log.fine "Database: Inserting into DATA_POINTS: $dp"
@@ -600,14 +569,12 @@ public class Database implements Storage {
 		"jdbc:h2:file:$config.dir$config.name;DB_CLOSE_ON_EXIT=FALSE"
 	}
 
-	@CompileStatic
 	private static String getDataPointTableName(DataPoint dp) {
 		String tableName=dp.historyString?TABLE_PREFIX_STRING:TABLE_PREFIX_DOUBLE
 		tableName+="${dp.id.interfaceId}_${dp.id.address}_${dp.id.identifier}"
 		tableName.toUpperCase().replaceAll(/[^A-Z0-9_]/, '_')
 	}
 	
-	@CompileStatic
 	private static boolean isStringTable(String tableName) {
 		// up to and including V0.6.0-dev4
 		tableName.startsWith(TABLE_PREFIX_DEVICE_STRING) || tableName.startsWith(TABLE_PREFIX_SYSVAR_STRING) ||
@@ -615,7 +582,6 @@ public class Database implements Storage {
 		tableName.startsWith(TABLE_PREFIX_STRING)
 	}
 	
-	@CompileStatic
 	public static String formatTimestamp(String pattern, Date timestamp) {
 		Calendar cal=Calendar.instance
 		cal.time=timestamp
@@ -631,7 +597,6 @@ public class Database implements Storage {
 		})
 	}
 	
-	@CompileStatic
 	private synchronized void checkBackupTime() {
 		if (!backupFuture) return
 		Exceptions.catchToLog(log) {
@@ -643,7 +608,6 @@ public class Database implements Storage {
 		}
 	}
 	
-	@CompileStatic
 	private synchronized void createBackup(String fileName) {
 		log.info "Creating backup of database to file $fileName"
 		long start=System.currentTimeMillis()
@@ -660,7 +624,6 @@ public class Database implements Storage {
 		log.fine "Backup created in ${(System.currentTimeMillis()-start)/1000} seconds"
 	} 
 	
-	@CompileStatic
 	private void prepareDatabase() {
 		log.fine 'Preparing database'
 
@@ -713,7 +676,6 @@ public class Database implements Storage {
 		}
 	}
 	
-	@CompileStatic 
 	public String getConfig(String name) {
 		def row=db.firstRow('SELECT VALUE FROM CONFIG WHERE NAME=?', name)
 		String value=row?(String)(row[0]):null
@@ -721,7 +683,6 @@ public class Database implements Storage {
 		value
 	}
 	
-	@CompileStatic
 	public void setConfig(String name, String value) {
 		log.fine("Writing config: $name=$value")
 		int cnt=db.executeUpdate('UPDATE CONFIG SET VALUE=? WHERE NAME=?', value, name)
@@ -730,7 +691,6 @@ public class Database implements Storage {
 		}
 	}
 	
-	@CompileStatic
 	private void migrateTo(int toVersion, String sql) {
 		if (getConfig(CONFIG_DATABASE_VERSION).toInteger() < toVersion) {
 			log.info "Migrating database to version $toVersion"

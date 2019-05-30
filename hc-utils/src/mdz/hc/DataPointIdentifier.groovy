@@ -18,11 +18,9 @@
 package mdz.hc
 
 import groovy.transform.AutoClone
-import groovy.transform.CompileStatic
 import groovy.transform.EqualsAndHashCode
 
 @EqualsAndHashCode
-@CompileStatic
 @AutoClone
 public class DataPointIdentifier {
 	String interfaceId

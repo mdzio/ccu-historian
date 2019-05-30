@@ -20,7 +20,6 @@ package mdz.ccuhistorian
 import java.util.logging.Logger
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.ScheduledFuture
-import groovy.transform.CompileStatic
 import groovy.util.logging.Log
 import mdz.eventprocessing.Buffer
 import mdz.eventprocessing.Consumer
@@ -41,7 +40,6 @@ import mdz.ccuhistorian.eventprocessing.OverflowHandler
 import mdz.ccuhistorian.eventprocessing.Preprocessor
 
 @Log
-@CompileStatic
 class Historian implements Runnable {
 
 	private static final long DEFAULT_START_DELAY = 2000 // ms
@@ -83,7 +81,7 @@ class Historian implements Runnable {
 		buffer.addConsumer dataPointStorageUpdater  
 		interfaceManager.addConsumer buffer 
 		
-		database.getOnReadListener() << { buffer.purge() }
+		database.onReadListener << { buffer.purge() }
 		
 		if (config.counters!=null)
 			overflowHandler.counters=config.counters

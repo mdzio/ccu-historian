@@ -27,9 +27,6 @@ import mdz.hc.itf.Manager;
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.webapp.WebAppContext
 
-import groovy.transform.CompileStatic
-
-@CompileStatic
 public class WebServer {
 
 	static private WebServer instance // required for the servlets

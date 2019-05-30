@@ -18,10 +18,8 @@
 package mdz.ccuhistorian
 
 import groovy.util.logging.Log
-import groovy.transform.CompileStatic
 
 @Log
-@CompileStatic
 class BaseSystem {
 	
 	Configuration config

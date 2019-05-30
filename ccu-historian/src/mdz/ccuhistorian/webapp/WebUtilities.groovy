@@ -21,7 +21,6 @@ import java.security.MessageDigest
 import java.util.logging.Logger
 import java.util.regex.Matcher
 
-import groovy.transform.CompileStatic
 import groovy.xml.MarkupBuilder
 import mdz.Exceptions
 import mdz.Text
@@ -30,7 +29,6 @@ import mdz.hc.DataPoint
 import mdz.hc.DataPointIdentifier
 import mdz.hc.persistence.DataPointStorage
 
-@CompileStatic
 class WebUtilities {
 
 	public String format(String txt) {

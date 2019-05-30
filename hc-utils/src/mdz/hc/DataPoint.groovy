@@ -19,13 +19,11 @@ package mdz.hc
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.AutoClone
-import groovy.transform.CompileStatic
 
 /* Note on the clone method: The objects in the attributes field are not cloned. 
  * They should therefore generally be treated as immutable.
  */
 @EqualsAndHashCode
-@CompileStatic
 @AutoClone
 public class DataPoint {
 	

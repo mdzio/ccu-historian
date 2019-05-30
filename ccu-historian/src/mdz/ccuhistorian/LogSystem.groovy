@@ -23,9 +23,7 @@ import java.text.*
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.eclipse.jetty.util.log.JavaUtilLog
 import org.eclipse.jetty.util.log.Log
-import groovy.transform.CompileStatic
 
-@CompileStatic
 public class LogSystem {
 	
 	private final static int SEVERITY_FIELD_LENGTH = 7

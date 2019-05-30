@@ -29,7 +29,19 @@ public class TimeRange {
 	String beginText
 	Date end
 	String endText
-	
+
+	public static TimeRange fromDates(Date begin, Date end) {
+		new TimeRange(
+			begin: begin,
+			beginText: TextFormat.formatDate(begin),
+			end: end,
+			endText: TextFormat.formatDate(end)
+		)
+	}
+
+	private TimeRange() {
+	}
+
 	public TimeRange(HttpServletRequest request) {
 		this(request.getParameter('b'), request.getParameter('e'))
 	}
@@ -66,13 +78,6 @@ public class TimeRange {
 		}
 	}
 
-	public TimeRange(Date begin, Date end) {
-		this.begin=begin
-		this.end=end
-			
-		beginText=TextFormat.formatDate(begin)
-		endText=TextFormat.formatDate(end)
-	}
 	
 	public Map<String, String[]> getParameters() {
 		Map<String, String[]> params=[:]

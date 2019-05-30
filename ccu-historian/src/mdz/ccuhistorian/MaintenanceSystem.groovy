@@ -18,7 +18,6 @@
 package mdz.ccuhistorian
 
 import groovy.util.logging.Log
-import groovy.transform.CompileStatic
 import java.util.concurrent.TimeUnit
 import mdz.Exceptions
 import mdz.ccuhistorian.eventprocessing.Preprocessor
@@ -35,7 +34,6 @@ import mdz.hc.timeseries.TimeSeries
 import mdz.hc.timeseries.ChunkIterator
 
 @Log
-@CompileStatic
 class MaintenanceSystem extends DatabaseSystem {
 
 	public MaintenanceSystem(Configuration config) {

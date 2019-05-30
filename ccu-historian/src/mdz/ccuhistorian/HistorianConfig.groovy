@@ -19,11 +19,9 @@ package mdz.ccuhistorian
 
 import java.util.Map;
 
-import groovy.transform.CompileStatic
 import groovy.util.logging.Log
 
 @Log
-@CompileStatic
 class HistorianConfig {
 
 	int metaCycle=3600000

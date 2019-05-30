@@ -17,7 +17,6 @@
 */
 package mdz.ccuhistorian.eventprocessing
 
-import groovy.transform.CompileStatic
 import groovy.util.logging.Log
 import mdz.eventprocessing.BasicProducer
 import mdz.eventprocessing.Processor
@@ -28,7 +27,6 @@ import mdz.ccuhistorian.Main
 import mdz.Exceptions
 import java.util.logging.Level
 
-@CompileStatic
 @Log
 public class Preprocessor extends BasicProducer<Event> implements Processor<Event, Event> {
 
