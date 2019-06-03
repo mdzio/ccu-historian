@@ -38,7 +38,7 @@ class WebServerConfig {
 	String historianAddress=''
 	Map<String, TrendDesign> trendDesigns=[:].withDefault { new TrendDesign(identifier: (String)it, displayName: (String)it) }
 	Map<String, Link> menuLinks=new TreeMap().withDefault { new Link() }
-	String[] apiKeys
+	String[] apiKeys=[]
 
 	void logDebug() {
 		log.fine "webServer.port=$port"
@@ -47,6 +47,6 @@ class WebServerConfig {
 		log.fine "webServer.historianAddress='${getHistorianAddress()}'"
 		log.fine "webServer.trendDesigns=[${trendDesigns.collect { it.key }.join(', ')}]"
 		log.fine "webServer.apiKeys=[${apiKeys.collect { "'$it'" }.join(', ')}]"
-		log.fine "webServer.menuLinks=[${menuLinks.collect { it.value.text }.join(', ')}]"
+		log.fine "webServer.menuLinks=[${menuLinks.values().collect { it.text }.join(', ')}]"
 	}
 }

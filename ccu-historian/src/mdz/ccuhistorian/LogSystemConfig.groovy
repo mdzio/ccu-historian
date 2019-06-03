@@ -18,13 +18,11 @@
 package mdz.ccuhistorian
 
 import groovy.util.logging.Log
-import groovy.transform.CompileStatic
 
 import java.util.logging.Level
 import java.util.logging.Logger
 
 @Log
-@CompileStatic
 public class LogSystemConfig {
 
 	Level fileLevel=Level.OFF

@@ -17,13 +17,15 @@
 */
 package mdz.hc.itf.hm;
 
-import groovy.util.GroovyTestCase
+import org.junit.Test
+
 import groovy.util.logging.Log
 import mdz.hc.TestConfiguration
 
 @Log(value='l')
-class HmScriptClientTest extends GroovyTestCase {
+class HmScriptClientTest {
 	
+	@Test
 	void testExecute() {
 		HmScriptClient script=new HmScriptClient(TestConfiguration.CCU_ADDRESS)
 		
@@ -35,6 +37,7 @@ class HmScriptClientTest extends GroovyTestCase {
 		assert t>=script.DEFAULT_SCRIPT_PAUSE
 	}
 	
+	@Test
 	void testGetSystemDate() {
 		HmScriptClient script=new HmScriptClient(TestConfiguration.CCU_ADDRESS)
 		Date tccu=script.getSystemDate()
@@ -45,6 +48,7 @@ class HmScriptClientTest extends GroovyTestCase {
 		assert Math.abs(d)<120000
 	}
 	
+	@Test
 	void testHmModel() {
 		HmScriptClient script=new HmScriptClient(TestConfiguration.CCU_ADDRESS)
 		

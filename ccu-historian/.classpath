@@ -12,11 +12,17 @@
 	<classpathentry kind="lib" path="/external-libs/jetty-all-7.2.2/jetty-all-7.2.2.v20101205.jar"/>
 	<classpathentry kind="lib" path="/external-libs/javax.servlet.jsp-2.1.0/javax.servlet.jsp_2.1.0.v201004190952.jar"/>
 	<classpathentry kind="lib" path="/external-libs/javax.el-api-1.1.2/javax.el-api-1.1.2.jar"/>
-	<classpathentry kind="lib" path="/external-libs/commons-cli-1.2/commons-cli-1.2.jar"/>
 	<classpathentry kind="lib" path="/external-libs/jfreechart-1.0.19/lib/jfreechart-1.0.19.jar"/>
 	<classpathentry kind="lib" path="/external-libs/jcommon-1.0.23/jcommon-1.0.23.jar"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
 	<classpathentry kind="lib" path="/external-libs/servlet-api-2.4/servlet-api-2.4.jar"/>
 	<classpathentry kind="lib" path="/external-libs/h2-1.4.199/h2-1.4.199.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-2.5.6/groovy-json-2.5.6.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-2.5.6/groovy-sql-2.5.6.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-2.5.6/groovy-servlet-2.5.6.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-2.5.6/groovy-templates-2.5.6.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-2.5.6/groovy-xml-2.5.6.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-2.5.6/groovy-cli-commons-2.5.6.jar"/>
+	<classpathentry kind="lib" path="/external-libs/commons-cli-1.4/commons-cli-1.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -133,7 +133,7 @@ renderer.content={
 	if (navFunc) {
 		def tr=trendParams.timeRange
 		def (b, e)=navFunc(tr.begin.time, tr.end.time)
-		trendParams.timeRange=new TimeRange(new Date((long)b), new Date((long)e))
+		trendParams.timeRange=TimeRange.fromDates(new Date((long)b), new Date((long)e))
 	}
 	
 	div(class:'row') {

@@ -19,11 +19,9 @@ package mdz.ccuhistorian
 
 import java.util.logging.Level
 
-import groovy.transform.CompileStatic
 import groovy.util.logging.Log
 
 @Log
-@CompileStatic
 class CmdLineConfig {
 
 	boolean help

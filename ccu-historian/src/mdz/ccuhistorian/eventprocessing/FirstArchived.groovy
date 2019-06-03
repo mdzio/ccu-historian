@@ -17,14 +17,12 @@
 */
 package mdz.ccuhistorian.eventprocessing
 
-import groovy.transform.CompileStatic
 import mdz.eventprocessing.BasicProducer
 import mdz.eventprocessing.Processor
 import mdz.hc.DataPointIdentifier
 import mdz.hc.Event
 import mdz.hc.ProcessValue
 
-@CompileStatic
 class FirstArchived extends BasicProducer<Event> implements Processor<Event, Event> {
 
 	private Set<DataPointIdentifier> alreadyArchived = []

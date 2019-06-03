@@ -18,13 +18,16 @@
 package mdz.hc.itf.binrpc
 
 import java.util.concurrent.Executors
-import groovy.util.GroovyTestCase
+
+import org.junit.Test
+
 import mdz.hc.TestConfiguration
 import mdz.hc.itf.binrpc.BinRpcClient
 import mdz.hc.itf.binrpc.BinRpcException
 
-class BinRpcClientTest extends GroovyTestCase {
+class BinRpcClientTest {
 
+	@Test
 	void testHttpConnection() {
 		BinRpcClient c=new BinRpcClient()
 		c.executor=Executors.newScheduledThreadPool(1)
@@ -36,6 +39,7 @@ class BinRpcClientTest extends GroovyTestCase {
 		assert new String(data)=='HTTP/1.1 200 OK\r\n'
 	}
 	
+	@Test
 	void testCcuRaw() {
 		BinRpcClient c=new BinRpcClient()
 		c.executor=Executors.newScheduledThreadPool(1)
@@ -75,6 +79,7 @@ class BinRpcClientTest extends GroovyTestCase {
 			111, 119, 110, 32, 109, 101, 116, 104, 111, 100, 32, 110, 97, 109, 101]
 	}
 
+	@Test
 	void testWithCcu() {
 		BinRpcClient c=new BinRpcClient()
 		c.executor=Executors.newScheduledThreadPool(1)

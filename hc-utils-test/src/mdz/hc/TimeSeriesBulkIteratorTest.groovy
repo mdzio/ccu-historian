@@ -19,13 +19,15 @@ package mdz.hc;
 
 import java.util.Date;
 
-import groovy.util.GroovyTestCase;
+import org.junit.Test
+
 import mdz.hc.persistence.HistoryStorage
 import mdz.hc.timeseries.TimeSeries
 import mdz.hc.timeseries.ChunkIterator
 
-class TimeSeriesBulkIteratorTest extends GroovyTestCase {
+class TimeSeriesBulkIteratorTest {
 
+	@Test
 	public void testEmptyMiddle() {
 		DataPoint dataPoint=new DataPoint()
 		dataPoint.setHistoryString(false)
@@ -80,6 +82,7 @@ class TimeSeriesBulkIteratorTest extends GroovyTestCase {
 		assert !it.hasNext()
 	}
 	
+	@Test
 	public void testStartWithEmpty() {
 		DataPoint dataPoint=new DataPoint()
 		dataPoint.setHistoryString(false)
@@ -117,6 +120,7 @@ class TimeSeriesBulkIteratorTest extends GroovyTestCase {
 		assert !it.hasNext()
 	}
 
+	@Test
 	public void testEndWithEmpty() {
 		DataPoint dataPoint=new DataPoint()
 		dataPoint.setHistoryString(false)
@@ -154,6 +158,7 @@ class TimeSeriesBulkIteratorTest extends GroovyTestCase {
 		assert !it.hasNext()
 	}
 	
+	@Test
 	public void testAllEmpty() {
 		DataPoint dataPoint=new DataPoint()
 		dataPoint.setHistoryString(false)
@@ -169,6 +174,7 @@ class TimeSeriesBulkIteratorTest extends GroovyTestCase {
 		assert !it.hasNext()
 	}
 	
+	@Test
 	public void testError() {
 		HistoryStorage hs={ DataPoint dp, Date begin, Date end ->
 			throw new Exception("Error")

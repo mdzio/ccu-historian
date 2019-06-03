@@ -18,12 +18,10 @@
 package mdz.ccuhistorian
 
 import groovy.util.logging.Log
-import groovy.transform.CompileStatic
 import java.util.concurrent.TimeUnit
 import mdz.Exceptions
 
 @Log
-@CompileStatic
 class OfflineMaintenanceSystem extends BaseSystem {
 
 	public OfflineMaintenanceSystem(Configuration config) {

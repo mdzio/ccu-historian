@@ -1,13 +1,15 @@
 package mdz.ccuhistorian.webapp
 
-import groovy.util.GroovyTestCase
 import javax.servlet.http.HttpServletRequest
+
+import org.junit.Test
+
 import mdz.ccuhistorian.TrendDesign
 import mdz.hc.DataPoint
 import mdz.hc.DataPointIdentifier
 import mdz.hc.persistence.DataPointStorage
 
-class TrendParametersTest extends GroovyTestCase {
+class TrendParametersTest {
 
 	private requestStub(params) {
 		[
@@ -32,6 +34,7 @@ class TrendParametersTest extends GroovyTestCase {
 		} as DataPointStorage
 	}
 
+	@Test
 	public void testCompleteParameters() {
 		def tp=TrendParameters.from(
 			requestStub([
@@ -77,6 +80,7 @@ class TrendParametersTest extends GroovyTestCase {
 		assert [params.gh1, params.gh2]==[['3'], ['4']]
 	}
 	
+	@Test
 	public void testPartialParameters() {
 		def tp=TrendParameters.from(
 			requestStub([
@@ -114,6 +118,7 @@ class TrendParametersTest extends GroovyTestCase {
 		assert [params.gh1, params.gh2]==[['2'], ['1']]
 	}
 	
+	@Test
 	public void testParametersV1() {
 		def tp=TrendParameters.from(
 			requestStub([
@@ -141,6 +146,7 @@ class TrendParametersTest extends GroovyTestCase {
 		assert tp.groups[3].dataPoints.idx==[1]
 	}
 	
+	@Test
 	public void testParametersV1BeginAndDuration() {
 		def tp=TrendParameters.from(
 			requestStub([
@@ -154,6 +160,7 @@ class TrendParametersTest extends GroovyTestCase {
 		assert tp.timeRange.end==Date.parse('yyyy-MM-dd hh:mm:ss', '2017-01-02 02:00:00')
 	}
 
+	@Test
 	public void testParametersV1Duration() {
 		def now=new Date()
 		def tp=TrendParameters.from(

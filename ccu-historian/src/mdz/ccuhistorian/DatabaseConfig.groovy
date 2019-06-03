@@ -17,11 +17,9 @@
 */
 package mdz.ccuhistorian
 
-import groovy.transform.CompileStatic
 import groovy.util.logging.Log
 
 @Log
-@CompileStatic
 class DatabaseConfig {
 
 	String dir='./data', name='history'

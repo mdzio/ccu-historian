@@ -1,21 +1,25 @@
 package mdz.ccuhistorian.webapp
 
-import groovy.util.GroovyTestCase
+import org.junit.Test
+
 import groovy.time.BaseDuration
 
-class TextFormatTest extends GroovyTestCase {
+class TextFormatTest {
 
+	@Test	
 	public void testFormatDate() {
 		def d=Date.parse('yyyy-MM-dd HH:mm:ss', '2016-12-31 23:59:58')
 		assert TextFormat.formatDate(d)=='31.12.2016 23:59:58'
 	}
 	
+	@Test	
 	public void testParseDate() {
 		assert TextFormat.parseDate('')==null
 		assert TextFormat.parseDate('31.12.2017 23:59:58')==Date.parse('yyyy-MM-dd HH:mm:ss', '2017-12-31 23:59:58')
 		assert TextFormat.parseDate('20171231235957')==Date.parse('yyyy-MM-dd HH:mm:ss', '2017-12-31 23:59:57')
 	}
 	
+	@Test	
 	public void testParseRelativeDate() {
 		def d
 		d=TextFormat.parseDate(null, '')
@@ -52,6 +56,7 @@ class TextFormatTest extends GroovyTestCase {
 		assert TextFormat.formatDate(d)=='03.01.2018 00:00:00'
 	}
 	
+	@Test	
 	public void testParseRelativeWeekOfYear() {
 		// set week no., keep day of week
 		
@@ -65,6 +70,7 @@ class TextFormatTest extends GroovyTestCase {
 		assert TextFormat.formatDate(d)=='31.12.2018 00:00:00'
 	}
 
+	@Test	
 	public void testParseRelativeDayOfWeek() {
 		// set day of week, keep week no.
 		
@@ -75,6 +81,7 @@ class TextFormatTest extends GroovyTestCase {
 		assert TextFormat.formatDate(d)=='17.12.2017 00:00:00'
 	}
 	
+	@Test	
 	public void testFormatDuration() {
 		assert TextFormat.formatDuration(0)=='0:00:00,000'
 		assert TextFormat.formatDuration(12)=='0:00:00,012'

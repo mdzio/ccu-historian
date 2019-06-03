@@ -17,19 +17,21 @@
 */
 package mdz.eventprocessing
 
-import groovy.util.GroovyTestCase
+import org.junit.Test
 
-class IteratorAdaptersTest extends GroovyTestCase {
+class IteratorAdaptersTest {
 
+	@Test
 	public void testBasics() {
 		def list=[1, 2, 3, 4]
 		def itpro=new IteratorProducerAdapter(list)
 		def itcons=new ConsumerIteratorAdapter(itpro)
 		itpro.addConsumer(itcons)
 		def result=itcons.collect()
-		assertEquals list, result
+		assert list==result
 	}
-	
+
+	@Test
 	public void testRequestSize() {
 		def list=(0..<2000)
 		def itpro=new IteratorProducerAdapter(list)
@@ -37,6 +39,6 @@ class IteratorAdaptersTest extends GroovyTestCase {
 		itcons.setRequestSize(1)
 		itpro.addConsumer(itcons)
 		def result=itcons.collect()
-		assertEquals list, result
+		assert list==result
 	}
 }

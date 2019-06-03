@@ -18,12 +18,15 @@
 package mdz.hc.itf.binrpc
 
 import java.util.concurrent.Executors
+
+import org.junit.Test
+
 import mdz.hc.itf.binrpc.BinRpcClient
 import mdz.hc.itf.binrpc.BinRpcServer
-import groovy.util.GroovyTestCase
 
-class BinRpcServerTest extends GroovyTestCase {
+class BinRpcServerTest {
 
+	@Test
 	void testServer() {
 		BinRpcServer server=[]
 		server.port=80
@@ -44,6 +47,7 @@ class BinRpcServerTest extends GroovyTestCase {
 		server.stop()
 	}
 	
+	@Test
 	void test2Clients() {
 		BinRpcServer server=[]
 		server.port=80
@@ -68,6 +72,7 @@ class BinRpcServerTest extends GroovyTestCase {
 		server.stop()
 	}
 	
+	@Test
 	void testMultiCall() {
 		BinRpcServer server=[]
 		server.port=80
@@ -91,6 +96,7 @@ class BinRpcServerTest extends GroovyTestCase {
 		server.stop()
 	}
 	
+	@Test
 	void testRestart() {
 		BinRpcServer server=[]
 		server.port=80

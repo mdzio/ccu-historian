@@ -17,14 +17,12 @@
  */
 package mdz.ccuhistorian.webapp
 
-import groovy.transform.CompileStatic
 import groovy.transform.AutoClone
 import javax.servlet.http.HttpServletRequest
 import mdz.ccuhistorian.TrendDesign
 import mdz.hc.DataPoint
 import mdz.hc.persistence.DataPointStorage
 
-@CompileStatic
 @AutoClone
 public class TrendParameters {
 

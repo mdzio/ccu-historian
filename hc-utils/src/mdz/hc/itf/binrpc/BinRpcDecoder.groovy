@@ -65,7 +65,7 @@ class BinRpcDecoder {
 		new Header(type: type, payloadLength: payloadLength)	
 	}
 	
-	private Request decodeRequest(byte[] data) {
+	public Request decodeRequest(byte[] data) {
 		is=[data]
 		Request req=[]
 		req.methodName=decodeString()

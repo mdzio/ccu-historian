@@ -21,9 +21,7 @@ import java.util.logging.Logger
 import mdz.Exceptions
 import mdz.hc.itf.Manager
 import mdz.hc.persistence.Storage
-import groovy.transform.CompileStatic
 
-@CompileStatic
 class Main {
 
 	public static String version='2.2.0-beta.4'

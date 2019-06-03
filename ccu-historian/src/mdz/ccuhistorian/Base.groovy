@@ -18,7 +18,6 @@
 package mdz.ccuhistorian
 
 import groovy.util.logging.Log
-import groovy.transform.CompileStatic
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.ThreadPoolExecutor
@@ -30,7 +29,6 @@ import java.util.concurrent.TimeUnit
  * modules have been stopped, the base module is finally stopped.
  */
 @Log
-@CompileStatic
 class Base {
 	
 	private final static long SHUTDOWN_TIMEOUT = 15000 // ms

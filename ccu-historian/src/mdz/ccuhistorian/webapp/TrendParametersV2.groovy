@@ -18,13 +18,11 @@
 package mdz.ccuhistorian.webapp
 
 import javax.servlet.http.HttpServletRequest
-import groovy.transform.CompileStatic
 import mdz.ccuhistorian.TrendDesign
 import mdz.ccuhistorian.webapp.TrendParameters.Group
 import mdz.hc.DataPoint
 import mdz.hc.persistence.DataPointStorage
 
-@CompileStatic
 class TrendParametersV2 extends TrendParameters {
 
 	protected TrendParametersV2(HttpServletRequest request, DataPointStorage storage, Map<String, TrendDesign> trendDesigns) {

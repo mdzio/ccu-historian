@@ -17,16 +17,18 @@
 */
 package mdz.hc.itf.hm
 
-import groovy.util.GroovyTestCase
+import org.junit.Test
+
 import mdz.hc.DataPoint
 import mdz.hc.TestConfiguration
 
-class HmXmlRpcClientTest extends GroovyTestCase {
+class HmXmlRpcClientTest {
 
 	private HmXmlRpcClient createClient() {
 		[host:TestConfiguration.CCU_ADDRESS, port:TestConfiguration.INTERFACE_RF_PORT]
 	}
 	
+	@Test
 	void testSystemListMethods() {
 		HmXmlRpcClient clnt=createClient()
 		List<String> res=clnt.systemListMethods()
@@ -36,6 +38,7 @@ class HmXmlRpcClientTest extends GroovyTestCase {
 		])
 	}
 	
+	@Test
 	void testGetParameterDescr() {
 		HmXmlRpcClient clnt=createClient()
 		Map<String, Map<String, Object>> params=clnt.getParamsetDescription("IEQ0018941:1", "VALUES")

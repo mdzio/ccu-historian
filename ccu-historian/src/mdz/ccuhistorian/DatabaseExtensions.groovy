@@ -1,9 +1,7 @@
 package mdz.ccuhistorian
 
-import groovy.transform.CompileStatic
 import java.sql.Timestamp
 
-@CompileStatic
 public class DatabaseExtensions {
 	
 	public static Long TS_TO_UNIX(Timestamp ts) {

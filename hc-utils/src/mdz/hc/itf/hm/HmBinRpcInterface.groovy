@@ -23,7 +23,6 @@ import java.util.logging.Level
 import groovy.util.logging.Log
 import groovy.transform.TupleConstructor
 import groovy.transform.EqualsAndHashCode
-import groovy.transform.CompileStatic
 import mdz.Exceptions
 import mdz.Text
 import mdz.eventprocessing.Consumer
@@ -43,7 +42,6 @@ import mdz.hc.itf.binrpc.BinRpcException
  */
 @Log
 @TupleConstructor
-@CompileStatic
 public class HmBinRpcInterface extends BasicProducer<RawEvent> implements Interface, WriteSupport, Consumer<RawEvent>, HmReinitable {
 
 	public static final String PARAMSET_VALUES = 'VALUES'

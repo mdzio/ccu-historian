@@ -108,7 +108,7 @@ class TrendParametersV1 extends TrendParameters {
 				}	
 			}	
 		}
-		timeRange=new TimeRange(begin, end)
+		timeRange=TimeRange.fromDates(begin, end)
 		
 		// trend design
 		if (request.getParameter('t') && request.getParameter('t')!='default') {

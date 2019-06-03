@@ -18,7 +18,6 @@
 package mdz.hc.itf.misc
 
 import groovy.transform.TupleConstructor
-import groovy.transform.CompileStatic
 import groovy.util.logging.Log
 
 import java.util.concurrent.ScheduledFuture
@@ -38,7 +37,6 @@ import mdz.hc.itf.WriteSupport
 
 @Log
 @TupleConstructor
-@CompileStatic
 class SimulationInterface extends BasicProducer<RawEvent> implements Interface, SubscriptionSupport, BrowseSupport, WriteSupport {
 	
 	private final static long DEFAULT_DATA_CYCLE = 2000 // ms

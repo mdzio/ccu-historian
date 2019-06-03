@@ -17,13 +17,15 @@
 */
 package mdz.hc.itf.hm
 
-import groovy.util.GroovyTestCase
+import org.junit.Test
+
 import mdz.eventprocessing.Collector
 import mdz.hc.RawEvent
 import uk.co.wilson.net.xmlrpc.XMLRPCFailException
 
-class HmXmlRpcServerTest extends GroovyTestCase {
+class HmXmlRpcServerTest {
 
+	@Test
 	void testStandalone() {
 		HmXmlRpcServer svr=[]
 		Collector<RawEvent> col=[]
