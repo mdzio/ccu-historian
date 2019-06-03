@@ -43,7 +43,7 @@ def displayError(html, msg, e=null) {
 }
 
 renderer.head={
-	title 'CCU-historian: Datenpunktwerkzeuge'
+	title 'CCU-Historian: Datenpunktwerkzeuge'
 }
 
 renderer.content={

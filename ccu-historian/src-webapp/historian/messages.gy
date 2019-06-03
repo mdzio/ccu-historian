@@ -93,7 +93,7 @@ def generateMessages(timeSeries) {
 def renderer=new mdz.ccuhistorian.webapp.PageRenderer(servlet: this)
 
 renderer.head={
-	title 'CCU-historian: Meldungen'
+	title 'CCU-Historian: Meldungen'
 }
 
 renderer.content={

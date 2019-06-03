@@ -19,7 +19,7 @@
 def renderer=new mdz.ccuhistorian.webapp.PageRenderer(servlet: this)
 
 renderer.head={
-	title 'CCU-historian: Konfiguration'
+	title 'CCU-Historian: Konfiguration'
 }
 
 renderer.content={

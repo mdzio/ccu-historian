@@ -20,7 +20,7 @@
 def renderer=new mdz.ccuhistorian.webapp.PageRenderer(servlet: this)
 
 renderer.head={
-	title 'CCU-historian: Beispiel 1 - Vorjahresvergleich'
+	title 'CCU-Historian: Beispiel 1 - Vorjahresvergleich'
 }
 
 renderer.content={

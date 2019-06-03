@@ -148,7 +148,7 @@ m.mount(document.getElementById("outputPane"), OutputPane)
 def renderer=new mdz.ccuhistorian.webapp.PageRenderer(servlet: this)
 
 renderer.head={
-	title 'CCU-historian: Skriptumgebung'
+	title 'CCU-Historian: Skriptumgebung'
 	style { mkp.yieldUnescaped css }
 }
 

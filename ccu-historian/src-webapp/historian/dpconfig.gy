@@ -36,7 +36,7 @@ private final static preprocTypes = [
 def renderer=new mdz.ccuhistorian.webapp.PageRenderer(servlet: this)
 
 renderer.head={
-	title 'CCU-historian: Datenpunktkonfiguration'
+	title 'CCU-Historian: Datenpunktkonfiguration'
 }
 
 renderer.content={

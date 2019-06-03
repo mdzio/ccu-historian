@@ -22,7 +22,7 @@ import mdz.ccuhistorian.webapp.WebUtilities
 def renderer=new mdz.ccuhistorian.webapp.PageRenderer(servlet: this)
 
 renderer.head={
-	title 'CCU-historian: Datenpunktliste'
+	title 'CCU-Historian: Datenpunktliste'
 }
 
 renderer.content={

@@ -113,7 +113,7 @@ private final static Logger log = Logger.getLogger('mdz.ccuhistorian.webapp.Tren
 def renderer=new mdz.ccuhistorian.webapp.PageRenderer(servlet: this)
 
 renderer.head={
-	title 'CCU-historian: Trend'
+	title 'CCU-Historian: Trend'
 }
 
 renderer.content={

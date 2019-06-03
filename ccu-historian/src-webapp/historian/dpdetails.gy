@@ -32,7 +32,7 @@ def bitToText(value, bitMask) {
 }
 
 renderer.head={
-	title 'CCU-historian: Datenpunktdetails'
+	title 'CCU-Historian: Datenpunktdetails'
 }
 
 renderer.content={

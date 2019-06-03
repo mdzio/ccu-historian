@@ -16,7 +16,7 @@ def renderer=new mdz.ccuhistorian.webapp.PageRenderer(servlet: this)
 def js=$/ var apiKey="$apiKey"/$
 
 renderer.head={
-	title 'CCU-historian: HighChart'
+	title 'CCU-Historian: HighChart'
 	script { mkp.yieldUnescaped js }
 }
 
