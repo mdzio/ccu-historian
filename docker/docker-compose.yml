@@ -1,0 +1,27 @@
+version: '3.6'
+services:
+  ccu-historian:
+    # Build your image before running this compose file. 
+    # Execute this in the same directory as your Dockerfile and the ccu-historian-bin.zip is saved:
+    # $ docker build --tag=ccu-historian .
+    image: ccu-historian
+    ports:
+      - 10080:80            # change if neccessary           
+      - 2098:2098
+      - 2099:2099
+      - 8082:8082
+      - 9092:9092
+      - 5432:5435
+    volumes:
+      # save the database, backups and the configuration file outside of the container
+      # use simple slashes ( / ) for windows file pathes, as you do in unix file systems - example: c:/Users/myUser/Documents/docker/ccu-historian/database
+      - type: bind
+        source: < /path/to/database/folder >                                # change this
+        target: /opt/ccu-historian/data 
+      - type: bind
+        source: < /path/to/backup/folder >                                  # change this
+        target: /opt/ccu-historian/backup
+      - type: bind
+        source: < /path/to/configuration/folder/ccu-historian.config >      # change this
+        target: /opt/ccu-historian/ccu-historian.config
+    restart: unless-stopped
