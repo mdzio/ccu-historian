@@ -101,7 +101,7 @@ def createPlot(parameters, dataPoints, plotState) {
 		def isDeltaCompr=((dataPoint.attributes.preprocType as Integer)?:0) == 1
 		
 		// create/select y-axis
-		def axisKey=[dataPoint.attributes.type, dataPoint.attributes.unit, dataPoint.attributes.minimum, dataPoint.attributes.maximum]
+		def axisKey=[isAction, dataPoint.attributes.unit, dataPoint.attributes.minimum, dataPoint.attributes.maximum]
 		def axisIdx=rangeAxes[axisKey]
 		if (axisIdx==null) {
 			axisIdx=rangeAxes.size()
