@@ -91,7 +91,9 @@ def createPlot(parameters, dataPoints, plotState) {
 	def rangeAxesDisplayIdx=[]
 	def visibleRangeAxesCnt=0
 	
+	
 	// create time series and y-axis
+	def actionSentinel=new Object()
 	dataPoints.eachWithIndex { dataPoint, dpIdx ->
 		
 		if (dataPoint.historyString)
@@ -99,9 +101,20 @@ def createPlot(parameters, dataPoints, plotState) {
 		def isAction=dataPoint.attributes.type=='ACTION'
 		def isContinuous=dataPoint.continuous
 		def isDeltaCompr=((dataPoint.attributes.preprocType as Integer)?:0) == 1
-		
+
+		// generate axis key		
+		def axisKey
+		if (isAction) {
+			axisKey=actionSentinel
+		} else {
+			if (dataPoint.attributes.unit in [null, '']) {
+				axisKey=[dataPoint.attributes.minimum, dataPoint.attributes.maximum]
+			} else {
+				axisKey=dataPoint.attributes.unit
+			}
+		}
+
 		// create/select y-axis
-		def axisKey=[isAction, dataPoint.attributes.unit, dataPoint.attributes.minimum, dataPoint.attributes.maximum]
 		def axisIdx=rangeAxes[axisKey]
 		if (axisIdx==null) {
 			axisIdx=rangeAxes.size()
