@@ -61,4 +61,10 @@ ${ADDON_DIR}/update_hm_addons.tcl -a ${ADDON_ID} -name "${ADDON_NAME}" -url /add
 
 sync
 echo "Installed"
+
+# force a reboot on RM and CCU3
+if [ "$1" = "HM-RASPBERRYMATIC" ] || [ "$1" = "CCU3" ]; then
+  exit 10
+fi
+
 exit 0
