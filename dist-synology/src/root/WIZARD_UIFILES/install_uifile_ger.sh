@@ -61,7 +61,7 @@ tee $SYNOPKG_TEMP_LOGFILE <<EOF
           },
           {
             "key": "pkgwizard_enable_hmlgw",
-            "desc": "Homematic LAN Gateway",
+            "desc": "Homematic Wired RS485 LAN Gateway (HMW-LGW)",
             "defaultValue": false
             }
 		]
