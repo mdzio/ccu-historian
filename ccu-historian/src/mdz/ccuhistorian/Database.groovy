@@ -682,6 +682,9 @@ public class Database implements Storage {
 			
 			// add attribute 'custom'
 			migrateTo(2, '''ALTER TABLE DATA_POINTS ADD IF NOT EXISTS CUSTOM VARCHAR DEFAULT '{}' AFTER COMMENT''')
+			
+			// replace invalid values for attribute 'custom'
+			migrateTo(3, '''UPDATE DATA_POINTS SET CUSTOM='{}' WHERE CUSTOM='null' OR CUSTOM IS NULL''')
 		}
 	}
 	

@@ -101,7 +101,8 @@ public class DataPoint {
 	int managementFlags
 	
 	// meta data
-	Map<String, Object> attributes = [:]
+	// (initialize attribute 'custom' with empty map.)
+	Map<String, Object> attributes = [ (ATTR_CUSTOM):[:] ]
 
 	public boolean isHistoryHidden() { 
 		getManagementFlag(FLAGS_HISTORY_HIDDEN)
