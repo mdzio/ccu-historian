@@ -9,7 +9,7 @@ var H2_refreshSec = 60;
 // Refresh Time is enabled
 
 // declare global Variables
-var H2_version = 'v3.4';
+var H2_version = 'v3.5';
 var chart;
 var filter_feld = '';
 var DP_point = [];
@@ -35,6 +35,7 @@ var DP_PopupAxisPos;
 var DP_Theme = 'Standard';
 var DP_DashType = ['Solid', 'Dash', 'DashDot', 'Dot', 'LongDash', 'LongDashDot', 'LongDashDotDot', 'ShortDash', 'ShortDashDot', 'ShortDashDotDot', 'ShortDot'];
 var DP_Queue = [];
+var DP_ColorNext = 0;
 var DP_Title = '';
 var DP_Subtitle = '';
 var DP_Loading = 0;
@@ -233,44 +234,55 @@ function createChart() {
 }
 
 /**
-* create serien option and add it to HighStock Chart
+* define default display attributes
 */
-function addSerie(DP, DP_type) {
+function defaultAttrib(DP, colorNr, idx) {
 
-    var unit = DP.attributes.unit;
-    var valueDecimals = 1;
-    var factor = 1;
-    var yAxis = 0;
-    var dp_vis = 0;
-    var grouping = undefined;
-    var type = "line";
-    var step = "left";
-    var color = null;
-    var lineType = 0;
-    var aggrType = 0;
-    var aggrTime = 1;
-    var stacking = 0;
-    var dptype = DP.id.identifier;
-    var dashtype = DP_DashType[0];
-    var linewidth = 2;
-    var marker = defineMarker(0);
+    // add default from fix settings
 
-    var attrIDX = (DP_type === '') ? DP.idx.toString() : (DP_type + '_' + DP.idx.toString());
+    var attr = {
+                id: idx,
+                aggr: 'A0',
+                atime: 'T1',
+                yaxis: 'Y0',
+                comp: 'C0',
+                line: 'L0',
+                mark: 'M0',
+                color: 'F0',
+                visible: 0,
+                dash: 'D0',
+                width: 'W2',
+                stack: 0,
+                factor: 1,            
+                offset: 0,
+                unit: '',
+                buffer_data: {
+                              timestamps: [],
+                              values: [],
+                              buffer_start: 0,
+                              buffer_end: 0
+                             },
+               };
+  if (colorNr === -1) {
+     attr.color = 'F' + ( DP_ColorNext % chart.options.colors.length );
+     DP_ColorNext++;
+  } else {
+     attr.color = 'F' + ( colorNr % chart.options.colors.length );
+  }
 
-    switch (dptype) {
+  if (DP != -1) {
+    attr.unit = DP.attributes.unit;
+
+    switch (DP.id.identifier) {
     case "ABS_HUMIDITY":
-        yAxis = 10;
-        valueDecimals = 1;
-        lineType = 0;
+        attr.yaxis = 'Y10';
         break;
     case "HUMIDITY":
     case "HUMIDITYF":
     case "ACTUAL_HUMIDITY":
     case "HUM_MAX_24H":
     case "HUM_MIN_24H":
-        yAxis = 6;
-        valueDecimals = 1;
-        lineType = 0;
+        attr.yaxis = 'Y6';
         break;
     case "TEMPERATURE":
     case "ACTUAL_TEMPERATURE":
@@ -278,96 +290,169 @@ function addSerie(DP, DP_type) {
     case "DEW_POINT":
     case "TEMP_MAX_24H":
     case "TEMP_MIN_24H":
-        yAxis = 1;
-        lineType = 0;
-        valueDecimals = 1;
+        attr.yaxis = 'Y1';
         break;
     case "SET_TEMPERATURE":
     case "SETPOINT":
-        yAxis = 1;
-        lineType = 2;
-        valueDecimals = 1;
+        attr.yaxis = 'Y1';
+        attr.line  = 'L2';
         break;
     case "MEAN5MINUTES":
-        valueDecimals = 3;
-        lineType = 0;
+        attr.yaxis = 'Y3';
         break;
     case "BRIGHTNESS":
-        yAxis = 8;
-        valueDecimals = 0;
-        lineType = 0;
+        attr.yaxis = 'Y8';
         break;
     case "LEVEL":
-        lineType = 2;
-        unit = "";
-        yAxis = 4;
-        valueDecimals = 1;
+        attr.yaxis = 'Y4';
+        attr.line  = 'L2';
+        attr.unit  = '';
         break;
     case "STATE":
-        yAxis = 5,
-        valueDecimals = 0;
-        lineType = 2;
+        attr.yaxis = 'Y5';
+        attr.line  = 'L2';
         break;
     case "PRESS_SHORT":
     case "PRESS_LONG":
     case "PRESS_OPEN":
     case "MOTION":
-        yAxis = 5,
-        marker = {
-            enabled: true
-        };
-        factor = 5;
-        lineType = 5;
+        attr.yaxis = 'Y5';
+        attr.mark  = 'M1';
+        attr.factor  = 5;
+        attr.line  = 'L5';
         break;
     case "VALVE_STATE":
-        valueDecimals = 0;
-        lineType = 2;
-        unit = "%";
-        yAxis = 4;
+        attr.yaxis = 'Y4';
+        attr.line  = 'L2';
+        attr.unit  = '%';
         break;
     }
 
     if (DP.attributes.type === "BOOL") {
-        yAxis = 5,
-        valueDecimals = 0;
-        type = "line";
-        step = "left";
+        attr.yaxis = 'Y5';
+        attr.line  = 'L2';
     }
     if (DP.attributes.unit === "%") {
-        yAxis = 4,
-        valueDecimals = 0;
-        type = "line";
-        step = "left";
-        unit = "%";
+        attr.yaxis = 'Y4';
+        attr.line  = 'L2';
+        attr.unit  = '%';
     }
     if (DP.id.interfaceId === "SysVar" && DP.attributes.unit === "°C") {
-        yAxis = 1;
-        lineType = 0;
-        valueDecimals = 1;
+        attr.yaxis = 'Y1';
+        attr.line  = 'L0';
     }
 
-    // Popup Change types
+    // add default from database
+    if (DP.attributes.custom && DP.attributes.custom.HighChart) {
+    
+      var text2 = DP.attributes.custom.HighChart.split('|');
+      if (text2.length > 0) {
+        for (var k = 0; k < text2.length; k++) {
+            if (text2[k].substr(0, 1) === 'A') {
+              	attr.aggr = text2[k];
+            } else if (text2[k].substr(0, 1) === 'Y') {
+              	attr.yaxis = text2[k];
+            } else if (text2[k].substr(0, 1) === 'T') {
+              	attr.atime = text2[k];
+            } else if (text2[k].substr(0, 1) === 'F') {
+              	attr.color = text2[k];
+            } else if (text2[k].substr(0, 1) === 'C') {
+              	attr.comp = text2[k];
+            } else if (text2[k].substr(0, 1) === 'L') {
+              	attr.line = text2[k];
+            } else if (text2[k].substr(0, 1) === 'M') {
+              	attr.mark = text2[k];
+            } else if (text2[k].substr(0, 1) === 'D') {
+              	attr.dash = text2[k];
+            } else if (text2[k].substr(0, 1) === 'W') {
+              	attr.width = text2[k];
+            } else if (text2[k].substr(0, 1) === 'V') {
+              	attr.visible = parseInt(text2[k].substr(1, 1));
+            } else if (text2[k].substr(0, 1) === 'S') {
+              	attr.stack = parseInt(text2[k].substr(1, 2));
+            } else if (text2[k].substr(0, 1) === 'U') {
+              	attr.unit = text2[k].substr(1, 20);
+            } else if (text2[k].substr(0, 1) === 'X') {
+              	attr.factor = parseFloat(text2[k].substr(1, 10));
+            } else if (text2[k].substr(0, 1) === 'O') {
+              	attr.offset = parseFloat(text2[k].substr(1, 10));
+            }
+        }
+      }
+    }
+   }
+   // give back default values 
+   return attr;
+}
+
+
+/**
+* create serien option and add it to HighStock Chart
+*/
+function addSerie(DP, DP_type) {
+
+    var unit;
+    var yAxis;
+    var dp_vis;
+    var type;
+    var step;
+    var color;
+    var lineType;
+    var aggrType;
+    var aggrTime;
+    var stacking;
+    var dashtype;
+    var linewidth;
+    var marker;
+
+    var grouping = undefined;
+    var dptype = DP.id.identifier;
+    var valueDecimals = 1;
+    var factor = 1;
+
+    var attrIDX = (DP_type === '') ? DP.idx.toString() : (DP_type + '_' + DP.idx.toString());
 
     var attr = DP_attribute.findIndex(obj => obj.id === attrIDX);
-    if (attr != -1) {
-        yAxis = parseInt(DP_attribute[attr].yaxis.substr(1, 2));
-        color = chart.options.colors[parseInt(DP_attribute[attr].color.substr(1, 2))];
-        aggrType = parseInt(DP_attribute[attr].aggr.substr(1, 2))
-        aggrTime = parseInt(DP_attribute[attr].atime.substr(1, 2))
-        lineType = parseInt(DP_attribute[attr].line.substr(1, 2))
-        dp_vis = DP_attribute[attr].visible;
-        unit = DP_attribute[attr].unit;
 
-        stacking = DP_attribute[attr].stack;
+    if (attr === -1) {
+        DP_attribute.push( defaultAttrib(DP, -1, attrIDX ) );
+        attr = DP_attribute.findIndex(obj => obj.id === attrIDX);
+    }
 
-        var dashID = parseInt(DP_attribute[attr].dash.substr(1, 2));
-        if (dashID > 0) {
-            dashtype = DP_DashType[dashID];
-        }
+    yAxis = parseInt(DP_attribute[attr].yaxis.substr(1, 2));
+    color = chart.options.colors[parseInt(DP_attribute[attr].color.substr(1, 2))];
+    aggrType = parseInt(DP_attribute[attr].aggr.substr(1, 2))
+    aggrTime = parseInt(DP_attribute[attr].atime.substr(1, 2))
+    lineType = parseInt(DP_attribute[attr].line.substr(1, 2))
+    dp_vis = DP_attribute[attr].visible;
+    unit = DP_attribute[attr].unit;
 
-        linewidth = parseInt(DP_attribute[attr].width.substr(1, 2));
+    stacking = DP_attribute[attr].stack;
 
-        marker = defineMarker( parseInt(DP_attribute[attr].mark.substr(1, 2)), color, linewidth );
+    dashtype = DP_DashType[ parseInt(DP_attribute[attr].dash.substr(1, 2)) ];
+
+    linewidth = parseInt(DP_attribute[attr].width.substr(1, 2));
+
+    marker = defineMarker( parseInt(DP_attribute[attr].mark.substr(1, 2)), color, linewidth );
+
+    switch (dptype) {
+    case "MEAN5MINUTES":
+        valueDecimals = 3;
+        break;
+    case "STATE":
+    case "VALVE_STATE":
+        valueDecimals = 0;
+        break;
+    }
+
+    if (DP.attributes.type === "BOOL") {
+        valueDecimals = 0;
+    }
+    if (DP.attributes.unit === "%") {
+        valueDecimals = 0;
+    }
+    if (DP.id.interfaceId === "SysVar" && DP.attributes.unit === "°C") {
+        valueDecimals = 1;
     }
 
     if (lineType === 0) {
@@ -642,33 +727,6 @@ function addSerie(DP, DP_type) {
 
     // Create Chart Serie !!!
     var serie2 = chart.addSeries(def_serie, false, false);
-
-    attr = DP_attribute.findIndex(obj=>obj.id === attrIDX);
-    if (attr === -1) {
-        DP_attribute.push({
-            id: serie2.options.id.toString(),
-            aggr: 'A' + aggrType,
-            atime: 'T' + aggrTime,
-            yaxis: 'Y' + yAxis,
-            comp: 'C0',
-            line: 'L' + lineType,
-            mark: 'M0',
-            color: 'F' + serie2.colorIndex,
-            visible: dp_vis,
-            dash: 'D0',
-            width: 'W2',
-            factor: 1,
-            stack: 0,
-            offset: 0,
-            unit: unit,
-            buffer_data: {
-                timestamps: [],
-                values: [],
-                buffer_start: 0,
-                buffer_end: 0
-            },
-        });
-    }
 
 }
 
@@ -1258,7 +1316,7 @@ function requestSettings() {
 
 	        	    DP_settings = JSON.parse(strSetNew);
 	        	    DP_settings_old = JSON.parse(strSetNew);
-	                console.log(DP_settings);
+	             // console.log(DP_settings);
         	    }
         	    catch (e) {
         	        console.log(e);
@@ -1354,7 +1412,7 @@ function readLinkData() {
             if (nv[0].toLowerCase() === 'dp') {
                 DP_Limit = true;
                 // parameter Periode (Stunden)
-            } else if (nv[0].toLowerCase() === 'periode') {
+            } else if ((nv[0].toLowerCase() === 'periode') || (nv[0].toLowerCase() === 'period')) {
                 Zeitraum_Start = new Date(Zeitraum_Ende - (new Date(3600 * 1000 * parseInt(nv[1]))));
                 // parameter Data Point
             } else if (nv[0].toLowerCase() === 'filterkey') {
@@ -1499,61 +1557,8 @@ function requestData2(TXT_JSON) {
         if (DP_point[i].attributes.custom && DP_point[i].attributes.custom.HighChart) {
             var text2 = DP_point[i].attributes.custom.HighChart.split('|');
             if (text2.length > 0) {
-                var attr = {
-                            id: DP_point[i].idx.toString(),
-                            aggr: 'A0',
-                            atime: 'T1',
-                            yaxis: 'Y0',
-                            comp: 'C0',
-                            line: 'L0',
-                            mark: 'M0',
-                            color: 'F0',
-                            visible: 0,
-                            dash: 'D0',
-                            width: 'W2',
-                            stack: 0,
-                            factor: 1,            
-                            offset: 0,
-                            unit: DP_point[i].attributes.unit,
-                            buffer_data: {
-                                timestamps: [],
-                                values: [],
-                                buffer_start: 0,
-                                buffer_end: 0
-                            },
-                };
-                for (var k = 0; k < text2.length; k++) {
-                    if (text2[k].substr(0, 1) === 'A') {
-                    	attr.aggr = text2[k];
-                    } else if (text2[k].substr(0, 1) === 'Y') {
-                    	attr.yaxis = text2[k];
-                    } else if (text2[k].substr(0, 1) === 'T') {
-                    	attr.atime = text2[k];
-                    } else if (text2[k].substr(0, 1) === 'F') {
-                    	attr.color = text2[k];
-                    } else if (text2[k].substr(0, 1) === 'C') {
-                    	attr.comp = text2[k];
-                    } else if (text2[k].substr(0, 1) === 'L') {
-                    	attr.line = text2[k];
-                    } else if (text2[k].substr(0, 1) === 'M') {
-                    	attr.mark = text2[k];
-                    } else if (text2[k].substr(0, 1) === 'D') {
-                    	attr.dash = text2[k];
-                    } else if (text2[k].substr(0, 1) === 'W') {
-                    	attr.width = text2[k];
-                    } else if (text2[k].substr(0, 1) === 'V') {
-                    	attr.visible = parseInt(text2[k].substr(1, 1));
-                    } else if (text2[k].substr(0, 1) === 'S') {
-                    	attr.stack = parseInt(text2[k].substr(1, 2));
-                    } else if (text2[k].substr(0, 1) === 'U') {
-                    	attr.unit = text2[k].substr(1, 20);
-                    } else if (text2[k].substr(0, 1) === 'X') {
-                    	attr.factor = parseFloat(text2[k].substr(1, 10));
-                    } else if (text2[k].substr(0, 1) === 'O') {
-                    	attr.offset = parseFloat(text2[k].substr(1, 10));
-                    }
-                }
-                DP_attribute.push(attr);
+               var attr = defaultAttrib(DP_point[i], i, DP_point[i].idx.toString());
+               DP_attribute.push(attr);
             }
         }
     }
@@ -1627,38 +1632,20 @@ function requestData2(TXT_JSON) {
 
                     if (text2.length > 0) {
 
-                        var default_unit = '';
                         var DP_pos = DP_point.findIndex(obj=>obj.idx.toString().toUpperCase() === dp_id.toString().toUpperCase() || ((obj.attributes.displayName) && obj.attributes.displayName.toUpperCase() === dp_id.toUpperCase()) || (obj.id.address + '.' + obj.id.identifier).toUpperCase() === dp_id.toUpperCase());
                         if (DP_pos != -1) {
                             dp_id = DP_point[DP_pos].idx.toString();
-                            default_unit = DP_point[DP_pos].attributes.unit;
                         }
 
                         var attrpos = DP_attribute.findIndex(obj=>obj.id === dp_id);
                         if (attrpos === -1) {
-                            var attr = {
-                                id: dp_id,
-                                aggr: 'A0',
-                                atime: 'T1',
-                                yaxis: 'Y0',
-                                comp: 'C0',
-                                line: 'L0',
-                                mark: 'M0',
-                                color: 'F0',
-                                visible: 2,
-                                dash: 'D0',
-                                width: 'W2',
-                                stack: 0,
-                                factor: 1,
-                                offset: 0,
-                                unit: default_unit,
-                                buffer_data: {
-                                    timestamps: [],
-                                    values: [],
-                                    buffer_start: 0,
-                                    buffer_end: 0
-                                },
-                            };
+                            var attr = {};
+                            if (DP_pos != -1) {
+                               attr = defaultAttrib(DP_point[DP_pos], j, dp_id);
+                            } else {
+                               attr = defaultAttrib(-1, j, dp_id);
+                            }
+
                             DP_attribute.push(attr);
                             attrpos = DP_attribute.findIndex(obj=>obj.id === dp_id);
                         }
@@ -2663,36 +2650,7 @@ function showDialogLine(serieObj) {
 
     // Set Dialog Values
     if (serieObj.options.id) {
-        DP_PopupID = serieObj.options.id.toString();
 
-        var attr = DP_attribute.findIndex(obj=>obj.id === serieObj.options.id.toString());
-        if (attr === -1) {
-            var ArrAttr = {
-                id: serieObj.options.id.toString(),
-                aggr: 'A0',
-                atime: 'T1',
-                yaxis: 'Y' + serieObj.options.yAxis,
-                comp: 'C0',
-                line: 'L0',
-                mark: 'M0',
-                color: 'F' + serieObj.colorIndex,
-                visible: 2,
-                dash: 'D0',
-                width: 'W2',
-                stack: 0,
-                factor: 1,
-                offset: 0,
-                unit: '',
-                buffer_data: {
-                    timestamps: [],
-                    values: [],
-                    buffer_start: 0,
-                    buffer_end: 0
-                },
-            };
-            DP_attribute.push(ArrAttr);
-            attr = DP_attribute.length - 1;
-        }
         if ('C' === serieObj.options.id.toString().substr(0, 1)) {
             document.getElementById("compare").style.display = 'none';
         } else {
@@ -2712,6 +2670,26 @@ function showDialogLine(serieObj) {
             techName = '<br/>Systemvariable';
         } else {
             techName = '<br/>' + DP_point[DP_pos].id.interfaceId + '.' + DP_point[DP_pos].id.address + '.' + DP_point[DP_pos].id.identifier;
+        }
+
+        DP_PopupID = serieObj.options.id.toString();
+
+        var attr = DP_attribute.findIndex(obj=>obj.id === serieObj.options.id.toString());
+        if (attr === -1) {
+
+            var ArrAttr;
+            if (DP_pos === -1) {
+               ArrAttr = defaultAttrib(-1, serieObj.colorIndex, DP_PopupID);
+            } else {
+               ArrAttr = defaultAttrib(DP_point[DP_pos], serieObj.colorIndex, DP_PopupID);
+            }
+  
+            // ArrAttr.yasix = 'Y' + serieObj.options.yAxis;
+
+            DP_attribute.push(ArrAttr);
+
+            attr = DP_attribute.length - 1;
+
         }
 
         // set value on Popup
@@ -2771,9 +2749,14 @@ function saveLine() {
     strCustom += '|U' + DP_attribute[attr].unit;
 
     var DP_pos = DP_point.findIndex(obj=>obj.idx.toString() === DP_PopupID);
-    var key = 'YAXIS';
-    
-    if (!DP_point[DP_pos].attributes.custom.HighChart || DP_point[DP_pos].attributes.custom.HighChart != strCustom ) {
+    var key = 'POINT'+DP_PopupID;
+
+    // define customer if still NULL
+    if (!DP_point[DP_pos].attributes.custom) {
+       DP_point[DP_pos].attributes.custom = {};
+    }
+
+    if (DP_point[DP_pos].attributes.custom.HighChart != strCustom ) {
     	
     	DP_point[DP_pos].attributes.custom.HighChart = strCustom;
 

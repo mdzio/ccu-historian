@@ -493,13 +493,22 @@ public class Database implements Storage {
 
 	private DataPoint getRowAsDataPoint(def row) {
 		// decode custom attribute
-		def custom=[:]
-		try {
-			custom=new JsonSlurper().parseText(row.CUSTOM)
-		} catch (e) {
-			log.warning "Invalid content in table DATA_POINTS field CUSTOM (expected JSON): $row"
+		def custom
+		if (!row.CUSTOM) {
+			custom=[:]
+		} else {
+			try {
+				custom=new JsonSlurper().parseText(row.CUSTOM)
+				if (!(custom instanceof Map)) {
+					log.warning "Invalid content in table DATA_POINTS field CUSTOM (expected JSON object): $row"
+					custom=[:]
+				}
+			} catch (e) {
+				log.warning "Invalid content in table DATA_POINTS field CUSTOM (expected JSON): $row"
+				custom=[:]
+			}
 		}
-		
+
 		// create DataPoint
 		new DataPoint(
 			idx:row.DP_ID, historyTableName:row.TABLE_NAME,
