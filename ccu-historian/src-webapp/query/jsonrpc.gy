@@ -211,12 +211,18 @@ private static rpcFunctions=[
 		if (!(custom instanceof Map)) {
 			throw new RpcException("Custom attribute is not a JSON object: $custom", RpcException.INVALID_PARAMS)
 		}
+		// define empty custom field as empty object {}
+		if (dbDp.attributes.custom==null) {
+		         dbDp.attributes.custom={}
+		}
+                // ***************************
+
 		custom.each { k, v ->
-            if (v!=null) {
-                dbDp.attributes.custom[k]=v
-            } else {
-                dbDp.attributes.custom.remove(k)
-            }
+           		 if (v!=null) {
+                		dbDp.attributes.custom[k]=v
+            		} else {
+                		dbDp.attributes.custom.remove(k)
+            		}
 		}
 		database.updateDataPoint(dbDp)
 	},
