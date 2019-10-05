@@ -668,7 +668,7 @@ public class Database implements Storage {
 			db.execute 'CREATE ALIAS UNIX_TO_TS DETERMINISTIC FOR "mdz.ccuhistorian.DatabaseExtensions.UNIX_TO_TS"'
 			
 			// set current version (keep aligned with database migration)
-			setConfig(CONFIG_DATABASE_VERSION, '2')
+			setConfig(CONFIG_DATABASE_VERSION, '3')
 			
 		} else {
 			// migrate database
