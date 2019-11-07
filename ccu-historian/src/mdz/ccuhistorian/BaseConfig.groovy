@@ -22,9 +22,13 @@ import groovy.util.logging.Log
 @Log
 class BaseConfig {
 
+	// directory for scripts
+	String scriptDir='.'
+	
 	// undocumented
 	int threadPoolSize=2
 
 	void logDebug() {
+		log.fine "base.scriptDir='$scriptDir'"
 	}
 }

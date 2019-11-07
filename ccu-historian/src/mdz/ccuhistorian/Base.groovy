@@ -22,6 +22,9 @@ import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
+import org.codehaus.groovy.control.CompilerConfiguration
+import org.codehaus.groovy.control.customizers.ImportCustomizer
+import org.codehaus.groovy.control.customizers.SecureASTCustomizer
 
 /* The basic module is stopped in two steps: First, the scheduler is stopped 
  * before all other modules are stopped. As a result, pending tasks of all 
@@ -35,6 +38,7 @@ class Base {
 
 	private BaseConfig config
 	private ScheduledThreadPoolExecutor executor
+	private GroovyScriptEngine scriptEngine
 	
 	public Base(BaseConfig config) {
 		log.info 'Starting base services'
@@ -42,6 +46,16 @@ class Base {
 		config.logDebug()
 		executor=new ScheduledThreadPoolExecutor(config.threadPoolSize, new ThreadPoolExecutor.DiscardPolicy())
 		executor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+		def scriptDir=new File(config.scriptDir)
+		
+		// create script engine
+		scriptEngine=new GroovyScriptEngine([scriptDir.toURI().toURL()] as URL[])
+		// configure script compiler
+		CompilerConfiguration compilerConfig=[]
+		// default imports
+		ImportCustomizer importCustomizer=[]
+		importCustomizer.addImports 'mdz.ccuhistorian.TrendDesign'
+		scriptEngine.config=compilerConfig
 	}
 	
 	protected synchronized stopScheduler() {
@@ -65,4 +79,8 @@ class Base {
 	}
 	
 	public synchronized ScheduledExecutorService getExecutor() { executor }
+	
+	public runScript(String scriptName, Binding binding) {
+		scriptEngine.run(scriptName, binding)
+	}
 }
