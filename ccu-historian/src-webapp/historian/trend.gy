@@ -117,7 +117,7 @@ renderer.head={
 }
 
 renderer.content={
-	def trendParams=TrendParameters.from(request, database, webServer.config.trendDesigns)
+	def trendParams=TrendParameters.from(request, database, webServer.trendDesigns)
 	
 	// separate string data points
 	def stringDataPoints=[]

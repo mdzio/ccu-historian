@@ -20,6 +20,7 @@ package mdz.ccuhistorian.webapp
 import java.util.logging.Logger
 import java.util.logging.Level
 import mdz.Exceptions
+import mdz.ccuhistorian.Base
 import mdz.ccuhistorian.ExtendedStorage
 import mdz.ccuhistorian.TrendDesign
 import mdz.hc.itf.Manager;
@@ -29,19 +30,23 @@ import org.eclipse.jetty.webapp.WebAppContext
 
 public class WebServer {
 
+	static private final TRENDDESIGNS_SCRIPTNAME = 'trenddesigns.groovy'
+	
 	static private WebServer instance // required for the servlets
 	
 	WebUtilities webUtilities
 	WebServerConfig config
 	ExtendedStorage database // required for the servlets
 	Manager interfaceManager // required for the servlets
-
+	Base base
+	
 	private final Logger log=Logger.getLogger(WebServer.class.name)
 	private final Logger webServerLog=Logger.getLogger('org.eclipse.jetty')
 	private Server server
 
-	public WebServer(WebServerConfig config, ExtendedStorage database, Manager interfaceManager) {
+	public WebServer(WebServerConfig config, Base base, ExtendedStorage database, Manager interfaceManager) {
 		this.config=config
+		this.base=base
 		this.database=database
 		this.interfaceManager=interfaceManager
 		
@@ -88,6 +93,13 @@ public class WebServer {
 		config.historianAddress
 	}
 
+	public Map<String, TrendDesign> getTrendDesigns() {
+		// add trend designs from script file
+		def binding=new Binding([trendDesigns:config.trendDesigns])
+		base.runScript(TRENDDESIGNS_SCRIPTNAME, binding)
+		config.trendDesigns
+	}
+	
 	// required for the servlets
 	public static WebServer getInstance() { instance }
 }

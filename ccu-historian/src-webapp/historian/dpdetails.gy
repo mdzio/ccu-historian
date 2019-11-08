@@ -36,7 +36,7 @@ renderer.head={
 }
 
 renderer.content={
-	def trendParams=TrendParameters.from(request, database, webServer.config.trendDesigns)
+	def trendParams=TrendParameters.from(request, database, webServer.trendDesigns)
 	def apiKey=webServer.config.apiKeys ? [k:webServer.config.apiKeys[0]] : [:]
 	
 	trendParams.groups.values().dataPoints.flatten().each { dp ->

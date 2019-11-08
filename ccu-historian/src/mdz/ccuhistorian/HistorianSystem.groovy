@@ -38,7 +38,7 @@ class HistorianSystem extends DatabaseSystem {
 			new ManagerConfigurator().configure(interfaceManager, config.deviceConfigs)
 			interfaceManager.start()
 			historian=new Historian(config.historianConfig, base, extendedStorage, interfaceManager)
-			webServer=new WebServer(config.webServerConfig, extendedStorage, interfaceManager)
+			webServer=new WebServer(config.webServerConfig, base, extendedStorage, interfaceManager)
 		} catch (Throwable t) {
 			stopScheduler();
 			stop();

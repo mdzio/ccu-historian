@@ -213,7 +213,7 @@ def ex=utils.catchToLog(log) {
 			throw new Exception('Access denied')
 			
 	// parse parameters
-	TrendParameters parameters=TrendParameters.from(request, database, webServer.config.trendDesigns)
+	TrendParameters parameters=TrendParameters.from(request, database, webServer.trendDesigns)
 	log.finer "Web server: Parameters: $parameters"
 	if (!parameters.groups) {
 		throw new IllegalArgumentException('Parameter dp... (data point id/s) not set')

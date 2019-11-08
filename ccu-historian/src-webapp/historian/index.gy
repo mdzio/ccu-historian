@@ -27,7 +27,7 @@ renderer.head={
 
 renderer.content={
 	// parse trend parameters
-	def trendParams=TrendParameters.from(request, database, webServer.config.trendDesigns)
+	def trendParams=TrendParameters.from(request, database, webServer.trendDesigns)
 
     form(id:'dp-form', action:'trend.gy') {
 		// forward other trend parameters

@@ -18,6 +18,7 @@
 package mdz.ccuhistorian
 
 import groovy.util.logging.Log
+import groovy.util.ResourceException
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.ThreadPoolExecutor
@@ -25,6 +26,8 @@ import java.util.concurrent.TimeUnit
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.customizers.ImportCustomizer
 import org.codehaus.groovy.control.customizers.SecureASTCustomizer
+import mdz.Exceptions
+import java.util.logging.Level
 
 /* The basic module is stopped in two steps: First, the scheduler is stopped 
  * before all other modules are stopped. As a result, pending tasks of all 
@@ -54,7 +57,10 @@ class Base {
 		CompilerConfiguration compilerConfig=[]
 		// default imports
 		ImportCustomizer importCustomizer=[]
-		importCustomizer.addImports 'mdz.ccuhistorian.TrendDesign'
+		importCustomizer.addImports 'mdz.ccuhistorian.TrendDesign', 'java.util.logging.Level',
+			'java.awt.Color', 'org.jfree.chart.ChartColor', 'java.awt.BasicStroke',
+			'java.awt.GradientPaint', 'org.jfree.chart.title.TextTitle'
+		compilerConfig.addCompilationCustomizers importCustomizer
 		scriptEngine.config=compilerConfig
 	}
 	
@@ -80,7 +86,15 @@ class Base {
 	
 	public synchronized ScheduledExecutorService getExecutor() { executor }
 	
-	public runScript(String scriptName, Binding binding) {
-		scriptEngine.run(scriptName, binding)
+	public void runScript(String scriptName, Binding binding) {
+		try {
+			log.finer "Executing script $scriptName"
+			scriptEngine.run(scriptName, binding)
+		} catch (ResourceException e) {
+			// ignore missing scripts
+			log.finer "Script $scriptName not found"
+		} catch (e) {
+			Exceptions.logTo log, Level.SEVERE, e
+		}
 	}
 }
