@@ -47,11 +47,12 @@ public class DataPointStorageUpdater extends BasicProducer<Event> implements Pro
 					storage.updateDataPoint dataPoint
 				}
 			} else {
-				dataPoint=new DataPoint([
-					id: rawEvent.id,
-					managementFlags: (isValueString?DataPoint.FLAGS_HISTORY_STRING:0),
-					attributes: [paramSet:'VALUES'] as Map<String, Object>
-				])
+				dataPoint=new DataPoint()
+				dataPoint.with {
+					id=rawEvent.id
+					managementFlags=(isValueString?DataPoint.FLAGS_HISTORY_STRING:0)
+					attributes.paramSet='VALUES'
+				}
 				storage.createDataPoint dataPoint
 			}
 			produce new Event(
