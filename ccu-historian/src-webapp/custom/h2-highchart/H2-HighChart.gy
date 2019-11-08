@@ -145,6 +145,10 @@ renderer.content={
                   span id: "Text-Layout", class:"LinePopup-text", "Layout" 
                   select(id: "Select-Layout", class:"form-select-h2")  { }
                }
+               div(id:"grid") {
+                  span id: "Text-Grid", class:"LinePopup-text", "Grid" 
+                  select(id: "Select-Grid", class:"form-select-h2")  { }
+               }
                div(id:"content") {
                   span id: "Text-Content", class:"LinePopup-text", "Content"
                   select(id: "Select-Content", class:"form-select-h2")  { }

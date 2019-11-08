@@ -9,7 +9,7 @@ var H2_refreshSec = 60;
 // Refresh Time is enabled
 
 // declare global Variables
-var H2_version = 'v3.5';
+var H2_version = 'v3.9';
 var chart;
 var filter_feld = '';
 var DP_point = [];
@@ -21,8 +21,9 @@ var Zeitraum_Ende = new Date(Date.now());
 var Zeitraum_Start = new Date(Zeitraum_Ende - (new Date(86400000 * 1)));
 var Scroll_Legend = true;
 var DP_Legend = 1;
-var DP_Navigator = 1;
+var DP_Navigator = 0;
 var DP_Labels = 0;
+var DP_Grid = 2;
 var DP_DayLight = 1;
 var DP_Limit = false;
 var DP_AutoRefresh = 0;
@@ -33,6 +34,7 @@ var DP_PopupID;
 var DP_PopupAxisObj;
 var DP_PopupAxisPos;
 var DP_Theme = 'Standard';
+var DP_Theme_Setting;
 var DP_DashType = ['Solid', 'Dash', 'DashDot', 'Dot', 'LongDash', 'LongDashDot', 'LongDashDotDot', 'ShortDash', 'ShortDashDot', 'ShortDashDotDot', 'ShortDot'];
 var DP_Queue = [];
 var DP_ColorNext = 0;
@@ -224,11 +226,11 @@ var DP_yAxis_default = JSON.parse(JSON.stringify(DP_yAxis));
 
 function createChart() {
     if (DP_Theme != 'Standard' && DP_Themes[DP_Theme]) {
-        var chartingOptions = Highcharts.merge(DP_Themes.Standard, DP_Themes[DP_Theme]);
-        Highcharts.setOptions(chartingOptions);
+    	DP_Theme_Setting = Highcharts.merge(DP_Themes.Standard, DP_Themes[DP_Theme]);
     } else {
-        Highcharts.setOptions(DP_Themes.Standard);
+    	DP_Theme_Setting = Highcharts.merge(DP_Themes.Standard, {});
     }
+    Highcharts.setOptions(DP_Theme_Setting);
     ChartSetOptions();
     chartSetElements();
 }
@@ -931,8 +933,11 @@ function BufferSerienData(id, data) {
         }
 
         // update counter
-        document.getElementById("count_val").innerHTML = (Number(document.getElementById("count_val").innerHTML) + data.values.length).toString();
-
+        if (DP_Navigator < 3) {
+        	document.getElementById("count_val").innerHTML = (Number(document.getElementById("count_val").innerHTML) + data.values.length).toString();
+        } else {
+        	document.getElementById("count_val").innerHTML = "";
+        }
     }
 
     // get which serie has to be updated
@@ -1257,7 +1262,13 @@ function getDataH2(p_series, p_attrID, p_attr, datStart, datEnd) {
 */
 function requestData() {
 
-    document.getElementById("count_val").innerHTML = "0";
+    if (DP_Navigator < 3) {
+    	document.getElementById("count_val").innerHTML = "0";
+        document.getElementById('count_text').innerHTML = ChhLanguage.default.historian.labelValues;
+    } else {
+      	document.getElementById("count_val").innerHTML = "";
+        document.getElementById('count_text').innerHTML = "";
+    }
 
     // display loading info
     setTimeout(loadingInfo, 500);
@@ -1375,6 +1386,8 @@ function requestSettings() {
                         	DP_Labels = parseInt(text2[k].substr(1, 2));
                         } else if (text2[k].substr(0, 1) === 'D') {
                         	DP_DayLight = parseInt(text2[k].substr(1, 2));
+                        } else if (text2[k].substr(0, 1) === 'G') {
+                        	DP_Grid = parseInt(text2[k].substr(1, 2));
                         } else if (text2[k].substr(0, 1) === 'F') {
                         	DP_ShowFilter = parseInt(text2[k].substr(1, 2));
                         } else if (text2[k].substr(0, 1) === 'I') {
@@ -1403,7 +1416,7 @@ function requestSettings() {
 function readLinkData() {
     // check parameter from get-link
     if (location.search) {
-        var parts = location.search.substring(1).split('&');
+        var parts = decodeURIComponent(location.search.substring(1)).split('&');
         for (var i = 0; i < parts.length; i++) {
             var nv = parts[i].split('=');
             if (!nv[0])
@@ -1430,13 +1443,22 @@ function readLinkData() {
                 }
             } else if (nv[0].toLowerCase() === 'navigator') {
                 if (decodeURIComponent(nv[1].toLowerCase()) === 'false') {
-                    DP_Navigator = 0;
+                    DP_Navigator = 3;
                 }
                 if (decodeURIComponent(nv[1].toLowerCase()) === '0') {
                     DP_Navigator = 0;
                 }
                 if (decodeURIComponent(nv[1].toLowerCase()) === '1') {
                     DP_Navigator = 1;
+                }
+                if (decodeURIComponent(nv[1].toLowerCase()) === '2') {
+                    DP_Navigator = 2;
+                }
+                if (decodeURIComponent(nv[1].toLowerCase()) === '3') {
+                    DP_Navigator = 3;
+                }
+                if (decodeURIComponent(nv[1].toLowerCase()) === '4') {
+                    DP_Navigator = 4;
                 }
             } else if (nv[0].toLowerCase() === 'theme') {
                 DP_Theme = decodeURIComponent(nv[1].toLowerCase());
@@ -1471,6 +1493,8 @@ function readLinkData() {
                 if (decodeURIComponent(nv[1].toLowerCase()) === '3') {
                     DP_DayLight = 3;
                 }
+            } else if (nv[0].toLowerCase() === 'grid') {
+            	DP_Grid = parseInt(decodeURIComponent(nv[1]));
             } else if (nv[0].toLowerCase() === 'refresh') {
                 if (parseInt(decodeURIComponent(nv[1])) > 0) {
                     H2_refreshSec = parseInt(decodeURIComponent(nv[1]));
@@ -1618,7 +1642,7 @@ function requestData2(TXT_JSON) {
 
     // check parameter from get-link
     if (location.search) {
-        var parts = location.search.substring(1).split('&');
+        var parts = decodeURIComponent(location.search.substring(1)).split('&');
         for (var i = 0; i < parts.length; i++) {
             var nv = parts[i].split('=');
             if (!nv[0])
@@ -1788,7 +1812,7 @@ function requestData2(TXT_JSON) {
 
     // check parameter Zoom from get-link
     if (location.search) {
-        var parts = location.search.substring(1).split('&');
+        var parts = decodeURIComponent(location.search.substring(1)).split('&');
         for (var i = 0; i < parts.length; i++) {
             var nv = parts[i].split('=');
             if (!nv[0])
@@ -1825,10 +1849,9 @@ $(document).ready(function() {
     document.getElementById('button5').innerHTML = ChhLanguage.default.historian.buttonALL;
     document.getElementById('refresh').innerHTML = ChhLanguage.default.historian.buttonRefresh;
     document.getElementById('createLink').innerHTML = ChhLanguage.default.historian.buttonLink;
-    document.getElementById('count_text').innerHTML = ChhLanguage.default.historian.labelValues;
     document.getElementById('filterFeld').placeholder = ChhLanguage.default.historian.filterPlaceHolder;
     document.title = ChhLanguage.default.interface.pageTitle;
-
+  
     // Define a custom symbol PLUS
     Highcharts.SVGRenderer.prototype.symbols.plus = function (x, y, w, h) {
         return [ 'M', x + w*0.3, y,
@@ -1970,7 +1993,7 @@ $(document).ready(function() {
 
     // Navigator options
     var select = document.getElementById("Select-Navigator");
-    for (var i = 0; i < 2; i++) {
+    for (var i = 0; i < 5; i++) {
         var option = document.createElement("option");
         option.text = ChhLanguage.default.historian['navitxt' + i];
         option.value = i;
@@ -1991,6 +2014,15 @@ $(document).ready(function() {
     for (var i = 0; i < 4; i++) {
         var option = document.createElement("option");
         option.text = ChhLanguage.default.historian['layouttxt' + i];
+        option.value = i;
+        select.add(option);
+    }
+    
+    // Grid options
+    var select = document.getElementById("Select-Grid");
+    for (var i = 0; i < 7; i++) {
+        var option = document.createElement("option");
+        option.text = ChhLanguage.default.historian['gridtxt' + i];
         option.value = i;
         select.add(option);
     }
@@ -2255,6 +2287,10 @@ function loadNewSerienData() {
 }
 
 function loadNewAxisInfo() {
+	var yaxis_count = 0;
+	
+	var yaxis_grid = (DP_Grid === 2 || DP_Grid === 3 || DP_Grid === 5 || DP_Grid === 6) ? 1 : 0;
+	var yaxis_mgrid = (DP_Grid === 5 || DP_Grid === 6) ? 1 : 0;
 
     for (var axispos = 0; axispos < DP_yAxis.length; axispos++) {
     	var axVisible = false;
@@ -2267,6 +2303,7 @@ function loadNewAxisInfo() {
         
 //         if (chart.yAxis[axispos].hasVisibleSeries) {
         if (axVisible) {
+        	yaxis_count++;
 
             var axiscolor = null;
             if (DP_yAxis[axispos].color == 0) {
@@ -2295,10 +2332,19 @@ function loadNewAxisInfo() {
                             "color": axiscolor
                         }
                     },
+
+                    // set gridlines only on 1 
+                	gridLineWidth: (yaxis_count === 1) ? yaxis_grid : 0,
+                   	minorGridLineWidth: (yaxis_count === 1) ? yaxis_mgrid : 0,
+                    minorTickInterval: (DP_Grid == 5 || DP_Grid == 6) ? 'auto' : null,
                     visible: true
                 }, false);
             } else {
                 chart.yAxis[axispos].update({
+                    // set gridlines only on 1 
+                	gridLineWidth: (yaxis_count === 1) ? yaxis_grid : 0,
+                   	minorGridLineWidth: (yaxis_count === 1) ? yaxis_mgrid : 0,
+                    minorTickInterval: (DP_Grid == 5 || DP_Grid == 6) ? 'auto' : null,
                     visible: true
                 }, false);
 
@@ -2308,6 +2354,7 @@ function loadNewAxisInfo() {
             if (DP_yAxis[axispos].limit == '2') {
                 chart.yAxis[axispos].setExtremes(parseFloat(DP_yAxis[axispos].min), parseFloat(DP_yAxis[axispos].max));
             }
+           
         } else {
             chart.yAxis[axispos].update({
                 visible: false
@@ -2421,7 +2468,6 @@ function loadNewPlotBand() {
 
 //********************
 function createUrl() {
-
     var url = location.pathname + "?";
     var attr;
 
@@ -2522,8 +2568,8 @@ function createUrl() {
     }
 
     // Navigator not show    
-    if (!chart.navigator.navigatorEnabled) {
-        url += '&navigator=false';
+    if (DP_Navigator != 0) {
+        url += '&navigator=' + DP_Navigator.toString();
     }
 
     // Labels show    
@@ -2536,6 +2582,10 @@ function createUrl() {
         url += '&daylight=' + DP_DayLight;
     }
 
+    // Grid show    
+    if (DP_Grid != 2) {
+        url += '&grid=' + DP_Grid;
+    }
     // AutoRefresh    
     if (DP_AutoRefresh != 0) {
         url += '&refresh=' + (DP_AutoRefresh === 60 ? true : DP_AutoRefresh);
@@ -2576,7 +2626,9 @@ function createUrl() {
 function AutoRefresh() {
     if (DP_AutoRefresh > 0) {
         setTimeout(AutoRefresh, 1000);
-        document.getElementById('autorefresh').innerHTML = ' - ' + ChhLanguage.default.highcharts.autorefreshText + ':' + AutoRefreshCount + ' Sek.';
+        if (DP_Navigator < 3) {
+        	document.getElementById('autorefresh').innerHTML = ' - ' + ChhLanguage.default.highcharts.autorefreshText + ':' + AutoRefreshCount + ' Sek.';
+        }
         AutoRefreshCount--;
         if (AutoRefreshCount <= 0) {
             AutoRefreshCount = DP_AutoRefresh;
@@ -2593,7 +2645,7 @@ function AutoRefresh() {
 
 //********************
 function loadingInfo() {
-    if (DP_Queue.length > 0) {
+    if (DP_Queue.length > 0 && DP_Navigator < 3) {
         if (DP_Loading != DP_Queue.length) {
            document.getElementById('loading').innerHTML = ' (Loading - '+DP_Queue.length+') <img src="loading.gif" alt="loading" height="20" width="20">';
            DP_Loading = DP_Queue.length;
@@ -2842,6 +2894,7 @@ function showDialogSettings() {
     document.getElementById("Select-Navigator").value = DP_Navigator.toString();
     document.getElementById("Select-Label").value = DP_Labels.toString();
     document.getElementById("Select-Layout").value = DP_DayLight.toString();
+    document.getElementById("Select-Grid").value = DP_Grid.toString();
     document.getElementById("Select-Content").value = DP_ShowFilter.toString();
     document.getElementById("Select-DataPoint").value = DP_DataPointFilter.toString();
     document.getElementById("Select-Theme").value = DP_Theme;
@@ -2877,6 +2930,7 @@ function saveSetting() {
     strCustom += '|N' + DP_Navigator.toString();
     strCustom += '|P' + DP_Labels.toString();
     strCustom += '|D' + DP_DayLight.toString();
+    strCustom += '|G' + DP_Grid.toString();
     strCustom += '|F' + DP_ShowFilter.toString();
     strCustom += '|I' + DP_DataPointFilter.toString();
     strCustom += '|B' + DP_Theme;
@@ -2953,17 +3007,23 @@ function getDialogSetting() {
     // Navigator
     if (DP_Navigator.toString() != document.getElementById("Select-Navigator").value) {
         DP_Navigator = parseInt(document.getElementById("Select-Navigator").value);
-        if (DP_Navigator == 1) {
-            chart.navigator.update({
-                enabled: true,
-            });
-        } else {
-            chart.navigator.update({
-                enabled: false,
-            });
-        }
-        chart.legend.update(defineLegend());
-        chart.redraw();
+        
+        /* chart.navigator.update({
+            enabled: (DP_Navigator == 0 || DP_Navigator == 1 ) ? true : false,
+        });
+        chart.scrollbar.update({
+            enabled: (DP_Navigator == 0 || DP_Navigator == 2) ? true : false,
+        });
+        chart.credits.update({
+            enabled: (DP_Navigator != 3) ? true : false,
+        });
+
+        // chart.legend.update(defineLegend());
+        // chart.redraw();
+        */
+        ChartSetOptions();
+        chartSetElements();
+        filterrefresh = false;
     }
 
     // Title
@@ -2991,6 +3051,13 @@ function getDialogSetting() {
     // Layout
     if (DP_DayLight.toString() != document.getElementById("Select-Layout").value) {
         DP_DayLight = parseInt(document.getElementById("Select-Layout").value);
+        filterrefresh = true;
+    }
+
+    // Grid
+    if (DP_Grid.toString() != document.getElementById("Select-Grid").value) {
+        DP_Grid = parseInt(document.getElementById("Select-Grid").value);
+        ChartSetOptions();
         filterrefresh = true;
     }
 
@@ -3049,21 +3116,28 @@ $("#Dialog2BtnClose").click(function() {
 });
 
 function showFilterLine() {
+	// check height of navigator+messages+range selector
+	if (DP_Navigator == 4 || DP_Navigator == 3) {
+		var nav_height = 10;
+	} else {
+		var nav_height = 55;
+	}		
+	
     // ajust height of content to screen height
     if (DP_ShowFilter === 0) {
-        document.getElementById("container").setAttribute("style", "height:" + ($(document).height() - 55) + "px");
+        document.getElementById("container").setAttribute("style", "height:" + ($(document).height() - nav_height - 0) + "px");
         document.getElementById("filter").style.display = "none";
         $('nav.navbar.navbar-default')[0].style.display = "none";
     } else if (DP_ShowFilter === 1) {
-        document.getElementById("container").setAttribute("style", "height:" + ($(document).height() - 160) + "px");
+        document.getElementById("container").setAttribute("style", "height:" + ($(document).height() - nav_height - 105) + "px");
         document.getElementById("filter").style.display = "block";
         $('nav.navbar.navbar-default')[0].style.display = "block";
     } else if (DP_ShowFilter === 2) {
-        document.getElementById("container").setAttribute("style", "height:" + ($(document).height() - 90) + "px");
+        document.getElementById("container").setAttribute("style", "height:" + ($(document).height() - nav_height - 35) + "px");
         document.getElementById("filter").style.display = "block";
         $('nav.navbar.navbar-default')[0].style.display = "none";
     } else if (DP_ShowFilter === 3) {
-        document.getElementById("container").setAttribute("style", "height:" + ($(document).height() - 125) + "px");
+        document.getElementById("container").setAttribute("style", "height:" + ($(document).height() - nav_height - 70) + "px");
         document.getElementById("filter").style.display = "none";
         $('nav.navbar.navbar-default')[0].style.display = "block";
     }
@@ -3363,6 +3437,7 @@ function ChartSetOptions() {
         },
 
         rangeSelector: {
+        	enabled: (DP_Navigator < 4) ? true : false,
             buttons: [{
                 count: 30,
                 type: 'minute',
@@ -3411,18 +3486,26 @@ function ChartSetOptions() {
 
         navigation: {
             buttonOptions: {
-                enabled: true,
+                enabled: (DP_Navigator < 4) ? true : false,
             }
         },
         navigator: {
-            enabled: (DP_Navigator == 1) ? true : false,
+            enabled: (DP_Navigator == 0 || DP_Navigator == 1 ) ? true : false,
+        },
+        scrollbar: {
+            enabled: (DP_Navigator == 0 || DP_Navigator == 2) ? true : false,
+        },
+        credits: {
+            enabled: (DP_Navigator < 3) ? true : false,
+            text: '(c) wak - H2-HighChart version ' + H2_version + ' - verwendet Highstock http://www.highcharts.com - Kommerzielle Nutzung untersagt',
+            href: 'https://github.com/wakr70/CCU-Historian-HC'
         },
 
         exporting: {
             buttons: {
                 contextButton: {
                     symbol: "menu",
-                    enabled: true,
+                    enabled: (DP_Navigator < 4) ? true : false,
                     menuItems: [{
                         text: ChhLanguage.default.historian.settings,
                         onclick: function() {
@@ -3465,15 +3548,12 @@ function ChartSetOptions() {
             floating: false,
         },
 
-        credits: {
-            enabled: true,
-            text: '(c) wak - H2-HighChart version ' + H2_version + ' - verwendet Highstock http://www.highcharts.com - Kommerzielle Nutzung untersagt',
-            href: 'https://github.com/wakr70/CCU-Historian-HC'
-        },
-
         xAxis: {
             type: 'datetime',
             ordinal: false,
+        	gridLineWidth: (DP_Grid == 1 || DP_Grid == 3 || DP_Grid == 4 || DP_Grid == 6) ? 1 : 0,
+        	minorGridLineWidth: (DP_Grid == 4 || DP_Grid == 6) ? 1 : 0,
+        	minorTickInterval: (DP_Grid == 4 || DP_Grid == 6) ? 'auto' : null,
             dataMax: Date.now(),
             events: {
                 afterSetExtremes: function() {
@@ -3545,46 +3625,49 @@ function ChartSetOptions() {
 function showAggrText() {
 	var attr;
     var aggrType;
-    for (var serie = 0; serie < chart.series.length; serie++) {
-        if (chart.series[serie].visible && chart.series[serie].options.group != "nav") {
-            var grouping = chart.series[serie].currentDataGrouping;
-            if (grouping) {
-                var text = grouping.unitName;
-                if (ChhLanguage.default.highcharts['aggr' + text]) {
-                    text = ChhLanguage.default.highcharts['aggr' + text];
-                }
-                if (chart.series[serie].options.id) {
-                    attr = DP_attribute.findIndex(obj=>obj.id === chart.series[serie].options.id.toString());
-                    aggrType = 0;
-                    if (attr != -1) {
-                        aggrType = parseInt(DP_attribute[attr].aggr.substr(1, 2))
-                    }
-                }
-
-                if (aggrType === 1) {
-                    document.getElementById('aggr_text').innerHTML = ' - ' + ChhLanguage.default.historian.aggrtxt1 + ': ' + grouping.count + '/' + text;
-                } else if (aggrType === 2) {
-                    document.getElementById('aggr_text').innerHTML = ' - ' + ChhLanguage.default.historian.aggrtxt2 + ': ' + grouping.count + '/' + text;
-                } else if (aggrType === 3) {
-                    document.getElementById('aggr_text').innerHTML = ' - ' + ChhLanguage.default.historian.aggrtxt3 + ': ' + grouping.count + '/' + text;
-                } else if (aggrType === 4) {
-                    document.getElementById('aggr_text').innerHTML = ' - ' + ChhLanguage.default.historian.aggrtxt4 + ': ' + grouping.count + '/' + text;
-                } else if (aggrType === 5) {
-                    document.getElementById('aggr_text').innerHTML = ' - ' + ChhLanguage.default.historian.aggrtxt5 + ': ' + grouping.count + '/' + text;
-                } else if (aggrType === 6) {
-                    document.getElementById('aggr_text').innerHTML = ' - ' + ChhLanguage.default.historian.aggrtxt6;
-                } else if (aggrType === 7) {
-                    document.getElementById('aggr_text').innerHTML = ' - ' + ChhLanguage.default.historian.aggrtxt7 + ': ' + grouping.count + '/' + text;
-                } else {
-                    document.getElementById('aggr_text').innerHTML = ' - ' + ChhLanguage.default.historian.aggrtxt1 + ': ' + grouping.count + '/' + text;
-                }
-            } else {
-                document.getElementById('aggr_text').innerHTML = ' -  ' + ChhLanguage.default.historian.aggrtxt0;
-            }
-            break;
-        }
-    }
+    if (DP_Navigator < 3) {
+	    for (var serie = 0; serie < chart.series.length; serie++) {
+	        if (chart.series[serie].visible && chart.series[serie].options.group != "nav") {
+	            var grouping = chart.series[serie].currentDataGrouping;
+	            if (grouping) {
+	                var text = grouping.unitName;
+	                if (ChhLanguage.default.highcharts['aggr' + text]) {
+	                    text = ChhLanguage.default.highcharts['aggr' + text];
+	                }
+	                if (chart.series[serie].options.id) {
+	                    attr = DP_attribute.findIndex(obj=>obj.id === chart.series[serie].options.id.toString());
+	                    aggrType = 0;
+	                    if (attr != -1) {
+	                        aggrType = parseInt(DP_attribute[attr].aggr.substr(1, 2))
+	                    }
+	                }
 	
+	                if (aggrType === 1) {
+	                    document.getElementById('aggr_text').innerHTML = ' - ' + ChhLanguage.default.historian.aggrtxt1 + ': ' + grouping.count + '/' + text;
+	                } else if (aggrType === 2) {
+	                    document.getElementById('aggr_text').innerHTML = ' - ' + ChhLanguage.default.historian.aggrtxt2 + ': ' + grouping.count + '/' + text;
+	                } else if (aggrType === 3) {
+	                    document.getElementById('aggr_text').innerHTML = ' - ' + ChhLanguage.default.historian.aggrtxt3 + ': ' + grouping.count + '/' + text;
+	                } else if (aggrType === 4) {
+	                    document.getElementById('aggr_text').innerHTML = ' - ' + ChhLanguage.default.historian.aggrtxt4 + ': ' + grouping.count + '/' + text;
+	                } else if (aggrType === 5) {
+	                    document.getElementById('aggr_text').innerHTML = ' - ' + ChhLanguage.default.historian.aggrtxt5 + ': ' + grouping.count + '/' + text;
+	                } else if (aggrType === 6) {
+	                    document.getElementById('aggr_text').innerHTML = ' - ' + ChhLanguage.default.historian.aggrtxt6;
+	                } else if (aggrType === 7) {
+	                    document.getElementById('aggr_text').innerHTML = ' - ' + ChhLanguage.default.historian.aggrtxt7 + ': ' + grouping.count + '/' + text;
+	                } else {
+	                    document.getElementById('aggr_text').innerHTML = ' - ' + ChhLanguage.default.historian.aggrtxt1 + ': ' + grouping.count + '/' + text;
+	                }
+	            } else {
+	                document.getElementById('aggr_text').innerHTML = ' -  ' + ChhLanguage.default.historian.aggrtxt0;
+	            }
+	            break;
+	        }
+	    }
+    } else {
+        document.getElementById('aggr_text').innerHTML = '';
+    }
 }
 
 function chartSetElements() {
@@ -3723,9 +3806,11 @@ function chartSetElements() {
         Zeitraum_Ende = new Date(Date.now());
         loadNewSerienData();
     });
+
     // **********************
     $('#createLink').click(function() {
         createUrl();
     });
 
 }
+

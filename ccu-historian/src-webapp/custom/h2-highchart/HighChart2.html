@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="de"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/external/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="historian.css" rel="stylesheet">
+    <link rel="icon" sizes="192x192" href="http://10.0.0.250:8082/custom/h2-highchart/historian-196.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="http://10.0.0.250:8082/custom/h2-highchart/historian-180.png">
+    <title>CCU-historian: HighChart</title>
+    <script> var apiKey=""</script>
+  </head>
+  <body style="background-color: rgb(255, 255, 255);">
+    <div class="container-navbar" style="display: none">
+       <nav class="navbar navbar-default" style="display: none;"></nav>
+    </div>
+    <div class="container-fluid" style="margin-top: 0.5em">
+      <div id="filter" style="display: none;">
+        <div class="btn-group" role="group">
+          <button id="button1" class="btn btn-default">Tag</button>
+          <button id="button2" class="btn btn-default">Woche</button>
+          <button id="button3" class="btn btn-default">Monat</button>
+          <button id="button4" class="btn btn-default">Jahr</button>
+          <button id="button5" class="btn btn-default">Alles</button>
+        </div>
+        <select id="Select-Raum" class="form-select-h2"></select>
+        <select id="Select-Gewerk" class="form-select-h2"></select>
+        <input id="filterFeld" class="form-select-h2" type="text" placeholder="Suchen ...">
+        <div class="btn-group" role="group">
+          <button id="refresh" class="btn btn-default">Refresh</button>
+          <button id="createLink" class="btn btn-default">Link erzeugen</button>
+        </div>
+      </div>
+      <div id="container" style="height:200px" data-highcharts-chart="0"></div>
+      <div id="message" style="color: rgb(51, 51, 51);display: none;">
+        <span id="count_val">0</span>
+        <span id="count_text">Werte</span>
+        <span id="aggr_text"></span>
+        <span id="autorefresh"></span>
+        <span id="loading"></span>
+      </div>
+      <div id="LinePopup" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" id="DialogBtnClose">x</button>
+              <h4 class="modal-title">Modal Header</h4>
+            </div>
+            <div class="modal-body">
+              <div id="yasix">
+                <span id="Text-Yaxis" class="LinePopup-text">Y-Axis</span>
+                <select id="Select-Yaxis" class="form-select-h2"></select>
+              </div>
+              <div id="aggregation">
+                <span id="Text-Aggregation" class="LinePopup-text">Aggregation</span>
+                <select id="Select-Aggregation" class="form-select-h2"></select>
+              </div>
+              <div id="aggrtime">
+                <span id="Text-AggrTime" class="LinePopup-text">Aggr.Zeitraum</span>
+                <select id="Select-AggrTime" class="form-select-h2"></select>
+              </div>
+              <div id="compare">
+                <span id="Text-Compare" class="LinePopup-text">Compare</span>
+                <select id="Select-Compare" class="form-select-h2"></select>
+              </div>
+              <div id="stacking">
+                <span id="Text-Stacking" class="LinePopup-text">Stacking</span>
+                <select id="Select-Stacking" class="form-select-h2"></select>
+              </div>
+              <div id="color">
+                <span id="Text-Color" class="LinePopup-text">Color</span>
+                <select id="Select-Color" class="form-select-h2"></select>
+              </div>
+              <div id="linetype">
+                <span id="Text-Line" class="LinePopup-text">Line-Type</span>
+                <select id="Select-Line" class="form-select-h2"></select>
+              </div>
+              <div id="marker">
+                <span id="Text-Marker" class="LinePopup-text">Marker</span>
+                <select id="Select-Marker" class="form-select-h2"></select>
+              </div>
+              <div id="dashtype">
+                <span id="Text-DashType" class="LinePopup-text">Line-Art</span>
+                <select id="Select-DashType" class="form-select-h2"></select>
+              </div>
+              <div id="linewidth">
+                <span id="Text-LineWidth" class="LinePopup-text">Line-Width</span>
+                <select id="Select-LineWidth" class="form-select-h2"></select>
+              </div>
+              <div id="linefactor">
+                <span id="Text-LineFactor" class="LinePopup-text">Faktor</span>
+                <input id="Line-Factor" type="number" step="any" class="form-input-h2">
+              </div>
+              <div id="lineoffset">
+                <span id="Text-LineOffSet" class="LinePopup-text">Offset</span>
+                <input id="Line-OffSet" type="number" step="any" class="form-input-h2">
+              </div>
+              <div id="lineunit">
+                <span id="Text-LineUnit" class="LinePopup-text">Einheit</span>
+                <input id="Line-Unit" class="form-input-h2">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" id="LineDefault">Default</button>
+              <button type="button" class="btn btn-default" id="DialogBtnOK">Ok</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="SettingPopup" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" id="Dialog2BtnClose">x</button>
+              <h4 class="modal-title2">Modal Header</h4>
+            </div>
+            <div class="modal-body">
+              <div id="legend">
+                <span id="Text-Legend" class="LinePopup-text">Legende</span>
+                <select id="Select-Legend" class="form-select-h2"></select>
+              </div>
+              <div id="navigator">
+                <span id="Text-Navigator" class="LinePopup-text">Navigator</span>
+                <select id="Select-Navigator" class="form-select-h2"></select>
+              </div>
+              <div id="labels">
+                <span id="Text-Label" class="LinePopup-text">Point-Labels</span>
+                <select id="Select-Label" class="form-select-h2"></select>
+              </div>
+              <div id="layout">
+                <span id="Text-Layout" class="LinePopup-text">Layout</span>
+                <select id="Select-Layout" class="form-select-h2"></select>
+              </div>
+              <div id="content">
+                <span id="Text-Content" class="LinePopup-text">Content</span>
+                <select id="Select-Content" class="form-select-h2"></select>
+              </div>
+              <div id="datapoint">
+                <span id="Text-DataPoint" class="LinePopup-text">DataPoint</span>
+                <select id="Select-DataPoint" class="form-select-h2"></select>
+              </div>
+              <div id="theme">
+                <span id="Text-Theme" class="LinePopup-text">Theme</span>
+                <select id="Select-Theme" class="form-select-h2"></select>
+              </div>
+              <div id="refresh">
+                <span id="Text-Refresh" class="LinePopup-text">Refresh in Sec.</span>
+                <input id="Line-Refresh" type="number" step="0" class="form-input-h2">
+              </div>
+              <div id="title">
+                <span id="Text-Refresh" class="LinePopup-text">Title</span>
+                <input id="Line-Title" class="form-input-h2">
+              </div>
+              <div id="subtitle">
+                <span id="Text-Refresh" class="LinePopup-text">Subtitle</span>
+                <input id="Line-Subtitle" class="form-input-h2">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" id="SettingDefault">Default</button>
+              <button type="button" class="btn btn-default" id="Dialog2BtnOK">Ok</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="AxisPopup" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" id="Dialog3BtnClose">x</button>
+              <h4 class="modal-title3">Modal Header</h4>
+            </div>
+            <div class="modal-body">
+              <div id="title">
+                <span id="Text-Refresh" class="LinePopup-text">Title</span>
+                <input id="Line-Title3" class="form-input-h2">
+              </div>
+              <div id="position">
+                <span id="Text-Position" class="LinePopup-text">Position</span>
+                <select id="Select-Position" class="form-select-h2"></select>
+              </div>
+              <div id="axiscolor">
+                <span id="Text-AxisColor" class="LinePopup-text">Farbe</span>
+                <select id="Select-AxisColor" class="form-select-h2"></select>
+              </div>
+              <div id="type">
+                <span id="Text-AxisType" class="LinePopup-text">Type</span>
+                <select id="Select-AxisType" class="form-select-h2"></select>
+              </div>
+              <div id="limit">
+                <span id="Text-Limit" class="LinePopup-text">Limit</span>
+                <select id="Select-Limit" class="form-select-h2"></select>
+              </div>
+              <div id="min">
+                <span id="Text-Min" class="LinePopup-text">Minimum</span>
+                <input id="Line-Min" type="number" step="any" class="form-input-h2">
+              </div>
+              <div id="max">
+                <span id="Text-Max" class="LinePopup-text">Maximum</span>
+                <input id="Line-Max" type="number" step="any" class="form-input-h2">
+              </div>
+              <div id="tickamount">
+                <span id="Text-TickAmount" class="LinePopup-text">Teilung</span>
+                <input id="Line-TickAmount" type="number" step="0" class="form-input-h2">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" id="AxisDefault">Default</button>
+              <button type="button" class="btn btn-default" id="Dialog3BtnOK">Ok</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="/external/jquery/jquery.js"></script>
+    <script src="/external/bootstrap/js/bootstrap.js"></script>
+    <script src="/external/underscore/underscore.js"></script>
+    <script src="highstock.js"></script>
+    <script src="highcharts-more.js"></script>
+    <script src="exporting.js"></script>
+    <script src="offline-exporting.js"></script>
+    <script src="language.js"></script>
+    <script src="themes.js"></script>
+    <script src="H2-HighChart.js"></script>
+  
+</body></html>
