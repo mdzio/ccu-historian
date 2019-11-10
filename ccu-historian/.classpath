@@ -11,7 +11,6 @@
 	<classpathentry kind="lib" path="/external-libs/jcommon-1.0.23/jcommon-1.0.23.jar"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
 	<classpathentry kind="lib" path="/external-libs/servlet-api-2.4/servlet-api-2.4.jar"/>
-	<classpathentry kind="lib" path="/external-libs/h2-1.4.199/h2-1.4.199.jar"/>
 	<classpathentry kind="lib" path="/external-libs/groovy-2.5.6/groovy-json-2.5.6.jar"/>
 	<classpathentry kind="lib" path="/external-libs/groovy-2.5.6/groovy-sql-2.5.6.jar"/>
 	<classpathentry kind="lib" path="/external-libs/groovy-2.5.6/groovy-servlet-2.5.6.jar"/>
@@ -20,5 +19,6 @@
 	<classpathentry kind="lib" path="/external-libs/groovy-2.5.6/groovy-cli-commons-2.5.6.jar"/>
 	<classpathentry kind="lib" path="/external-libs/commons-cli-1.4/commons-cli-1.4.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="lib" path="/external-libs/h2-1.4.200/h2-1.4.200.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
