@@ -575,7 +575,7 @@ public class Database implements Storage {
 	
 	private static String getUrl(DatabaseConfig config) {
 		if (!config.dir.isEmpty() && !config.dir.endsWith('/')) config.dir+='/'
-		"jdbc:h2:file:$config.dir$config.name;DB_CLOSE_ON_EXIT=FALSE"
+		"jdbc:h2:file:$config.dir$config.name;DB_CLOSE_ON_EXIT=FALSE;BUILTIN_ALIAS_OVERRIDE=TRUE"
 	}
 
 	private static String getDataPointTableName(DataPoint dp) {
