@@ -111,6 +111,4 @@ class Main {
 	public static shutdown() {
 		Thread.start { System.exit(0) }
 	}
-
-	public static void restart() {	main.restart=true }
 }
