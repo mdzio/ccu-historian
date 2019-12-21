@@ -20,6 +20,7 @@ package mdz.ccuhistorian
 import java.util.Date
 import java.util.List;
 import java.util.logging.Logger
+import java.util.logging.Level
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 import java.sql.ResultSet
@@ -63,55 +64,62 @@ public class Database implements Storage {
 	private final static String CONFIG_DATABASE_VERSION='internal.databaseVersion'
 		
 	public Database(DatabaseConfig config, Base base) {
-		log.info 'Connecting to database'
 		this.config=config
 		this.base=base
 		config.logDebug()
-		try {
-			db=Sql.newInstance(getUrl(config), config.user, config.password, 'org.h2.Driver')
-			prepareDatabase()
-			if (config.webEnable) {
-				log.info 'Starting database web server'
-				def args=['-ifExists', '-webPort', config.webPort as String]
-				if (config.webAllowOthers) args << '-webAllowOthers'
-				webServer=Server.createWebServer(args as String[])
-				webServer.start()
-				log.fine "Database management URL: ${webServer.getURL()}"
-			}
-			if (config.tcpEnable) {
-				log.info 'Starting database TCP server'
-				def args=['-ifExists', '-tcpPort', config.tcpPort as String]
-				if (config.tcpAllowOthers) args << '-tcpAllowOthers'
-				tcpServer=Server.createTcpServer(args as String[])
-				tcpServer.start()
-				log.info "Databse TCP server port: ${tcpServer.getPort()}"
-			}
-			if (config.pgEnable) {
-				log.info 'Starting database PG server'
-				def args=['-ifExists', '-pgPort', config.pgPort as String]
-				if (config.pgAllowOthers) args << '-pgAllowOthers'
-				pgServer=Server.createPgServer(args as String[])
-				pgServer.start()
-				log.info "PG ODBC driver port: ${pgServer.getPort()}"
-			}
-			if (config.backup) {
-				Calendar cal=Calendar.instance
-				backupLast=formatTimestamp(config.backup, cal.time)
-				long initialDelay=-cal.timeInMillis
-				cal[Calendar.MINUTE]=0
-				cal[Calendar.SECOND]=0
-				cal[Calendar.MILLISECOND]=0
-				cal.add(Calendar.HOUR_OF_DAY, 1)
-				initialDelay+=cal.timeInMillis
-				backupFuture=base.executor.scheduleAtFixedRate(
-					this.&checkBackupTime, 
-					initialDelay, 3600*1000, TimeUnit.MILLISECONDS)
-			}
-		} catch (Exception ex) {
-			stop();	throw ex
-		}
+		// start database
+		Exceptions.catchToLog(log) { connect() }
 	}
 	
+	private void connect() {
+		if (db==null) {
+			try {
+				log.info 'Connecting to database'
+				db=Sql.newInstance(getUrl(config), config.user, config.password, 'org.h2.Driver')
+				prepareDatabase()
+				if (config.webEnable) {
+					log.info 'Starting database web server'
+					def args=['-ifExists', '-webPort', config.webPort as String]
+					if (config.webAllowOthers) args << '-webAllowOthers'
+					webServer=Server.createWebServer(args as String[])
+					webServer.start()
+					log.fine "Database management URL: ${webServer.getURL()}"
+				}
+				if (config.tcpEnable) {
+					log.info 'Starting database TCP server'
+					def args=['-ifExists', '-tcpPort', config.tcpPort as String]
+					if (config.tcpAllowOthers) args << '-tcpAllowOthers'
+					tcpServer=Server.createTcpServer(args as String[])
+					tcpServer.start()
+					log.info "Databse TCP server port: ${tcpServer.getPort()}"
+				}
+				if (config.pgEnable) {
+					log.info 'Starting database PG server'
+					def args=['-ifExists', '-pgPort', config.pgPort as String]
+					if (config.pgAllowOthers) args << '-pgAllowOthers'
+					pgServer=Server.createPgServer(args as String[])
+					pgServer.start()
+					log.info "PG ODBC driver port: ${pgServer.getPort()}"
+				}
+				if (config.backup) {
+					Calendar cal=Calendar.instance
+					backupLast=formatTimestamp(config.backup, cal.time)
+					long initialDelay=-cal.timeInMillis
+					cal[Calendar.MINUTE]=0
+					cal[Calendar.SECOND]=0
+					cal[Calendar.MILLISECOND]=0
+					cal.add(Calendar.HOUR_OF_DAY, 1)
+					initialDelay+=cal.timeInMillis
+					backupFuture=base.executor.scheduleAtFixedRate(
+						this.&checkBackupTime,
+						initialDelay, 3600*1000, TimeUnit.MILLISECONDS)
+				}
+			} catch (Exception ex) {
+				// partial initialization clean up
+				stop();	throw ex
+			}
+		}
+	}
 	protected synchronized stop() {
 		if (db) {
 			log.info 'Stopping database'
@@ -136,7 +144,8 @@ public class Database implements Storage {
 				db.connection.rollback()
 				db.connection.autoCommit=true
 			} catch(Exception e2) {
-				// ignore
+				// rollback failed
+				Exceptions.logTo(log, Level.SEVERE, e2)
 			}
 			throw e;
 		}
@@ -144,6 +153,7 @@ public class Database implements Storage {
 
 	@Override
 	public synchronized Date getFirstTimestamp(DataPoint dp) {
+		connect()
 		if (!dp.historyTableName)
 			throw new Exception('Table name of data point is not set')
 		def row=db.firstRow("SELECT MIN(TS) FROM $dp.historyTableName" as String)
@@ -152,6 +162,7 @@ public class Database implements Storage {
 
 	@Override
 	public synchronized ProcessValue getLast(DataPoint dp) {
+		connect()
 		if (!dp.historyTableName)
 			throw new Exception('Table name of data point is not set')
 		def row=db.firstRow("SELECT TS, VALUE, STATE FROM $dp.historyTableName WHERE TS=(SELECT MAX(TS) FROM $dp.historyTableName)" as String)
@@ -160,6 +171,7 @@ public class Database implements Storage {
 	
 	@Override
 	public synchronized TimeSeries getTimeSeriesRaw(DataPoint dp, Date begin, Date end) {
+		connect()
 		log.finer "Database: Retrieving raw time series for ${dp.id}, begin: $begin, end: $end"
 		if (!dp.historyTableName)
 			throw new Exception('Table name of data point is not set')
@@ -174,6 +186,7 @@ public class Database implements Storage {
 	
 	@Override
 	public synchronized TimeSeries getTimeSeries(DataPoint dp, Date begin, Date end) {
+		connect()
 		log.finer "Database: Retrieving time series for ${dp.id}, begin: $begin, end: $end"
 		if (!dp.historyTableName)
 			throw new Exception('Table name of data point is not set')
@@ -202,6 +215,7 @@ public class Database implements Storage {
 
 	@Override
 	public synchronized int getCount(DataPoint dp, Date startTime, Date endTime) {
+		connect()
 		if (!dp.historyTableName)
 			throw new Exception('Table name of data point is not set')
 		if (startTime!=null) {
@@ -219,12 +233,14 @@ public class Database implements Storage {
 		
 	@Override
 	public synchronized List<DataPoint> getDataPoints() {
+		connect()
 		log.finer 'Database: Getting data points'
 		db.rows('SELECT * FROM DATA_POINTS ORDER BY INTERFACE, DISPLAY_NAME, ADDRESS, IDENTIFIER').collect { getRowAsDataPoint(it) }
 	}
 
 	@Override
 	public synchronized List<DataPoint> getDataPointsOfInterface(String itfName) {
+		connect()
 		db.rows(
 			"""SELECT * FROM DATA_POINTS WHERE INTERFACE=$itfName
 			ORDER BY DISPLAY_NAME, ADDRESS, IDENTIFIER"""
@@ -233,6 +249,7 @@ public class Database implements Storage {
 
 	@Override
 	public synchronized DataPoint getDataPoint(int idx) {
+		connect()
 		log.finer "Database: Getting data point with index $idx"
 		def row=db.firstRow("SELECT * FROM DATA_POINTS WHERE DP_ID=$idx")
 		row?getRowAsDataPoint(row):null
@@ -240,6 +257,7 @@ public class Database implements Storage {
 	
 	@Override
 	public synchronized DataPoint getDataPoint(DataPointIdentifier id) {
+		connect()
 		log.finer "Database: Getting data point with id $id"
 		def row=db.firstRow("""SELECT * FROM DATA_POINTS WHERE
 			INTERFACE=$id.interfaceId AND ADDRESS=$id.address AND IDENTIFIER=$id.identifier""")
@@ -248,6 +266,7 @@ public class Database implements Storage {
 
 	@Override
 	public synchronized void createDataPoint(DataPoint dp) throws Exception {
+		connect()
 		normalizeDataPoint(dp)
 		dp.historyTableName=getDataPointTableName(dp)
 		createDataPointTable(dp)
@@ -256,6 +275,7 @@ public class Database implements Storage {
 
 	@Override
 	public synchronized void updateDataPoint(DataPoint dp) {
+		connect()
 		normalizeDataPoint(dp)
 		if (isStringTable(dp.historyTableName)!=dp.historyString) {
 			log.fine "Database: Data point $dp.id has changed value type"
@@ -291,6 +311,7 @@ public class Database implements Storage {
 
 	@Override
 	public synchronized void deleteDataPoint(DataPoint dp) {
+		connect()
 		log.fine "Database: Deleting data point ${dp.id}"
 		if (!dp.historyTableName)
 			throw new Exception('Table name of data point is not set')
@@ -305,9 +326,9 @@ public class Database implements Storage {
 		db.execute "DELETE FROM DATA_POINTS WHERE DP_ID=$dp.idx"
 	} 
 	 
-	// not synchronized, the deletion may take longer 
 	@Override
-	public int deleteTimeSeries(DataPoint dp, Date startTime, Date endTime) {
+	public synchronized int deleteTimeSeries(DataPoint dp, Date startTime, Date endTime) {
+		connect()
 		log.fine "Database: Deleting timeseries of data point ${dp.id} (start time: $startTime, end time: $endTime)"
 		if (!dp.historyTableName)
 			throw new Exception('Table name of data point is not set')
@@ -327,9 +348,9 @@ public class Database implements Storage {
 		affectedRows
 	}
 	
-	// not synchronized, the copy may take longer 
 	@Override
-	public int copyTimeSeries(DataPoint dstDp, DataPoint srcDp, Date startTime, Date endTime, Date newStartTime) {
+	public synchronized int copyTimeSeries(DataPoint dstDp, DataPoint srcDp, Date startTime, Date endTime, Date newStartTime) {
+		connect()
 		log.fine "Database: Copying timeseries of data point ${srcDp.id} to data point "+
 			"${dstDp.id} (start time: $startTime, end time: $endTime, new start time: $newStartTime)"
 		if (!dstDp.historyTableName)
@@ -361,7 +382,8 @@ public class Database implements Storage {
 	}
 	
 	@Override
-	public int replaceTimeSeries(DataPoint dstDp, Iterable<ProcessValue> srcSeries, Date startTime, Date endTime) throws Exception {
+	public synchronized int replaceTimeSeries(DataPoint dstDp, Iterable<ProcessValue> srcSeries, Date startTime, Date endTime) throws Exception {
+		connect()
 		log.fine "Database: Replacing timeseries of data point ${dstDp.id} (start time: $startTime, end time: $endTime)"
 		// store all entries in temporary table
 		createTemporaryTable('REPLACE_TEMP', dstDp.historyString)
@@ -419,6 +441,7 @@ public class Database implements Storage {
 	
 	@Override
 	public synchronized void consume(Event e) throws Exception {
+		connect()
 		log.fine "Database: Inserting ($e.pv.timestamp, $e.pv.value, $e.pv.state) into $e.dataPoint.historyTableName"
 		if (!e.dataPoint.historyTableName)
 			throw new Exception('Table name of data point is not set')
@@ -484,11 +507,6 @@ public class Database implements Storage {
 			((Number) value).doubleValue();
 		else
 			null
-	}
-
-	private boolean tableExists(String tableName) {
-		def row=db.firstRow("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='$tableName'" as String)
-		row[0]!=0
 	}
 
 	private DataPoint getRowAsDataPoint(def row) {
@@ -621,6 +639,7 @@ public class Database implements Storage {
 	}
 	
 	private synchronized void createBackup(String fileName) {
+		connect()
 		log.info "Creating backup of database to file $fileName"
 		long start=System.currentTimeMillis()
 		switch (fileName) {
@@ -691,14 +710,16 @@ public class Database implements Storage {
 		}
 	}
 	
-	public String getConfig(String name) {
+	public synchronized String getConfig(String name) {
+		connect()
 		def row=db.firstRow('SELECT VALUE FROM CONFIG WHERE NAME=?', name)
 		String value=row?(String)(row[0]):null
 		log.fine("Read config: $name=$value")
 		value
 	}
 	
-	public void setConfig(String name, String value) {
+	public synchronized void setConfig(String name, String value) {
+		connect()
 		log.fine("Writing config: $name=$value")
 		int cnt=db.executeUpdate('UPDATE CONFIG SET VALUE=? WHERE NAME=?', value, name)
 		if (cnt==0) {
