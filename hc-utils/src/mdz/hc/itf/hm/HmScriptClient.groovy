@@ -55,7 +55,7 @@ public class HmScriptClient {
 	
 	public List<DataPoint> getSystemVariables(String interfaceIdFiller) {
 		log.finer 'Getting list of system variables'
-		List<String> response=execute('''string id; foreach(id, dom.GetObject(ID_SYSTEM_VARIABLES).EnumUsedIDs()) {
+		List<String> response=execute('''string id; foreach(id, dom.GetObject(ID_SYSTEM_VARIABLES).EnumIDs()) {
 			var sv=dom.GetObject(id);
 			var vt=sv.ValueType(); var st=sv.ValueSubType();
 			var outvt="";
