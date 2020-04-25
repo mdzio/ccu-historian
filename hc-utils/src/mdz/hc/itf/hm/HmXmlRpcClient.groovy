@@ -19,16 +19,26 @@ package mdz.hc.itf.hm
 
 import groovy.net.xmlrpc.XMLRPCServerProxy as Proxy
 import groovy.util.logging.Log
-import groovy.lang.Lazy
 
 @Log
 public class HmXmlRpcClient {
 
 	String host
 	int port
+	String username
+	String password
 	
-	@Lazy
-	private Proxy proxy=new Proxy("http://$host:$port")
+	private Proxy proxy
+	
+	public synchronized Proxy getProxy() {
+		if (proxy==null) {
+			proxy=new Proxy("http://$host:$port")
+			if (username) {
+				proxy.setBasicAuth(username, password?:"")
+			}
+		} 
+		return proxy
+	}
 	
 	public List<String> systemListMethods() {
 		log.fine "Calling system.listMethods()"
@@ -41,17 +51,17 @@ public class HmXmlRpcClient {
 		
 	public void init(String url, String interfaceId) {
 		log.fine "Calling init($url, $interfaceId)"
-		proxy.init url, interfaceId
+		getProxy().init url, interfaceId
 	}
 
 	public void deinit(String url) {
 		log.fine "Calling init($url)"
-		proxy.init url
+		getProxy().init url
 	}	
 
 	public Map<String, Map<String, Object>> getParamsetDescription(String address, String type) {
 		log.fine "Calling getParamsetDescription($address, $type)"
-		def result=proxy.getParamsetDescription(address, type)
+		def result=getProxy().getParamsetDescription(address, type)
 		if (!(result in Map) || 
 			!result.every { 
 				it.key in String && it.value in Map &&
@@ -69,11 +79,11 @@ public class HmXmlRpcClient {
 
 	public void setValue(String address, String identifier, value) {
 		log.fine "Calling setValue($address, $identifier, $value)"
-		proxy.setValue address, identifier, value
+		getProxy().setValue address, identifier, value
 	}
 	
 	public void event(String interfaceId, String address, String key, value) {
 		log.fine "Calling event($interfaceId, $address, $key, $value)"
-		proxy.event interfaceId, address, key, value
+		getProxy().event interfaceId, address, key, value
 	}
 }

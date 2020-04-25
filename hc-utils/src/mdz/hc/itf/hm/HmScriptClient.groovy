@@ -45,9 +45,13 @@ public class HmScriptClient {
 	private HmModel model
 	private long modelLastScan
 	private Object modelMutex=[]
+	private String auth
 	
-	public HmScriptClient(String address) {
+	public HmScriptClient(String address, String username, String password) {
 		this.address=address
+		if (username) {
+			auth='Basic '+(username+':'+password?:'').bytes.encodeBase64() 
+		}
 		String host="http://$address:8181/tclrega.exe"
 		log.info "Creating HM script client for $host"
 		url=[host]
@@ -349,6 +353,9 @@ public class HmScriptClient {
 		con.connectTimeout=DEFAULT_CONNECT_TIMEOUT
 		con.requestMethod='POST'
 		con.doOutput=true
+		if (auth) {
+			con.setRequestProperty("Authorization", auth);
+		}
 		con.outputStream.write script.getBytes('ISO-8859-1')
 		con.outputStream.close()
 		List<String> response=[]

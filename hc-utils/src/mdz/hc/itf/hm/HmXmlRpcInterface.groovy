@@ -55,6 +55,8 @@ public class HmXmlRpcInterface extends BasicProducer<RawEvent> implements Interf
 	final HmScriptClient scriptClient
 	final HmReinitTask reinitTask
 	final ScheduledExecutorService executor
+	final String username
+	final String password
 	
 	private HmXmlRpcClient client=[]
 	private Date lastCommTime
@@ -68,6 +70,8 @@ public class HmXmlRpcInterface extends BasicProducer<RawEvent> implements Interf
 			server.addConsumer(this)
 			client.host=host
 			client.port=port
+			client.username=username
+			client.password=password
 			if (!disableRegistration) {
 				Exceptions.catchToLog(log) { init() }
 				reinitTask.add this

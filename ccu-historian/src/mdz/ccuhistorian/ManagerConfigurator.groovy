@@ -110,16 +110,19 @@ class ManagerConfigurator {
 					Boolean writeAccess=getOption(cfg, 'writeAccess', Boolean, "Device $idx: ", false)
 					Integer sysVarDataCycle=getOption(cfg, 'sysVarDataCycle', Integer, "Device $idx: ", false)
 					Integer timeout=getOption(cfg, 'timeout', Integer, "Device $idx: ", false)
+					String username=getOption(cfg, 'username', String, "Device $idx: ", false) 
+					String password=getOption(cfg, 'password', String, "Device $idx: ", false)
 					
 					HmReinitTask reinitTask=new HmReinitTask(manager.executor)
 					if (reinitTimeout!=null)
 						reinitTask.timeout=reinitTimeout
-					HmScriptClient scriptClient=new HmScriptClient(address)
+					HmScriptClient scriptClient=new HmScriptClient(address, username, password)
 
 					if (type==DeviceTypes.CCU1) {
 						HmXmlRpcInterface xmlRpcItfWired=new HmXmlRpcInterface(
 							prefix+INTERFACE_WIRED_NAME, INTERFACE_WIRED_NAME, address, INTERFACE_WIRED_PORT,
-							manager.xmlRpcServer, scriptClient, reinitTask, manager.executor
+							manager.xmlRpcServer, scriptClient, reinitTask, manager.executor,
+							username, password
 						)
 						if (writeAccess!=null) 
 							xmlRpcItfWired.writeAccess=writeAccess
@@ -128,7 +131,8 @@ class ManagerConfigurator {
 					
 					HmXmlRpcInterface xmlRpcItfRf=new HmXmlRpcInterface(
 						prefix+INTERFACE_RF_NAME, INTERFACE_RF_NAME, address, INTERFACE_RF_PORT,
-						manager.xmlRpcServer, scriptClient, reinitTask, manager.executor
+						manager.xmlRpcServer, scriptClient, reinitTask, manager.executor,
+						username, password
 					)
 					if (writeAccess!=null) 
 						xmlRpcItfRf.writeAccess=writeAccess
@@ -137,7 +141,8 @@ class ManagerConfigurator {
 					if (type==DeviceTypes.CCU1) {
 						HmXmlRpcInterface xmlRpcItfSys=new HmXmlRpcInterface(
 							prefix+INTERFACE_SYSTEM_NAME, INTERFACE_SYSTEM_NAME, address, INTERFACE_SYSTEM_PORT,
-							manager.xmlRpcServer, scriptClient, reinitTask, manager.executor
+							manager.xmlRpcServer, scriptClient, reinitTask, manager.executor,
+							username, password
 						)
 						if (writeAccess!=null) 
 							xmlRpcItfSys.writeAccess=writeAccess
@@ -147,7 +152,8 @@ class ManagerConfigurator {
 					if (type==DeviceTypes.CCU2 || type==DeviceTypes.CCU3) {
 						HmXmlRpcInterface hmIpItf=new HmXmlRpcInterface(
 							prefix+INTERFACE_HMIP_RF_NAME, INTERFACE_HMIP_RF_NAME, address, INTERFACE_HMIP_RF_PORT,
-							manager.xmlRpcServer, scriptClient, reinitTask, manager.executor
+							manager.xmlRpcServer, scriptClient, reinitTask, manager.executor,
+							username, password
 						)
 						if (writeAccess!=null)
 							hmIpItf.writeAccess=writeAccess
@@ -200,7 +206,8 @@ class ManagerConfigurator {
 							} else {
 								HmXmlRpcInterface xmlRpcItfPi=new HmXmlRpcInterface(
 									prefix+name, name, address, port,
-									manager.xmlRpcServer, scriptClient, reinitTask, manager.executor
+									manager.xmlRpcServer, scriptClient, reinitTask, manager.executor,
+									username, password
 								)
 								if (writeAccess!=null)
 									xmlRpcItfPi.writeAccess=writeAccess
