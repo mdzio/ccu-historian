@@ -248,13 +248,16 @@ class ManagerConfigurator {
 					Long reinitTimeout=getOption(cfg, 'reinitTimeout', Long, "Device $idx: ", false)
 					Boolean writeAccess=getOption(cfg, 'writeAccess', Boolean, "Device $idx: ", false)
 					Integer timeout=getOption(cfg, 'timeout', Integer, "Device $idx: ", false)
-					
+					String username=getOption(cfg, 'username', String, "Device $idx: ", false)
+					String password=getOption(cfg, 'password', String, "Device $idx: ", false)
+
 					HmReinitTask reinitTask=new HmReinitTask(manager.executor)
 					if (reinitTimeout!=null)
 						reinitTask.timeout=reinitTimeout
 
 					HmXmlRpcInterface xmlRpcItf=new HmXmlRpcInterface(
-						name, null, address, port, manager.xmlRpcServer, null, reinitTask, manager.executor
+						name, null, address, port, manager.xmlRpcServer, null, reinitTask, manager.executor,
+						username, password
 					)
 					if (writeAccess!=null)
 						xmlRpcItf.writeAccess=writeAccess
@@ -281,11 +284,13 @@ class ManagerConfigurator {
 					Boolean writeAccess=getOption(cfg, 'writeAccess', Boolean, "Device $idx: ", false)
 					Integer sysVarDataCycle=getOption(cfg, 'sysVarDataCycle', Integer, "Device $idx: ", false)
 					Integer timeout=getOption(cfg, 'timeout', Integer, "Device $idx: ", false)
-					
+					String username=getOption(cfg, 'username', String, "Device $idx: ", false)
+					String password=getOption(cfg, 'password', String, "Device $idx: ", false)
+
 					HmReinitTask reinitTask=new HmReinitTask(manager.executor)
 					if (reinitTimeout!=null)
 						reinitTask.timeout=reinitTimeout
-					HmScriptClient scriptClient=new HmScriptClient(address)
+					HmScriptClient scriptClient=new HmScriptClient(address, username, password)
 
 					HmSysVarInterface sysVarItf
 					if (sysVarDataCycle!=null)
@@ -352,6 +357,7 @@ class ManagerConfigurator {
 								HmXmlRpcInterface xmlRpcItfPi=new HmXmlRpcInterface(
 									prefix+name, name, address, port,
 									manager.xmlRpcServer, scriptClient, reinitTask, manager.executor,
+									username, password
 								)
 								if (writeAccess!=null)
 									xmlRpcItfPi.writeAccess=writeAccess
