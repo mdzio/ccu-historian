@@ -143,7 +143,7 @@ public class DataPoint {
 		if (isNoSynchronization() && attributes.displayName) {
 			attributes.displayName
 		} else {
-			id.interfaceId+'.'+(attributes.displayName?:id.address)+'.'+id.identifier
+			(attributes.displayName?:id.address)+'.'+id.identifier
 		}
 	}
 	
