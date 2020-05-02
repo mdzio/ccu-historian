@@ -78,7 +78,16 @@ class WebUtilities {
 	}
 	
 	public Throwable catchToLog(Logger log, Closure cl) {
-		Exceptions.catchToLog(log, cl)
+		Exceptions.catchToLog(log) {
+			try {
+				cl()
+				// do not log some exceptions, probably client closed connection
+			} catch (org.eclipse.jetty.io.RuntimeIOException e) {
+				return e
+			} catch (org.eclipse.jetty.io.EofException e) {
+				return e
+			}
+		}
 	}
 
 	public newTimeRange(String begin, String end) {

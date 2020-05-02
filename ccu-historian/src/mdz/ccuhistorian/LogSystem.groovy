@@ -82,7 +82,7 @@ public class LogSystem {
 		this.config=config
 		
 		// configure root logger
-		rootLogger.level=Level.WARNING
+		rootLogger.level=Level.SEVERE
 		rootLogger.handlers.each { Handler h -> rootLogger.removeHandler h }
 		consoleHandler.formatter=new MdzFormatter(this, 'yyyy-MM-dd HH:mm:ss')
 		rootLogger.addHandler consoleHandler
