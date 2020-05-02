@@ -71,6 +71,7 @@ class Historian implements Runnable {
 		historyDisabledFilter=[]
 		dataPointStorageUpdater=[]
 		dataPointStorageUpdater.storage=database
+		dataPointStorageUpdater.defaultActive=config.defaultActive
 		buffer=[]
 		
 		firstArchived.addConsumer database
@@ -127,6 +128,10 @@ class Historian implements Runnable {
 			DataPoint dbDp=dbDps.find { it.id==itfDp.id }
 			if (dbDp==null) {
 				log.info "Historian: Creating data point $itfDp.id"
+				if (!config.defaultActive) {
+					itfDp.historyDisabled=true
+					itfDp.historyHidden=true
+				}
 				database.createDataPoint itfDp
 			}
 		}

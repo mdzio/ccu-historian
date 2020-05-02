@@ -35,6 +35,7 @@ import mdz.Exceptions
 public class DataPointStorageUpdater extends BasicProducer<Event> implements Processor<RawEvent, Event> {
 
 	DataPointStorage storage
+	boolean defaultActive
 	
 	public void consume(RawEvent rawEvent) throws Exception {
 		try {
@@ -52,6 +53,10 @@ public class DataPointStorageUpdater extends BasicProducer<Event> implements Pro
 					id=rawEvent.id
 					managementFlags=(isValueString?DataPoint.FLAGS_HISTORY_STRING:0)
 					attributes.paramSet='VALUES'
+					if (!defaultActive) {
+						historyDisabled=true
+						historyHidden=true
+					} 
 				}
 				storage.createDataPoint dataPoint
 			}
