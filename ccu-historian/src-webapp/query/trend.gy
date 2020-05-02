@@ -228,7 +228,12 @@ def ex=utils.catchToLog(log) {
 	
 	// send graphics
 	response.contentType='image/png'
-	encoder.encode(image, sout)
+	try {
+		encoder.encode(image, sout)
+	} catch (IndexOutOfBoundsException e) {
+		// this special exception occurs when the client closes the connection, wrap it
+		throw new org.eclipse.jetty.io.RuntimeIOException(e)
+	}
 	
 	log.finer "Web server: Trend generated in ${System.currentTimeMillis()-startTime}ms"
 }
