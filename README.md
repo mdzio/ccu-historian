@@ -14,7 +14,7 @@ Die Kommunikationsvorgänge der CCU-Schnittstellen (BidCos-RF, BidCos-Wired und 
 
 Der CCU-Historian erfreut sich bei den HomeMatic-Anwendern einer großen Beliebtheit und verfügt über eine breite Installationsbasis.
 
-Viele weitere Informationen sind auf der [offiziellen Web-Seite des CCU-Historians](http://www.ccu-historian.de/) und im [umfangreichen Handbuch](https://github.com/mdzio/ccu-historian/wiki) zu finden.
+**[Viele weitere Informationen sind im umfangreichen Handbuch zu finden.](https://github.com/mdzio/ccu-historian/wiki)**
 
 ## Übersicht
 
@@ -43,7 +43,7 @@ Für bestimmte Systeme existieren fertige Installationspakete:
 
 ## Installation und Konfiguration
 
-Die Installation und Konfiguration ist im [Handbuch](https://github.com/mdzio/ccu-historian/wiki) ausführlich beschrieben.
+Die Installation und Konfiguration ist im [Handbuch](https://github.com/mdzio/ccu-historian/wiki#installation) ausführlich beschrieben.
 
 ## Entwicklungsumgebung
 
