@@ -32,6 +32,18 @@ import org.codehaus.groovy.control.customizers.ASTTransformationCustomizer
 @Field
 private final static log = Logger.getLogger('mdz.ccuhistorian.webapp.JsonRpc')
 
+// add CORS headers
+response.setHeader('Access-Control-Allow-Origin', webServer.config.corsOrigin);
+if (webServer.config.corsOrigin!='*') {
+	response.setHeader('Access-Control-Allow-Credentials', 'true');
+}
+response.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,OPTIONS');
+response.setHeader('Access-Control-Allow-Headers', '*');
+if (request.method=="OPTIONS") {
+	response.status=response.SC_ACCEPTED
+	return
+}
+
 def rpcResponse=[:]
 rpcResponse.id=null
 try {
