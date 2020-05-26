@@ -27,7 +27,8 @@ class HistorianConfig {
 	int metaCycle=3600000
 	int bufferCount=5000
 	long bufferTime=0
-	boolean defaultActive=true
+	boolean defaultDisabled=false
+	boolean defaultHidden=false
 	
 	// undocumented
 	Map counters
@@ -36,6 +37,7 @@ class HistorianConfig {
 		log.fine "historian.metaCycle=$metaCycle"
 		log.fine "historian.bufferCount=$bufferCount"
 		log.fine "historian.bufferTime=$bufferTime"
-		log.fine "historian.defaultActive=$defaultActive"
+		log.fine "historian.defaultActive=$defaultDisabled"
+		log.fine "historian.defaultHidden=$defaultHidden"
 	}
 }

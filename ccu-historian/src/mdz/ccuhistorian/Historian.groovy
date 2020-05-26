@@ -71,7 +71,8 @@ class Historian implements Runnable {
 		historyDisabledFilter=[]
 		dataPointStorageUpdater=[]
 		dataPointStorageUpdater.storage=database
-		dataPointStorageUpdater.defaultActive=config.defaultActive
+		dataPointStorageUpdater.defaultDisabled=config.defaultDisabled
+		dataPointStorageUpdater.defaultHidden=config.defaultHidden
 		buffer=[]
 		
 		firstArchived.addConsumer database
@@ -128,10 +129,8 @@ class Historian implements Runnable {
 			DataPoint dbDp=dbDps.find { it.id==itfDp.id }
 			if (dbDp==null) {
 				log.info "Historian: Creating data point $itfDp.id"
-				if (!config.defaultActive) {
-					itfDp.historyDisabled=true
-					itfDp.historyHidden=true
-				}
+				itfDp.historyDisabled=config.defaultDisabled
+				itfDp.historyHidden=config.defaultHidden
 				database.createDataPoint itfDp
 			}
 		}
@@ -150,9 +149,7 @@ class Historian implements Runnable {
 	private void update(Interface itf) {
 		log.finer "Historian: Updating data points of interface: $itf.name"
 		
-		List<DataPoint> dataPoints=database.getDataPointsOfInterface(itf.name).findAll {
-			!it.historyDisabled && !it.noSynchronization
-		}
+		List<DataPoint> dataPoints=database.getDataPointsOfInterface(itf.name).findAll { !it.noSynchronization }
 		List<DataPoint> oldDataPoints=dataPoints.collect { (DataPoint)it.clone() }
 		interfaceManager.updateProperties(dataPoints, config.metaCycle-1)
 		dataPoints.eachWithIndex { DataPoint dp, int index ->
