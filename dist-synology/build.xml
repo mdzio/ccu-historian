@@ -30,6 +30,12 @@
 			<tarfileset dir=".." username="root" group="root">
 				<include name="LICENSE.txt" />
 			</tarfileset>
+			<tarfileset dir="../dist-generic/src" username="root" group="root">
+				<include name="trenddesigns.groovy" />
+			</tarfileset>
+			<tarfileset dir="../dist-generic/src" filemode="755" username="root" group="root">
+				<include name="tool" />
+			</tarfileset>
 			<!-- ui files -->
 			<tarfileset dir="src/package" username="root" group="root" />
 		</tar>

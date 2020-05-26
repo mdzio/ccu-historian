@@ -36,6 +36,9 @@
 			<tarfileset dir="../dist-generic/src" prefix="ccu-historian" filemode="755" username="root" group="root">
 				<include name="tool" />
 			</tarfileset>
+			<tarfileset dir="../dist-generic/src" prefix="ccu-historian" username="root" group="root">
+				<include name="trenddesigns.groovy" />
+			</tarfileset>
 			<tarfileset dir=".." prefix="ccu-historian" username="root" group="root">
 				<include name="LICENSE.txt" />
 			</tarfileset>
