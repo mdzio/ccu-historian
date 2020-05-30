@@ -121,6 +121,7 @@ def createPlot(parameters, dataPoints, plotState) {
 			def numberAxis=new NumberAxis(dataPoint.attributes.unit)
 			numberAxis.autoRangeIncludesZero=false
 			numberAxis.autoRangeStickyZero=false
+			numberAxis.autoRangeMinimumSize=0.2
 			numberAxis.upperMargin=0.02
 			numberAxis.lowerMargin=0.02
 			if (isAction) {
