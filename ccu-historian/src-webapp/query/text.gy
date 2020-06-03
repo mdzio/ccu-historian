@@ -1,0 +1,93 @@
+/*
+    CCU-Historian, a long term archive for the HomeMatic CCU
+    Copyright (C) 2020 MDZ (info@ccu-historian.de)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+import groovy.transform.Field
+import java.util.logging.Logger
+import mdz.ccuhistorian.webapp.TimeRange
+import javax.servlet.http.HttpServletResponse
+
+@Field
+private final static log = Logger.getLogger('mdz.ccuhistorian.webapp.Text')
+
+class Stats {
+	def min=Double.POSITIVE_INFINITY
+	def max=Double.NEGATIVE_INFINITY
+	def avg
+	def diff
+	def counter=0
+	def first
+	def last
+} 
+
+// main function
+def ex=utils.catchToLog(log) {
+	def startTime=System.currentTimeMillis()
+	
+	// check key
+	if (webServer.config.apiKeys)
+		if (!params.k || !webServer.config.apiKeys.contains(params.k))
+			throw new Exception('Access denied')
+			
+	// parse parameters
+	def timeRange=new TimeRange(request)
+	def dataPoint=utils.parseDataPoint(params.dp, database)
+	def aggrs=request.getParameterValues('ag')?:['first']
+	log.finer "Web server: Generating aggregate/s ${aggrs.join(", ")} for $dataPoint.displayName from ${utils.format(timeRange.begin)} to ${utils.format(timeRange.end)}"
+	if (aggrs.any { !(it in ['min','max','avg','diff','counter','first','last'])}) {
+		throw new Exception("Invalid parameter ag: " + aggrs.join(", "))
+	}
+	
+	// get time series
+	if (dataPoint.historyString) {
+		throw new Exception("Datapoint $dataPoint.displayName is not numeric")
+	}
+	def timeSeries=database.getTimeSeries(dataPoint, timeRange.begin, timeRange.end)
+	
+	// calculate statistics
+	def stats=new Stats()
+	def integr=0
+	def previous
+	timeSeries.each { pv ->
+	  if (pv.value<stats.min) stats.min=pv.value
+	  if (pv.value>stats.max) stats.max=pv.value
+	  if (previous!=null) {
+		integr+=previous.value*(pv.timestamp.time-previous.timestamp.time)
+		def d=pv.value-previous.value
+		if (d>0) {
+			stats.counter+=d
+		}
+	  }
+	  previous=pv
+	}
+	def duration=timeRange.end.time-timeRange.begin.time
+	stats.avg=integr/duration
+	stats.first=timeSeries[0].value
+	stats.last=previous.value
+	stats.diff=stats.last-stats.first
+	
+	// output statistics
+	println(aggrs.collect { aggr ->	stats."$aggr" }.collect { it!=null?it:"NaN" }.join("\t"))
+	
+	log.finer "Web server: Aggregates generated in ${System.currentTimeMillis()-startTime}ms"
+}
+
+// signal error
+if (ex) {
+	utils.catchToLog(log) {
+		response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.message?:ex.class.name)
+	}
+}
