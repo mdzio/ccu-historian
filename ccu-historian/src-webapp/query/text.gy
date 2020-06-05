@@ -43,8 +43,11 @@ def ex=utils.catchToLog(log) {
 			throw new Exception('Access denied')
 			
 	// parse parameters
-	def timeRange=new TimeRange(request)
+	if (params.dp==null) {
+		throw new Exception("Missing parameter dp (data point)")
+	}
 	def dataPoint=utils.parseDataPoint(params.dp, database)
+	def timeRange=new TimeRange(request)
 	def aggrs=request.getParameterValues('ag')?:['first']
 	log.finer "Web server: Generating aggregate/s ${aggrs.join(", ")} for $dataPoint.displayName from ${utils.format(timeRange.begin)} to ${utils.format(timeRange.end)}"
 	if (aggrs.any { !(it in ['min','max','avg','diff','counter','first','last'])}) {
