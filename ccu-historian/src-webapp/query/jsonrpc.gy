@@ -219,6 +219,10 @@ private static rpcFunctions=[
 			throw new RpcException("Data point not found: $ident", RpcException.INVALID_PARAMS)
 		}
 		// merge attributes
+		def custom=updateDp.attributes?.custom
+		if (custom==null || !(custom instanceof Map) ) {
+			throw new RpcException("Invalid custom attribute (missing or not an object)", RpcException.INVALID_PARAMS)
+		}
 		custom.each { k, v ->
 			if (v!=null) {
 				dbDp.attributes.custom[k]=v
