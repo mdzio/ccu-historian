@@ -9,7 +9,7 @@ var H2_refreshSec = 60;
 // Refresh Time is enabled
 
 // declare global Variables
-var H2_version = 'v3.9';
+var H2_version = 'v3.10';
 var chart;
 var filter_feld = '';
 var DP_point = [];
@@ -373,7 +373,7 @@ function defaultAttrib(DP, colorNr, idx) {
             } else if (text2[k].substr(0, 1) === 'S') {
               	attr.stack = parseInt(text2[k].substr(1, 2));
             } else if (text2[k].substr(0, 1) === 'U') {
-              	attr.unit = text2[k].substr(1, 20);
+              	attr.unit = text2[k].substr(1, 20).replace('*','%');
             } else if (text2[k].substr(0, 1) === 'X') {
               	attr.factor = parseFloat(text2[k].substr(1, 10));
             } else if (text2[k].substr(0, 1) === 'O') {
@@ -991,16 +991,24 @@ function SetSerienData(p_attr, serieObj) {
         // get start and end position over binary search
         var arrStart = sortedIndex(buffer.timestamps, datStart);
         var arrEnd = sortedIndex(buffer.timestamps, datEnd);
-        for (var i = arrStart; i < arrEnd; i++) {
+
+        if (arrStart>0 && datStart != buffer.timestamps[arrStart]) {
+            arr.push([datStart - backSec, (buffer.values[arrStart-1] * DP_attribute[p_attr].factor) + DP_attribute[p_attr].offset]);
+        }
+        for (var i = arrStart; i <= arrEnd; i++) {
             arr.push([buffer.timestamps[i] - backSec, (buffer.values[i] * DP_attribute[p_attr].factor) + DP_attribute[p_attr].offset]);
         }
+//        if (buffer.timestamps.length>0 && datEnd != buffer.timestamps[arrEnd]) {
+//            arr.push([datEnd - backSec, (buffer.values[arrEnd] * DP_attribute[p_attr].factor) + DP_attribute[p_attr].offset]);
+//        }
+        
         // no aggregation but rounded to min, better for mouse over sync to other lines
     } else if (aggrType === 6) {
 
         // get start and end position over binary search
         var arrStart = sortedIndex(buffer.timestamps, datStart);
         var arrEnd = sortedIndex(buffer.timestamps, datEnd);
-        for (var i = arrStart; i < arrEnd; i++) {
+        for (var i = arrStart; i <= arrEnd; i++) {
 
             var timestamprounded = Math.round((buffer.timestamps[i] - backSec) / 60000) * 60000;
             arr.push([timestamprounded, (buffer.values[i] * DP_attribute[p_attr].factor) + DP_attribute[p_attr].offset]);
@@ -1018,7 +1026,7 @@ function SetSerienData(p_attr, serieObj) {
             var last_value = buffer.values[arrStart];
             var last_time = buffer.timestamps[arrStart];
 
-            for (var i = arrStart + 1; i < arrEnd; i++) {
+            for (var i = arrStart + 1; i <= arrEnd; i++) {
 
                 if (buffer.timestamps[i] >= datStart && buffer.timestamps[i] <= datEnd) {
                     // fill missing times with delta 0 every 10 min.
@@ -1049,7 +1057,7 @@ function SetSerienData(p_attr, serieObj) {
             var last_value = buffer.values[arrStart];
             var last_time = buffer.timestamps[arrStart];
 
-            for (var i = arrStart + 1; i < arrEnd; i++) {
+            for (var i = arrStart + 1; i <= arrEnd; i++) {
 
                 if (buffer.timestamps[i] >= datStart && buffer.timestamps[i] <= datEnd) {
                     // fill missing times with delta 0 every 10 min.
@@ -1085,7 +1093,7 @@ function SetSerienData(p_attr, serieObj) {
             var last_value = (buffer.values[arrStart] > 0) ? 1 : 0;
             var last_time = buffer.timestamps[arrStart];
 
-            for (var i = arrStart + 1; i < arrEnd; i++) {
+            for (var i = arrStart + 1; i <= arrEnd; i++) {
                 if (last_value > 0 && buffer.values[i] === 0) {
 
                     last_value = buffer.timestamps[i] - last_time;
@@ -1119,7 +1127,7 @@ function SetSerienData(p_attr, serieObj) {
             }
             // fill also last minutes if still on
             if (last_value > 0) {
-                last_value = arrEnd - last_time;
+                last_value = datEnd - last_time;
                 if (last_value > 60000) {
                     for (var t = last_time; t < arrEnd - 60000; t = t + 60000) {
                         arr.push([t - backSec, (1 * DP_attribute[p_attr].factor) + DP_attribute[p_attr].offset]);
@@ -1141,7 +1149,7 @@ function SetSerienData(p_attr, serieObj) {
         var last_value = buffer.values[arrStart];
         var last_time = buffer.timestamps[arrStart];
 
-        for (var i = arrStart; i < arrEnd; i++) {
+        for (var i = arrStart; i <= arrEnd; i++) {
 
             // fill long empty periods with last_value, that aggregation works
             if ((buffer.timestamps[i] - last_time) > 600000) {
@@ -1187,10 +1195,10 @@ function SetSerienData(p_attr, serieObj) {
 
 // Find next timestamp in array by binary search
 function sortedIndex(array, value) {
-    var low = 0, high = array.length, mid;
-    if (array[low] > value)
+    var low = 0, high = array.length-1, mid;
+    if (array[low] >= value)
         return 0;
-    if (array[high] < value)
+    if (array[high] <= value)
         return high;
     while (low < high) {
         mid = Math.floor((low + high) / 2);
@@ -1198,6 +1206,9 @@ function sortedIndex(array, value) {
             low = mid + 1;
         else
             high = mid;
+    }
+    if (low > array.length-1) {
+        low = array.length-1
     }
     return low;
 }
@@ -1226,33 +1237,39 @@ function getDataH2(p_series, p_attrID, p_attr, datStart, datEnd) {
     // display loading info
     setTimeout(loadingInfo, 500);
 
-    var url = 'http://' + H2_server + ':' + H2_port;
-    url += '/query/jsonrpc.gy?j={%22id%22:%22' + key + '%22';
-    url += ',%22method%22:%22getTimeSeriesRaw%22';
-    url += ',%22params%22:[' + p_id + ',' + datStart + ',' + datEnd + ']}';
-    url += DP_ApiKey 
-
     // get serien data from H2 database
-    $.ajax({
-        type: "GET",
-        url: url,
-        dataType: "json",
-        async: true,
-        cache: false,
-        error: function(xhr, status, error) {
-            console.log('AXAJ-error:');
-            console.log(xhr);
-            console.log(status);
-            console.log(error);
-        },
-        success: function(result) {
-            if (!result.result) {
-                console.log(result);
-            } else if (result.result) {
-                BufferSerienData(result.id, result.result);
+       var url = 'http://' + H2_server + ':' + H2_port;
+       url += '/query/jsonrpc.gy';
+       url += (DP_ApiKey=="")?"":"?"+DP_ApiKey;
+
+       var postData = {id: key,
+                       method: 'getTimeSeriesRaw',
+                       params: [p_id, datStart, datEnd ]};
+
+       postData = JSON.stringify(postData);
+
+	    $.ajax({
+	        url: url,
+	        dataType: "json",
+	        contentType: "application/json",
+	        type: "post",
+            data: postData,
+	        cache: false,
+	        async: true,
+	        error: function(xhr, status, error) {
+	            console.log('AXAJ-error:');
+	            console.log(xhr);
+	            console.log(status);
+	            console.log(error);
+	        },
+	        success: function(result) {
+               if (!result.result) {
+                   console.log(result);
+               } else if (result.result) {
+                   BufferSerienData(result.id, result.result);
+               }
             }
-        }
-    });
+	    });
     return;
 }
 
@@ -1272,27 +1289,36 @@ function requestData() {
 
     // display loading info
     setTimeout(loadingInfo, 500);
+   
+       var url = 'http://' + H2_server + ':' + H2_port;
+       url += '/query/jsonrpc.gy';
+       url += (DP_ApiKey=="")?"":"?"+DP_ApiKey;
 
-    var url = 'http://' + H2_server + ':' + H2_port
-    url += '/query/jsonrpc.gy?j={%22method%22:%22getDataPoint%22,%22params%22:%20[]}'
-    url += DP_ApiKey 
+       var postData = {id: 'DP',
+                       method: 'getDataPoint',
+                       params: []};
 
-    $.ajax({
-        type: "GET",
-        url: url,
-        dataType: "json",
-        async: true,
-        cache: false,
-        error: function(xhr, status, error) {
-            console.log('AXAJ-error:');
-            console.log(xhr);
-            console.log(status);
-            console.log(error);
-        },
-        success: function(result) {
-            requestData2(result);
-        },
-    });
+       postData = JSON.stringify(postData);
+
+	    $.ajax({
+	        url: url,
+	        dataType: "json",
+	        contentType: "application/json",
+	        type: "post",
+            data: postData,
+	        cache: false,
+	        async: true,
+	        error: function(xhr, status, error) {
+	            console.log('AXAJ-error:');
+	            console.log(xhr);
+	            console.log(status);
+	            console.log(error);
+	        },
+	        success: function(result) {
+               requestData2(result);
+            }
+	    });
+    
 }
 
 /**
@@ -1301,25 +1327,33 @@ function requestData() {
 */
 function requestSettings() {
 
-    var url = 'http://' + H2_server + ':' + H2_port
-    url += '/query/jsonrpc.gy?j={%22method%22:%22getConfig%22,%22params%22:[%22HighChart%22],%22id%22:%22Einstellung%22}'
-    url += DP_ApiKey 
+
+
+    var url = 'http://' + H2_server + ':' + H2_port;
+    url += '/query/jsonrpc.gy';
+    url += (DP_ApiKey=="")?"":"?"+DP_ApiKey;
+
+    var postData = {id: 'Setup',
+                    method: 'getConfig',
+                    params: ['HighChart']};
+
+    postData = JSON.stringify(postData);
 
     $.ajax({
-        type: "GET",
-        url: url,
-        dataType: "json",
-        async: true,
-        cache: false,
-        error: function(xhr, status, error) {
-            console.log('AXAJ-error:');
-            console.log(xhr);
-            console.log(status);
-            console.log(error);
-            readLinkData();
-        },
-        success: function(result) {
-        	
+	        url: url,
+	        dataType: "json",
+	        contentType: "application/json",
+	        type: "post",
+            data: postData,
+	        cache: false,
+	        async: true,
+	        error: function(xhr, status, error) {
+	            console.log('AXAJ-error:');
+	            console.log(xhr);
+	            console.log(status);
+	            console.log(error);
+	        },
+	        success: function(result) {
         	// Get Settings from H2 database as String
         	if (result.result) {
         	    try {
@@ -1432,8 +1466,10 @@ function readLinkData() {
                 filter_feld = decodeURIComponent(nv[1].toLowerCase());
             } else if (nv[0].toLowerCase() === 'title') {
                 DP_Title = decodeURIComponent(nv[1]);
+                DP_Title = DP_Title.replace('§','%');
             } else if (nv[0].toLowerCase() === 'subtitle') {
                 DP_Subtitle = decodeURIComponent(nv[1]);
+                DP_Subtitle = DP_Subtitle.replace('§','%');
             } else if (nv[0].toLowerCase() === 'legend') {
                 if (decodeURIComponent(nv[1].toLowerCase()) === 'false') {
                     DP_Legend = 0;
@@ -1698,7 +1734,7 @@ function requestData2(TXT_JSON) {
                             } else if (text2[k].substr(0, 1) === 'V') {
                                 DP_attribute[attrpos].visible = parseInt(text2[k].substr(1, 1));
                             } else if (text2[k].substr(0, 1) === 'U') {
-                                DP_attribute[attrpos].unit = decodeURIComponent(nv[1]).split(',')[j].split('|')[k].substr(1, 20);
+                                DP_attribute[attrpos].unit = decodeURIComponent(nv[1]).split(',')[j].split('|')[k].substr(1, 20).replace("§","%");
                             } else if (text2[k].substr(0, 1) === 'X') {
                                 DP_attribute[attrpos].factor = parseFloat(text2[k].substr(1, 10));
                             } else if (text2[k].substr(0, 1) === 'O') {
@@ -1743,7 +1779,7 @@ function requestData2(TXT_JSON) {
                                 } else if (text2[k].substr(0, 1) === 'F') {
                                     DP_yAxis[axis_id].color = parseInt(text2[k].substr(1, 2));
                                 } else if (text2[k].substr(0, 1) === 'T') {
-                                    DP_yAxis[axis_id].text = decodeURIComponent(nv[1]).split(',')[j].split('|')[k].substr(1, 50);
+                                    DP_yAxis[axis_id].text = decodeURIComponent(nv[1]).split(',')[j].split('|')[k].substr(1, 50).replace("§","%");
                                 }
                             }
                         }
@@ -1834,7 +1870,7 @@ $(document).ready(function() {
 
 	DP_ApiKey = "";
 	if (apiKey != "") {
-		DP_ApiKey = "&" + apiKey.substring(1,apiKey.length);	
+		DP_ApiKey = apiKey.substring(1,apiKey.length);	
 	}
 
 	requestSettings();
@@ -2503,7 +2539,7 @@ function createUrl() {
                         DP_pos = DP_point.findIndex(obj=>obj.idx.toString() === chart.series[serie].options.id.toString());
                     }
                     if (DP_pos === -1 || DP_point[DP_pos].attributes.unit != DP_attribute[attr].unit) {
-                        url2 += (DP_attribute[attr].unit === 'xx') ? '' : '|U' + DP_attribute[attr].unit;
+                        url2 += (DP_attribute[attr].unit === 'xx') ? '' : '|U' + DP_attribute[attr].unit.replace("%","§");
                     }
 
                     url2 += (DP_attribute[attr].visible === 2) ? '' : '|V' + DP_attribute[attr].visible;
@@ -2529,7 +2565,7 @@ function createUrl() {
                 url2 += (DP_yAxis[axispos].max == DP_yAxis_default[axispos].max) ? '' : '|H' + DP_yAxis[axispos].max;
                 url2 += (DP_yAxis[axispos].tick == DP_yAxis_default[axispos].tick) ? '' : '|G' + DP_yAxis[axispos].tick;
                 url2 += (DP_yAxis[axispos].color == DP_yAxis_default[axispos].color) ? '' : '|F' + DP_yAxis[axispos].color;
-                url2 += (DP_yAxis[axispos].text == DP_yAxis_default[axispos].text) ? '' : '|T' + DP_yAxis[axispos].text;
+                url2 += (DP_yAxis[axispos].text == DP_yAxis_default[axispos].text) ? '' : '|T' + DP_yAxis[axispos].text.replace("%","§");
                 url2 += ',';
             }
         }
@@ -2610,12 +2646,12 @@ function createUrl() {
 
     // Title    
     if (DP_Title != '') {
-        url += '&title=' + DP_Title;
+        url += '&title=' + DP_Title.replace("%","§");
     }
 
     // Subtitle    
     if (DP_Subtitle != '') {
-        url += '&subtitle=' + DP_Subtitle;
+        url += '&subtitle=' + DP_Subtitle.replace("%","§");
     }
 
     window.open(url, '_blank');
@@ -2812,22 +2848,27 @@ function saveLine() {
     	
     	DP_point[DP_pos].attributes.custom.HighChart = strCustom;
 
-	    var url = 'http://' + H2_server + ':' + H2_port;
-	    url += '/query/jsonrpc.gy?j={%22method%22:%22updateDataPoint%22';
-	    url += ',%22id%22:%22' + key + '%22';
-	    url += ',%22params%22:[{%22id%22:{%22interfaceId%22:%22' + DP_point[DP_pos].id.interfaceId ; 
-	    url += '%22,%22address%22:%22' + DP_point[DP_pos].id.address; 
-	    url += '%22,%22identifier%22:%22' + DP_point[DP_pos].id.identifier+ '%22}'; 
-	    url += ',%22attributes%22:{%22custom%22:{%22HighChart%22:%22' + strCustom + '%22}}}]}'; 
-	    url += DP_ApiKey 
-	    
-	    // get serien data from H2 database
+       var url = 'http://' + H2_server + ':' + H2_port;
+       url += '/query/jsonrpc.gy';
+       url += (DP_ApiKey=="")?"":"?"+DP_ApiKey;
+
+       var postData = {id: key,
+                       method: 'updateDataPoint',
+                       params: [{ 'id': {'interfaceId': DP_point[DP_pos].id.interfaceId,
+                                         'address':     DP_point[DP_pos].id.address,
+                                         'identifier':  DP_point[DP_pos].id.identifier },
+                                  'attributes': {'custom': {'HighChart': strCustom }}}]};
+
+       postData = JSON.stringify(postData);
+
 	    $.ajax({
-	        type: "GET",
 	        url: url,
 	        dataType: "json",
-	        async: true,
+	        contentType: "application/json",
+	        type: "post",
+           data: postData,
 	        cache: false,
+	        async: true,
 	        error: function(xhr, status, error) {
 	            console.log('AXAJ-error:');
 	            console.log(xhr);
@@ -2953,22 +2994,28 @@ function saveSettingsH2() {
     if (strSetNew != strSetOld) {
     	
     	DP_settings_old = JSON.parse(strSetNew);
-    	
-    	strSetNew = strSetNew.replace(new RegExp('"', 'g'), "'");
-    	
-	    var url = 'http://' + H2_server + ':' + H2_port;
-	    url += '/query/jsonrpc.gy?j={%22method%22:%22setConfig%22';
-	    url += ',%22params%22:[%22HighChart%22,%22' + strSetNew +'%22]' ; 
-	    url += ',%22id%22:%22' + key + '%22}';
-	    url += DP_ApiKey 
 
-	    // update setting data to H2 database
+       var url = 'http://' + H2_server + ':' + H2_port;
+       url += '/query/jsonrpc.gy';
+       url += (DP_ApiKey=="")?"":"?"+DP_ApiKey;
+
+
+       strSetNew = strSetNew.replace(new RegExp('"', 'g'), "'");
+
+       var postData = {id: key,
+                       method: 'setConfig',
+                       params: [ 'HighChart', strSetNew ]};
+
+       postData = JSON.stringify(postData);
+
 	    $.ajax({
-	        type: "GET",
 	        url: url,
 	        dataType: "json",
-	        async: true,
+	        contentType: "application/json",
+	        type: "post",
+            data: postData,
 	        cache: false,
+	        async: true,
 	        error: function(xhr, status, error) {
 	            console.log('AXAJ-error:');
 	            console.log(xhr);
@@ -2979,10 +3026,8 @@ function saveSettingsH2() {
 	            console.log(result);
 	        }
 	    });
-	    
     }
     return;	
-	
 }
 
 function getDialogSetting() {

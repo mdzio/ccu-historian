@@ -16,26 +16,18 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 /*** overwrite bootstrap CSS ***/
-
-.table > tbody > tr > td { 
-	vertical-align: middle; 
+.table>tbody>tr>td {
+	vertical-align: middle;
 }
 
-.table > thead > tr > th,
-.table > tbody > tr > th,
-.table > tfoot > tr > th,
-.table > thead > tr > td,
-.table > tbody > tr > td,
-.table > tfoot > tr > td {
-  padding: 5px;
+.table>thead>tr>th, .table>tbody>tr>th, .table>tfoot>tr>th, .table>thead>tr>td,
+	.table>tbody>tr>td, .table>tfoot>tr>td {
+	padding: 5px;
 }
 
-.table-condensed > thead > tr > th,
-.table-condensed > tbody > tr > th,
-.table-condensed > tfoot > tr > th,
-.table-condensed > thead > tr > td,
-.table-condensed > tbody > tr > td,
-.table-condensed > tfoot > tr > td {
+.table-condensed>thead>tr>th, .table-condensed>tbody>tr>th,
+	.table-condensed>tfoot>tr>th, .table-condensed>thead>tr>td,
+	.table-condensed>tbody>tr>td, .table-condensed>tfoot>tr>td {
 	padding: 3px;
 }
 
@@ -65,9 +57,15 @@
 
 .navbar {
 	margin-bottom: 7px;
+	display:none;
 }
 
 .LinePopup-text {
-   float: left;
-   width: 150px;
+	float: left;
+	width: 150px;
 }
+
+#filter {
+	display: none;
+}
+
