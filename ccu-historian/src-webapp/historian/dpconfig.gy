@@ -184,6 +184,8 @@ renderer.content={
 						'data-toggle':'tooltip', title:'Gewerk oder Funktion des Datenpunktes'
                     th class:'hidden-xs hidden-sm', 'Adresse',
 						'data-toggle':'tooltip', title:'Bei HomeMatic-Geräten ist der Adressaufbau "Geräteseriennummer:Kanalnummer".'
+                    th class:'hidden-xs hidden-sm hidden-md', 'ID',
+						'data-toggle':'tooltip', title:'Eindeutige Historian-ID für URL-Parameter bzw. JSON-RPC.'
 					th 'Inaktiv',
 						'data-toggle':'tooltip', title:'Inaktive Datenpunkte werden nicht weiter aufgezeichnet.'
 					th 'Versteckt',
@@ -206,6 +208,7 @@ renderer.content={
 						td class:'hidden-xs hidden-sm hidden-md', dp.attributes.room
 						td class:'hidden-xs hidden-sm hidden-md', dp.attributes.function
                         td class:'hidden-xs hidden-sm', dp.id.address
+                        td class:'hidden-xs hidden-sm hidden-md text-right', dp.idx
 						td {
 							// history disabled?
 							def checked=dp.historyDisabled?[checked:'checked']:[:]
@@ -251,7 +254,7 @@ renderer.end={
 			var terms=$(this).val().toLowerCase().split(/\s+/);
 			$('#dp-table tbody tr').each(function() {
 				// | separated cell contents
-				var content='|'+$(this).children('td').slice(0,6).map(function() {
+				var content='|'+$(this).children('td').slice(0,7).map(function() {
 					return $(this).text() }).get().join('|').toLowerCase()+'|';
 				if (terms.every(t => content.indexOf(t) >= 0))
 					$(this).css('display', '');
