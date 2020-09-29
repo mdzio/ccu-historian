@@ -41,13 +41,17 @@ Für bestimmte Systeme existieren fertige Installationspakete:
 
 **Hinweis:** Für den Betrieb als Addon auf einer CCU3 oder RaspberryMatic muss an der Zentrale ein USB-Stick angeschlossen sein!
 
+## Installationspakete
+
+Die Installationspakete sind bei den [Veröffentlichungen](https://github.com/mdzio/ccu-historian/releases) zu finden.
+
 ## Installation und Konfiguration
 
 Die Installation und Konfiguration ist im [Handbuch](https://github.com/mdzio/ccu-historian/wiki#installation) ausführlich beschrieben.
 
 ## Entwicklungsumgebung
 
-Der CCU-Historian ist größtenteils in der [Programmiersprache Apache Groovy](http://groovy-lang.org) geschrieben. Weitere Programmiersprachen sind Java und JavaScript. Als Entwicklungsumgebung wird [Eclipse Photon](http://www.eclipse.org) in der Variante für Java-Entwickler verwendet. Desweiteren wird das [Groovy-Eclipse-Plugin](https://github.com/groovy/groovy-eclipse/wiki) benötigt. Dafür unter *Help* → *Install New Software* die Update-Site [http://dist.springsource.org/snapshot/GRECLIPSE/e4.8](http://dist.springsource.org/snapshot/GRECLIPSE/e4.8) eintragen. Über *File* → *Import* → *Projects from Git* kann direkt das Repository geklont werden. Die Zielplattform ist Java Version 8.
+Der CCU-Historian ist größtenteils in der [Programmiersprache Apache Groovy](http://groovy-lang.org) geschrieben. Weitere Programmiersprachen sind Java und JavaScript. Als Entwicklungsumgebung wird [Eclipse 2019-06](http://www.eclipse.org) in der Variante für Java-Entwickler verwendet. Desweiteren wird das [Groovy-Eclipse-Plugin](https://github.com/groovy/groovy-eclipse/wiki) benötigt. Dafür unter *Help* → *Install New Software* die Update-Site [http://dist.springsource.org/snapshot/GRECLIPSE/e4.8](http://dist.springsource.org/snapshot/GRECLIPSE/e4.8) eintragen. Über *File* → *Import* → *Projects from Git* kann direkt das Repository geklont werden. Die Zielplattform ist Java Version 8.
 
 Alle Beiträge zum Projekt müssen unter die [GNU General Public License V3](LICENSE.txt) gestellt werden. Die Lizenzen von verwendeten Bibliotheken müssen mit dieser kompatibel sein.
 
