@@ -50,29 +50,83 @@ class SimulationInterface extends BasicProducer<RawEvent> implements Interface, 
 		def minimum
 		def maximum
 		String unit
+		boolean continuous
 		Closure function
 	}
 	private final static List<DataPointTemplate> DATA_POINT_TEMPLATES = [
-		new DataPointTemplate('ACTION', DataPoint.ATTR_TYPE_ACTION, 1.0, 1.0, 'Aktion', { int it -> (it%4)==0?1:null }),
-		new DataPointTemplate('BOOL', DataPoint.ATTR_TYPE_BOOL, 0.0, 1.0, 'Ein/Aus', { int it -> (it%2)!=0 }),
-		new DataPointTemplate('RAMP', DataPoint.ATTR_TYPE_INTEGER, 0.0, 9.0, '', { int it -> it%10 }),
-		new DataPointTemplate('SIN', DataPoint.ATTR_TYPE_FLOAT, -10.0, 10.0, '', { int it -> Math.sin((double)it/30.0*Math.PI)*10.0 }),
-		new DataPointTemplate('TEXT', DataPoint.ATTR_TYPE_STRING, null, '', '', { "Text $it" as String }),
-		new DataPointTemplate('SUNSHINEDURATION', DataPoint.ATTR_TYPE_INTEGER, 0.0, 255.0, '', { int it -> (it*30)%256 }),
-		new DataPointTemplate('RANDOM', DataPoint.ATTR_TYPE_FLOAT, 0.0, 20.0, '', { int it -> random.nextDouble()*20.0 }),
-		new DataPointTemplate('PEAK', DataPoint.ATTR_TYPE_BOOL, 0.0, 1.0, 'Ein/Aus', { int it ->
-			if ((it%10)==0) true
-			else if ((it%10)==1) false
-			else null 
-		}),
-		new DataPointTemplate('NOISY_SQUARE', DataPoint.ATTR_TYPE_BOOL, 0.0, 1.0, 'Ein/Aus', { int it ->
-			int phase=it%20
-			if (phase==0) false
-			else if (phase>=7 && phase<10) random.nextBoolean()
-			else if (phase==10) true
-			else if (phase>=17) random.nextBoolean()
-			else null
-		})
+		new DataPointTemplate(
+			'ACTION', 
+			DataPoint.ATTR_TYPE_ACTION, 
+			1.0, 1.0, 'Aktion', 
+			false, 
+			{ int it -> (it%4)==0?1:null }
+		),
+		new DataPointTemplate(
+			'BOOL', 
+			DataPoint.ATTR_TYPE_BOOL, 
+			0.0, 1.0, 'Ein/Aus', 
+			false, 
+			{ int it -> (it%2)!=0 }
+		),
+		new DataPointTemplate(
+			'RAMP',
+			DataPoint.ATTR_TYPE_INTEGER, 
+			0.0, 9.0, '', 
+			true, 
+			{ int it -> it%10 }
+		),
+		new DataPointTemplate(
+			'SIN', 
+			DataPoint.ATTR_TYPE_FLOAT, 
+			-10.0, 10.0, '', 
+			true, 
+			{ int it -> Math.sin((double)it/30.0*Math.PI)*10.0 }
+		),
+		new DataPointTemplate(
+			'TEXT', 
+			DataPoint.ATTR_TYPE_STRING, 
+			null, '', '', 
+			false, 
+			{ "Text $it" as String }
+		),
+		new DataPointTemplate(
+			'SUNSHINEDURATION', 
+			DataPoint.ATTR_TYPE_INTEGER, 
+			0.0, 255.0, '', 
+			true, 
+			{ int it -> (it*30)%256 }
+		),
+		new DataPointTemplate(
+			'RANDOM', 
+			DataPoint.ATTR_TYPE_FLOAT, 
+			0.0, 20.0, '', 
+			true, 
+			{ int it -> random.nextDouble()*20.0 }
+		),
+		new DataPointTemplate('PEAK', 
+			DataPoint.ATTR_TYPE_BOOL, 
+			0.0, 1.0, 'Ein/Aus', 
+			false, 
+			{ int it ->
+				if ((it%10)==0) true
+				else if ((it%10)==1) false
+				else null 
+			}
+		),
+		new DataPointTemplate(
+			'NOISY_SQUARE', 
+			DataPoint.ATTR_TYPE_BOOL, 
+			0.0, 1.0, 'Ein/Aus',
+			false, 
+			{ int it ->
+				int phase=it%20
+				if (phase==0) false
+				else if (phase>=7 && phase<10) random.nextBoolean()
+				else if (phase==10) true
+				else if (phase>=17) random.nextBoolean()
+				else null
+			}
+		)
 	]
 	private final static int DEFAULT_DATA_POINT_COUNT = DATA_POINT_TEMPLATES.size()
 	
@@ -109,7 +163,8 @@ class SimulationInterface extends BasicProducer<RawEvent> implements Interface, 
 					(DataPoint.ATTR_MAXIMUM):tmpl.maximum,
 					(DataPoint.ATTR_UNIT):tmpl.unit,
 					(DataPoint.ATTR_MINIMUM):tmpl.minimum,
-				]
+				],
+				managementFlags:tmpl.continuous?DataPoint.FLAGS_CONTINUOUS:0
 			)]
 			functions << [(id): tmpl.function]
 		}
@@ -137,7 +192,10 @@ class SimulationInterface extends BasicProducer<RawEvent> implements Interface, 
 			DataPoint foundDp=dataPoints[dp.id]
 			if (foundDp) {
 				dp.attributes.putAll foundDp.attributes
-			} else log.warning "Unknown data point $dp.id" 
+				dp.managementFlags=foundDp.managementFlags
+			} else {
+				log.warning "Unknown data point $dp.id"
+			} 
 		}
 	}
 	

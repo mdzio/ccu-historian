@@ -30,7 +30,7 @@ import java.util.logging.Level
 @Log
 public class Preprocessor extends BasicProducer<Event> implements Processor<Event, Event> {
 
-	public enum Type { DISABLED, DELTA_COMPR, TEMPORAL_COMPR, AVG_COMPR, MIN_COMPR, MAX_COMPR }
+	public enum Type { DISABLED, DELTA_COMPR, TEMPORAL_COMPR, AVG_COMPR, MIN_COMPR, MAX_COMPR, SWD_COMPR }
 	
 	public void consume(Event event) throws Exception {
 		try {
@@ -47,6 +47,7 @@ public class Preprocessor extends BasicProducer<Event> implements Processor<Even
 						case Type.AVG_COMPR:
 						case Type.MIN_COMPR:
 						case Type.MAX_COMPR: applyIntervalProcessor(event, type, param); break
+						case Type.SWD_COMPR: applySwingingDoor(event, type, param); break
 					}
 				}
 			} else {
@@ -61,6 +62,9 @@ public class Preprocessor extends BasicProducer<Event> implements Processor<Even
 	
 	public void stop() {
 		log.fine 'Stopping preprocessor'
+		// close swinging door processors
+		swingingDoorProcessors.values().each { it.close() }
+		swingingDoorProcessors.clear()
 	}
 
 	private Map<DataPointIdentifier, ProcessValue> deltaPreviousValues=[:]
@@ -226,5 +230,34 @@ public class Preprocessor extends BasicProducer<Event> implements Processor<Even
 			intervalProcessors[event.dataPoint.id]=ip
 		}
 		ip.consume event
+	}
+
+	private Map<DataPointIdentifier, SwingingDoorProcessor> swingingDoorProcessors=[:]
+	
+	private void applySwingingDoor(Event event, Type type, double deviation) {
+		log.finer "Preprocessor: Applying swinging door compression to $event" 
+		if (deviation<0) {
+			log.warning "Preprocessor: Invalid swinging door parameter (data point: $event.dataPoint.id)"
+			produce event
+			return
+		}
+		if (!(event.pv.value instanceof Number)) {
+			log.warning "Preprocessor: Invalid data type ${event.pv.value.class.name} for swinging door compression (data point: $event.dataPoint.id)"
+			produce event
+			return
+		}
+		SwingingDoorProcessor swdp=swingingDoorProcessors[event.dataPoint.id]
+		if (swdp==null || swdp.deviation!=deviation) {
+			// replace previous processor?
+			if (swdp!=null) {
+				swdp.close()
+			}
+			// create new processor
+			swdp=[]
+			swdp.deviation=deviation
+			swdp.addConsumer { Event e -> produce e }
+			swingingDoorProcessors[event.dataPoint.id]=swdp
+		}
+		swdp.consume event
 	}
 }

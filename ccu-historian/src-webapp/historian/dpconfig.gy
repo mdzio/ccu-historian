@@ -30,6 +30,7 @@ private final static preprocTypes = [
 	3:'Mittelw.',
 	4:'Minimum',
 	5:'Maximum',
+	6:'Sw.Do.K.',
 ] as TreeMap
 
 // setup page
