@@ -229,36 +229,45 @@ renderer.content={
 		}
 		
 		// layout toolbar
-		div(style:'margin-bottom: 0.5em') {
-			// show/hide trend options
-			button(class:'btn btn-default', type:'button', 'data-toggle':'collapse', 'data-target':'#options', 
-				'Optionen') {
-				span class:'caret'
-			}
-			
-			// CSV export
-			a class:'btn btn-default', href:buildUrl('/query/csv.gy', trendParams.parameters, stringDpParams), 'CSV-Export'
-			
-			// individual groups
-			button class:'btn btn-default', form:'individual-groups', type:'submit',
-				'data-toggle':'tooltip', title:'Jedem Datenpunkt wird eine eigene Gruppe zugewiesen. ' + 
-				'Sie werden dadurch getrennt übereinander dargestellt.', 
-				'Einzelne Gruppen'
-			form(id:'individual-groups') {
-				def fp=trendParams.clone()
-				def dps=trendParams.groups.values().dataPoints.flatten()
-				fp.groups.clear()
-				// create group for each data point
-				dps.eachWithIndex { dp, idx ->
-					def gr=new TrendParameters.Group()
-					gr.dataPoints << dp
-					fp.groups[idx+1]=gr  
+		div(class:'row', style:'margin-bottom: 0.5em') {
+			div(class:'col-sm-6') {
+				// show/hide trend options
+				button(class:'btn btn-default', type:'button', 'data-toggle':'collapse', 'data-target':'#options', 
+					'Optionen') {
+					span class:'caret'
 				}
-				buildHiddenInputs(html, fp.parameters, stringDpParams)
+				
+				// CSV export
+				a class:'btn btn-default', href:buildUrl('/query/csv.gy', trendParams.parameters, stringDpParams), 'CSV-Export'
+				
+				// individual groups
+				button class:'btn btn-default', form:'individual-groups', type:'submit',
+					'data-toggle':'tooltip', title:'Jedem Datenpunkt wird eine eigene Gruppe zugewiesen. ' + 
+					'Sie werden dadurch getrennt übereinander dargestellt.', 
+					'Einzelne Gruppen'
 			}
-			
+			div(class:'col-sm-6') {
+				// display current time range
+				def beginTxt=utils.format(trendParams.timeRange.begin)
+				def endTxt=utils.format(trendParams.timeRange.end)
+				p class:'text-center', "Dargestellter Zeitbereich: $beginTxt bis $endTxt"
+			}
 		}
 		
+		// form for individual groups
+		form(id:'individual-groups') {
+			def fp=trendParams.clone()
+			def dps=trendParams.groups.values().dataPoints.flatten()
+			fp.groups.clear()
+			// create group for each data point
+			dps.eachWithIndex { dp, idx ->
+				def gr=new TrendParameters.Group()
+				gr.dataPoints << dp
+				fp.groups[idx+1]=gr
+			}
+			buildHiddenInputs(html, fp.parameters, stringDpParams)
+		}
+
 		// trend options
 		form {
 			// forward other trend parameters
