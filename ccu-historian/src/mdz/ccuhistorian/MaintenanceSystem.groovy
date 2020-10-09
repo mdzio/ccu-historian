@@ -55,21 +55,18 @@ class MaintenanceSystem extends DatabaseSystem {
 		log.info 'Starting recalculation of compressed data points'
 		
 		Collection<DataPoint> dps=database.dataPoints.findAll { DataPoint dp ->
-			boolean found=false
 			int typeIndex=(dp.attributes.preprocType as Integer)?:Type.DISABLED.ordinal()
-			if (typeIndex!=Type.DISABLED.ordinal()) {
-				if (typeIndex<0 || typeIndex>=Type.values().length)
-					log.warning "Invalid preprocessing type $typeIndex (data point: $dp.id)"
-				else {
-					Type type=Type.values()[typeIndex]
-					switch (type) {
-						case Type.DELTA_COMPR: found=true;break
-						case Type.TEMPORAL_COMPR: found=true; break
-					}
-				}
+			if (typeIndex<0 || typeIndex>=Type.values().length) {
+				log.warning "Invalid preprocessing type $typeIndex (data point: $dp.id)"
+			} else if (typeIndex!=Type.DISABLED.ordinal()) {
+				return true
 			}
-			found
+			return false
 		}
+		
+		// current total number of entries
+		long totalNumOfEntries=dps.sum { DataPoint dp -> database.getCount(dp, null, null) } 
+		log.fine "Total of $totalNumOfEntries entries are processed"
 		
 		long totalCurNumOfEntries=0
 		long totalNewNumOfEntries=0
@@ -110,8 +107,11 @@ class MaintenanceSystem extends DatabaseSystem {
 			totalNewNumOfEntries+=newNumOfEntries
 			timeTaken=System.currentTimeMillis()-timeTaken
 			float percentDropped=curNumOfEntries?(curNumOfEntries-newNumOfEntries)/curNumOfEntries*100:0.0
+			percentDropped=Math.round(percentDropped*10.0)/10.0
+			float percentProcessed=totalNumOfEntries?totalCurNumOfEntries/totalNumOfEntries*100.0:0.0
+			percentProcessed=Math.round(percentProcessed*10.0)/10.0
 			log.info "${curNumOfEntries-newNumOfEntries} entries from $curNumOfEntries dropped" +
-				" ($percentDropped %); ${timeTaken/1000} seconds" 
+				" ($percentDropped %); ${timeTaken/1000} seconds; $percentProcessed % of all entries processed" 
 			totalTimeTaken+=timeTaken
 			
 			if (Thread.interrupted()) 

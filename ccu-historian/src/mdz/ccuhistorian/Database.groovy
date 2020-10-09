@@ -454,12 +454,12 @@ public class Database implements Storage {
 		log.info 'Starting compaction of database'
 		config.logDebug()
 		String tmpFileName='temp.sql'
-		log.fine "Dumping database to $tmpFileName"
+		log.info "Dumping database to $tmpFileName"
 		org.h2.tools.Script.main('-url', getUrl(config), '-user', config.user, '-password', config.password, 
 			'-script', tmpFileName, '-options', 'DROP')
 		log.fine 'Deleting database files'
 		org.h2.tools.DeleteDbFiles.execute(config.dir, config.name, true)
-		log.fine "Restoring database from $tmpFileName"
+		log.info "Restoring database from $tmpFileName"
 		org.h2.tools.RunScript.execute(getUrl(config), config.user, config.password, tmpFileName, null, false)
 		log.fine "Deleting $tmpFileName"
 		File tmpFile=[tmpFileName]

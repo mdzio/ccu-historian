@@ -167,6 +167,26 @@ class SwingingDoorTest {
 		])
 	}
 
+	@Test
+	public void testNoisy() {
+		helper([
+			event(0, 0.1),
+			event(1, 0.2),
+			event(2, 0.25),
+			event(3, 0.4),
+			event(4, 0.3),
+			event(5, 0.15),
+			event(6, 0.15),
+			event(7, 0.0),
+			event(8, 0.1),
+		], [
+			event(0, 0.1),
+			event(3, 0.4),
+			event(7, 0.0),
+			event(8, 0.1),
+		])
+	}
+
 	private helper(List<Event> input, List<Event> expected, boolean stop=true) {
 		Collector c=[]
 		Preprocessor pp=[]
