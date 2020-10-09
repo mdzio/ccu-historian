@@ -19,7 +19,7 @@ class SwingingDoorTest {
 	void before() {
 		dataPoint=new DataPoint(id:new DataPointIdentifier("", "", "Test"))
 		dataPoint.attributes.(DataPoint.ATTR_PREPROC_TYPE)=6 // swinging door
-		dataPoint.attributes.(DataPoint.ATTR_PREPROC_PARAM)=0.1 // deviation
+		dataPoint.attributes.(DataPoint.ATTR_PREPROC_PARAM)=0.2 // max. deviation
 	}
 
 	private Event event(long ts, value, int state = ProcessValue.STATE_QUALITY_GOOD) {
@@ -181,8 +181,7 @@ class SwingingDoorTest {
 			event(8, 0.1),
 		], [
 			event(0, 0.1),
-			event(3, 0.4),
-			event(7, 0.0),
+			event(4, 0.3),
 			event(8, 0.1),
 		])
 	}
