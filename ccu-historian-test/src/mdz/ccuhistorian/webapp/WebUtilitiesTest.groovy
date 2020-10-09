@@ -1,6 +1,6 @@
 package mdz.ccuhistorian.webapp
 
-import static WebUtilities.*
+import static mdz.ccuhistorian.webapp.WebUtilities.*
 
 import org.junit.Test
 
