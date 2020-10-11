@@ -18,13 +18,10 @@
 package mdz.hc.itf.hm
 
 import groovy.transform.EqualsAndHashCode
-import groovy.transform.CompileStatic
 
-@CompileStatic
 public class HmModel {
 
 	@EqualsAndHashCode
-	@CompileStatic
 	public static class HmObject {
 		int iseId
 		String address
@@ -33,13 +30,11 @@ public class HmModel {
 	}
 	
 	@EqualsAndHashCode
-	@CompileStatic
 	public static class Device extends HmObject {
 		List<Channel> channels=[]
 	}
 	
 	@EqualsAndHashCode
-	@CompileStatic
 	public static class Channel extends HmObject {
 		List<DataPoint> dataPoints=[]
 		Device device
@@ -48,19 +43,16 @@ public class HmModel {
 	}
 
 	@EqualsAndHashCode
-	@CompileStatic
 	public static class DataPoint extends HmObject {
 		Channel channel
 	}
 
 	@EqualsAndHashCode
-	@CompileStatic
 	public static class Room extends HmObject {
 		List<Channel> channels=[]
 	}
 
 	@EqualsAndHashCode
-	@CompileStatic
 	public static class Function extends HmObject {
 		List<Channel> channels=[]
 	}

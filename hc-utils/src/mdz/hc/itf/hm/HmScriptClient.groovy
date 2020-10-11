@@ -18,7 +18,6 @@
 package mdz.hc.itf.hm
 
 import groovy.util.logging.Log
-import groovy.transform.CompileStatic
 
 import java.text.SimpleDateFormat
 import java.text.ParseException
@@ -29,7 +28,6 @@ import mdz.hc.DataPoint
 import mdz.hc.DataPointIdentifier
 
 @Log
-@CompileStatic
 public class HmScriptClient {
 
 	private static String VALUE_TERMINATOR = '\1'

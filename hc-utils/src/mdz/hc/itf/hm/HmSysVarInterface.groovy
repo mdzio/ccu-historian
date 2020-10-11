@@ -18,7 +18,6 @@
 package mdz.hc.itf.hm
 
 import groovy.transform.TupleConstructor
-import groovy.transform.CompileStatic
 import groovy.util.logging.Log
 
 import java.util.concurrent.ScheduledFuture
@@ -37,7 +36,6 @@ import mdz.hc.ProcessValue
 
 @Log
 @TupleConstructor
-@CompileStatic
 public class HmSysVarInterface extends BasicProducer<RawEvent> implements Interface, SubscriptionSupport, BrowseSupport, WriteSupport {
 
 	private final static int DEFAULT_DATA_CYCLE = 30000 // ms
