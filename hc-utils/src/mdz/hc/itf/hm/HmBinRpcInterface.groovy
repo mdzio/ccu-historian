@@ -182,6 +182,11 @@ public class HmBinRpcInterface extends BasicProducer<RawEvent> implements Interf
 				'TEMPERATURE',
 				'VOLTAGE',
 				'WIND_SPEED',
+				'AVERAGE_ILLUMINATION',
+				'CURRENT_ILLUMINATION',
+				'HIGHEST_ILLUMINATION',
+				'LOWEST_ILLUMINATION',
+				'OPERATING_VOLTAGE',
 			]
 			
 			// device properties never changes
