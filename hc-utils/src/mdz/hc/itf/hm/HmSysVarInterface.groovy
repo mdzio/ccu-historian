@@ -88,6 +88,7 @@ public class HmSysVarInterface extends BasicProducer<RawEvent> implements Interf
 			DataPoint foundDp=systemVariables.find { it.id==dp.id }
 			if (foundDp) {
 				dp.historyString=(foundDp.attributes.type=='STRING')
+				dp.continuous=(foundDp.attributes.type=='FLOAT')
 				dp.attributes.displayName=foundDp.attributes.displayName
 				dp.attributes.maximum=foundDp.attributes.maximum
 				dp.attributes.unit=foundDp.attributes.unit
