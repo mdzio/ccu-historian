@@ -98,7 +98,8 @@ def createPlot(parameters, dataPoints, plotState) {
 		
 		if (dataPoint.historyString)
 			throw new Exception("Data point $dataPoint.displayName is not numeric")
-		def isAction=dataPoint.attributes.type=='ACTION'
+		def isAction=(dataPoint.attributes.type=='ACTION') ||
+			(dataPoint.id.identifier=='PRESS_SHORT') || (dataPoint.id.identifier=='PRESS_LONG')
 		def isContinuous=dataPoint.continuous
 		def isDeltaCompr=((dataPoint.attributes.preprocType as Integer)?:0) == 1
 
