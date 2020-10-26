@@ -12,7 +12,10 @@ WWW_DIR=/usr/local/etc/config/addons/www/${ADDON_ID}
 stop() {
     logger -t ${ADDON_ID} -p user.debug "Stopping"
     # stop process
+    pid=$(cat /var/run/${ADDON_ID}.pid)
     start-stop-daemon -K -q -p /var/run/${ADDON_ID}.pid
+    # wait for process to exit
+    while kill -0 $pid > /dev/null 2>&1; do sleep 1; done
     logger -t ${ADDON_ID} -p user.info "Stopped"
 }
 
@@ -37,6 +40,7 @@ start() {
       ipaddress=$(ip -4 route get 1 | head -1 | cut -d' ' -f8 | tr -d '\n')
       if [[ -n "${ipaddress}" ]]; then
         sed -i "s/webServer\.historianAddress=.*/webServer.historianAddress='${ipaddress}'/g" ${ADDON_DIR}/ccu-historian.config
+        sed -i "s/devices\.device1\.address=.*/devices.device1.address='${ipaddress}'/g" ${ADDON_DIR}/ccu-historian.config
       fi
     fi
 
@@ -60,7 +64,7 @@ start() {
 
 info() {
     echo "Info: <b>CCU-Historian Add-On</b><br>"
-    echo "Info: (c) 2011-2019 Mathias Dzionsko, u.a.<br>"
+    echo "Info: (c) 2011-2020 Mathias Dzionsko, u.a.<br>"
     echo "Info: <a href="https://github.com/mdzio/ccu-historian" target="_blank">https://github.com/mdzio/ccu-historian</a>"
     echo "Name: CCU-Historian"
     echo "Version: $(cat ${ADDON_DIR}/VERSION)"

@@ -595,8 +595,8 @@ public class Database implements Storage {
 		if (!config.dir.isEmpty() && !config.dir.endsWith('/')) config.dir+='/'
 		// DB_CLOSE_ON_EXIT=FALSE: the database is explicitly closed.
 		// BUILTIN_ALIAS_OVERRIDE=TRUE: no error, if overriding aliases.
-		// MAX_COMPACT_COUNT=100: disables chunk rewriting. faster database shutdown.
-		"jdbc:h2:file:$config.dir$config.name;DB_CLOSE_ON_EXIT=FALSE;BUILTIN_ALIAS_OVERRIDE=TRUE;MAX_COMPACT_COUNT=100"
+		// MAX_COMPACT_COUNT=0: disables chunk rewriting. faster database shutdown.
+		"jdbc:h2:file:$config.dir$config.name;DB_CLOSE_ON_EXIT=FALSE;BUILTIN_ALIAS_OVERRIDE=TRUE;MAX_COMPACT_COUNT=0"
 	}
 
 	private static String getDataPointTableName(DataPoint dp) {
