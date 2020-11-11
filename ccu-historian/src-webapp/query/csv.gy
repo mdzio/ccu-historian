@@ -70,7 +70,7 @@ def ex=utils.catchToLog(log) {
 		dataPoint.attributes.unit?:''
 	}.join(';') << '\n'
 
-	strBuilder << 'Zeistempel;Status;' << dataPoints.collect { 'Wert' }.join(';') << '\n'
+	strBuilder << 'Zeitstempel;Status;' << dataPoints.collect { 'Wert' }.join(';') << '\n'
 	
 	// data lines
 	def numberFormat=new DecimalFormat('#,##0.###')
