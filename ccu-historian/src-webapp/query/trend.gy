@@ -34,6 +34,7 @@ import org.jfree.chart.plot.PlotOrientation
 import mdz.hc.timeseries.TimeSeries
 import mdz.hc.DataPoint
 import mdz.ccuhistorian.TrendDesign
+import mdz.ccuhistorian.eventprocessing.Preprocessor
 import mdz.ccuhistorian.webapp.TrendParameters
 
 @Field
@@ -101,7 +102,7 @@ def createPlot(parameters, dataPoints, plotState) {
 		def isAction=(dataPoint.attributes.type=='ACTION') ||
 			(dataPoint.id.identifier=='PRESS_SHORT') || (dataPoint.id.identifier=='PRESS_LONG')
 		def isContinuous=dataPoint.continuous
-		def isDeltaCompr=((dataPoint.attributes.preprocType as Integer)?:0) == 1
+		def preprocType=Preprocessor.Type.ofDataPoint(dataPoint)
 
 		// generate axis key		
 		def axisKey
@@ -158,7 +159,7 @@ def createPlot(parameters, dataPoints, plotState) {
 			renderer=new XYLineAndShapeRenderer()
 			renderer.baseShapesVisible=true
 			renderer.baseLinesVisible=false
-		} else if (isContinuous && !isDeltaCompr) {
+		} else if (isContinuous && !preprocType.clearsContinuous()) {
 			renderer=new XYLineAndShapeRenderer()
 			renderer.baseShapesVisible=false
 		} else { 

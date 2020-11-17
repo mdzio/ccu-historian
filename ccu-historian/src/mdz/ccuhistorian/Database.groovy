@@ -28,9 +28,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.sql.Sql
 import groovy.util.logging.Log
-
 import org.h2.tools.Server
-
 import mdz.hc.DataPoint
 import mdz.hc.DataPointIdentifier
 import mdz.hc.Event
@@ -38,6 +36,7 @@ import mdz.hc.ProcessValue
 import mdz.hc.persistence.Storage
 import mdz.hc.timeseries.TimeSeries
 import mdz.Exceptions
+import mdz.ccuhistorian.eventprocessing.Preprocessor
 
 @Log
 public class Database implements Storage {
@@ -169,6 +168,10 @@ public class Database implements Storage {
 		row?new ProcessValue((Date)row[0], row[1], (int)row[2]):null
 	}
 	
+	/**
+	 * getTimeSeriesRaw returns raw entries from database without any interpolation, whose timestamps fulfill
+	 * the condition begin<=TS<end.
+	 */
 	@Override
 	public synchronized TimeSeries getTimeSeriesRaw(DataPoint dp, Date begin, Date end) {
 		connect()
@@ -176,41 +179,139 @@ public class Database implements Storage {
 		if (!dp.historyTableName)
 			throw new Exception('Table name of data point is not set')
 		TimeSeries ts=new TimeSeries(dp)
-		db.query("SELECT TS, VALUE, STATE FROM $dp.historyTableName WHERE TS>=? AND TS<? ORDER BY TS" as String, 
-			[(Object)begin, (Object)end]) { ResultSet rs ->
-			ts.add(rs);
-		}
+		db.query("SELECT TS, VALUE, STATE FROM $dp.historyTableName WHERE TS>=? AND TS<? ORDER BY TS" as String,
+				[(Object)begin, (Object)end]) { ResultSet rs ->
+					ts.add(rs);
+				}
 		log.finer "Database: Retrieved $ts.size points"
 		ts
 	}
-	
+
+	/**
+	 * getTimeSeries returns entries from database with interpolated values on the boundaries (begin and end).
+	 */
 	@Override
 	public synchronized TimeSeries getTimeSeries(DataPoint dp, Date begin, Date end) {
 		connect()
 		log.finer "Database: Retrieving time series for ${dp.id}, begin: $begin, end: $end"
-		if (!dp.historyTableName)
+		if (!dp.historyTableName) {
 			throw new Exception('Table name of data point is not set')
-		TimeSeries ts=new TimeSeries(dp)
-		ProcessValue bv=getFirstBefore(dp, begin, true)
-		if (bv) ts.add begin.time, bv.value, bv.state
-		db.query("SELECT TS, VALUE, STATE FROM $dp.historyTableName WHERE TS>? AND TS<=? ORDER BY TS" as String, 
-			[(Object)begin, (Object)end]) { ResultSet rs ->
-			ts.add(rs);
 		}
-		if (ts.size) {
-			bv=ts[ts.size-1]
-			if (bv.timestamp<end) {
-				Date t
-				if (getFirstAfter(dp, end, false)) {
-					t=end
+		if (dp.historyString) {
+			throw new Exception("Data point ${dp.id} is not numeric")
+		}
+
+		// extent time range to get boundary values
+		Date beginExt=getFirstBeforeIncl(dp, begin)
+		if (beginExt==null) {
+			beginExt=begin
+		}
+		Date endExt=getFirstAfterIncl(dp, end)
+		if (endExt==null) {
+			endExt=end
+		}
+		
+		// retrieve time series (add 1 ms to include boundary value)
+		TimeSeries ts=getTimeSeriesRaw(dp, beginExt, new Date(endExt.time+1))
+		if (ts.size()==0) {
+			log.finer "Database: Returning 0 points"
+			return ts
+		}
+
+		// interpolate?
+		Preprocessor.Type preprocType=Preprocessor.Type.ofDataPoint(dp)
+		boolean interpLinear=dp.continuous && !preprocType.clearsContinuous()
+
+		// calculate boundary values
+		if (interpLinear) {
+			// * linear interpolation *
+			 
+			// cut at begin of time range
+			ProcessValue entry1=ts[0]
+			if (entry1.timestamp<begin) {
+				// exists another entry?
+				if (ts.size()>=2) {
+					// interpolate linear
+					ProcessValue entry2=ts[1]
+					ProcessValue interpEntry=interpolate(entry1, entry2, begin)
+					if (interpEntry!=null) {
+						// replace first entry
+						ts[0]=interpEntry
+					}
 				} else {
-					t=new Date(); if (t>end) t=end
+					// remove the out of range entry 
+					ts.remove(0)
 				}
-				ts.add t.time, bv.value, bv.state
+			}
+
+			// cut at end of time range
+			if (ts.size()==0) {
+				log.finer "Database: Returning 0 points"
+				return ts
+			}
+			ProcessValue entry2=ts[ts.size()-1]
+			if (entry2.timestamp>end) {
+				// exists another entry?
+				if (ts.size()>=2) {
+					// interpolate linear
+					entry1=ts[ts.size()-2]
+					ProcessValue interpEntry=interpolate(entry1, entry2, end)
+					if (interpEntry!=null) {
+						// replace last entry
+						ts[ts.size()-1]=interpEntry
+					}
+				} else {
+					// remove the out of range entry
+					ts.remove(ts.size()-1)
+				}
+			}
+			
+		} else {
+			// * hold value interpolation *
+			
+			// cut at begin of time range
+			ProcessValue firstEntry=ts[0]
+			if (firstEntry.timestamp<begin) {
+				// move first entry to begin of time range
+				firstEntry.timestamp=begin
+				ts[0]=firstEntry
+			}
+
+			// cut at end of time range
+			ProcessValue lastEntry=ts[ts.size()-1]
+			if (lastEntry.timestamp<end) {
+				// last entry before end: hold value until now or end timestamp
+				def holdEnd=new Date()
+				if (holdEnd>end) {
+					holdEnd=end
+				}
+				ts.add(holdEnd.time, lastEntry.value, lastEntry.state)
+				
+			} else if (lastEntry.timestamp==end) {
+				// last entry exactly on end: do nothing
+				
+			} else {
+				// last entry after end: remove entry
+				ts.remove(ts.size()-1)
+				// hold previous value until end
+				if (ts.size()>0) {
+					lastEntry=ts[ts.size()-1]
+					ts.add(end.time, lastEntry.value, lastEntry.state)
+				}
 			}
 		}
-		log.finer "Database: Retrieved $ts.size points"
+		log.finer "Database: Returning $ts.size points"
 		ts
+	}
+	
+	private ProcessValue interpolate(ProcessValue first, ProcessValue second, Date ts) {
+		double tdiff=second.timestamp.time-first.timestamp.time
+		if (tdiff==0) {
+			return null
+		}
+		double slope=(second.value-first.value)/tdiff
+		double value=(ts.time-first.timestamp.time)*slope+first.value
+		new ProcessValue(ts, value, first.state)
 	}
 
 	@Override
@@ -484,20 +585,14 @@ public class Database implements Storage {
 		log.info 'Script run completed'
 	}
 
-	private ProcessValue getFirstBefore(DataPoint dp, Date ts, boolean incBoundary=false) {
-		if (!dp.historyTableName)
-			throw new Exception('Table name of data point is not set')
-		def row=db.firstRow("""SELECT TS, VALUE, STATE FROM $dp.historyTableName WHERE
-			TS=(SELECT MAX(TS) FROM $dp.historyTableName WHERE TS${incBoundary?'<=':'<'}?)""" as String, ts)
-		row?new ProcessValue((Date)row[0], row[1], (int)row[2]):null
+	private Date getFirstBeforeIncl(DataPoint dp, Date ts) {
+		def row=db.firstRow("""SELECT MAX(TS) FROM $dp.historyTableName WHERE TS<=?""" as String, ts)
+		row?(Date)row[0]:null
 	}
 
-	private ProcessValue getFirstAfter(DataPoint dp, Date ts, boolean incBoundary=true) {
-		if (!dp.historyTableName)
-			throw new Exception('Table name of data point is not set')
-		def row=db.firstRow("""SELECT TS, VALUE, STATE FROM $dp.historyTableName WHERE
-			TS=(SELECT MIN(TS) FROM $dp.historyTableName WHERE TS${incBoundary?'>=':'>'}?)""" as String, ts)
-		row?new ProcessValue((Date)row[0], row[1], (int)row[2]):null
+	private Date getFirstAfterIncl(DataPoint dp, Date ts) {
+		def row=db.firstRow("""SELECT MIN(TS) FROM $dp.historyTableName WHERE TS>=?""" as String, ts)
+		row?(Date)row[0]:null
 	}
 
 	private static Double asDoubleOrNull(value) {

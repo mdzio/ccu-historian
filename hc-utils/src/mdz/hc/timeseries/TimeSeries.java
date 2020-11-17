@@ -103,7 +103,8 @@ public class TimeSeries implements Iterable<ProcessValue> {
 	private DataPoint dataPoint;
 
 	/**
-	 * The property historyString must return something useful for the passed data point.
+	 * The property historyString must return something useful for the passed data
+	 * point.
 	 */
 	public TimeSeries(DataPoint dataPoint) {
 		this.dataPoint = dataPoint;
@@ -137,12 +138,29 @@ public class TimeSeries implements Iterable<ProcessValue> {
 	}
 
 	public ProcessValue getAt(int idx) {
-		if (idx >= size)
-			throw new ArrayIndexOutOfBoundsException();
-		if (isNumeric())
+		// lower bound is checked by array access
+		if (idx >= size) {
+			throw new ArrayIndexOutOfBoundsException(idx);
+		}
+		if (isNumeric()) {
 			return new ProcessValue(new Date(timestamps[idx]), ((double[]) values)[idx], states[idx]);
-		else
+		} else {
 			return new ProcessValue(new Date(timestamps[idx]), ((String[]) values)[idx], states[idx]);
+		}
+	}
+
+	public void putAt(int idx, ProcessValue pv) {
+		// lower bound is checked by array access
+		if (idx >= size) {
+			throw new ArrayIndexOutOfBoundsException(idx);
+		}
+		timestamps[idx] = pv.getTimestamp().getTime();
+		states[idx] = pv.getState();
+		if (isNumeric()) {
+			((double[]) values)[idx] = (Double) pv.getValue();
+		} else {
+			((String[]) values)[idx] = (String) pv.getValue();
+		}
 	}
 
 	@Override
@@ -179,12 +197,26 @@ public class TimeSeries implements Iterable<ProcessValue> {
 	}
 
 	public void add(ResultSet resultSet) throws SQLException {
-		if (isNumeric())
-			while (resultSet.next())
+		if (isNumeric()) {
+			while (resultSet.next()) {
 				add(resultSet.getTimestamp(1).getTime(), resultSet.getDouble(2), resultSet.getInt(3));
-		else
-			while (resultSet.next())
+			}
+		} else {
+			while (resultSet.next()) {
 				add(resultSet.getTimestamp(1).getTime(), resultSet.getString(2), resultSet.getInt(3));
+			}
+		}
+	}
+
+	public void remove(int idx) {
+		if (idx < 0 || idx >= size) {
+			throw new ArrayIndexOutOfBoundsException(idx);
+		}
+		// shift arrays
+		System.arraycopy(timestamps, idx + 1, timestamps, idx, size - idx - 1);
+		System.arraycopy(values, idx + 1, values, idx, size - idx - 1);
+		System.arraycopy(states, idx + 1, states, idx, size - idx - 1);
+		size--;
 	}
 
 	public void ensureCapacity(int minCapacity) {

@@ -20,6 +20,7 @@ package mdz.ccuhistorian.eventprocessing
 import groovy.util.logging.Log
 import mdz.eventprocessing.BasicProducer
 import mdz.eventprocessing.Processor
+import mdz.hc.DataPoint
 import mdz.hc.DataPointIdentifier
 import mdz.hc.Event
 import mdz.hc.ProcessValue
@@ -30,25 +31,45 @@ import java.util.logging.Level
 @Log
 public class Preprocessor extends BasicProducer<Event> implements Processor<Event, Event> {
 
-	public enum Type { DISABLED, DELTA_COMPR, TEMPORAL_COMPR, AVG_COMPR, MIN_COMPR, MAX_COMPR, SWD_COMPR }
+	public enum Type { 
+		DISABLED(false), 
+		DELTA_COMPR(true), 
+		TEMPORAL_COMPR(false), 
+		AVG_COMPR(true), 
+		MIN_COMPR(true), 
+		MAX_COMPR(true), 
+		SWD_COMPR(false);
+		 
+		private boolean clrCont;
+		Type(boolean clearsContinuous) {
+			clrCont=clearsContinuous	
+		}
+		public boolean clearsContinuous() {
+			clrCont
+		}
+		public static Type ofDataPoint(DataPoint dataPoint) {
+			int typeIndex=(dataPoint.attributes.preprocType as Integer)?:Type.DISABLED.ordinal()
+			if (typeIndex<0 || typeIndex>=Type.values().length) {
+				log.warning "Preprocessor: Invalid preprocessing type (data point: $dataPoint.id)"
+				DISABLED
+			} else {
+				Type.values()[typeIndex] 
+			}
+		} 
+	}
 	
 	public void consume(Event event) throws Exception {
 		try {
-			int typeIndex=(event.dataPoint.attributes.preprocType as Integer)?:Type.DISABLED.ordinal()
-			if (typeIndex!=Type.DISABLED.ordinal()) {
-				if (typeIndex<0 || typeIndex>=Type.values().length) {
-					log.warning "Preprocessor: Invalid preprocessing type $typeIndex (data point: $event.dataPoint.id)"
-				} else {
-					Type type=Type.values()[typeIndex]
-					double param=(event.dataPoint.attributes.preprocParam as Double)?:0.0D
-					switch (type) {
-						case Type.DELTA_COMPR: applyDelta(event, param); break
-						case Type.TEMPORAL_COMPR: applyTemporal(event, param); break
-						case Type.AVG_COMPR:
-						case Type.MIN_COMPR:
-						case Type.MAX_COMPR: applyIntervalProcessor(event, type, param); break
-						case Type.SWD_COMPR: applySwingingDoor(event, type, param/2.0); break
-					}
+			Type type=Type.ofDataPoint(event.dataPoint)
+			if (type!=Type.DISABLED) {
+				double param=(event.dataPoint.attributes.preprocParam as Double)?:0.0D
+				switch (type) {
+					case Type.DELTA_COMPR: applyDelta(event, param); break
+					case Type.TEMPORAL_COMPR: applyTemporal(event, param); break
+					case Type.AVG_COMPR:
+					case Type.MIN_COMPR:
+					case Type.MAX_COMPR: applyIntervalProcessor(event, type, param); break
+					case Type.SWD_COMPR: applySwingingDoor(event, type, param/2.0); break
 				}
 			} else {
 				// forward unmodified
