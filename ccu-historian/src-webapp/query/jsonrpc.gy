@@ -162,7 +162,8 @@ def executeScript(script, writeAccess) {
 		'mdz.hc.DataPointIdentifier',
 		'mdz.hc.Event',
 		'mdz.hc.ProcessValue',
-		'mdz.hc.RawEvent'
+		'mdz.hc.RawEvent',
+		'mdz.hc.timeseries.TimeSeries'
 	config.addCompilationCustomizers importCustomizer
 	// security
 	SecureASTCustomizer secureCustomizer=[]
@@ -174,10 +175,11 @@ def executeScript(script, writeAccess) {
 			'mdz.hc.Event',
 			'mdz.hc.ProcessValue',
 			'mdz.hc.RawEvent',
+			'mdz.hc.timeseries.TimeSeries'
 		]
 		staticImportsWhitelist=[]
 		staticStarImportsWhitelist=[
-			'java.lang.Math',
+			'java.lang.Math'
 		]
 		receiversBlackList=['java.lang.System']
 	}
