@@ -35,8 +35,7 @@ Für bestimmte Systeme existieren fertige Installationspakete:
   * CCU3
   * [RaspberryMatic](https://github.com/jens-maus/RaspberryMatic)
 * Synology-Paket
-* Docker-Images (alphabetisch sortiert)
-  * [sacomedv/ccu-historian](https://hub.docker.com/r/sacomedv/ccu-historian)
+* Docker-Image
   * [xjokay/ccu-historian](https://hub.docker.com/r/xjokay/ccu-historian)
 
 **Hinweis:** Für den Betrieb als Addon auf einer CCU3 oder RaspberryMatic muss an der Zentrale ein USB-Stick angeschlossen sein!
