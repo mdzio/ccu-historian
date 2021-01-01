@@ -78,7 +78,7 @@ public class Database implements Storage {
 				prepareDatabase()
 				if (config.webEnable) {
 					log.info 'Starting database web server'
-					def args=['-ifExists', '-webPort', config.webPort as String]
+					def args=['-ifExists', '-webPort', config.webPort as String, '-webAdminPassword', config.password]
 					if (config.webAllowOthers) args << '-webAllowOthers'
 					webServer=Server.createWebServer(args as String[])
 					webServer.start()
