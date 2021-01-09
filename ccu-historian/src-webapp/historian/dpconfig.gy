@@ -169,6 +169,8 @@ renderer.content={
 		}
 		
 		// data point table
+		def sumTotal=0
+		def sumLast24h=0
 		table(id:'dp-table', class:'table table-bordered table-condensed table-hover') {
 			thead {
 				tr {
@@ -221,8 +223,10 @@ renderer.content={
 							input(type:'checkbox', class:'form-control', name:'hidden-'+dp.idx, value:1, *:checked)
 						}
 						def total=database.getCount(dp, null, null)
+						sumTotal+=total
 						def last24h=database.getCount(dp, new Date(System.currentTimeMillis()-24*3600*1000), null)
-						td class:'hidden-xs hidden-sm hidden-md', "$total / $last24h"
+						sumLast24h+=last24h
+						td class:'hidden-xs hidden-sm hidden-md', "${utils.format(total)} / ${utils.format(last24h)}"
 						td {
 							select(class:'form-control', name:'ptype-'+dp.idx, size:1) {
 								preprocTypes.each { idx, name ->
@@ -239,6 +243,8 @@ renderer.content={
 				}
 			}
 		}
+		p "Gesamtanzahl aller Einträge: ${utils.format(sumTotal)}, " +
+			"Anzahl aller Einträge in den letzten 24 Stunden: ${utils.format(sumLast24h)}"
 	}
 }
 

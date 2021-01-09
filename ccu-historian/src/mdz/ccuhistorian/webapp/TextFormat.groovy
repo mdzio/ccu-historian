@@ -34,6 +34,13 @@ import mdz.Text
 class TextFormat {
 
 	private static NumberFormat numberFormat=new DecimalFormat('#,##0.0#####')
+	private static NumberFormat integerFormat=new DecimalFormat('#,##0')
+	
+	public static String formatNumber(Integer number) {
+		synchronized(integerFormat) {
+			number!=null?integerFormat.format(number):''
+		}
+	}
 	
 	public static String formatNumber(Number number) {
 		synchronized(numberFormat) {
