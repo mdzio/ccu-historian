@@ -34,7 +34,7 @@ Für bestimmte Systeme existieren fertige Installationspakete:
 * CCU-Addon für folgende HomeMatic-Zentralen:
   * CCU3
   * [RaspberryMatic](https://github.com/jens-maus/RaspberryMatic)
-* Synology-Paket
+* Synology-Paket (Die DSM Version 7 wird zurzeit noch nicht unterstützt.)
 * Docker-Image
   * [xjokay/ccu-historian](https://hub.docker.com/r/xjokay/ccu-historian)
 
