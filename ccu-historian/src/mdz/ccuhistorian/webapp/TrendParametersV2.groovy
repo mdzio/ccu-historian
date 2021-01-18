@@ -33,8 +33,6 @@ class TrendParametersV2 extends TrendParameters {
 				throw new IllegalArgumentException('Parameter w (width) is invalid')
 			}
 			width=widthText.toInteger()
-		} else {
-			width=DEFAULT_WIDTH
 		}
 		
 		String heightText=request.getParameter('h')
@@ -43,10 +41,8 @@ class TrendParametersV2 extends TrendParameters {
 				throw new IllegalArgumentException('Parameter h (height) is invalid')
 			}
 			height=heightText.toInteger()
-		} else {
-			height=DEFAULT_HEIGHT
 		}
-
+		
 		// data points
 		List<DataPoint> dataPoints=[]
 		List<Integer> groupIds=[]

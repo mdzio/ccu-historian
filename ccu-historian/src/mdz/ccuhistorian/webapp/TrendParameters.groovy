@@ -40,7 +40,7 @@ public class TrendParameters {
 		}
 	}
 	
-	int width, height
+	Integer width, height
 	TimeRange timeRange
 	TrendDesign trendDesign
 	TreeMap<Integer /* group id */, Group> groups=new TreeMap<Integer, Group>()
@@ -56,10 +56,10 @@ public class TrendParameters {
 	
 	public Map<String, String[]> getParameters() {
 		Map<String, String[]> params=[:]
-		if (width!=DEFAULT_WIDTH) {
+		if (width!=null) {
 			params.w=[width]
 		}
-		if (height!=DEFAULT_HEIGHT) {
+		if (height!=null) {
 			params.h=[height]
 		}
 		params << timeRange.parameters
@@ -76,6 +76,20 @@ public class TrendParameters {
 			} 
 		}
 		params
+	}
+	
+	public Integer getWidth() {
+		if (width==null) { 
+			return DEFAULT_WIDTH
+		}
+		return width
+	}
+	
+	public Integer getHeight() {
+		if (height==null) {
+			return DEFAULT_HEIGHT
+		}
+		return height
 	}
 	
 	@Override
