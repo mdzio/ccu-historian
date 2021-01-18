@@ -140,7 +140,7 @@ renderer.content={
 		// toolbar
 		div(class:'row', style:'margin-bottom: 0.5em') {
 			// filter input
-			div(class:'col-sm-4') {
+			div(class:'col-sm-3') {
 				div(class:'input-group') {
 					String descr='Es wird nach allen Teilen des Filterausdrucks in allen Eigenschaften des ' +
 						'Datenpunktes gesucht. Wird ein Suchbegriff in | (Verkettungszeichen) eingeschlossen, ' +
@@ -159,10 +159,68 @@ renderer.content={
 					}
 				}
 			}
-			div(class:'col-sm-4') {
+			// bulk settings
+			div(class:'col-sm-7') {
+				div(class:'form-inline') {
+					div(class:'form-group') {
+						div(class:'input-group') {
+							div(class:'input-group-addon', 'Inaktiv')
+							span(class:'input-group-btn') {
+								button(type:'button', class:'btn btn-default', id:'button-check-inactive', 'data-toggle':'tooltip',
+									title:'Alle sichtbaren Datenpunkte werden inaktiv gesetzt.') {
+									span class:'glyphicon glyphicon-check'
+								}
+								button(type:'button', class:'btn btn-default', id:'button-uncheck-inactive', 'data-toggle':'tooltip',
+									title:'Alle sichtbaren Datenpunkte werden aktiv gesetzt.') {
+									span class:'glyphicon glyphicon-unchecked'
+								}
+							}
+						}
+					}
+					div(class:'form-group') {
+						div(class:'input-group') {
+							div(class:'input-group-addon', 'Versteckt')
+							span(class:'input-group-btn') {
+								button(type:'button', class:'btn btn-default', id:'button-check-hidden', 'data-toggle':'tooltip',
+									title:'Alle sichtbaren Datenpunkte werden versteckt.') {
+									span class:'glyphicon glyphicon-check'
+								}
+								button(type:'button', class:'btn btn-default', id:'button-uncheck-hidden', 'data-toggle':'tooltip',
+									title:'Alle sichtbaren Datenpunkte werden nicht mehr versteckt.') {
+									span class:'glyphicon glyphicon-unchecked'
+								}
+							}
+						}
+					}
+					div(class:'btn-group') {
+						button(type:'button', class:'btn btn-default dropdown-toggle', 'data-toggle':'dropdown') {
+							mkp.yield 'Vorverarb.'
+							span class:'caret'
+						}
+						ul(class:'dropdown-menu') {
+							li { a href:'#', id:'select-preproc-0', 'Ausschalten' } 
+							li { a href:'#', id:'select-preproc-1', 'Delta K.' } 
+							li { a href:'#', id:'select-preproc-2', 'Zeitl.K.' } 
+							li { a href:'#', id:'select-preproc-3', 'Mittelw.' } 
+							li { a href:'#', id:'select-preproc-4', 'Minimum' } 
+							li { a href:'#', id:'select-preproc-5', 'Maximum' } 
+							li { a href:'#', id:'select-preproc-6', 'Sw.Do.K.' } 
+						}
+					}
+					div(class:'input-group') {
+						span class:'input-group-addon', 'Param.'
+						input type:'text', class:'form-control', id:'input-param', size:2, placeholder:'Zahl'
+						span(class:'input-group-btn') {
+							button (class:'btn btn-default', type:'button', id:'button-param', 'data-toggle':'tooltip',
+								title:'Der eingegebene Parameter wird für alle sichtbaren Datenpunkte übernommen.') {
+								span class:'glyphicon glyphicon-ok'
+							}
+						} 
+					}
+				}
 			}
 			// data point actions
-			div(class:'col-sm-4') {
+			div(class:'col-sm-2') {
 				button class:'btn btn-primary btn-block', type:'submit', name:'update-datapoints', value:1, 'Übernehmen',
 					'data-toggle':'tooltip', title:'Alle Änderungen werden in der Datenbank abgespeichert.'
 			}
@@ -171,6 +229,7 @@ renderer.content={
 		// data point table
 		def sumTotal=0
 		def sumLast24h=0
+		def dpCount=0
 		table(id:'dp-table', class:'table table-bordered table-condensed table-hover') {
 			thead {
 				tr {
@@ -204,6 +263,7 @@ renderer.content={
 			}
 			tbody {
 				database.dataPoints.each { dp ->
+					dpCount++
 					tr {
 						td class:'hidden-xs hidden-sm hidden-md', dp.id.interfaceId
 						td dp.attributes.displayName?:dp.id.address
@@ -243,7 +303,7 @@ renderer.content={
 				}
 			}
 		}
-		p "Gesamtanzahl aller Einträge: ${utils.format(sumTotal)}, " +
+		p "Anzahl Datenpunkt: $dpCount, Gesamtanzahl aller Einträge: ${utils.format(sumTotal)}, " +
 			"Anzahl aller Einträge in den letzten 24 Stunden: ${utils.format(sumLast24h)}"
 	}
 }
@@ -272,6 +332,39 @@ renderer.end={
 		$('#filter-input').on('keyup', _.debounce(filter, 500));
 		// enable filter
 		$('#filter-input').prop('disabled', false);
+		
+		// set inactive
+		$('#button-check-inactive').on('click', function(e) {
+			$('#dp-table tbody > tr:visible td:nth-child(8) > input').prop('checked', true);
+		});
+		$('#button-uncheck-inactive').on('click', function(e) {
+			$('#dp-table tbody > tr:visible td:nth-child(8) > input').prop('checked', false);
+		});
+
+		// set hidden
+		$('#button-check-hidden').on('click', function(e) {
+			$('#dp-table tbody > tr:visible td:nth-child(9) > input').prop('checked', true);
+		});
+		$('#button-uncheck-hidden').on('click', function(e) {
+			$('#dp-table tbody > tr:visible td:nth-child(9) > input').prop('checked', false);
+		});
+
+		// set preprocessing
+		for (let t=0; t<=6; t++) {
+			$('#select-preproc-' + t).on('click', function(e) {
+				$('#dp-table tbody > tr:visible td:nth-child(11) > select').val(t);
+			});
+		}
+		
+		// set param
+		function setparam() {
+			var val=$('#input-param').val();
+			$('#dp-table tbody > tr:visible td:last-child > input').val(val);
+		}
+		$('#button-param').on('click', setparam);
+		$('#input-param').on('keydown', function(e) {
+			if (e.keyCode===13) { e.preventDefault(); setparam(); }
+		})
 	/$) }
 }
 
