@@ -64,7 +64,7 @@ Bei einer kommerziellen Verwendung des CCU-Historians muss also auf die Erweiter
 
 ## Autoren
 
-Copyright (c) 2011-2020
+Copyright (c) 2011-2021
 
 * Mathias Dzionsko
 * Jens Maus (CCU/RaspberryMatic-Distribution)
