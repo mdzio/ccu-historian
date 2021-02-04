@@ -17,15 +17,20 @@
 */
 import groovy.transform.Field
 import java.util.logging.Logger
+import java.text.SimpleDateFormat
 import mdz.ccuhistorian.webapp.TimeRange
 import javax.servlet.http.HttpServletResponse
 
 @Field
 private final static log = Logger.getLogger('mdz.ccuhistorian.webapp.Text')
+@Field
+private final static dateFormat=new SimpleDateFormat('yyyy-MM-dd HH:mm:ss')
 
 class Stats {
 	def min=Double.POSITIVE_INFINITY
+	def mints
 	def max=Double.NEGATIVE_INFINITY
+	def maxts
 	def avg
 	def diff
 	def counter=0
@@ -50,7 +55,7 @@ def ex=utils.catchToLog(log) {
 	def timeRange=new TimeRange(request)
 	def aggrs=request.getParameterValues('ag')?:['avg']
 	log.finer "Web server: Generating aggregate/s ${aggrs.join(", ")} for $dataPoint.displayName from ${utils.format(timeRange.begin)} to ${utils.format(timeRange.end)}"
-	if (aggrs.any { !(it in ['min','max','avg','diff','counter','first','last'])}) {
+	if (aggrs.any { !(it in ['min','mints','max','maxts','avg','diff','counter','first','last'])}) {
 		throw new Exception("Invalid parameter ag: " + aggrs.join(", "))
 	}
 	
@@ -65,8 +70,14 @@ def ex=utils.catchToLog(log) {
 	def integr=0
 	def previous
 	timeSeries.each { pv ->
-	  if (pv.value<stats.min) stats.min=pv.value
-	  if (pv.value>stats.max) stats.max=pv.value
+	  if (pv.value<stats.min) {
+		  stats.min=pv.value
+		  stats.mints=pv.timestamp
+	  }
+	  if (pv.value>stats.max) {
+		  stats.max=pv.value
+		  stats.maxts=pv.timestamp
+	  }
 	  if (previous!=null) {
 		integr+=previous.value*(pv.timestamp.time-previous.timestamp.time)
 		def d=pv.value-previous.value
@@ -77,10 +88,22 @@ def ex=utils.catchToLog(log) {
 	  previous=pv
 	}
 	def duration=timeRange.end.time-timeRange.begin.time
-	stats.avg=integr/duration
-	stats.first=timeSeries[0].value
-	stats.last=previous.value
-	stats.diff=stats.last-stats.first
+	if (previous!=null) {
+		stats.avg=integr/duration
+	}
+	if (timeSeries.getSize()>0) {
+		stats.first=timeSeries[0].value
+	}
+	stats.last=previous?.value
+	if (stats.first && stats.last!=null) {
+		stats.diff=stats.last-stats.first
+	}
+	if (stats.mints) {
+		stats.mints=dateFormat.format(stats.mints)
+	}
+	if (stats.maxts) {
+		stats.maxts=dateFormat.format(stats.maxts)
+	}
 	
 	// output statistics
 	println(aggrs.collect { aggr ->	stats."$aggr" }.collect { it!=null?it:"NaN" }.join("\t"))
