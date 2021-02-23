@@ -9,7 +9,7 @@ var H2_refreshSec = 60;
 // Refresh Time is enabled
 
 // declare global Variables
-var H2_version = 'v3.10';
+var H2_version = 'v3.12';
 var chart;
 var filter_feld = '';
 var DP_point = [];
@@ -296,6 +296,7 @@ function defaultAttrib(DP, colorNr, idx) {
         break;
     case "SET_TEMPERATURE":
     case "SETPOINT":
+    case "SET_POINT_TEMPERATURE":
         attr.yaxis = 'Y1';
         attr.line  = 'L2';
         break;
