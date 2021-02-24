@@ -9,7 +9,7 @@ var H2_refreshSec = 60;
 // Refresh Time is enabled
 
 // declare global Variables
-var H2_version = 'v3.12';
+var H2_version = 'v3.13';
 var chart;
 var filter_feld = '';
 var DP_point = [];
@@ -2278,7 +2278,7 @@ function check_filter(p_raum, p_gewerk, p_dp) {
         if (p_dp.attributes.room.indexOf(p_raum) === -1)
             return false;
     }
-    if (p_raum != "ALLES" && p_raum === "SYSVAR" && !p_dp.displayName.includes("SysVar."))
+    if (p_raum != "ALLES" && p_raum === "SYSVAR" && p_dp.id.interfaceId != "SysVar")
         return false;
 
     // Function Filter
