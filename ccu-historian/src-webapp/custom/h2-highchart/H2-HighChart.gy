@@ -4,9 +4,9 @@ import mdz.ccuhistorian.webapp.WebUtilities
 // get api key
 def apiKey
 if (webServer.config.apiKeys) {
-	apiKey="?k="+webServer.config.apiKeys[0]
+  apiKey="?k="+webServer.config.apiKeys[0]
 } else {
-	apiKey=""
+  apiKey=""
 }
 
 // setup page
@@ -16,34 +16,28 @@ def renderer=new mdz.ccuhistorian.webapp.PageRenderer(servlet: this)
 def js=$/ var apiKey="$apiKey"/$
 
 renderer.head={
-	title 'CCU-historian: HighChart'
-	script { mkp.yieldUnescaped js }
+  title 'CCU-historian: HighChart'
+  script { mkp.yieldUnescaped js }
+  meta('http-equiv':'"expires" content="4500"') 
 }
 
 renderer.content={
 
-	div(id:'filter') {
-		div(class:'btn-group', role:'group') {
-			button id:'button1', class:'btn btn-default', 'Tag'
-			button id:'button2', class:'btn btn-default', 'Woche'
-			button id:'button3', class:'btn btn-default', 'Monat'
-			button id:'button4', class:'btn btn-default', 'Jahr'
-			button id:'button5', class:'btn btn-default', 'Alles'
-      }    
-					
-      select(id: "Select-Raum", class:"form-select-h2")  { }
-      select(id: "Select-Gewerk", class:"form-select-h2" )  { }
-      input id:"filterFeld", class:"form-select-h2", type:"text", placeholder:"Suchen.."
-      div(class:'btn-group', role:'group') {
-          button id:'refresh', class:'btn btn-default', 'Refresh'
-          button id:'createLink', class:'btn btn-default', 'Link erzeugen'
+  div(id:'filter') {
+    select(id: "Select-Raum", class:"form-select-h2")  { }
+    select(id: "Select-Gewerk", class:"form-select-h2" )  { }
+    input id:"filterFeld", class:"form-select-h2", type:"text", placeholder:"Suchen.."
+    div(class:'btn-group', role:'group') {
+        button id:'refresh', class:'btn btn-default', 'Refresh'
+        button id:'createLink', class:'btn btn-default', 'Link erzeugen'
+    }
+   }
+   div(id:'chart-container-outer') {
+      style: "position:relative; flex-grow:1"
+      div(id:'container') { 
+         style: "position:absolute; left:0; top: 0; bottom:0; right:0; overflow:hidden; min-height: 400px; min-width: 310px"
       }
    }
-
-   div(id:'container') { 
-      style: "min-height: 400px; height: auto; min-width: 310px"
-   }
-
    div(id:'message') {
       span id: "count_val", ""
       span id: "count_text", ""
@@ -161,16 +155,16 @@ renderer.content={
                   span id: "Text-Theme", class:"LinePopup-text", "Theme"
                   select(id: "Select-Theme", class:"form-select-h2")  { }
                }
-               div(id:"refresh") {
+               div(id:"refreshSec") {
                    span id: "Text-Refresh", class:"LinePopup-text", "Refresh in Sec." 
                    input(id: "Line-Refresh", type:"number", step: "0", class:"form-input-h2") 
                }
                div(id:"title") {
-                   span id: "Text-Refresh", class:"LinePopup-text", "Title" 
+                   span id: "Text-Title", class:"LinePopup-text", "Title" 
                    input(id: "Line-Title", class:"form-input-h2") 
                }
                div(id:"subtitle") {
-                   span id: "Text-Refresh", class:"LinePopup-text", "Subtitle" 
+                   span id: "Text-Subtitle", class:"LinePopup-text", "Subtitle" 
                    input(id: "Line-Subtitle", class:"form-input-h2") 
                }
             }
@@ -189,8 +183,8 @@ renderer.content={
                h4 class:"modal-title3", "Modal Header"
             }
             div(class:"modal-body") {
-               div(id:"title") {
-                   span id: "Text-Refresh", class:"LinePopup-text", "Title" 
+               div(id:"title3") {
+                   span id: "Text-Title3", class:"LinePopup-text", "Title" 
                    input(id: "Line-Title3", class:"form-input-h2") 
                }
                div(id:"position") {
@@ -232,13 +226,13 @@ renderer.content={
 }
 
 renderer.end={
-   script src:'highstock.js'
-   script src:'highcharts-more.js'
-   script src:'exporting.js'
-   script src:'offline-exporting.js'
-   script src:'language.js'
-   script src:'themes.js'
-   script src:'H2-HighChart.js'
+  script src:'highstock.js'
+  script src:'highcharts-more.js'
+  script src:'exporting.js'
+  script src:'offline-exporting.js'
+  script src:'language.js'
+  script src:'themes.js'
+  script src:'H2-HighChart.js'
 }
 
 // render page
