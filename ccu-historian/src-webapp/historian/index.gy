@@ -122,6 +122,12 @@ renderer.content={
 						'data-toggle':'tooltip', title:'Bei HomeMatic-Geräten ist der Adressaufbau "Geräteseriennummer:Kanalnummer".'
                     th class:'hidden-xs hidden-sm hidden-md', 'ID',
 						'data-toggle':'tooltip', title:'Eindeutige Historian-ID für URL-Parameter bzw. JSON-RPC.'
+					if (webServer.config.showLastValue) {
+						th class:'hidden-xs hidden-sm', 'Kommunikation',
+							'data-toggle':'tooltip', title:'Letzte erfolgreiche Kommunikation'
+						th class:'hidden-xs hidden-sm', 
+							'Wert', 'data-toggle':'tooltip', title:'Letzter Wert'
+					}
                 }
             }
             tbody {
@@ -145,6 +151,11 @@ renderer.content={
                         td class:'hidden-xs', dp.attributes.function
                         td class:'hidden-xs hidden-sm hidden-md', dp.id.address
                         td class:'hidden-xs hidden-sm hidden-md text-right', dp.idx
+						if (webServer.config.showLastValue) {
+							def last=database.getLast(dp)
+							td class:'hidden-xs hidden-sm', utils.format(last?.timestamp)
+							td class:'hidden-xs hidden-sm text-right', utils.format(last?.value)
+						}
                     }
                 }
             }
