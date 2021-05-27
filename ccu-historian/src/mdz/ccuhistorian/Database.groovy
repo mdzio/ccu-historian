@@ -568,7 +568,7 @@ public class Database implements Storage {
 		log.info 'Compaction of database completed'
 	}
 
-	public static void dump(DatabaseConfig config, String fileName) {
+	public static void createScript(DatabaseConfig config, String fileName) {
 		log.info 'Starting dump of database'
 		config.logDebug()
 		log.fine "Dumping database to $fileName"

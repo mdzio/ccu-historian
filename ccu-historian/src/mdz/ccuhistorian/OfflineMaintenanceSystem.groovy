@@ -30,7 +30,7 @@ class OfflineMaintenanceSystem extends BaseSystem {
 		if (config.cmdLineConfig.compaction)
 			action=Database.&compact.curry(config.databaseConfig)
 		else if (config.cmdLineConfig.scriptFileName)
-			action=Database.&dump.curry(config.databaseConfig, config.cmdLineConfig.scriptFileName)
+			action=Database.&createScript.curry(config.databaseConfig, config.cmdLineConfig.scriptFileName)
 		else if (config.cmdLineConfig.runScriptFileName)
 			action=Database.&runScript.curry(config.databaseConfig, config.cmdLineConfig.runScriptFileName)
 		else
