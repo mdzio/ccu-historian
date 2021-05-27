@@ -18,11 +18,13 @@ public class PageRenderer {
 
     // render page content
     public render() {
+		long st=System.currentTimeMillis()
         servlet.utils.catchToLog(log) {
             setup()
             handleUserLogInOut()
             writeDocument()
         }
+		log.finest "Page build time: ${System.currentTimeMillis()-st} ms"
     }
     
 	private def setup() {

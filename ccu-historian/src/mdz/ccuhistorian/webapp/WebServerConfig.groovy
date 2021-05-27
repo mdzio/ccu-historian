@@ -40,6 +40,7 @@ class WebServerConfig {
 	Map<String, Link> menuLinks=new TreeMap().withDefault { new Link() }
 	String[] apiKeys=[]
 	String corsOrigin="*"
+	boolean showLastValue=false
 
 	void logDebug() {
 		log.fine "webServer.port=$port"
@@ -50,5 +51,6 @@ class WebServerConfig {
 		log.fine "webServer.apiKeys=[${apiKeys.collect { "'$it'" }.join(', ')}]"
 		log.fine "webServer.menuLinks=[${menuLinks.values().collect { it.text }.join(', ')}]"
 		log.fine "webServer.corsOrigin='$corsOrigin'"
+		log.fine "webServer.showLastValue=$showLastValue"
 	}
 }
