@@ -44,7 +44,10 @@ public class DataPoint {
 	
 	// Metadata of the data point should not be synchronized. Set by user.
 	static public final int FLAGS_NO_SYNCHRONIZATION = 0x00000100
-	
+
+	// Metadata for the data point has been synchronized at least once.
+	static public final int FLAGS_SYNCED             = 0x00000200
+
 	// Attributes of Data Preprocessing
 	static public final String ATTR_PREPROC_TYPE	= 'preprocType'
 	static public final String ATTR_PREPROC_PARAM	= 'preprocParam'
@@ -137,6 +140,13 @@ public class DataPoint {
 	}
 	public void setNoSynchronization(boolean noSynchronization) {
 		setManagementFlag(FLAGS_NO_SYNCHRONIZATION, noSynchronization)
+	}
+
+	public boolean isSynced() {
+		getManagementFlag(FLAGS_SYNCED)
+	}
+	public void setSynced(boolean sync) {
+		setManagementFlag(FLAGS_SYNCED, sync)
 	}
 
 	public String getDisplayName() {

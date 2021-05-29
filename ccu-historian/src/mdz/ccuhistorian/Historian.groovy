@@ -150,11 +150,12 @@ class Historian implements Runnable {
 		log.finer "Historian: Updating data points of interface: $itf.name"
 		
 		List<DataPoint> dataPoints=database.getDataPointsOfInterface(itf.name).findAll { 
-			!it.noSynchronization && !it.historyDisabled
+			!it.noSynchronization && (!it.historyDisabled || !it.synced)
 		}
 		List<DataPoint> oldDataPoints=dataPoints.collect { (DataPoint)it.clone() }
 		interfaceManager.updateProperties(dataPoints, config.metaCycle-1)
 		dataPoints.eachWithIndex { DataPoint dp, int index ->
+			dp.synced=true
 			if (dp!=oldDataPoints[index]) {
 				database.updateDataPoint dp
 			}
