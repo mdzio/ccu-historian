@@ -82,7 +82,7 @@ def ex=utils.catchToLog(log) {
 			} else if (v in Number) {
 				numberFormat.format(v)
 			} else {
-				'"'+v.toString().tr('"', '""')+'"'
+				'"'+v.toString().replaceAll('"', '""')+'"'
 			}
 		}.join(';')
 		strBuilder << '\n'
