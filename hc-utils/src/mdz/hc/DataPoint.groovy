@@ -95,6 +95,26 @@ public class DataPoint {
 	static public final int ATTR_FLAGS_SERVICE	  	= 8
 	static public final int ATTR_FLAGS_STICKY	  	= 16
 
+	static public final String[] attributeNames=[
+		DataPoint.ATTR_PREPROC_TYPE,
+		DataPoint.ATTR_PREPROC_PARAM,
+		DataPoint.ATTR_DISPLAY_NAME,
+		DataPoint.ATTR_ROOM,
+		DataPoint.ATTR_FUNCTION,
+		DataPoint.ATTR_COMMENT,
+		DataPoint.ATTR_CUSTOM,
+		DataPoint.ATTR_PARAM_SET,
+		DataPoint.ATTR_TAB_ORDER,
+		DataPoint.ATTR_MAXIMUM,
+		DataPoint.ATTR_UNIT,
+		DataPoint.ATTR_MINIMUM,
+		DataPoint.ATTR_CONTROL,
+		DataPoint.ATTR_OPERATIONS,
+		DataPoint.ATTR_FLAGS,
+		DataPoint.ATTR_TYPE,
+		DataPoint.ATTR_DEFAULT_VALUE,
+	]
+	
 	// unique identification
 	DataPointIdentifier id
 	 

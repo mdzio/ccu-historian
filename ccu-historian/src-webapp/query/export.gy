@@ -1,0 +1,99 @@
+/*
+    CCU-Historian, a long term archive for the HomeMatic CCU
+    Copyright (C) 2011-2021 MDZ (info@ccu-historian.de)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+import groovy.transform.Field
+import java.text.SimpleDateFormat
+import java.util.logging.Logger
+import javax.servlet.http.HttpServletResponse
+import mdz.ccuhistorian.Database
+import mdz.ccuhistorian.webapp.TrendParameters
+import mdz.hc.DataPoint
+import mdz.hc.timeseries.ChunkIterator
+
+@Field
+private final static log=Logger.getLogger('mdz.ccuhistorian.webapp.Export')
+@Field
+private final static dateFormat=new SimpleDateFormat('yyyy-MM-dd HH:mm:ss.SSS')
+
+String csv(v) {
+	if (v.is(null)) {
+		''
+	} else if (v in Number) {
+		v.toString()
+	} else {
+		'"'+v.toString().replaceAll('"', '""')+'"'
+	}
+}
+
+// main function
+def ex=utils.catchToLog(log) {
+	def startTime=System.currentTimeMillis()
+	log.finer 'Web server: Exporting database'
+	
+	// check key
+	if (webServer.config.apiKeys)
+		if (!params.k || !webServer.config.apiKeys.contains(params.k))
+			throw new Exception('Access denied')
+			
+	// parse parameters
+	TrendParameters parameters=TrendParameters.from(request, database, webServer.trendDesigns)
+	log.finer "Web server: Parameters: $parameters"
+	def dataPoints
+	if (!parameters.groups) {
+		// select all data points
+		dataPoints=database.getDataPoints()
+	} else {
+		dataPoints=parameters.groups.values().dataPoints.flatten()
+	}
+
+	// set headers
+	response.contentType='text/csv; charset=utf8'
+	response.setHeader 'Content-disposition', 'attachment; filename=export.csv'
+	
+	// create UTF-8 writer
+	sout.withWriter('utf8') { outw ->
+		dataPoints.each { dp ->
+			// print data point attributes
+			outw.print csv(dp.id.interfaceId) + ',' + csv(dp.id.address) + ',' + csv(dp.id.identifier) + ','
+			outw.print csv(dp.idx) + ',' + csv(dp.historyTableName) + ',' + csv(dp.managementFlags) + ','
+			outw.println(DataPoint.attributeNames.collect { n -> csv(dp.attributes."$n") }.join(',')) 
+
+			// print time series, use ChunkIterator to not blow up memory
+			def ts=new ChunkIterator(dp, database, parameters.timeRange.begin, parameters.timeRange.end)
+			ts.each { e ->
+				outw.print dateFormat.format(e.timestamp)
+				outw.print ','
+				outw.print csv(e.value)
+				outw.print ','
+				outw.println e.state
+			}
+			
+			// separate with empty line
+			outw.println ''
+		}
+	}
+	
+	log.fine "Web server: Database export generated in ${System.currentTimeMillis()-startTime}ms"
+}
+
+// signal error
+if (ex) {
+	utils.catchToLog(log) {
+		response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.message?:ex.class.name)
+	}
+	return
+}
