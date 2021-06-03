@@ -62,6 +62,9 @@ public class WebServer {
 		context.resourceBase=config.dir
 		context.contextPath='/'
 		context.parentLoaderPriority=true
+		// adjust limits for the data point configuration form
+		context.maxFormContentSize=2000000
+		context.maxFormKeys=50000
 		
 		server=new Server(config.port)
 		server.setHandler context
