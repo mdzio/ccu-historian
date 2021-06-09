@@ -543,7 +543,7 @@ public class Database implements Storage {
 	@Override
 	public synchronized void consume(Event e) throws Exception {
 		connect()
-		log.fine "Database: Inserting ($e.pv.timestamp, $e.pv.value, $e.pv.state) into $e.dataPoint.historyTableName"
+		log.finer "Database: Inserting ($e.pv.timestamp, $e.pv.value, $e.pv.state) into $e.dataPoint.historyTableName"
 		if (!e.dataPoint.historyTableName)
 			throw new Exception('Table name of data point is not set')
 		def value=TimeSeries.getNormalizedValue(e.pv.value)
@@ -670,14 +670,16 @@ public class Database implements Storage {
 				DP_ID, TABLE_NAME, STATE,
 				INTERFACE, ADDRESS, IDENTIFIER,
 				PREPROC_TYPE, PREPROC_PARAM,
-				DISPLAY_NAME, COMMENT, CUSTOM,
+				DISPLAY_NAME, ROOM, FUNCTION, COMMENT, CUSTOM,
 				PARAM_SET, TAB_ORDER, MAXIMUM, UNIT, MINIMUM, CONTROL,
 				OPERATIONS, FLAGS, TYPE, DEFAULT_VALUE
 			) VALUES (
 				$dp.idx, $dp.historyTableName, $dp.managementFlags,
 				$dp.id.interfaceId, $dp.id.address, $dp.id.identifier,
 				$dp.attributes.preprocType, $dp.attributes.preprocParam,
-				$dp.attributes.displayName, $dp.attributes.comment, $custom,
+				$dp.attributes.displayName, $dp.attributes.room,
+				$dp.attributes.function, $dp.attributes.comment,
+				$custom,
 				$dp.attributes.paramSet, $dp.attributes.tabOrder, 
 				$dp.attributes.maximum, $dp.attributes.unit, $dp.attributes.minimum, 
 				$dp.attributes.control,	$dp.attributes.operations, 

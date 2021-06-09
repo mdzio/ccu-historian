@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-	id="WebApp_ID" version="2.5">
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee" 
+         xmlns:web="http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee">
 	<display-name>CCU-Historian Web Application</display-name>
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>
@@ -35,7 +35,7 @@
 		<!-- Keep the URL patterns for this servlet aligned.  -->
 		<init-param>
 			<param-name>resource.name.regex</param-name>
-			<param-value>^/query/(jsonrpc|csv|trend)$</param-value>
+			<param-value>^/query/(jsonrpc|csv|trend|export)$</param-value>
 		</init-param>
 		<init-param>
 			<param-name>resource.name.replacement</param-name>
@@ -53,6 +53,20 @@
 		<url-pattern>/query/trend</url-pattern>
 		<url-pattern>/query/csv</url-pattern>
 		<url-pattern>/query/jsonrpc</url-pattern>
+		<url-pattern>/query/export</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>Import</servlet-name>
+		<servlet-class>mdz.ccuhistorian.webapp.ImportServlet</servlet-class>
+		<multipart-config>
+        	<max-file-size>-1</max-file-size>
+        	<max-request-size>-1</max-request-size>
+        	<file-size-threshold>1048576</file-size-threshold>
+    	</multipart-config>		
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Import</servlet-name>
+		<url-pattern>/query/import</url-pattern>
 	</servlet-mapping>
 	<filter>
         <filter-name>cross-origin</filter-name>

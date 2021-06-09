@@ -61,11 +61,11 @@ def ex=utils.catchToLog(log) {
 	}
 
 	// set headers
-	response.contentType='text/csv; charset=utf8'
+	response.contentType='text/csv; charset=utf-8'
 	response.setHeader 'Content-disposition', 'attachment; filename=export.csv'
 	
 	// create UTF-8 writer
-	sout.withWriter('utf8') { outw ->
+	sout.withWriter('UTF-8') { outw ->
 		dataPoints.each { dp ->
 			// print data point attributes
 			outw.print csv(dp.id.interfaceId) + ',' + csv(dp.id.address) + ',' + csv(dp.id.identifier) + ','

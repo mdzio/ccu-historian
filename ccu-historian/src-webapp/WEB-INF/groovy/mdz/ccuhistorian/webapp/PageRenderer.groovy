@@ -219,9 +219,14 @@ public class PageRenderer {
 								li { a href:'diagnosis.html', 'Diagnose' }
 								*/
 								// database web access
-								def port; servlet.utils.catchToLog(log) { port=servlet.database.config.webPort }
-								if (port)
+								def port
+								servlet.utils.catchToLog(log) { 
+									port=servlet.database.config.webPort 
+								}
+								if (port) {
 									li { a href:"http://$servlet.webServer.historianAddress:$port", target:'_blank', 'Datenbank' }
+								}
+								li { a href:'/historian/expimp.gy', 'Datenbankexport/-import' }
 							}
 						}
 						
