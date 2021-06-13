@@ -1,6 +1,6 @@
 /*
     CCU-Historian, a long term archive for the HomeMatic CCU
-    Copyright (C) 2011-2017 MDZ (info@ccu-historian.de)
+    Copyright (C) 2011-2021 MDZ (info@ccu-historian.de)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,21 +18,23 @@
 package mdz.hc
 
 import groovy.transform.AutoClone
+import groovy.transform.CompileStatic
 import groovy.transform.EqualsAndHashCode
 
 @EqualsAndHashCode
+@CompileStatic
 @AutoClone
 public class DataPointIdentifier {
 	String interfaceId
 	String address
 	String identifier
-	
+
 	public DataPointIdentifier(String interfaceId, String address, String identifier) {
 		this.interfaceId=interfaceId
 		this.address=address
 		this.identifier=identifier
 	}
-	
+
 	@Override
 	public String toString() {
 		"${interfaceId?:''}.${address?:''}.${identifier?:''}"
