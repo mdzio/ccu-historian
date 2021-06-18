@@ -1,0 +1,15 @@
+[
+  {
+    "step_title": "!!! DEINSTALLATION WARNING !!!",
+    "items": [
+      {
+        "type": "multiselect",
+        "desc": "ALL DATA AND THE CONFIGURATION WILL BE DELETED! PLEASE MAKE SURE YOU HAVE A BACKUP!",
+		"subitems": [{
+			"key": "pkgwizard_confirm",
+			"desc": "I do have a backup, please proceed!"
+		}]
+      }
+    ]
+  }
+]

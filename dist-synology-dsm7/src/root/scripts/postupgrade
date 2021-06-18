@@ -1,0 +1,5 @@
+#!/bin/sh
+#restore the config file and database
+/bin/cp -fpR "$SYNOPKG_TEMP_UPGRADE_FOLDER/data/" $SYNOPKG_PKGDEST
+/bin/cp -f "$SYNOPKG_TEMP_UPGRADE_FOLDER/ccu-historian.config" $SYNOPKG_PKGDEST
+exit 0

@@ -1,0 +1,10 @@
+#!/bin/sh
+
+source /etc/profile 
+
+if [ ! -x `which java` ]; then
+	echo "Java is not installed or not properly configured. The Java binary could not be located. " > $SYNOPKG_TEMP_LOGFILE
+	exit 1
+fi
+
+exit 0

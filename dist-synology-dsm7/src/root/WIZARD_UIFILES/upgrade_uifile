@@ -1,0 +1,15 @@
+[
+  {
+    "step_title": "!!! UPGRADE WARNING !!!",
+    "items": [
+      {
+        "type": "multiselect",
+        "desc": "Please make sure you have a backup before proceeding!",
+		"subitems": [{
+			"key": "pkgwizard_confirm",
+			"desc": "I do have a backup, please proceed!"
+		}]
+      }
+    ]
+  }
+]

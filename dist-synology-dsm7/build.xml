@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="dist-synology-dsm7" default="build" xmlns:syno="antlib:net.filebot.ant.spk">
+	<!-- setup properties -->
+	<property file="../ccu-historian/build.properties" />
+	<property name="tmpdir" value="build/tmp" />
+	<condition property="betaflag" value="yes" else="no">
+		<or>
+			<contains string="${version}" substring="alpha" />
+			<contains string="${version}" substring="beta" />
+		</or>
+	</condition>
+	<!-- clean up version for DSM -->
+	<loadresource property="cleanVersion">
+		<propertyresource name="version" />
+		<filterchain>
+			<tokenfilter>
+				<filetokenizer />
+				<replacestring from="alpha." to="" />
+				<replacestring from="beta." to="" />
+			</tokenfilter>
+		</filterchain>
+	</loadresource>
+
+	<target name="build">
+		<mkdir dir="${tmpdir}" />
+		<!-- convert ccu-historian-sample.config to unix eol -->
+		<fixcrlf eol="unix" file="../dist-generic/src/ccu-historian-sample.config" destDir="${tmpdir}" />
+		<!-- convert LICENSE.txt to unix eol -->
+		<fixcrlf eol="unix" file="../LICENSE.txt" destdir="${tmpdir}" />
+
+		<syno:spk destdir="build" name="ccu-historian" version="${cleanVersion}" arch="noarch">
+			<info name="displayname" value="CCU-Historian" />
+			<info name="displayname_ger" value="CCU-Historian" />
+			<info name="description" value="CCU-Historian provides a long term archive for the central component (CCU) of the home automation system Homematic by the company eQ-3." />
+			<info name="description_ger" value="CCU-Historian provides a long term archive for the central component (CCU) of the home automation system Homematic by the company eQ-3." />
+			<info name="reloadui" value="yes" />
+			<info name="os_min_ver" value="7.0-40000" />
+			<info name="maintainer" value="Developers of CCU-Historian" />
+			<info name="maintainer_url" value="http://www.ccu-historian.de" />
+			<info name="dsmappname" value="SYNO.SDS.CCU-HISTORIAN" />
+			<info name="dsmuidir" value="ui" />
+			<info name="adminport" value="8080" />
+			<info name="checkport" value="no" />
+			<info name="thirdparty" value="yes" />
+			<info name="beta" value="${betaflag}" />
+
+			<icon file="src/root/PACKAGE_ICON.PNG" />
+			<icon size="256" file="src/root/PACKAGE_ICON_256.PNG" />
+
+			<conf dir="src/root/conf" />
+
+			<wizard dir="src/root/WIZARD_UIFILES" includes="**/*.sh" filemode="755" />
+			<wizard dir="src/root/WIZARD_UIFILES" excludes="**/*.sh" />
+
+			<scripts dir="src/root/scripts" filemode="755" />
+
+			<package dir="src/package" />
+			<package dir="../ccu-historian/build" />
+			<package dir="${tmpdir}" includes="ccu-historian-sample.config,LICENSE.txt" />
+			<package dir="../dist-generic/src" includes="trenddesigns.groovy" />
+			<package dir="../dist-generic/src" includes="tool" filemode="755" />
+		</syno:spk>
+	</target>
+
+	<target name="clean">
+		<delete>
+			<fileset dir="build" includes="ccu-historian-*.spk" />
+		</delete>
+		<delete dir="${tmpdir}" />
+	</target>
+</project>
