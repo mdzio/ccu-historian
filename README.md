@@ -12,7 +12,7 @@ Der CCU-Historian ist ein Langzeitarchiv für die Zentrale (CCU) des [Hausautoma
 
 Die Kommunikationsvorgänge der CCU-Schnittstellen (BidCos-RF, BidCos-Wired und System) werden aufgezeichnet. Darunter befinden sich z.B. die Messwerte aller Sensoren und alle ausgeführten Schaltvorgänge. Aus der Logikschicht der CCU werden zusätzlich die Systemvariablen archiviert. Die gesammelten Daten werden strukturiert in einer Datenbank abgelegt und stehen daraufhin für Visualisierungen oder Analysen zur Verfügung. Für einen ersten Überblick werden Web-Seiten mit Trend-Diagrammen durch einen eingebetteten Web-Server generiert.
 
-Mit geschätzten **4.400 Installationen** (September 2020) erfreut sich der CCU-Historian bei den HomeMatic-Anwendern einer großen Beliebtheit .
+Mit vielen tausend Installationen erfreut sich der CCU-Historian bei den HomeMatic-Anwendern einer großen Beliebtheit.
 
 **[Viele weitere Informationen sind im umfangreichen Handbuch zu finden.](https://github.com/mdzio/ccu-historian/wiki)**
 
@@ -34,11 +34,11 @@ Für bestimmte Systeme existieren fertige Installationspakete:
 * CCU-Addon für folgende HomeMatic-Zentralen:
   * CCU3
   * [RaspberryMatic](https://github.com/jens-maus/RaspberryMatic)
-* Synology-Paket (Die DSM Version 7 wird zurzeit noch nicht unterstützt.)
+* Synology-Paket (DSM Version 6 und 7)
 * Docker-Image
   * [xjokay/ccu-historian](https://hub.docker.com/r/xjokay/ccu-historian)
 
-**Hinweis:** Für den Betrieb als Addon auf einer CCU3 oder RaspberryMatic muss an der Zentrale ein USB-Stick angeschlossen sein!
+**Hinweis:** Für den Betrieb als Addon auf einer CCU3 oder RaspberryMatic muss an der Zentrale ein USB-Stick oder vorzugsweise eine USB-SSD angeschlossen sein!
 
 ## Installationspakete
 
@@ -66,7 +66,7 @@ Bei einer kommerziellen Verwendung des CCU-Historians muss also auf die Erweiter
 
 Copyright (c) 2011-2021
 
-* Mathias Dzionsko
-* Jens Maus (CCU/RaspberryMatic-Distribution)
-* Yannick Rocks, Thomas Zahari (Synology-Distribution)
-* wak (Erweiterung H2-Highcharts)
+* [Mathias Dzionsko](https://github.com/mdzio)
+* [Jens Maus](https://github.com/jens-maus) (CCU/RaspberryMatic-Distribution)
+* [hotroot](https://github.com/hotroot), Yannick Rocks, [Thomas Zahari](https://github.com/tzahari) (Synology-Distribution)
+* [wak](https://github.com/wakr70) (Erweiterung H2-Highcharts)
