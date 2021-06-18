@@ -28,7 +28,7 @@
 		<!-- convert LICENSE.txt to unix eol -->
 		<fixcrlf eol="unix" file="../LICENSE.txt" destdir="${tmpdir}" />
 
-		<syno:spk destdir="build" name="ccu-historian" version="${cleanVersion}" arch="noarch">
+		<syno:spk destdir="build" name="ccu-historian-dsm7" version="${cleanVersion}" arch="noarch">
 			<info name="displayname" value="CCU-Historian" />
 			<info name="displayname_ger" value="CCU-Historian" />
 			<info name="description" value="CCU-Historian provides a long term archive for the central component (CCU) of the home automation system Homematic by the company eQ-3." />
