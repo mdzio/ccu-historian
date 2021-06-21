@@ -1,7 +1,7 @@
 package="ccu-historian"
 displayname="CCU-Historian"
 displayname_ger="CCU-Historian"
-version="${version}"
+version="${cleanVersion}"
 description="CCU-Historian provides a long term archive for the central component (CCU) of the home automation system Homematic by the company eQ-3."
 description_ger="CCU-Historian stellt ein Langzeitarchiv für die Zentrale (CCU) des Hausautomations-Systems HomeMatic der Firma eQ-3 zur Verfügung."
 arch="noarch"

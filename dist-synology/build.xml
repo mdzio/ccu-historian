@@ -2,7 +2,6 @@
 <project name="dist-synology" default="build">
 	<!-- setup properties -->
 	<property file="../ccu-historian/build.properties" />
-	<property name="destfile" value="build/ccu-historian-${version}.spk" />
 	<property name="tmpdir" value="build/tmp" />
 	<condition property="betaflag" value="yes" else="no">
 		<or>
@@ -10,6 +9,18 @@
 			<contains string="${version}" substring="beta" />
 		</or>
 	</condition>
+	<!-- clean up version for DSM -->
+	<loadresource property="cleanVersion">
+		<propertyresource name="version" />
+		<filterchain>
+			<tokenfilter>
+				<filetokenizer />
+				<replacestring from="alpha." to="" />
+				<replacestring from="beta." to="" />
+			</tokenfilter>
+		</filterchain>
+	</loadresource>
+	<property name="destfile" value="build/ccu-historian-${cleanVersion}.spk" />
 
 	<target name="build">
 		<mkdir dir="${tmpdir}" />
