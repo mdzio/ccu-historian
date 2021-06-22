@@ -10,13 +10,14 @@
 		</or>
 	</condition>
 	<!-- clean up version for DSM -->
+	<!-- only numbers and the delimiters .-_ are allowed. -->
 	<loadresource property="cleanVersion">
 		<propertyresource name="version" />
 		<filterchain>
 			<tokenfilter>
 				<filetokenizer />
-				<replacestring from="alpha." to="" />
-				<replacestring from="beta." to="" />
+				<replacestring from="alpha." to="1." />
+				<replacestring from="beta." to="2." />
 			</tokenfilter>
 		</filterchain>
 	</loadresource>
