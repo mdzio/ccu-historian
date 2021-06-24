@@ -85,6 +85,16 @@ class ExtendedStorage implements Storage {
 		return storage.getLast(dp)
 	}
 
+	public Date getFirstBeforeIncl(DataPoint dp, Date ts) {
+		fireOnRead()
+		return storage.getFirstBeforeIncl(dp, ts)
+	}
+
+	public Date getFirstAfterIncl(DataPoint dp, Date ts) {
+		fireOnRead()
+		return storage.getFirstAfterIncl(dp, ts)
+	}
+
 	public TimeSeries getTimeSeriesRaw(DataPoint dp, Date begin, Date end) throws Exception {
 		fireOnRead()
 		return storage.getTimeSeriesRaw(dp, begin, end)

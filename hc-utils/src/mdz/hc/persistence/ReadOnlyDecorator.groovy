@@ -67,6 +67,16 @@ public class ReadOnlyDecorator implements Storage {
 	}
 
 	@Override
+	public Date getFirstBeforeIncl(DataPoint dp, Date ts) {
+		storage.getFirstBeforeIncl(dp, ts)
+	}
+
+	@Override
+	public Date getFirstAfterIncl(DataPoint dp, Date ts) {
+		storage.getFirstAfterIncl(dp, ts)
+	}
+
+	@Override
 	public TimeSeries getTimeSeriesRaw(DataPoint dp, Date begin, Date end) throws Exception {
 		storage.getTimeSeriesRaw(dp, begin, end)
 	}

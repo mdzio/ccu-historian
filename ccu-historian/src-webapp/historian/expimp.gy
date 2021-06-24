@@ -47,9 +47,31 @@ renderer.content={
 				div(class:'panel-body') {
 					p 'Hinweis: Je nach Datenbankgröße kann der Export der Datenbank einige Zeit dauern! ' + 
 						'Die Web-Oberfläche kann währenddessen weiter verwendet werden.'
-					a(class:'btn btn-default', role:'button', 
-						href:buildUrl('../query/export', [b:DEFAULT_EXPORT_BEGIN], apiKey), 
-						'Export starten')
+					div(class:'btn-group') {
+						a(class:'btn btn-default', role:'button',
+							href:buildUrl('../query/export', [b:DEFAULT_EXPORT_BEGIN], apiKey),
+							'Gesamter Zeitbereich')
+						button(type:'button', class:'btn btn-default dropdown-toggle', 'data-toggle':'dropdown') {
+							span(class:'caret')
+						}
+						ul(class:'dropdown-menu') {
+							li {
+								a(href:buildUrl('../query/export', [b:'-1D'], apiKey), 'Letzten 24 Stunden')
+							}
+							li {
+								a(href:buildUrl('../query/export', [b:'-7D'], apiKey), 'Letzten 7 Tage')
+							}
+							li {
+								a(href:buildUrl('../query/export', [b:'-1M'], apiKey), 'Letzter Monat')
+							}
+							li {
+								a(href:buildUrl('../query/export', [b:'1=M1=Dz'], apiKey), 'Aktuelles Jahr')
+							}
+							li {
+								a(href:buildUrl('../query/export', [b:'-1Y1=M1=Dz'], apiKey), 'Vorjahr')
+							}
+						}
+					}
 				}
 			}
 		}
@@ -71,6 +93,18 @@ renderer.content={
 						div(class:'form-group') {
 							label(for:'input-file', 'Import-Datei auswählen:')
 							input(type:'file', id:'input-file', name:'input-file')
+						}
+						div(class:'radio') {
+							label {
+								input(type:'radio', name:'mode', value:'clear-import-time-range', checked:'checked')
+								mkp.yield 'Nur den importierten Zeitbereich von bereits vorhandenen Datenpunkten löschen.'
+							}
+						}
+						div(class:'radio') {
+							label {
+								input(type:'radio', name:'mode', value:'clear-all')
+								mkp.yield 'Zeitreihen von vorhandenen Datenpunkten komplett löschen.'
+							}
 						}
 						div(class:'checkbox') {
 							label {

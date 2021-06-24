@@ -70,16 +70,36 @@ def ex=utils.catchToLog(log) {
 			// print data point attributes
 			outw.print csv(dp.id.interfaceId) + ',' + csv(dp.id.address) + ',' + csv(dp.id.identifier) + ','
 			outw.print csv(dp.idx) + ',' + csv(dp.historyTableName) + ',' + csv(dp.managementFlags) + ','
-			outw.println(DataPoint.attributeNames.collect { n -> csv(dp.attributes."$n") }.join(',')) 
+			outw.print (DataPoint.attributeNames.collect { n -> csv(dp.attributes."$n") }.join(','))
 
-			// print time series, use ChunkIterator to not blow up memory
-			def ts=new ChunkIterator(dp, database, parameters.timeRange.begin, parameters.timeRange.end)
-			ts.each { e ->
-				outw.print dateFormat.format(e.timestamp)
+			// get actual begin and end of time series
+			def begin=database.getFirstAfterIncl(dp, parameters.timeRange.begin)
+			def end=database.getFirstBeforeIncl(dp, parameters.timeRange.end)
+			
+			// entries in interval?
+			if (begin!=null && end!=null && begin<=end) {
+				// print time range of time series
 				outw.print ','
-				outw.print csv(e.value)
+				outw.print dateFormat.format(begin)
 				outw.print ','
-				outw.println e.state
+				outw.println dateFormat.format(end)
+				
+				// adjust end to include last entry
+				end=new Date(end.time+1)
+				
+				// print time series, use ChunkIterator to not blow up memory
+				def ts=new ChunkIterator(dp, database, begin, end)
+				ts.each { e ->
+					outw.print dateFormat.format(e.timestamp)
+					outw.print ','
+					outw.print csv(e.value)
+					outw.print ','
+					outw.println e.state
+				}
+	
+			} else {
+				outw.println ',,'
+				// no time series entries
 			}
 			
 			// separate with empty line

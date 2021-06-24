@@ -585,12 +585,12 @@ public class Database implements Storage {
 		log.info 'Script run completed'
 	}
 
-	private Date getFirstBeforeIncl(DataPoint dp, Date ts) {
+	public Date getFirstBeforeIncl(DataPoint dp, Date ts) {
 		def row=db.firstRow("""SELECT MAX(TS) FROM $dp.historyTableName WHERE TS<=?""" as String, ts)
 		row?(Date)row[0]:null
 	}
 
-	private Date getFirstAfterIncl(DataPoint dp, Date ts) {
+	public Date getFirstAfterIncl(DataPoint dp, Date ts) {
 		def row=db.firstRow("""SELECT MIN(TS) FROM $dp.historyTableName WHERE TS>=?""" as String, ts)
 		row?(Date)row[0]:null
 	}

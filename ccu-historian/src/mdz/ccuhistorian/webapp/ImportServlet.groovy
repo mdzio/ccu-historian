@@ -37,6 +37,11 @@ class ImportServlet extends HttpServlet {
 
 	private final static SimpleDateFormat dateFormat=new SimpleDateFormat('yyyy-MM-dd HH:mm:ss.SSS')
 
+	public enum Mode {
+		CLEAR_IMPORT_TIME_RANGE,
+		CLEAR_ALL
+	}
+
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		resp.contentType='text/plain'
@@ -55,13 +60,37 @@ class ImportServlet extends HttpServlet {
 					throw new Exception('Zugriff verweigert')
 				}
 			}
-			
+
+			// import mode
+			Mode mode
+			switch (req.getParameter('mode')) {
+				case 'clear-import-time-range':
+					mode=Mode.CLEAR_IMPORT_TIME_RANGE
+					break
+				case 'clear-all':
+					mode=Mode.CLEAR_ALL
+					break
+				default:
+					throw new Exception('Invalid mode parameter')
+			}
+
 			// safety check
 			String safety=req.getParameter('safety')
 			if (safety!='ack') {
 				throw new Exception('Sicherheitshinweis nicht bestätigt')
 			}
-			
+
+			// print import mode
+			out.print 'Import-Modus: '
+			switch(mode) {
+				case Mode.CLEAR_IMPORT_TIME_RANGE:
+					out.println 'Nur importierten Zeitbereich löschen'
+					break
+				case Mode.CLEAR_ALL:
+					out.println 'Zeitreihen komplett löschen'
+					break
+			}
+
 			// check file
 			def part=req.getPart("input-file")
 			if (part==null) {
@@ -73,9 +102,9 @@ class ImportServlet extends HttpServlet {
 				throw new Exception("Datei ist leer.")
 			}
 			log.fine "Importing file $part.submittedFileName with size $part.size"
-			out.println 'Importiere Zeitreihen:'
 
 			// import CSV
+			out.println 'Importiere Zeitreihen:'
 			CSVParser parser=new CSVParser()
 			Reader reader=new BufferedReader(new InputStreamReader(part.inputStream, 'UTF-8'))
 			long row=1
@@ -96,7 +125,7 @@ class ImportServlet extends HttpServlet {
 					}
 
 					// next data point?
-				} else if (fields.size()==23 && dataPoint==null) {
+				} else if (fields.size()==25 && dataPoint==null) {
 					def dpid=new DataPointIdentifier(fields[0], fields[1], fields[2])
 					out.print "$dpid: "
 
@@ -107,8 +136,20 @@ class ImportServlet extends HttpServlet {
 						out.print "Datenpunkt vorhanden. "
 						updateProperties(dataPoint, fields)
 						db.updateDataPoint(dataPoint)
-						// delete time series
-						db.deleteTimeSeries(dataPoint, null, null)
+
+						// delete current time series
+						switch(mode) {
+							case Mode.CLEAR_IMPORT_TIME_RANGE:
+								if (fields[23] && fields[24]) {
+									def begin=dateFormat.parse(fields[23])
+									def end=dateFormat.parse(fields[24])
+									db.deleteTimeSeries(dataPoint, begin, new Date(end.time+1))
+								}
+								break
+							case Mode.CLEAR_ALL:
+								db.deleteTimeSeries(dataPoint, null, null)
+								break
+						}
 
 					} else {
 						// create data point

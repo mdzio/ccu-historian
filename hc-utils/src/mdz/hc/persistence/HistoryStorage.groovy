@@ -27,6 +27,9 @@ public interface HistoryStorage extends Consumer<Event> {
 
 	public Date getFirstTimestamp(DataPoint dp) throws Exception
 	public ProcessValue getLast(DataPoint dp) throws Exception
+	
+	public Date getFirstBeforeIncl(DataPoint dp, Date ts) throws Exception
+	public Date getFirstAfterIncl(DataPoint dp, Date ts) throws Exception
 
 	public TimeSeries getTimeSeriesRaw(DataPoint dp, Date begin, Date end) throws Exception
 	public TimeSeries getTimeSeries(DataPoint dp, Date begin, Date end) throws Exception
