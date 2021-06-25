@@ -61,35 +61,32 @@ class ImportServlet extends HttpServlet {
 				}
 			}
 
-			// import mode
-			Mode mode
-			switch (req.getParameter('mode')) {
-				case 'clear-import-time-range':
-					mode=Mode.CLEAR_IMPORT_TIME_RANGE
-					break
-				case 'clear-all':
-					mode=Mode.CLEAR_ALL
-					break
-				default:
-					throw new Exception('Invalid mode parameter')
-			}
-
 			// safety check
 			String safety=req.getParameter('safety')
 			if (safety!='ack') {
 				throw new Exception('Sicherheitshinweis nicht bestätigt')
 			}
 
-			// print import mode
+			// import options
+			Mode mode
 			out.print 'Import-Modus: '
-			switch(mode) {
-				case Mode.CLEAR_IMPORT_TIME_RANGE:
+			switch (req.getParameter('mode')) {
+				case 'clear-import-time-range':
+					mode=Mode.CLEAR_IMPORT_TIME_RANGE
 					out.println 'Nur importierten Zeitbereich löschen'
 					break
-				case Mode.CLEAR_ALL:
+				case 'clear-all':
+					mode=Mode.CLEAR_ALL
 					out.println 'Zeitreihen komplett löschen'
 					break
+				default:
+					throw new Exception('Invalid mode parameter')
 			}
+			boolean meta=false;
+			if (req.getParameter('meta')) {
+				meta=true;
+			}
+			out.println 'Datenpunkteigenschaften: '+(meta?'Aktualisieren':'Nicht aktualisieren')
 
 			// check file
 			def part=req.getPart("input-file")
@@ -134,8 +131,10 @@ class ImportServlet extends HttpServlet {
 					if (dataPoint!=null) {
 						// update data point meta
 						out.print "Datenpunkt vorhanden. "
-						updateProperties(dataPoint, fields)
-						db.updateDataPoint(dataPoint)
+						if (meta) {
+							updateProperties(dataPoint, fields)
+							db.updateDataPoint(dataPoint)
+						}
 
 						// delete current time series
 						switch(mode) {

@@ -20,9 +20,6 @@ import mdz.ccuhistorian.webapp.TextFormat
 import static mdz.ccuhistorian.webapp.WebUtilities.*
 import groovy.transform.Field
 
-@Field
-private static final DEFAULT_EXPORT_BEGIN = '2000-01-01'
-
 // setup page
 def renderer=new mdz.ccuhistorian.webapp.PageRenderer(servlet: this)
 
@@ -46,10 +43,10 @@ renderer.content={
 				}
 				div(class:'panel-body') {
 					p 'Hinweis: Je nach Datenbankgröße kann der Export der Datenbank einige Zeit dauern! ' + 
-						'Die Web-Oberfläche kann währenddessen weiter verwendet werden.'
+						'Die Web-Oberfläche kann währenddessen (in einem anderen Browser-Tab) weiter verwendet werden.'
 					div(class:'btn-group') {
 						a(class:'btn btn-default', role:'button',
-							href:buildUrl('../query/export', [b:DEFAULT_EXPORT_BEGIN], apiKey),
+							href:buildUrl('../query/export', [b:'1970-01-01'], apiKey),
 							'Gesamter Zeitbereich')
 						button(type:'button', class:'btn btn-default dropdown-toggle', 'data-toggle':'dropdown') {
 							span(class:'caret')
@@ -70,6 +67,10 @@ renderer.content={
 							li {
 								a(href:buildUrl('../query/export', [b:'-1Y1=M1=Dz'], apiKey), 'Vorjahr')
 							}
+							li {
+								// no time series entries expected for 1970-01-01
+								a(href:buildUrl('../query/export', [b:'1970-01-01',e:'1s'], apiKey), 'Nur Datenpunkteigenschaften')
+							}
 						}
 					}
 				}
@@ -82,7 +83,7 @@ renderer.content={
 				}
 				div(class:'panel-body') {
 					p 'Hinweis: Je nach Größe der Datei kann der Import einige Zeit dauern! ' +
-						'Die Web-Oberfläche kann währenddessen weiter verwendet werden. ' + 
+						'Die Web-Oberfläche kann währenddessen (in einem anderen Browser-Tab) weiter verwendet werden. ' + 
 						'Vorhandene Zeitreihen in der Datenbank werden gelöscht! ' +
 						'Datenpunkteigenschaften werden überschrieben! ' +
 						'Das Ergebnis des Imports wird in einem gesonderten Web-Browser-Fenster angezeigt. ' +
@@ -104,6 +105,12 @@ renderer.content={
 							label {
 								input(type:'radio', name:'mode', value:'clear-all')
 								mkp.yield 'Zeitreihen von vorhandenen Datenpunkten komplett löschen.'
+							}
+						}
+						div(class:'checkbox') {
+							label {
+								input(type:'checkbox', name:'meta', value:'1', 'Datenpunkteigenschaften aktualisieren',
+									checked:'checked')
 							}
 						}
 						div(class:'checkbox') {
