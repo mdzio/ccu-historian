@@ -109,13 +109,15 @@ renderer.content={
 						}
 						div(class:'checkbox') {
 							label {
-								input(type:'checkbox', name:'meta', value:'1', 'Datenpunkteigenschaften aktualisieren',
+								input(type:'checkbox', name:'meta', value:'1', 
+									'Datenpunkteigenschaften von vorhandenen Datenpunkten aktualisieren.',
 									checked:'checked')
 							}
 						}
 						div(class:'checkbox') {
 							label {
-								input(type:'checkbox', name:'safety', value:'ack', 'Schreibzugriff auf Datenbank') {
+								input(type:'checkbox', name:'safety', value:'ack', 
+									'Schreibzugriff auf die Datenbank ermöglichen.') {
 									span class:"glyphicon glyphicon-alert"
 								}
 							}
