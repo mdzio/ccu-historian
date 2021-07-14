@@ -16,8 +16,8 @@
 		<filterchain>
 			<tokenfilter>
 				<filetokenizer />
-				<replacestring from="alpha." to="1." />
-				<replacestring from="beta." to="2." />
+				<replacestring from="-alpha." to=".1." />
+				<replacestring from="-beta." to=".2." />
 			</tokenfilter>
 		</filterchain>
 	</loadresource>
