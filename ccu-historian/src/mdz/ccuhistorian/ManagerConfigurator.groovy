@@ -219,8 +219,12 @@ class ManagerConfigurator {
 					// watchdog
 					String watchdogProgram=getOption(cfg, 'watchdogProgram', String, "Device $idx: ", false)
 					Long watchdogCycle=getOption(cfg, 'watchdogCycle', Long, "Device $idx: ", false)
-					if (watchdogProgram && watchdogCycle)
+					if (watchdogCycle==null) {
+						watchdogCycle=300000
+					}
+					if (watchdogProgram) {
 						new Watchdog(watchdogProgram, watchdogCycle, manager.executor, scriptClient)
+					}
 		   
 				} else if (type==DeviceTypes.BINRPC) {
 					String address=getOption(cfg, 'address', String, "Device $idx: ") 
