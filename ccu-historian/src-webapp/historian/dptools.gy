@@ -42,6 +42,10 @@ def displayError(html, msg, e=null) {
 	}
 }
 
+def dpInfo(dp) {
+	dp.displayName+' (Adresse:'+dp.id.address+', ID:'+dp.idx+')'	
+}
+
 renderer.head={
 	title 'CCU-Historian: Datenpunktwerkzeuge'
 }
@@ -89,9 +93,9 @@ renderer.content={
 			dataPoints.each { dp ->
 				try {
 					database.deleteDataPoint(dp)
-					displaySuccess(html, "Datenpunkt $dp.displayName wurde inkl. Historie gelöscht!")
+					displaySuccess(html, "Datenpunkt ${dpInfo(dp)} wurde inkl. Historie gelöscht!")
 				} catch (e) {
-					displayError(html, "Datenpunkt $dp.displayName konnte nicht gelöscht werden!", e)
+					displayError(html, "Datenpunkt${dpInfo(dp)} konnte nicht gelöscht werden!", e)
 				}
 			}
 			return
@@ -100,9 +104,9 @@ renderer.content={
 			dataPoints.each { dp ->
 				try {
 					def rows=database.deleteTimeSeries(dp, null, null)
-					displaySuccess(html, "Die Historie vom Datenpunkt $dp.displayName wurde gelöscht ($rows Einträge)!")
+					displaySuccess(html, "Die Historie vom Datenpunkt ${dpInfo(dp)} wurde gelöscht ($rows Einträge)!")
 				} catch (e) {
-					displayError(html, "Die Historie vom Datenpunkt $dp.displayName konnte nicht gelöscht werden!", e)
+					displayError(html, "Die Historie vom Datenpunkt ${dpInfo(dp)} konnte nicht gelöscht werden!", e)
 				}
 			}
 			return
@@ -121,7 +125,7 @@ renderer.content={
 					def rows=database.deleteTimeSeries(dp, begin, end)
 					def beginTxt=begin ? TextFormat.formatDate(begin) : 'k.A.'
 					def endTxt=end ? TextFormat.formatDate(end) : 'k.A.'
-					displaySuccess(html, "Der Zeitbereich (Beginn: $beginTxt, Ende: $endTxt) vom Datenpunkt $dp.displayName " +
+					displaySuccess(html, "Der Zeitbereich (Beginn: $beginTxt, Ende: $endTxt) vom Datenpunkt ${dpInfo(dp)} " +
 						"wurde gelöscht ($rows Einträge)!")
 				} catch (e) {
 					displayError(html, "Der Zeitbereich vom Datenpunkt $dp.displayName konnte nicht gelöscht werden!", e)
@@ -141,15 +145,15 @@ renderer.content={
 				return
 			}
 			if (sourceDp.historyString!=destDp.historyString) {
-				displayError(html, "Die Datenpunkte $sourceDp.displayName und $destDp.displayName besitzen nicht den gleichen Datentyp!")
+				displayError(html, "Die Datenpunkte ${dpInfo(sourceDp)} und ${dpInfo(destDp)} besitzen nicht den gleichen Datentyp!")
 				return
 			}
 			// copy
 			try {
 				def rows=database.copyTimeSeries(destDp, sourceDp, null, null, null)
-				displaySuccess(html, "Es wurden $rows Einträge von $sourceDp.displayName nach $destDp.displayName kopiert!")
+				displaySuccess(html, "Es wurden $rows Einträge von ${dpInfo(sourceDp)} nach ${dpInfo(destDp)} kopiert!")
 			} catch (e) {
-				displayError(html, "Die Historie konnte nicht von $sourceDp.displayName nach $destDp.displayName kopiert werden!", e)
+				displayError(html, "Die Historie konnte nicht von ${dpInfo(sourceDp)} nach ${dpInfo(destDp)} kopiert werden!", e)
 			}
 			return
 	}
@@ -168,7 +172,7 @@ renderer.content={
 		}
 		ul(class:'list-group') {
 			dataPoints.each { dp ->
-				li class:'list-group-item', dp.displayName
+				li class:'list-group-item', dpInfo(dp)
 			}
 		}
 	}
@@ -281,7 +285,7 @@ renderer.content={
 								select(class:'form-control', name:'dp1') {
 									dataPoints.eachWithIndex { dp, idx ->
 										def selected=(idx==0)?[selected:'selected']:[:]
-										option(value:dp.idx, *:selected, dp.displayName)
+										option(value:dp.idx, *:selected, dpInfo(dp))
 									}
 								}
 							}
@@ -292,7 +296,7 @@ renderer.content={
 								select(class:'form-control', name:'dp2') {
 									dataPoints.eachWithIndex { dp, idx ->
 										def selected=(idx==1)?[selected:'selected']:[:]
-										option(value:dp.idx, *:selected, dp.displayName)
+										option(value:dp.idx, *:selected, dpInfo(dp))
 									}
 								}
 							}
