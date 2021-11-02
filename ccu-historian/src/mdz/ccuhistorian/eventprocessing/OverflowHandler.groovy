@@ -33,7 +33,7 @@ import mdz.Exceptions
 public class OverflowHandler extends BasicProducer<Event> implements Processor<Event, Event> {
 
 	HistoryStorage historyStorage
-	Map<String, Double> counters=[RAIN_COUNTER: 9666.56D, SUNSHINEDURATION: 256D]
+	Map<String, Double> counters=[:]
 
 	private Map<DataPointIdentifier, Object> previousValues=[:]
 		
