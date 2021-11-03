@@ -34,16 +34,24 @@ class ManagerConfigurator {
 	
 	private final static String INTERFACE_WIRED_NAME = 'BidCos-Wired'
 	private final static int INTERFACE_WIRED_PORT = 2000
+	private final static String INTERFACE_WIRED_PATH = ''
 	
 	private final static String INTERFACE_RF_NAME = 'BidCos-RF'
 	private final static int INTERFACE_RF_PORT = 2001
+	private final static String INTERFACE_RF_PATH = ''
 	
 	private final static String INTERFACE_SYSTEM_NAME = 'System'
 	private final static int INTERFACE_SYSTEM_PORT = 2002
-
+	private final static String INTERFACE_SYSTEM_PATH = ''
+	
 	private final static String INTERFACE_HMIP_RF_NAME = 'HmIP-RF'
 	private final static int INTERFACE_HMIP_RF_PORT = 2010
-
+	private final static String INTERFACE_HMIP_RF_PATH = ''
+	
+	private final static String INTERFACE_JACK_NAME = 'CCU-Jack'
+	private final static int INTERFACE_JACK_PORT = 2121
+	private final static String INTERFACE_JACK_PATH = '/RPC3'
+	
 	private final static String INTERFACE_CUXD_NAME = 'CUxD'
 	private final static int INTERFACE_CUXD_PORT = 8701
 
@@ -56,7 +64,7 @@ class ManagerConfigurator {
 	}
 	
 	public static enum PlugInTypes {
-		HMWLGW, CUXD, BIDCOS_WIRED /* alias for HMWLGW */, BIDCOS_RF, SYSTEM, HMIP_RF
+		HMWLGW, CUXD, BIDCOS_WIRED /* alias for HMWLGW */, BIDCOS_RF, SYSTEM, HMIP_RF, JACK
 	}
 
 	private def getOption(ConfigObject devCfg, String name, Class clazz, String prefix='', boolean required=true) {
@@ -121,6 +129,7 @@ class ManagerConfigurator {
 					if (type==DeviceTypes.CCU1) {
 						HmXmlRpcInterface xmlRpcItfWired=new HmXmlRpcInterface(
 							prefix+INTERFACE_WIRED_NAME, INTERFACE_WIRED_NAME, address, INTERFACE_WIRED_PORT,
+							INTERFACE_WIRED_PATH,
 							manager.xmlRpcServer, scriptClient, reinitTask, manager.executor,
 							username, password
 						)
@@ -131,6 +140,7 @@ class ManagerConfigurator {
 					
 					HmXmlRpcInterface xmlRpcItfRf=new HmXmlRpcInterface(
 						prefix+INTERFACE_RF_NAME, INTERFACE_RF_NAME, address, INTERFACE_RF_PORT,
+						INTERFACE_RF_PATH,
 						manager.xmlRpcServer, scriptClient, reinitTask, manager.executor,
 						username, password
 					)
@@ -141,6 +151,7 @@ class ManagerConfigurator {
 					if (type==DeviceTypes.CCU1) {
 						HmXmlRpcInterface xmlRpcItfSys=new HmXmlRpcInterface(
 							prefix+INTERFACE_SYSTEM_NAME, INTERFACE_SYSTEM_NAME, address, INTERFACE_SYSTEM_PORT,
+							INTERFACE_SYSTEM_PATH,
 							manager.xmlRpcServer, scriptClient, reinitTask, manager.executor,
 							username, password
 						)
@@ -152,6 +163,7 @@ class ManagerConfigurator {
 					if (type==DeviceTypes.CCU2 || type==DeviceTypes.CCU3) {
 						HmXmlRpcInterface hmIpItf=new HmXmlRpcInterface(
 							prefix+INTERFACE_HMIP_RF_NAME, INTERFACE_HMIP_RF_NAME, address, INTERFACE_HMIP_RF_PORT,
+							INTERFACE_HMIP_RF_PATH,
 							manager.xmlRpcServer, scriptClient, reinitTask, manager.executor,
 							username, password
 						)
@@ -178,6 +190,7 @@ class ManagerConfigurator {
 
 							String name
 							int port
+							String path
 							boolean binRpc
 							switch (piType) {
 								case PlugInTypes.CUXD:
@@ -188,6 +201,13 @@ class ManagerConfigurator {
 								case PlugInTypes.HMWLGW:
 									name=INTERFACE_WIRED_NAME
 									port=INTERFACE_WIRED_PORT
+									path=INTERFACE_WIRED_PATH
+									binRpc=false
+									break
+								case PlugInTypes.JACK:
+									name=INTERFACE_JACK_NAME
+									port=INTERFACE_JACK_PORT
+									path=INTERFACE_JACK_PATH
 									binRpc=false
 									break
 								default:
@@ -205,7 +225,7 @@ class ManagerConfigurator {
 								manager.addInterface(binRpcItfPi)
 							} else {
 								HmXmlRpcInterface xmlRpcItfPi=new HmXmlRpcInterface(
-									prefix+name, name, address, port,
+									prefix+name, name, address, port, path,
 									manager.xmlRpcServer, scriptClient, reinitTask, manager.executor,
 									username, password
 								)
@@ -260,7 +280,8 @@ class ManagerConfigurator {
 						reinitTask.timeout=reinitTimeout
 
 					HmXmlRpcInterface xmlRpcItf=new HmXmlRpcInterface(
-						name, null, address, port, manager.xmlRpcServer, null, reinitTask, manager.executor,
+						name, null, address, port, "" /* path */,
+						manager.xmlRpcServer, null, reinitTask, manager.executor,
 						username, password
 					)
 					if (writeAccess!=null)
@@ -316,12 +337,14 @@ class ManagerConfigurator {
 							
 							String name
 							int port
+							String path
 							boolean binRpc
 							switch (piType) {
 								case PlugInTypes.HMWLGW:
 								case PlugInTypes.BIDCOS_WIRED:
 									name=INTERFACE_WIRED_NAME
 									port=INTERFACE_WIRED_PORT
+									path=INTERFACE_WIRED_PATH
 									binRpc=false
 									break;
 								case PlugInTypes.CUXD:
@@ -332,16 +355,25 @@ class ManagerConfigurator {
 								case PlugInTypes.BIDCOS_RF:
 									name=INTERFACE_RF_NAME
 									port=INTERFACE_RF_PORT
+									path=INTERFACE_RF_PATH
 									binRpc=false
 									break
 								case PlugInTypes.SYSTEM:
 									name=INTERFACE_SYSTEM_NAME
 									port=INTERFACE_SYSTEM_PORT
+									path=INTERFACE_SYSTEM_PATH
 									binRpc=false
 									break
 								case PlugInTypes.HMIP_RF:
 									name=INTERFACE_HMIP_RF_NAME
 									port=INTERFACE_HMIP_RF_PORT
+									path=INTERFACE_HMIP_RF_PATH
+									binRpc=false
+									break
+								case PlugInTypes.JACK:
+									name=INTERFACE_JACK_NAME
+									port=INTERFACE_JACK_PORT
+									path=INTERFACE_JACK_PATH
 									binRpc=false
 									break
 								default:
@@ -359,7 +391,7 @@ class ManagerConfigurator {
 								manager.addInterface(binRpcItfPi)
 							} else {
 								HmXmlRpcInterface xmlRpcItfPi=new HmXmlRpcInterface(
-									prefix+name, name, address, port,
+									prefix+name, name, address, port, path,
 									manager.xmlRpcServer, scriptClient, reinitTask, manager.executor,
 									username, password
 								)

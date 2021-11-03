@@ -51,6 +51,7 @@ public class HmXmlRpcInterface extends BasicProducer<RawEvent> implements Interf
 	final String logicName
 	final String host
 	final int port
+	final String path
 	final HmXmlRpcServer server
 	final HmScriptClient scriptClient
 	final HmReinitTask reinitTask
@@ -70,6 +71,7 @@ public class HmXmlRpcInterface extends BasicProducer<RawEvent> implements Interf
 			server.addConsumer(this)
 			client.host=host
 			client.port=port
+			client.path=path
 			client.username=username
 			client.password=password
 			if (!disableRegistration) {

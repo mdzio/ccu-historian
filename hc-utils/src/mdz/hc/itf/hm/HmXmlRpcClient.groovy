@@ -25,6 +25,7 @@ public class HmXmlRpcClient {
 
 	String host
 	int port
+	String path=""
 	String username
 	String password
 	
@@ -32,7 +33,7 @@ public class HmXmlRpcClient {
 	
 	public synchronized Proxy getProxy() {
 		if (proxy==null) {
-			proxy=new Proxy("http://$host:$port")
+			proxy=new Proxy("http://$host:$port$path")
 			if (username) {
 				proxy.setBasicAuth(username, password?:"")
 			}
