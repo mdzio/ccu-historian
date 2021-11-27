@@ -1,20 +1,17 @@
 /*
-    CCU-Historian, a long term archive for the HomeMatic CCU
-    Copyright (C) 2011-2017 MDZ (info@ccu-historian.de)
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ CCU-Historian, a long term archive for the HomeMatic CCU
+ Copyright (C) 2011-2017 MDZ (info@ccu-historian.de)
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package mdz.ccuhistorian
 
 import java.util.Date
@@ -43,25 +40,19 @@ public class Database implements Storage {
 
 	DatabaseConfig config
 	Base base
-	
+
 	private Server webServer, tcpServer, pgServer
 	private Sql db
 	private final static long TIMESERIES_COPY_INTERVAL=30l*24*60*60*1000 // 1 month
 	private String backupLast
 	private ScheduledFuture backupFuture
-	
+
 	// Prefixes of history tables
 	private final static String TABLE_PREFIX_DOUBLE='D_' // VALUE columns is of type DOUBLE
 	private final static String TABLE_PREFIX_STRING='C_' // VALUE column is of type VARCHAR
-	
-	// Prefixes of history tables up to and including V0.6.0-dev4
-	private final static String TABLE_PREFIX_DEVICE_DOUBLE='V_'
-	private final static String TABLE_PREFIX_DEVICE_STRING='VS_'
-	private final static String TABLE_PREFIX_SYSVAR_DOUBLE='S_'
-	private final static String TABLE_PREFIX_SYSVAR_STRING='SS_'
 
 	private final static String CONFIG_DATABASE_VERSION='internal.databaseVersion'
-		
+
 	public Database(DatabaseConfig config, Base base) {
 		this.config=config
 		this.base=base
@@ -69,7 +60,7 @@ public class Database implements Storage {
 		// start database
 		Exceptions.catchToLog(log) { connect() }
 	}
-	
+
 	private void connect() {
 		if (db==null) {
 			try {
@@ -78,7 +69,13 @@ public class Database implements Storage {
 				prepareDatabase()
 				if (config.webEnable) {
 					log.info 'Starting database web server'
-					def args=['-ifExists', '-webPort', config.webPort as String, '-webAdminPassword', config.password]
+					def args=[
+						'-ifExists',
+						'-webPort',
+						config.webPort as String,
+						'-webAdminPassword',
+						config.password
+					]
 					if (config.webAllowOthers) args << '-webAllowOthers'
 					webServer=Server.createWebServer(args as String[])
 					webServer.start()
@@ -86,7 +83,11 @@ public class Database implements Storage {
 				}
 				if (config.tcpEnable) {
 					log.info 'Starting database TCP server'
-					def args=['-ifExists', '-tcpPort', config.tcpPort as String]
+					def args=[
+						'-ifExists',
+						'-tcpPort',
+						config.tcpPort as String
+					]
 					if (config.tcpAllowOthers) args << '-tcpAllowOthers'
 					tcpServer=Server.createTcpServer(args as String[])
 					tcpServer.start()
@@ -94,7 +95,11 @@ public class Database implements Storage {
 				}
 				if (config.pgEnable) {
 					log.info 'Starting database PG server'
-					def args=['-ifExists', '-pgPort', config.pgPort as String]
+					def args=[
+						'-ifExists',
+						'-pgPort',
+						config.pgPort as String
+					]
 					if (config.pgAllowOthers) args << '-pgAllowOthers'
 					pgServer=Server.createPgServer(args as String[])
 					pgServer.start()
@@ -110,8 +115,8 @@ public class Database implements Storage {
 					cal.add(Calendar.HOUR_OF_DAY, 1)
 					initialDelay+=cal.timeInMillis
 					backupFuture=base.executor.scheduleAtFixedRate(
-						this.&checkBackupTime,
-						initialDelay, 3600*1000, TimeUnit.MILLISECONDS)
+							this.&checkBackupTime,
+							initialDelay, 3600*1000, TimeUnit.MILLISECONDS)
 				}
 			} catch (Exception ex) {
 				// partial initialization clean up
@@ -126,10 +131,10 @@ public class Database implements Storage {
 			if (pgServer) { pgServer.stop(); pgServer=null }
 			if (tcpServer) { tcpServer.stop(); tcpServer=null }
 			if (webServer) { webServer.stop(); webServer=null }
-			db.close(); db=null 
+			db.close(); db=null
 		}
 	}
-	
+
 	public synchronized transactional(Closure cl) {
 		cl=(Closure) cl.clone()
 		cl.delegate=this
@@ -164,10 +169,10 @@ public class Database implements Storage {
 		connect()
 		if (!dp.historyTableName)
 			throw new Exception('Table name of data point is not set')
-		def row=db.firstRow("SELECT TS, VALUE, STATE FROM $dp.historyTableName WHERE TS=(SELECT MAX(TS) FROM $dp.historyTableName)" as String)
+		def row=db.firstRow("SELECT TS, \"VALUE\", STATE FROM $dp.historyTableName WHERE TS=(SELECT MAX(TS) FROM $dp.historyTableName)" as String)
 		row?new ProcessValue((Date)row[0], row[1], (int)row[2]):null
 	}
-	
+
 	/**
 	 * getTimeSeriesRaw returns raw entries from database without any interpolation, whose timestamps fulfill
 	 * the condition begin<=TS<end.
@@ -179,7 +184,7 @@ public class Database implements Storage {
 		if (!dp.historyTableName)
 			throw new Exception('Table name of data point is not set')
 		TimeSeries ts=new TimeSeries(dp)
-		db.query("SELECT TS, VALUE, STATE FROM $dp.historyTableName WHERE TS>=? AND TS<? ORDER BY TS" as String,
+		db.query("SELECT TS, \"VALUE\", STATE FROM $dp.historyTableName WHERE TS>=? AND TS<? ORDER BY TS" as String,
 				[(Object)begin, (Object)end]) { ResultSet rs ->
 					ts.add(rs);
 				}
@@ -210,7 +215,7 @@ public class Database implements Storage {
 		if (endExt==null) {
 			endExt=end
 		}
-		
+
 		// retrieve time series (add 1 ms to include boundary value)
 		TimeSeries ts=getTimeSeriesRaw(dp, beginExt, new Date(endExt.time+1))
 		if (ts.size()==0) {
@@ -225,7 +230,7 @@ public class Database implements Storage {
 		// calculate boundary values
 		if (interpLinear) {
 			// * linear interpolation *
-			 
+
 			// cut at begin of time range
 			ProcessValue entry1=ts[0]
 			if (entry1.timestamp<begin) {
@@ -239,7 +244,7 @@ public class Database implements Storage {
 						ts[0]=interpEntry
 					}
 				} else {
-					// remove the out of range entry 
+					// remove the out of range entry
 					ts.remove(0)
 				}
 			}
@@ -265,10 +270,10 @@ public class Database implements Storage {
 					ts.remove(ts.size()-1)
 				}
 			}
-			
+
 		} else {
 			// * hold value interpolation *
-			
+
 			// cut at begin of time range
 			ProcessValue firstEntry=ts[0]
 			if (firstEntry.timestamp<begin) {
@@ -286,10 +291,10 @@ public class Database implements Storage {
 					holdEnd=end
 				}
 				ts.add(holdEnd.time, lastEntry.value, lastEntry.state)
-				
+
 			} else if (lastEntry.timestamp==end) {
 				// last entry exactly on end: do nothing
-				
+
 			} else {
 				// last entry after end: remove entry
 				ts.remove(ts.size()-1)
@@ -303,7 +308,7 @@ public class Database implements Storage {
 		log.finer "Database: Returning $ts.size points"
 		ts
 	}
-	
+
 	private ProcessValue interpolate(ProcessValue first, ProcessValue second, Date ts) {
 		double tdiff=second.timestamp.time-first.timestamp.time
 		if (tdiff==0) {
@@ -331,7 +336,7 @@ public class Database implements Storage {
 				(int)db.firstRow("SELECT COUNT(*) FROM $dp.historyTableName" as String)[0]
 		}
 	}
-		
+
 	@Override
 	public synchronized List<DataPoint> getDataPoints() {
 		connect()
@@ -343,9 +348,9 @@ public class Database implements Storage {
 	public synchronized List<DataPoint> getDataPointsOfInterface(String itfName) {
 		connect()
 		db.rows(
-			"""SELECT * FROM DATA_POINTS WHERE INTERFACE=$itfName
+				"""SELECT * FROM DATA_POINTS WHERE INTERFACE=$itfName
 			ORDER BY DISPLAY_NAME, ADDRESS, IDENTIFIER"""
-		).collect { getRowAsDataPoint(it) }
+				).collect { getRowAsDataPoint(it) }
 	}
 
 	@Override
@@ -355,7 +360,7 @@ public class Database implements Storage {
 		def row=db.firstRow("SELECT * FROM DATA_POINTS WHERE DP_ID=$idx")
 		row?getRowAsDataPoint(row):null
 	}
-	
+
 	@Override
 	public synchronized DataPoint getDataPoint(DataPointIdentifier id) {
 		connect()
@@ -384,7 +389,7 @@ public class Database implements Storage {
 			createDataPointTable(dp)
 		}
 		log.fine "Database: Updating data point description: $dp"
-		
+
 		// create JSON for custom attribute
 		String custom=JsonOutput.toJson(dp.attributes.custom)
 
@@ -425,8 +430,8 @@ public class Database implements Storage {
 		dp.historyString=!dp.historyString
 		db.execute "DROP TABLE IF EXISTS $tableName" as String
 		db.execute "DELETE FROM DATA_POINTS WHERE DP_ID=$dp.idx"
-	} 
-	 
+	}
+
 	@Override
 	public synchronized int deleteTimeSeries(DataPoint dp, Date startTime, Date endTime) {
 		connect()
@@ -437,23 +442,23 @@ public class Database implements Storage {
 		if (startTime!=null) {
 			if (endTime!=null)
 				affectedRows=db.executeUpdate "DELETE FROM $dp.historyTableName WHERE TS>=? AND TS<?" as String, startTime, endTime
-			else 
+			else
 				affectedRows=db.executeUpdate "DELETE FROM $dp.historyTableName WHERE TS>=?" as String, startTime
 		} else {
 			if (endTime!=null)
 				affectedRows=db.executeUpdate "DELETE FROM $dp.historyTableName WHERE TS<?" as String, endTime
-			else 
+			else
 				affectedRows=db.executeUpdate "DELETE FROM $dp.historyTableName" as String
 		}
 		log.fine "$affectedRows entries deleted"
 		affectedRows
 	}
-	
+
 	@Override
 	public synchronized int copyTimeSeries(DataPoint dstDp, DataPoint srcDp, Date startTime, Date endTime, Date newStartTime) {
 		connect()
 		log.fine "Database: Copying timeseries of data point ${srcDp.id} to data point "+
-			"${dstDp.id} (start time: $startTime, end time: $endTime, new start time: $newStartTime)"
+				"${dstDp.id} (start time: $startTime, end time: $endTime, new start time: $newStartTime)"
 		if (!dstDp.historyTableName)
 			throw new Exception('Table name of destination data point is not set')
 		if (!srcDp.historyTableName)
@@ -473,7 +478,7 @@ public class Database implements Storage {
 				counter+=timeSeries.size
 				timeSeries.each { ProcessValue e ->
 					e.timestamp.time+=timeMod
-					db.executeInsert "INSERT INTO $dstDp.historyTableName (TS, VALUE, STATE) VALUES (?, ?, ?)" as String, [e.timestamp, e.value, e.state]
+					db.executeInsert "INSERT INTO $dstDp.historyTableName (TS, \"VALUE\", STATE) VALUES (?, ?, ?)" as String, [e.timestamp, e.value, e.state]
 				}
 				startTime=tmpEndTime
 			}
@@ -481,7 +486,7 @@ public class Database implements Storage {
 		log.fine "$counter entries copied"
 		counter
 	}
-	
+
 	@Override
 	public synchronized int replaceTimeSeries(DataPoint dstDp, Iterable<ProcessValue> srcSeries, Date startTime, Date endTime) throws Exception {
 		connect()
@@ -492,13 +497,13 @@ public class Database implements Storage {
 		try {
 			srcSeries.each { ProcessValue pv ->
 				def value=TimeSeries.getNormalizedValue(pv.value)
-				db.executeInsert 'INSERT INTO REPLACE_TEMP (TS, VALUE, STATE) VALUES (?, ?, ?)', [pv.timestamp, value, pv.state]
+				db.executeInsert 'INSERT INTO REPLACE_TEMP (TS, "VALUE", STATE) VALUES (?, ?, ?)', [pv.timestamp, value, pv.state]
 				counter++
 			}
 			// delete time range
 			deleteTimeSeries(dstDp, startTime, endTime)
 			// insert all entries from the temporary table
-			db.executeInsert "INSERT INTO $dstDp.historyTableName SELECT TS, VALUE, STATE FROM REPLACE_TEMP" as String
+			db.executeInsert "INSERT INTO $dstDp.historyTableName SELECT TS, \"VALUE\", STATE FROM REPLACE_TEMP" as String
 		} finally {
 			try { db.execute "DROP TABLE IF EXISTS REPLACE_TEMP"
 			} catch (Exception e) {	/* ignore */ }
@@ -521,8 +526,8 @@ public class Database implements Storage {
 		boolean valueIsString=dataPoint.historyString
 		// exists the data point
 		DataPoint dataPointDb=getDataPoint(new DataPointIdentifier(
-			dataPoint.id.interfaceId, dataPoint.id.address, dataPoint.id.identifier
-		))
+				dataPoint.id.interfaceId, dataPoint.id.address, dataPoint.id.identifier
+				))
 		if (dataPointDb) {
 			// changed the data type?
 			if (isStringTable(dataPointDb.historyTableName)!=valueIsString) {
@@ -531,7 +536,7 @@ public class Database implements Storage {
 				updateDataPoint(dataPointDb)
 				// if necessary, create a table
 				createDataPointTable(dataPointDb)
-			}	
+			}
 			dataPoint=dataPointDb
 		} else {
 			// create data point and table
@@ -539,7 +544,7 @@ public class Database implements Storage {
 		}
 		dataPoint
 	}
-	
+
 	@Override
 	public synchronized void consume(Event e) throws Exception {
 		connect()
@@ -547,17 +552,21 @@ public class Database implements Storage {
 		if (!e.dataPoint.historyTableName)
 			throw new Exception('Table name of data point is not set')
 		def value=TimeSeries.getNormalizedValue(e.pv.value)
-		db.executeInsert "INSERT INTO $e.dataPoint.historyTableName (TS, VALUE, STATE) VALUES (?, ?, ?)" as String,
-			[e.pv.timestamp, value, e.pv.state]
+		db.executeInsert "INSERT INTO $e.dataPoint.historyTableName (TS, \"VALUE\", STATE) VALUES (?, ?, ?)" as String,
+				[
+					e.pv.timestamp,
+					value,
+					e.pv.state
+				]
 	}
 
-	public static void compact(DatabaseConfig config) {	
+	public static void compact(DatabaseConfig config) {
 		log.info 'Starting compaction of database'
 		config.logDebug()
 		String tmpFileName='temp.sql'
 		log.info "Dumping database to $tmpFileName"
-		org.h2.tools.Script.main('-url', getUrl(config), '-user', config.user, '-password', config.password, 
-			'-script', tmpFileName, '-options', 'DROP')
+		org.h2.tools.Script.main('-url', getUrl(config), '-user', config.user, '-password', config.password,
+				'-script', tmpFileName, '-options', 'DROP')
 		log.fine 'Deleting database files'
 		org.h2.tools.DeleteDbFiles.execute(config.dir, config.name, true)
 		log.info "Restoring database from $tmpFileName"
@@ -572,16 +581,16 @@ public class Database implements Storage {
 		log.info 'Starting dump of database'
 		config.logDebug()
 		log.fine "Dumping database to $fileName"
-		org.h2.tools.Script.main('-url', getUrl(config), '-user', config.user, '-password', config.password, 
-			'-script', fileName, '-options', 'DROP')
+		org.h2.tools.Script.main('-url', getUrl(config), '-user', config.user, '-password', config.password,
+				'-script', fileName, '-options', 'DROP')
 		log.info 'Dump of database completed'
 	}
-	
+
 	public static void runScript(DatabaseConfig config, String fileName) {
 		log.info "Running script $fileName on database"
 		config.logDebug()
 		org.h2.tools.RunScript.main('-url', getUrl(config), '-user', config.user, '-password', config.password,
-			'-script', fileName)
+				'-script', fileName)
 		log.info 'Script run completed'
 	}
 
@@ -624,57 +633,57 @@ public class Database implements Storage {
 
 		// create DataPoint
 		new DataPoint(
-			idx:row.DP_ID, historyTableName:row.TABLE_NAME,
-			managementFlags:(row.STATE?:0),
-			
-			id: new DataPointIdentifier(row.INTERFACE, row.ADDRESS,	row.IDENTIFIER),
-			
-			attributes: [
-				preprocType:row.PREPROC_TYPE, preprocParam:row.PREPROC_PARAM,
-				
-				displayName:row.DISPLAY_NAME, room:row.ROOM,
-				function:row.FUNCTION, comment:row.COMMENT,
-				custom:custom,
-			
-				paramSet:row.PARAM_SET,	tabOrder:row.TAB_ORDER,
-				maximum:row.MAXIMUM, unit:row.UNIT,
-				minimum:row.MINIMUM, control:row.CONTROL,
-				operations:row.OPERATIONS, flags:row.FLAGS,
-				type:row.TYPE, defaultValue:row.DEFAULT_VALUE
-			]
-		)
+				idx:row.DP_ID, historyTableName:row.TABLE_NAME,
+				managementFlags:(row.STATE?:0),
+
+				id: new DataPointIdentifier(row.INTERFACE, row.ADDRESS,	row.IDENTIFIER),
+
+				attributes: [
+					preprocType:row.PREPROC_TYPE, preprocParam:row.PREPROC_PARAM,
+
+					displayName:row.DISPLAY_NAME, room:row.ROOM,
+					function:row.FUNCTION, comment:row.COMMENT,
+					custom:custom,
+
+					paramSet:row.PARAM_SET,	tabOrder:row.TAB_ORDER,
+					maximum:row.MAXIMUM, unit:row.UNIT,
+					minimum:row.MINIMUM, control:row.CONTROL,
+					operations:row.OPERATIONS, flags:row.FLAGS,
+					type:row.TYPE, defaultValue:row.DEFAULT_VALUE
+				]
+				)
 	}
 
 	private void createDataPointTable(DataPoint dp) {
 		log.fine "Database: Creating table $dp.historyTableName"
 		String valueType=dp.historyString?'VARCHAR':'DOUBLE'
-		db.execute """CREATE TABLE IF NOT EXISTS $dp.historyTableName (TS DATETIME, VALUE $valueType, STATE INT);
+		db.execute """CREATE TABLE IF NOT EXISTS $dp.historyTableName (TS DATETIME, \"VALUE\" $valueType, STATE INT);
 			CREATE INDEX IF NOT EXISTS ${dp.historyTableName}_IDX ON $dp.historyTableName (TS)""" as String
 	}
 
 	private void createTemporaryTable(String tableName, boolean historyString) {
 		log.fine "Database: Creating temporary table $tableName"
 		String valueType=historyString?'VARCHAR':'DOUBLE'
-		db.execute """CREATE CACHED TEMP TABLE $tableName (TS DATETIME, VALUE $valueType, STATE INT);
+		db.execute """CREATE CACHED TEMP TABLE $tableName (TS DATETIME, \"VALUE\" $valueType, STATE INT);
 			CREATE INDEX ${tableName}_IDX ON $tableName (TS)""" as String
 	}
 
 	private void createDataPointEntry(DataPoint dp) {
 		normalizeDataPoint(dp)
 		log.fine "Database: Inserting into DATA_POINTS: $dp"
-		
+
 		// create JSON for custom attribute
 		String custom=JsonOutput.toJson(dp.attributes.custom)
-		
-		db.executeInsert """INSERT INTO DATA_POINTS (
-				DP_ID, TABLE_NAME, STATE,
+
+		def keys=db.executeInsert """INSERT INTO DATA_POINTS (
+				TABLE_NAME, STATE,
 				INTERFACE, ADDRESS, IDENTIFIER,
 				PREPROC_TYPE, PREPROC_PARAM,
 				DISPLAY_NAME, ROOM, FUNCTION, COMMENT, CUSTOM,
 				PARAM_SET, TAB_ORDER, MAXIMUM, UNIT, MINIMUM, CONTROL,
 				OPERATIONS, FLAGS, TYPE, DEFAULT_VALUE
 			) VALUES (
-				$dp.idx, $dp.historyTableName, $dp.managementFlags,
+				$dp.historyTableName, $dp.managementFlags,
 				$dp.id.interfaceId, $dp.id.address, $dp.id.identifier,
 				$dp.attributes.preprocType, $dp.attributes.preprocParam,
 				$dp.attributes.displayName, $dp.attributes.room,
@@ -686,14 +695,14 @@ public class Database implements Storage {
 				$dp.attributes.flags, $dp.attributes.type, 
 				$dp.attributes.defaultValue
 			)"""
+		dp.idx=keys[0][0]
 	}
-	
+
 	private static String getUrl(DatabaseConfig config) {
 		if (!config.dir.isEmpty() && !config.dir.endsWith('/')) config.dir+='/'
 		// DB_CLOSE_ON_EXIT=FALSE: the database is explicitly closed.
 		// BUILTIN_ALIAS_OVERRIDE=TRUE: no error, if overriding aliases.
-		// MAX_COMPACT_COUNT=0: disables chunk rewriting. faster database shutdown.
-		"jdbc:h2:file:$config.dir$config.name;DB_CLOSE_ON_EXIT=FALSE;BUILTIN_ALIAS_OVERRIDE=TRUE;MAX_COMPACT_COUNT=0"
+		"jdbc:h2:file:$config.dir$config.name;DB_CLOSE_ON_EXIT=FALSE;BUILTIN_ALIAS_OVERRIDE=TRUE"
 	}
 
 	private static String getDataPointTableName(DataPoint dp) {
@@ -701,69 +710,67 @@ public class Database implements Storage {
 		tableName+="${dp.id.interfaceId}_${dp.id.address}_${dp.id.identifier}"
 		tableName.toUpperCase().replaceAll(/[^A-Z0-9_]/, '_')
 	}
-	
+
 	private static boolean isStringTable(String tableName) {
-		// up to and including V0.6.0-dev4
-		tableName.startsWith(TABLE_PREFIX_DEVICE_STRING) || tableName.startsWith(TABLE_PREFIX_SYSVAR_STRING) ||
-		// from V0.6.0-dev5 upwards
 		tableName.startsWith(TABLE_PREFIX_STRING)
 	}
-	
+
 	public static String formatTimestamp(String pattern, Date timestamp) {
 		Calendar cal=Calendar.instance
 		cal.time=timestamp
 		pattern.replaceAll(~/%([%YMWDh])/, { List<String> captures ->
 			switch (captures[1]) {
-			case 'Y': cal[Calendar.YEAR]; break
-			case 'M': ((cal[Calendar.MONTH]-Calendar.JANUARY+1) as String).padLeft(2, '0'); break
-			case 'W': (cal[Calendar.WEEK_OF_YEAR] as String).padLeft(2, '0'); break
-			case 'D': (cal[Calendar.DAY_OF_MONTH] as String).padLeft(2, '0'); break
-			case 'h': (cal[Calendar.HOUR_OF_DAY] as String).padLeft(2, '0'); break
-			case '%': '%'; break
+				case 'Y': cal[Calendar.YEAR]; break
+				case 'M': ((cal[Calendar.MONTH]-Calendar.JANUARY+1) as String).padLeft(2, '0'); break
+				case 'W': (cal[Calendar.WEEK_OF_YEAR] as String).padLeft(2, '0'); break
+				case 'D': (cal[Calendar.DAY_OF_MONTH] as String).padLeft(2, '0'); break
+				case 'h': (cal[Calendar.HOUR_OF_DAY] as String).padLeft(2, '0'); break
+				case '%': '%'; break
 			}
 		})
 	}
-	
+
 	private synchronized void checkBackupTime() {
 		if (!backupFuture) return
-		Exceptions.catchToLog(log) {
-			log.finest "Checking backup time"
-			String nextBackup=formatTimestamp(config.backup, new Date())
-			if (backupLast!=nextBackup)
-				createBackup nextBackup
-			backupLast=nextBackup
-		}
+			Exceptions.catchToLog(log) {
+				log.finest "Checking backup time"
+				String nextBackup=formatTimestamp(config.backup, new Date())
+				if (backupLast!=nextBackup)
+					createBackup nextBackup
+				backupLast=nextBackup
+			}
 	}
-	
+
 	private synchronized void createBackup(String fileName) {
 		connect()
 		log.info "Creating backup of database to file $fileName"
 		long start=System.currentTimeMillis()
 		switch (fileName) {
-		case ~/(?i).*\.zip/:
-			db.execute "SCRIPT DROP TO $fileName COMPRESSION ZIP"
-			break
-		case ~/(?i).*\.gz/:
-			db.execute "SCRIPT DROP TO $fileName COMPRESSION GZIP"
-			break
-		default:	
-			db.execute "SCRIPT DROP TO $fileName"
+			case ~/(?i).*\.zip/:
+				db.execute "SCRIPT DROP TO $fileName COMPRESSION ZIP"
+				break
+			case ~/(?i).*\.gz/:
+				db.execute "SCRIPT DROP TO $fileName COMPRESSION GZIP"
+				break
+			default:
+				db.execute "SCRIPT DROP TO $fileName"
 		}
 		log.fine "Backup created in ${(System.currentTimeMillis()-start)/1000} seconds"
-	} 
-	
+	}
+
 	private void prepareDatabase() {
 		log.fine 'Preparing database'
 
 		// create configuration table
-		db.execute 'CREATE TABLE IF NOT EXISTS CONFIG (NAME VARCHAR(128) NOT NULL, VALUE VARCHAR(8192))'
-		
+		db.execute 'CREATE TABLE IF NOT EXISTS CONFIG (NAME VARCHAR(128) NOT NULL, "VALUE" VARCHAR(8192))'
+
 		// check database version
 		if (getConfig(CONFIG_DATABASE_VERSION)==null) {
-			
+
 			// new database detected
 			db.execute '''CREATE TABLE DATA_POINTS (
-				DP_ID INT IDENTITY,	TABLE_NAME VARCHAR NOT NULL,
+				DP_ID INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+				TABLE_NAME VARCHAR NOT NULL,
 				STATE INT,
 				
 				INTERFACE VARCHAR NOT NULL, ADDRESS VARCHAR NOT NULL,
@@ -785,45 +792,33 @@ public class Database implements Storage {
 			// add database functions
 			db.execute 'CREATE ALIAS TS_TO_UNIX DETERMINISTIC FOR "mdz.ccuhistorian.DatabaseExtensions.TS_TO_UNIX"'
 			db.execute 'CREATE ALIAS UNIX_TO_TS DETERMINISTIC FOR "mdz.ccuhistorian.DatabaseExtensions.UNIX_TO_TS"'
-			
+
 			// set current version (keep aligned with database migration)
 			setConfig(CONFIG_DATABASE_VERSION, '3')
-			
+
 		} else {
 			// migrate database
-			
-			// initialize continuous flag for existing data points
-			migrateTo(1, '''UPDATE DATA_POINTS SET STATE=BITOR(STATE, 0x80) WHERE IDENTIFIER IN (
-			'ACTUAL_HUMIDITY', 'ACTUAL_TEMPERATURE', 'AIR_PRESSURE', 'BRIGHTNESS',
-			'CURRENT', 'ENERGY_COUNTER', 'FREQUENCY', 'HUMIDITY', 'ILLUMINATION',
-			'LUX', 'POWER', 'RAIN_COUNTER', 'SUNSHINEDURATION', 'TEMPERATURE',
-			'VOLTAGE', 'WIND_SPEED')''')
-			
-			// add attribute 'custom'
-			migrateTo(2, '''ALTER TABLE DATA_POINTS ADD IF NOT EXISTS CUSTOM VARCHAR DEFAULT '{}' AFTER COMMENT''')
-			
-			// replace invalid values for attribute 'custom'
-			migrateTo(3, '''UPDATE DATA_POINTS SET CUSTOM='{}' WHERE CUSTOM='null' OR CUSTOM IS NULL''')
+			// V3 of the CCU-Historian starts with a new database. Therefore no migration steps exist at the moment.
 		}
 	}
-	
+
 	public synchronized String getConfig(String name) {
 		connect()
-		def row=db.firstRow('SELECT VALUE FROM CONFIG WHERE NAME=?', name)
+		def row=db.firstRow('SELECT "VALUE" FROM CONFIG WHERE NAME=?', name)
 		String value=row?(String)(row[0]):null
 		log.fine("Read config: $name=$value")
 		value
 	}
-	
+
 	public synchronized void setConfig(String name, String value) {
 		connect()
 		log.fine("Writing config: $name=$value")
-		int cnt=db.executeUpdate('UPDATE CONFIG SET VALUE=? WHERE NAME=?', value, name)
+		int cnt=db.executeUpdate('UPDATE CONFIG SET "VALUE"=? WHERE NAME=?', value, name)
 		if (cnt==0) {
 			db.executeUpdate('INSERT INTO CONFIG VALUES (?, ?)', name, value)
 		}
 	}
-	
+
 	private void migrateTo(int toVersion, String sql) {
 		if (getConfig(CONFIG_DATABASE_VERSION).toInteger() < toVersion) {
 			log.info "Migrating database to version $toVersion"
