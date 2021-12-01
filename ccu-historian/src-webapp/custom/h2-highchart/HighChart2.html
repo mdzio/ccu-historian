@@ -4,12 +4,15 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="/external/bootstrap/css/bootstrap.css" rel="stylesheet">
-    <link href="historian.css" rel="stylesheet">
     <link rel="icon" sizes="192x192" href="http://10.0.0.250:8082/custom/h2-highchart/historian-196.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="http://10.0.0.250:8082/custom/h2-highchart/historian-180.png">
     <title>CCU-historian: HighChart</title>
     <script> var apiKey=""</script>
+    <link rel='stylesheet' href="/external/bootstrap/css/bootstrap.css"></link>
+    <link rel='stylesheet' href="historian.css"></link>
+    <link rel='stylesheet' href='stock-tools/popup.css'></link>
+    <link rel='stylesheet' href='stock-tools/gui.css'></link>
+    <style>p { border: 0px solid; }</style>
   </head>
   <body style="background-color: rgb(255, 255, 255);">
     <div class="container-navbar" style="display: none">
@@ -125,6 +128,10 @@
                 <span id="Text-Layout" class="LinePopup-text">Layout</span>
                 <select id="Select-Layout" class="form-select-h2"></select>
               </div>
+              <div id="grid">
+                <span id="Text-Grid" class="LinePopup-text">Grid</span>
+                <select id="Select-Grid" class="form-select-h2"></select>
+              </div>
               <div id="content">
                 <span id="Text-Content" class="LinePopup-text">Content</span>
                 <select id="Select-Content" class="form-select-h2"></select>
@@ -136,6 +143,10 @@
               <div id="theme">
                 <span id="Text-Theme" class="LinePopup-text">Theme</span>
                 <select id="Select-Theme" class="form-select-h2"></select>
+              </div>
+              <div id="fontsize">
+                <span id="Font-Size" class="LinePopup-text">Font-Size</span>
+                <select id="Select-FontSize" class="form-select-h2"></select>
               </div>
               <div id="refresh">
                 <span id="Text-Refresh" class="LinePopup-text">Refresh in Sec.</span>
@@ -206,15 +217,30 @@
         </div>
       </div>
     </div>
-    <script src="/external/jquery/jquery.js"></script>
-    <script src="/external/bootstrap/js/bootstrap.js"></script>
-    <script src="/external/underscore/underscore.js"></script>
-    <script src="highstock.js"></script>
-    <script src="highcharts-more.js"></script>
-    <script src="exporting.js"></script>
-    <script src="offline-exporting.js"></script>
-    <script src="language.js"></script>
-    <script src="themes.js"></script>
-    <script src="H2-HighChart.js"></script>
-  
+    <script src='/external/jquery/jquery.js'></script>
+    <script src='/external/bootstrap/js/bootstrap.js'></script>
+    <script src='/external/underscore/underscore.js'></script>
+    <script src='highstock.js'></script>
+    <script src='highcharts-more.js'></script>
+    <script src='exporting.js'></script>
+    <script src='offline-exporting.js'></script>
+    <script src='modules/export-data.js'></script>
+    <script src='modules/debugger.js'></script>
+    <script src='modules/boost.js'></script>
+    <script src='stock-tools/indicators.js'></script>
+    <script src='stock-tools/acceleration-bands.js'></script>
+    <script src='stock-tools/bollinger-bands.js'></script>
+    <script src='stock-tools/dema.js'></script>
+    <script src='stock-tools/tema.js'></script>
+    <script src='stock-tools/wma.js'></script>
+    <script src='stock-tools/regressions.js'></script>
+    <script src='stock-tools/trendline.js'></script>
+    <script src='stock-tools/drag-panes.js'></script>
+    <script src='stock-tools/annotations-advanced.js'></script>
+    <script src='stock-tools/price-indicator.js'></script>
+    <script src='stock-tools/full-screen.js'></script>
+    <script src='stock-tools/stock-tools.js'></script>
+    <script src='language.js'></script>
+    <script src='themes.js'></script>
+    <script src='H2-HighChart.js'></script>
 </body></html>

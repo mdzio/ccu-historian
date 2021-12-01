@@ -19,18 +19,19 @@ renderer.head={
   title 'CCU-historian: HighChart'
   script { mkp.yieldUnescaped js }
   meta('http-equiv':'"expires" content="4500"') 
+  link(rel: 'stylesheet', href: 'stock-tools/popup.css')
+  link(rel: 'stylesheet', href: 'stock-tools/gui.css')
+  style "p {}"
 }
 
 renderer.content={
 
   div(id:'filter') {
-    select(id: "Select-Raum", class:"form-select-h2")  { }
-    select(id: "Select-Gewerk", class:"form-select-h2" )  { }
-    input id:"filterFeld", class:"form-select-h2", type:"text", placeholder:"Suchen.."
-    div(class:'btn-group', role:'group') {
-        button id:'refresh', class:'btn btn-default', 'Refresh'
-        button id:'createLink', class:'btn btn-default', 'Link erzeugen'
-    }
+    select(id: "Select-Raum", class:"form-select-h2 btn")  { }
+    select(id: "Select-Gewerk", class:"form-select-h2 btn" )  { }
+    input id:"filterFeld", class:"form-select-h2 btn", type:"text", placeholder:"Suchen.."
+    button id:'refresh', class:'btn btn-default', 'Refresh'
+    button id:'createLink', class:'btn btn-default', 'Link erzeugen'
    }
    div(id:'chart-container-outer') {
       style: "position:relative; flex-grow:1"
@@ -155,6 +156,10 @@ renderer.content={
                   span id: "Text-Theme", class:"LinePopup-text", "Theme"
                   select(id: "Select-Theme", class:"form-select-h2")  { }
                }
+               div(id:"fontsize") {
+                  span id: "Font-Size", class:"LinePopup-text", "Font-Size"
+                  select(id: "Select-FontSize", class:"form-select-h2")  { }
+               }
                div(id:"refreshSec") {
                    span id: "Text-Refresh", class:"LinePopup-text", "Refresh in Sec." 
                    input(id: "Line-Refresh", type:"number", step: "0", class:"form-input-h2") 
@@ -230,6 +235,22 @@ renderer.end={
   script src:'highcharts-more.js'
   script src:'exporting.js'
   script src:'offline-exporting.js'
+  script src:'modules/export-data.js'
+  script src:'modules/debugger.js'
+  script src:'modules/boost.js'
+  script src:'stock-tools/indicators.js'
+  script src:'stock-tools/acceleration-bands.js'
+  script src:'stock-tools/bollinger-bands.js'
+  script src:'stock-tools/dema.js'
+  script src:'stock-tools/tema.js'
+  script src:'stock-tools/wma.js'
+  script src:'stock-tools/regressions.js'
+  script src:'stock-tools/trendline.js'
+  script src:'stock-tools/drag-panes.js'
+  script src:'stock-tools/annotations-advanced.js'
+  script src:'stock-tools/price-indicator.js'
+  script src:'stock-tools/full-screen.js'
+  script src:'stock-tools/stock-tools.js'
   script src:'language.js'
   script src:'themes.js'
   script src:'H2-HighChart.js'
