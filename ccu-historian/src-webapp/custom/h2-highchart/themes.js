@@ -1,5 +1,7 @@
 var DP_Themes = {
-  'Standard': {
+
+// ********
+  'standard-light': {
     colors: ["#7cb5ec", "#434348", "#90ed7d", "#f7a35c", "#8085e9", "#f15c80", "#e4d354", "#2b908f", "#f45b5b", "#91e8e1",
       "#000000", "#663300", "#000066", "#4B0082", "#ff0000", "#8B008B", "#ff4000", "#ff8000", "#ffbf00", "#ffff00",
       "#bfff00", "#80ff00", "#40ff00", "#00ff00", "#00ff40", "#00ff80", "#00ffbf", "#00ffff", "#00bfff", "#0080ff",
@@ -213,6 +215,17 @@ var DP_Themes = {
           fill: null,
           stroke: null
         }
+      },
+      menuItemHoverStyle: {
+        background: "#335cad",
+        color: "#000000",
+      },
+      menuItemStyle: {
+        color: "#666666"
+      },
+      menuStyle: {
+        background: "#ffffff",
+        border: "#999999",
       }
     },
     rangeSelector: {
@@ -234,7 +247,6 @@ var DP_Themes = {
         color: "#666666",
         display: 'none'
       }
-
     },
     navigator: {
       handles: {
@@ -280,6 +292,173 @@ var DP_Themes = {
     maskColor: null
   },
 
+// ********
+  'standard-dark': {
+    colors: ["#7cb5ec", "#434348", "#90ed7d", "#f7a35c", "#8085e9", "#f15c80", "#e4d354", "#2b908f", "#f45b5b", "#91e8e1",
+      "#ffffff", "#663300", "#000066", "#4B0082", "#ff0000", "#8B008B", "#ff4000", "#ff8000", "#ffbf00", "#ffff00",
+      "#bfff00", "#80ff00", "#40ff00", "#00ff00", "#00ff40", "#00ff80", "#00ffbf", "#00ffff", "#00bfff", "#0080ff",
+      "#0040ff", "#0000ff", "#4000ff", "#8000ff", "#bf00ff", "#ff00ff", "#ff00bf", "#ff0080", "#ff0040", "#ff0000"],
+
+    chart: {
+      backgroundColor: "#000000",
+      borderColor: "#335cad",
+      plotBorderColor: "#000000",
+    },
+    title: {
+      style: { "color": "#C0C0C0" },
+    },
+    subtitle: {
+      style: { "color": "#666666" },
+    },
+    xAxis: {
+      lineColor: "#A0A0A0",
+      gridLineColor: "#333333",
+      minorGridLineColor: "#666666",
+      minorTickColor: "#666666",
+      tickColor: "#A0A0A0",
+      labels: { style: { "color": "#A0A0A0" } },
+      title: { style: { "color": "#A0A0A0" } },
+    },
+    yAxis: {
+      lineColor: "#A0A0A0",
+      gridLineColor: "#333333",
+      minorGridLineColor: "#666666",
+      minorTickColor: "#666666",
+      tickColor: "#A0A0A0",
+      labels: { style: { "color": "#A0A0A0" } },
+      title: { style: { "color": "#A0A0A0" } },
+    },
+    tooltip: {
+      backgroundColor: "rgba(0, 0, 0, 0.75)",
+      style: { color: "#333333" }
+    },
+    toolbar: { itemStyle: { color: 'silver' } }, 
+    plotOptions: {
+      line: { 
+        dataLabels: { color: '#CCC' },
+        marker: { lineColor: "#333" } 
+      },
+      spline: { marker: { lineColor: "#333" } },
+      scatter: { marker: { lineColor: "#333" } },
+      candlestick: { lineColor: "#000000" }
+    },
+    legend: {
+      backgroundColor: 'rgba(0,0,0,0.03)',
+      borderColor: "#999999",
+      itemHiddenStyle: { color: "#333333" },
+      itemHoverStyle: { color: "#A0A0A0" },
+      itemStyle: { color: "#cccccc" },
+      navigation: {
+        activeColor: '#003399',
+        inactiveColor: '#cccccc',
+        style: { color: '#333' }
+      },
+    },
+    credits: { style: { color: "#666" } },
+    labels: { style: { color: "#CCC" } },
+    navigation: {
+      annotationsOptions: {
+        labelOptions: {
+          backgroundColor: 'rgba(200,200,200,0.75)',
+          borderColor: 'rgba(255, 255, 255, 0.75)'
+        },
+        shapeOptions: {
+          fill: 'rgba(255, 255, 255, 0.75)',
+          stroke: 'rgba(255, 255, 255, 0.75)'
+        },
+      },
+      buttonOptions: {
+        symbolStroke: "#DDDDDD",
+        hoverSymbolStroke: '#FFFFFF',
+        theme: {
+          fill: {
+            linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+            stops: [
+              [0.4, '#606060'],
+              [0.6, '#333333']
+            ]
+          },
+          stroke: '#000000'
+        }
+      },
+      menuItemHoverStyle: {
+        background: "#335cad",
+        color: "#333333",
+      },
+      menuItemStyle: {
+        color: "#C0C0C0"
+      },
+      menuStyle: {
+        background: "#000000",
+        border: "#999999",
+      }
+    },
+    rangeSelector: {
+      buttonTheme: {
+        fill: {
+          linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+          stops: [
+            [0.4, '#888'],
+            [0.6, '#555']
+          ]
+        },
+        stroke: '#000000',
+        style: {
+          color: '#CCC',
+          fontWeight: 'bold'
+        }
+      },
+      inputStyle: {
+        backgroundColor: '#333',
+        color: 'silver'
+      },
+      labelStyle: { color: "silver" }
+    },
+    navigator: {
+      handles: {
+        backgroundColor: "#000000",
+        borderColor: "#999999"
+      },
+      outlineColor: "#cccccc",
+      maskFill: "rgba(102,133,194,0.3)",
+      xAxis: { gridLineColor: "#e6e6e6" }
+    },
+    scrollbar: {
+      barBackgroundColor: {
+        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+        stops: [
+          [0.4, '#888'],
+          [0.6, '#555']
+        ]
+      },
+      barBorderColor: '#CCC',
+      buttonArrowColor: '#CCC',
+      buttonBackgroundColor: {
+        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+        stops: [
+          [0.4, '#888'],
+          [0.6, '#555']
+        ]
+      },
+      buttonBorderColor: '#CCC',
+      rifleColor: '#FFF',
+      trackBackgroundColor: {
+        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+        stops: [
+          [0, '#000'],
+          [1, '#333']
+        ]
+      },
+      trackBorderColor: '#666',
+    },
+    legendBackgroundColor: 'rgb(255,255,255)',
+    background2: 'rgb(0,0,0)',
+    dataLabelsColor: '#444',
+    textColor: '#C0C0C0',
+    maskColor: 'rgba(255,255,255,0.3)'
+  },
+
+// ********
   'dark-green': {
     colors: ["#7cb5ec", "#434348", "#90ed7d", "#f7a35c", "#8085e9", "#f15c80", "#e4d354", "#2b908f", "#f45b5b", "#91e8e1",
       "#000000", "#663300", "#000066", "#4B0082", "#ff0000", "#8B008B", "#ff4000", "#ff8000", "#ffbf00", "#ffff00",
@@ -425,6 +604,17 @@ var DP_Themes = {
           },
           stroke: '#000000'
         }
+      },
+      menuItemHoverStyle: {
+        background: "#335cad",
+        color: "#333333",
+      },
+      menuItemStyle: {
+        color: "#C0C0C0"
+      },
+      menuStyle: {
+        background: "#000000",
+        border: "#999999",
       }
     },
 
@@ -503,6 +693,7 @@ var DP_Themes = {
     maskColor: 'rgba(255,255,255,0.3)'
   },
 
+// ********
   'avocado': {
     colors: ["#7cb5ec", "#434348", "#90ed7d", "#f7a35c", "#8085e9", "#f15c80", "#e4d354", "#2b908f", "#f45b5b", "#91e8e1",
       "#000000", "#663300", "#000066", "#4B0082", "#ff0000", "#8B008B", "#ff4000", "#ff8000", "#ffbf00", "#ffff00",
@@ -522,6 +713,8 @@ var DP_Themes = {
       }
     }
   },
+
+// ********
   'dark-blue': {
     colors: ["#7cb5ec", "#434348", "#90ed7d", "#f7a35c", "#8085e9", "#f15c80", "#e4d354", "#2b908f", "#f45b5b", "#91e8e1",
       "#000000", "#663300", "#000066", "#4B0082", "#ff0000", "#8B008B", "#ff4000", "#ff8000", "#ffbf00", "#ffff00",
@@ -665,6 +858,17 @@ var DP_Themes = {
           },
           stroke: '#000000'
         }
+      },
+      menuItemHoverStyle: {
+        background: "#335cad",
+        color: "#333333",
+      },
+      menuItemStyle: {
+        color: "#C0C0C0"
+      },
+      menuStyle: {
+        background: "#000000",
+        border: "#999999",
       }
     },
     rangeSelector: {
@@ -740,6 +944,7 @@ var DP_Themes = {
     maskColor: 'rgba(255,255,255,0.3)'
   },
 
+// ********
   'dark-unica': {
     colors: ["#7cb5ec", "#434348", "#90ed7d", "#f7a35c", "#8085e9", "#f15c80", "#e4d354", "#2b908f", "#f45b5b", "#91e8e1",
       "#000000", "#663300", "#000066", "#4B0082", "#ff0000", "#8B008B", "#ff4000", "#ff8000", "#ffbf00", "#ffff00",
@@ -860,6 +1065,17 @@ var DP_Themes = {
         theme: {
           fill: '#505053'
         }
+      },
+      menuItemHoverStyle: {
+        background: "#335cad",
+        color: "#333333",
+      },
+      menuItemStyle: {
+        color: "#C0C0C0"
+      },
+      menuStyle: {
+        background: "#000000",
+        border: "#999999",
       }
     },
 
@@ -918,6 +1134,7 @@ var DP_Themes = {
     maskColor: 'rgba(255,255,255,0.3)'
   },
 
+// ********
   'gray': {
     colors: ["#7cb5ec", "#434348", "#90ed7d", "#f7a35c", "#8085e9", "#f15c80", "#e4d354", "#2b908f", "#f45b5b", "#91e8e1",
       "#000000", "#663300", "#000066", "#4B0082", "#ff0000", "#8B008B", "#ff4000", "#ff8000", "#ffbf00", "#ffff00",
@@ -1066,6 +1283,17 @@ var DP_Themes = {
           },
           stroke: '#000000'
         }
+      },
+      menuItemHoverStyle: {
+        background: "#335cad",
+        color: "#333333",
+      },
+      menuItemStyle: {
+        color: "#C0C0C0"
+      },
+      menuStyle: {
+        background: "#000000",
+        border: "#999999",
       }
     },
 
@@ -1144,7 +1372,7 @@ var DP_Themes = {
     maskColor: 'rgba(255,255,255,0.3)'
   },
 
-
+// ********
   'grid-light': {
     colors: ["#7cb5ec", "#434348", "#90ed7d", "#f7a35c", "#8085e9", "#f15c80", "#e4d354", "#2b908f", "#f45b5b", "#91e8e1",
       "#000000", "#663300", "#000066", "#4B0082", "#ff0000", "#8B008B", "#ff4000", "#ff8000", "#ffbf00", "#ffff00",
@@ -1200,6 +1428,7 @@ var DP_Themes = {
 
   },
 
+// ********
   'grid': {
     colors: ["#7cb5ec", "#434348", "#90ed7d", "#f7a35c", "#8085e9", "#f15c80", "#e4d354", "#2b908f", "#f45b5b", "#91e8e1",
       "#000000", "#663300", "#000066", "#4B0082", "#ff0000", "#8B008B", "#ff4000", "#ff8000", "#ffbf00", "#ffff00",
@@ -1295,9 +1524,11 @@ var DP_Themes = {
           stroke: '#CCCCCC'
         }
       }
-    }
+    },
+    background2: '#F0F0EA'
   },
 
+// ********
   'skies': {
     colors: ["#7cb5ec", "#434348", "#90ed7d", "#f7a35c", "#8085e9", "#f15c80", "#e4d354", "#2b908f", "#f45b5b", "#91e8e1",
       "#000000", "#663300", "#000066", "#4B0082", "#ff0000", "#8B008B", "#ff4000", "#ff8000", "#ffbf00", "#ffff00",
@@ -1376,8 +1607,11 @@ var DP_Themes = {
       style: {
         color: '#3E576F'
       }
-    }
+    },
+    background2: '#F0F0EA'
   },
+
+// ********
   'sunset': {
     colors: ["#7cb5ec", "#434348", "#90ed7d", "#f7a35c", "#8085e9", "#f15c80", "#e4d354", "#2b908f", "#f45b5b", "#91e8e1",
       "#000000", "#663300", "#000066", "#4B0082", "#ff0000", "#8B008B", "#ff4000", "#ff8000", "#ffbf00", "#ffff00",
@@ -1396,6 +1630,7 @@ var DP_Themes = {
     }
   },
 
+// ********
   'transparent': {
     chart: {
       backgroundColor: 'rgba(255, 255, 255, 0.0)',
@@ -1547,6 +1782,17 @@ var DP_Themes = {
           },
           stroke: '#000000'
         }
+      },
+      menuItemHoverStyle: {
+        background: "#335cad",
+        color: "#333333",
+      },
+      menuItemStyle: {
+        color: "#C0C0C0"
+      },
+      menuStyle: {
+        background: "#000000",
+        border: "#999999",
       }
     },
 
@@ -1620,110 +1866,5 @@ var DP_Themes = {
     dataLabelsColor: '#444',
     textColor: '#C0C0C0',
     maskColor: 'rgba(255,255,255,0.3)'
-  },
-
-  'standard-groß': {
-    title: {
-      style: { "fontSize": "20px" },
-    },
-    subtitle: {
-      style: { "fontSize": "16px" },
-    },
-    xAxis: {
-      labels: { style: { "fontSize": "20px" } },
-      title: { style: { "fontSize": "20px" } },
-    },
-    yAxis: {
-      labels: { style: { "fontSize": "20px" } },
-      title: { style: { "fontSize": "20px" } },
-    },
-    tooltip: {
-      headerFormat: "<span style=\"font-size: 20px\">{point.key}</span><br/>",
-      style: { fontSize: "18px", }
-    },
-    legend: {
-      itemStyle: {
-        fontSize: "18px",
-      },
-      navigation: {
-        arrowSize: 20,
-        style: { fontSize: '20px' }
-      },
-      title: {
-        style: { fontSize: '20px' }
-      },
-    },
-    credits: {
-      style: { fontSize: "12px" },
-    },
-    labels: {
-      style: { fontSize: "18px" },
-    },
-    rangeSelector: {
-      buttonTheme: { // styles for the buttons
-        style: { fontSize: "18px" }
-      },
-    },
-    navigator: {
-      height: 60,
-    },
-    scrollbar: {
-      height: 25,
-    },
-  },
-
-  'standard-groesser': {
-    title: {
-      style: { "fontSize": "30px" },
-    },
-    subtitle: {
-      style: { "fontSize": "25px" },
-    },
-    xAxis: {
-      labels: { style: { "fontSize": "30px" } },
-      title: { style: { "fontSize": "30px" } },
-    },
-    yAxis: {
-      labels: { style: { "fontSize": "30px" } },
-      title: { style: { "fontSize": "30px" } },
-    },
-    tooltip: {
-      headerFormat: "<span style=\"font-size: 30px\">{point.key}</span><br/>",
-      style: { fontSize: "25px", }
-    },
-    legend: {
-      itemStyle: {
-        fontSize: "25px",
-      },
-      navigation: {
-        arrowSize: 25,
-        style: { fontSize: '25px' }
-      },
-      title: {
-        style: { fontSize: '30px' }
-      },
-    },
-    credits: {
-      style: { fontSize: "12px" },
-    },
-    labels: {
-      style: { fontSize: "25px" },
-    },
-    rangeSelector: {
-      buttonTheme: { // styles for the buttons
-        style: {
-          fontSize: "25px",
-        },
-        r: 5,
-        width: null,
-      },
-      buttonSpacing: 15,
-    },
-    navigator: {
-      height: 80,
-    },
-    scrollbar: {
-      height: 30,
-    },
   },
 };

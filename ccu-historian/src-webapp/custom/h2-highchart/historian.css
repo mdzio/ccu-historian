@@ -32,26 +32,22 @@
 }
 
 .form-select-h2 {
-	padding: 7px;
+	padding: 6px;
 	border-color: #ccc;
 	border-width: 1px;
 	border-style: solid;
 	position: relative;
 	border-radius: 4px;
-	line-height: 18px;
-	font-size: 14px;
 	vertical-align: middle;
 }
 
 .form-input-h2 {
-	padding: 7px;
+	padding: 6px;
 	border-color: #ccc;
 	border-width: 1px;
 	border-style: solid;
 	position: relative;
 	border-radius: 4px;
-	line-height: 18px;
-	font-size: 14px;
 	vertical-align: middle;
 }
 
@@ -69,3 +65,37 @@
 	display: none;
 }
 
+.highcharts-data-table table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    background: white;
+    min-width: 100%;
+    margin-top: 10px;
+    font-family: sans-serif;
+}
+.highcharts-data-table td, .highcharts-data-table th, .highcharts-data-table caption {
+    border: 1px solid silver;
+    padding: 0.5em;
+}
+.highcharts-data-table tr:nth-child(even), .highcharts-data-table thead tr {
+    background: #f8f8f8;
+}
+.highcharts-data-table tr:hover {
+    background: #eff;
+}
+.highcharts-data-table caption {
+    border-bottom: none;
+    font-weight: bold;
+}
+
+div.highcharts-popup {
+	width: 100%;
+}
+
+div.highcharts-popup-lhs-col {
+	width: 40%;
+}
+
+div.highcharts-popup-rhs-col {
+    width: 60%;
+}
