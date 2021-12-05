@@ -16,9 +16,9 @@
 		<filterchain>
 			<tokenfilter>
 				<filetokenizer />
+				<replaceregex pattern="^\d+\.\d+\.\d+$" replace="\0.3.0"/>
 				<replacestring from="-alpha." to=".1." />
 				<replacestring from="-beta." to=".2." />
-				<replaceregex pattern="\d+\.\d+\.\d+" replace="\0.3.0"/>
 			</tokenfilter>
 		</filterchain>
 	</loadresource>

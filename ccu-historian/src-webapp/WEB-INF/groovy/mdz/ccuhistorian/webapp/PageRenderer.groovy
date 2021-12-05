@@ -59,7 +59,7 @@ public class PageRenderer {
 				servlet.html.div(class:'alert alert-danger') {
 					h4 {
 						strong 'Fehler: '
-						mkp.yield e.message?:e.class.name
+						mkp.yield translateError(e)
 					}
 					button class:'btn btn-default', type:'button', 'data-toggle':'collapse', 
 						'data-target':'#errdescr', 'Details'
@@ -68,6 +68,17 @@ public class PageRenderer {
 					}
 				}
 			}
+		}
+	}
+	
+	private String translateError(Exception e) {
+		String msg=e.message?:e.class.name
+		switch (msg) {
+		case ~/(?s).*The write format 1 is smaller than the supported format 2.*/:
+		    return 'Die bestehende Datenbank muss für CCU-Historian V3 migriert werden! ' + 
+				'Datenpunkte können nicht aufgezeichnet werden!'
+		default:
+			return msg
 		}
 	}
 	
