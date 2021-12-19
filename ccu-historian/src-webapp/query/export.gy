@@ -16,6 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 import groovy.transform.Field
+import groovy.json.JsonOutput
 import java.text.SimpleDateFormat
 import java.util.logging.Logger
 import javax.servlet.http.HttpServletResponse
@@ -70,7 +71,14 @@ def ex=utils.catchToLog(log) {
 			// print data point attributes
 			outw.print csv(dp.id.interfaceId) + ',' + csv(dp.id.address) + ',' + csv(dp.id.identifier) + ','
 			outw.print csv(dp.idx) + ',' + csv(dp.historyTableName) + ',' + csv(dp.managementFlags) + ','
-			outw.print (DataPoint.attributeNames.collect { n -> csv(dp.attributes."$n") }.join(','))
+			outw.print (DataPoint.attributeNames.collect { n ->
+				if (n==DataPoint.ATTR_CUSTOM) {
+					// encode as JSON
+					csv(JsonOutput.toJson(dp.attributes."$n"))	
+				} else {
+					csv(dp.attributes."$n")
+				} 
+			}.join(','))
 
 			// get actual begin and end of time series
 			def begin=database.getFirstAfterIncl(dp, parameters.timeRange.begin)
