@@ -18,6 +18,7 @@
 import mdz.ccuhistorian.webapp.TrendParameters
 import mdz.hc.DataPoint
 import groovy.transform.Field
+import groovy.json.JsonOutput
 import static mdz.ccuhistorian.webapp.TextFormat.*
 import static mdz.ccuhistorian.webapp.WebUtilities.*
 
@@ -91,6 +92,10 @@ renderer.content={
 								tr { 
 									th 'Zeitstempel'
 									td formatDate(last?.timestamp) 
+								}	
+								tr { 
+									th 'Benutzerdefiniert'
+									td JsonOutput.toJson(dp.attributes.custom) 
 								}	
 							} 
 						}
