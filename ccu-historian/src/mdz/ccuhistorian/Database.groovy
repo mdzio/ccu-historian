@@ -702,7 +702,8 @@ public class Database implements Storage {
 		if (!config.dir.isEmpty() && !config.dir.endsWith('/')) config.dir+='/'
 		// DB_CLOSE_ON_EXIT=FALSE: the database is explicitly closed.
 		// BUILTIN_ALIAS_OVERRIDE=TRUE: no error, if overriding aliases.
-		"jdbc:h2:file:$config.dir$config.name;DB_CLOSE_ON_EXIT=FALSE;BUILTIN_ALIAS_OVERRIDE=TRUE"
+		// MODE=PostgreSQL: PostgreSQL emulation.
+		"jdbc:h2:file:$config.dir$config.name;MODE=PostgreSQL;DB_CLOSE_ON_EXIT=FALSE;BUILTIN_ALIAS_OVERRIDE=TRUE"
 	}
 
 	private static String getDataPointTableName(DataPoint dp) {
