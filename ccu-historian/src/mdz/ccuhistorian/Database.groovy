@@ -590,7 +590,7 @@ public class Database implements Storage {
 		log.info "Running script $fileName on database"
 		config.logDebug()
 		org.h2.tools.RunScript.main('-url', getUrl(config), '-user', config.user, '-password', config.password,
-				'-script', fileName)
+				'-script', fileName, '-options', 'FROM_1X')
 		log.info 'Script run completed'
 	}
 
