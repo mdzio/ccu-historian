@@ -571,9 +571,12 @@ public class Database implements Storage {
 	public static void createScript(DatabaseConfig config, String fileName) {
 		log.info 'Starting dump of database'
 		config.logDebug()
+		log.fine "Cleaning up database"
+		org.h2.tools.RunScript.main('-url', getUrl(config), '-user', config.user, '-password', config.password,
+			'-script', 'cleanup.sql')
 		log.fine "Dumping database to $fileName"
 		org.h2.tools.Script.main('-url', getUrl(config), '-user', config.user, '-password', config.password, 
-			'-script', fileName, '-options', 'DROP')
+			'-script', fileName, '-options', 'DROP', 'SCHEMA', 'PUBLIC')
 		log.info 'Dump of database completed'
 	}
 	

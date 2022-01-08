@@ -45,6 +45,7 @@
 			</tarfileset>
 			<tarfileset dir="../dist-generic/src" username="root" group="root">
 				<include name="trenddesigns.groovy" />
+				<include name="cleanup.sql" />
 			</tarfileset>
 			<tarfileset dir="../dist-generic/src" filemode="755" username="root" group="root">
 				<include name="tool" />
