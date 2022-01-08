@@ -1,17 +1,20 @@
 /*
- CCU-Historian, a long term archive for the HomeMatic CCU
- Copyright (C) 2011-2017 MDZ (info@ccu-historian.de)
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+    CCU-Historian, a long term archive for the HomeMatic CCU
+    Copyright (C) 2011-2017 MDZ (info@ccu-historian.de)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/ 
 package mdz.ccuhistorian
 
 import java.util.Date
@@ -580,9 +583,12 @@ public class Database implements Storage {
 	public static void createScript(DatabaseConfig config, String fileName) {
 		log.info 'Starting dump of database'
 		config.logDebug()
+		log.fine "Cleaning up database"
+		org.h2.tools.RunScript.main('-url', getUrl(config), '-user', config.user, '-password', config.password,
+			'-script', 'cleanup.sql')
 		log.fine "Dumping database to $fileName"
-		org.h2.tools.Script.main('-url', getUrl(config), '-user', config.user, '-password', config.password,
-				'-script', fileName, '-options', 'DROP')
+		org.h2.tools.Script.main('-url', getUrl(config), '-user', config.user, '-password', config.password, 
+			'-script', fileName, '-options', 'DROP', 'SCHEMA', 'PUBLIC')
 		log.info 'Dump of database completed'
 	}
 

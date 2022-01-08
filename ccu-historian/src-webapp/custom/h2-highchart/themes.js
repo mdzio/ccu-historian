@@ -44,7 +44,7 @@ var DP_Themes = {
       margin: 15,
       text: "",
       widthAdjust: -44,
-      y: 25,
+      y: 20,
       style: { "fontSize": "16px", "color": "#666666" },
     },
     subtitle: {
@@ -52,7 +52,7 @@ var DP_Themes = {
       margin: null,
       text: "",
       widthAdjust: -44,
-      y: 50,
+      y: 40,
       style: { "fontSize": "14px", "color": "#666666" },
     },
     xAxis: {
@@ -330,7 +330,7 @@ var DP_Themes = {
     },
     tooltip: {
       backgroundColor: "rgba(0, 0, 0, 0.75)",
-      style: { color: "#333333" }
+      style: { color: "#888" }
     },
     toolbar: { itemStyle: { color: 'silver' } }, 
     plotOptions: {
@@ -1708,7 +1708,7 @@ var DP_Themes = {
       }
     },
     tooltip: {
-      backgroundColor: 'rgba(247,247,247,0.7)',
+      backgroundColor: 'rgba(247,247,247,0.4)',
       style: {
         color: '#F0F0F0'
       }

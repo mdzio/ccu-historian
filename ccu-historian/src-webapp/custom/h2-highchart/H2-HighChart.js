@@ -2,6 +2,9 @@
  * HighChart javascripts by wak 2019-2021
  ************************************/
 
+// Version
+var H2_version = 'v5.7';
+
 /* define SLINT globals do avoid issues */
 /* global ChhLanguage:false, DP_Themes:false */
 /* eslint-env browser */
@@ -13,7 +16,7 @@ var H2_refreshSec = 60;
 // Refresh Time is enabled
 
 // declare global Variables
-var H2_version = 'v5.0';
+var cntrlIsPressed = false;
 var chart;
 var filter_feld = '';
 var DP_point = [];
@@ -670,9 +673,16 @@ function defineDataLabels() {
         "color": null,
       },
       formatter: function() {
-        var last = this.series.data[this.series.data.length - 1];
-        if (this.point.category === last.category) {
-          return this.series.name;
+        let last;
+        if (this.series.data.length > 0) {
+         last = this.series.data[this.series.data.length - 1];
+        } else if (this.series.points.length > 0) {
+         last = this.series.points[this.series.points.length - 1];
+        }
+        if (last && last.category) {
+          if (this.point.category === last.category) {
+            return this.series.name;
+          }
         }
         return "";
       }
@@ -1303,7 +1313,9 @@ function getDataH2(p_series, p_attrID, p_attr, datStart, datEnd) {
   });
 }
 
-
+/**
+* Request default settings from the server and check local storage
+*/
 function requestInitData() {
 
   if (DP_Navigator < 3) {
@@ -1314,12 +1326,14 @@ function requestInitData() {
     document.getElementById('count_text').innerHTML = "";
   }
 
+// set default global chart object
+  chart = $('#container').highcharts();
+
   // get LocalData DataPoints
   var loc_dataPoints = getLocalData('DataPoints');
   if (loc_dataPoints) {
 
     // speed up with local data and read actual one later
-    chart = $('#container').highcharts();
 
     try {
       DP_point = JSON.parse(loc_dataPoints);
@@ -1564,6 +1578,8 @@ function readLinkData() {
       } else if ((nv[0].toLowerCase() === 'periode') || (nv[0].toLowerCase() === 'period')) {
         Zeitraum_Start = new Date(Zeitraum_Ende - (new Date(3600 * 1000 * parseInt(nv[1]))));
         // parameter Data Point
+      } else if (nv[0].toLowerCase() === 'setting') {
+        readLinkDataSetting(nv[1]);
       } else if (nv[0].toLowerCase() === 'filterkey') {
         filter_feld = decodeURIComponent(nv[1].toLowerCase());
       } else if (nv[0].toLowerCase() === 'title') {
@@ -1634,6 +1650,66 @@ function readLinkData() {
 
 }
 
+function readLinkDataSetting(text) {
+  if (text) {
+    let text2 = text.split('|');
+    for (let setting of text2) {
+      switch (setting.substr(0, 1)) {
+      case 'L':
+        DP_Legend = parseInt(setting.substr(1, 2));
+        break;
+      case 'N':
+        DP_Navigator = parseInt(setting.substr(1, 2));
+        break;
+      case 'P':
+        DP_Labels = parseInt(setting.substr(1, 2));
+        break;
+      case 'D':
+        DP_DayLight = parseInt(setting.substr(1, 2));
+        break;
+      case 'G':
+        DP_Grid = parseInt(setting.substr(1, 2));
+        break;
+      case 'F':
+        DP_ShowFilter = parseInt(setting.substr(1, 2));
+        break;
+      case 'I':
+        DP_DataPointFilter = parseInt(setting.substr(1, 2));
+        break;
+      case 'B':
+        DP_Theme = setting.substr(1, 30);
+        if (DP_Theme === 'standard_groß') {    // check old version
+          DP_Theme = 'standard-light';
+          DP_FontSize = 20;
+        } else if (DP_Theme === 'standard_groesser') {     // check old version
+          DP_Theme = 'standard-light';
+          DP_FontSize = 30;
+        }
+        break;
+      case 'O':
+        DP_FontSize = parseInt(setting.substr(1, 2));
+        break;
+      case 'R':
+        H2_refreshSec = parseInt(setting.substr(1, 2));
+        break;
+      case 'T':
+        try {
+          DP_Title = decodeURIComponent(setting.substr(1, 50));
+        } catch {
+          DP_Title = setting.substr(1, 50);
+        }
+        break;
+      case 'S':
+        try {
+          DP_Subtitle = decodeURIComponent(setting.substr(1, 60));
+        } catch {
+          DP_Subtitle = setting.substr(1, 60);
+        }
+        break;
+      }
+    }
+  }
+}
 
 /**
 * Request data from the server, add it to the graph and set a timeout
@@ -2022,6 +2098,7 @@ $(document).ready(function() {
   // Translate to Language Set
   document.getElementById('refresh').innerHTML = window.ChhLanguage.default.historian.buttonRefresh;
   document.getElementById('createLink').innerHTML = window.ChhLanguage.default.historian.buttonLink;
+  document.getElementById('bntFavorit').innerHTML = window.ChhLanguage.default.historian.favoritTxt;
   document.getElementById('filterFeld').placeholder = window.ChhLanguage.default.historian.filterPlaceHolder;
   document.title = window.ChhLanguage.default.interface.pageTitle;
 
@@ -2303,7 +2380,7 @@ $(document).ready(function() {
     });
   }(window.Highcharts));
 
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
     if (DP_Theme === 'standard') {
       createChart();
     }
@@ -2338,7 +2415,6 @@ function changeEventRaumFilter() {
   var save_active_found = false;
   var attr2;
 
-  chart = $('#container').highcharts();
   var series;
 
   // remove all old series
@@ -2563,8 +2639,10 @@ function loadNewAxisInfo() {
 
       }
 
-      // set extrem if config HARD
-      if (DP_yAxis[axispos].limit === '2') {
+      if (DP_yAxis[axispos].limit === 0 || DP_yAxis[axispos].limit === 1 ) {
+        chart.yAxis[axispos].setExtremes(null, null);
+      } else if (DP_yAxis[axispos].limit === 2) {
+        // set extrem if config Dynamic or HARD
         chart.yAxis[axispos].setExtremes(parseFloat(DP_yAxis[axispos].min), parseFloat(DP_yAxis[axispos].max));
       }
 
@@ -2665,7 +2743,17 @@ function createUrl() {
   var url = location.pathname + "?";
 
   // Add Periode Parameter
-  url += 'periode=' + (Math.round(((Zeitraum_Ende - Zeitraum_Start) / (60 * 60 * 1000)) * 100) / 100).toString();
+  url += generateUrl();
+
+  window.open(url, '_blank');
+  window.focus();
+  return true;
+}
+
+function generateUrl() {
+
+  // Add Periode Parameter
+  let url = 'periode=' + (Math.round(((Zeitraum_Ende - Zeitraum_Start) / (60 * 60 * 1000)) * 100) / 100).toString();
 
   var url2 = createUrlSerie();
   if (url2.length > 0) {
@@ -2677,6 +2765,20 @@ function createUrl() {
   if (url2.length > 0) {
     url += '&yaxis=' + url2.substring(0, url2.length - 1);
   }
+
+  url += '&setting=';
+  url += 'L' + DP_Legend.toString();
+  url += '|N' + DP_Navigator.toString();
+  url += '|P' + DP_Labels.toString();
+  url += '|D' + DP_DayLight.toString();
+  url += '|G' + DP_Grid.toString();
+  url += '|F' + DP_ShowFilter.toString();
+  url += '|I' + DP_DataPointFilter.toString();
+  url += '|B' + DP_Theme;
+  url += '|O' + DP_FontSize;
+  url += '|R' + DP_AutoRefresh;
+  url += '|T' + encodeURIComponent(DP_Title).replace(/'/g, '%27');
+  url += '|S' + encodeURIComponent(DP_Subtitle).replace(/'/g, '%27');
 
   // Add Room to Link if needed
   var filter_raum = document.getElementById("Select-Raum").value;
@@ -2701,69 +2803,7 @@ function createUrl() {
     url += '&zoom=' + (Math.round(((extremes.max - extremes.min) / (60 * 60 * 1000)) * 100) / 100).toString();
   }
 
-  // Legend not show
-  if (DP_Legend !== 1) {
-    url += '&legend=' + DP_Legend;
-  }
-
-  // Navigator not show
-  if (DP_Navigator !== 0) {
-    url += '&navigator=' + DP_Navigator.toString();
-  }
-
-  // Labels show
-  if (DP_Labels !== 0) {
-    url += '&labels=' + DP_Labels;
-  }
-
-  // DayLight show
-  if (DP_DayLight !== 1) {
-    url += '&daylight=' + DP_DayLight;
-  }
-
-  // Grid show
-  if (DP_Grid !== 2) {
-    url += '&grid=' + DP_Grid;
-  }
-  // AutoRefresh
-  if (DP_AutoRefresh !== 0) {
-    url += '&refresh=' + (DP_AutoRefresh === 60 ? true : DP_AutoRefresh);
-  }
-
-  // showFilterLine()
-  if (DP_ShowFilter === 0) {
-    url += '&filterline=false';
-  } else if (DP_ShowFilter !== 1) {
-    url += '&filterline=' + DP_ShowFilter;
-  }
-
-  // showFilterLine()
-  if (DP_DataPointFilter !== 0) {
-    url += '&dpfilter=' + DP_DataPointFilter;
-  }
-
-  // Theme
-  if (DP_Theme !== '' && DP_Theme !== 'standard') {
-    url += '&theme=' + DP_Theme;
-  }
-
-  // Font-Size
-  if (DP_FontSize !== '' && DP_FontSize !== 14) {
-    url += '&fontsize=' + DP_FontSize;
-  }
-  // Title
-  if (DP_Title !== '') {
-    url += '&title=' + DP_Title.replaceAll("%", "§").replaceAll("&", "µ");
-  }
-
-  // Subtitle
-  if (DP_Subtitle !== '') {
-    url += '&subtitle=' + DP_Subtitle.replaceAll("%", "§").replaceAll("&", "µ");
-  }
-
-  window.open(url, '_blank');
-  window.focus();
-  return true;
+  return url;
 }
 
 //********************
@@ -2778,19 +2818,18 @@ function createUrlSerie() {
       if (attr !== -1) {
         if (DP_attribute[attr].visible === 2 || (DP_attribute[attr].visible === 1 && DP_Limit)) {
           url2 += lserie.options.id;
-          url2 += (DP_attribute[attr].aggr === 'A0') ? '' : '|' + DP_attribute[attr].aggr;
-          url2 += (DP_attribute[attr].atime === 'T1') ? '' : '|' + DP_attribute[attr].atime;
-          url2 += (DP_attribute[attr].yaxis === 'Y0') ? '' : '|' + DP_attribute[attr].yaxis;
-          url2 += (DP_attribute[attr].line === 'L0') ? '' : '|' + DP_attribute[attr].line;
-          url2 += (DP_attribute[attr].color === 'F0') ? '' : '|' + DP_attribute[attr].color;
-          url2 += (DP_attribute[attr].comp === 'C0') ? '' : '|' + DP_attribute[attr].comp;
-          url2 += (DP_attribute[attr].mark === 'M0') ? '' : '|' + DP_attribute[attr].mark;
-          url2 += (DP_attribute[attr].dash === 'D0') ? '' : '|' + DP_attribute[attr].dash;
-          url2 += (DP_attribute[attr].width === 'W2') ? '' : '|' + DP_attribute[attr].width;
-          url2 += (DP_attribute[attr].stack === 0) ? '' : '|S' + DP_attribute[attr].stack;
-          url2 += (DP_attribute[attr].factor === 1) ? '' : '|X' + DP_attribute[attr].factor;
-          url2 += (DP_attribute[attr].offset === 0) ? '' : '|O' + DP_attribute[attr].offset;
-
+          url2 += '|' + DP_attribute[attr].aggr;
+          url2 += '|' + DP_attribute[attr].atime;
+          url2 += '|' + DP_attribute[attr].yaxis;
+          url2 += '|' + DP_attribute[attr].line;
+          url2 += '|' + DP_attribute[attr].color;
+          url2 += '|' + DP_attribute[attr].comp;
+          url2 += '|' + DP_attribute[attr].mark;
+          url2 += '|' + DP_attribute[attr].dash;
+          url2 += '|' + DP_attribute[attr].width;
+          url2 += '|S' + DP_attribute[attr].stack;
+          url2 += '|X' + DP_attribute[attr].factor;
+          url2 += '|O' + DP_attribute[attr].offset;
           // check if still default unit, otherwise add to url
           if (lserie.options.id.substr(0, 1) === 'C') {
             DP_pos = DP_point.findIndex(obj => obj.idx.toString() === lserie.options.id.split('_')[1].toString());
@@ -2798,10 +2837,10 @@ function createUrlSerie() {
             DP_pos = DP_point.findIndex(obj => obj.idx.toString() === lserie.options.id.toString());
           }
           if (DP_pos === -1 || DP_point[DP_pos].attributes.unit !== DP_attribute[attr].unit) {
-            url2 += (DP_attribute[attr].unit === 'xx') ? '' : '|U' + DP_attribute[attr].unit.replaceAll("%", "§").replaceAll('&', 'µ');
+            url2 += '|U' + DP_attribute[attr].unit.replaceAll("%", "§").replaceAll('&', 'µ');
           }
 
-          url2 += (DP_attribute[attr].visible === 2) ? '' : '|V' + DP_attribute[attr].visible;
+          url2 += '|V' + DP_attribute[attr].visible;
           url2 += ',';
         }
       }
@@ -2816,21 +2855,20 @@ function createUrlAxis() {
   let url2 = '';
   for (let axispos = 0; axispos < DP_yAxis.length; axispos++) {
     if (chart.yAxis[axispos].visible && chart.yAxis[axispos].hasVisibleSeries) {
-      if (JSON.stringify(DP_yAxis[axispos]) !== JSON.stringify(DP_yAxis_default[axispos])) {
-
-        let lText = ((DP_yAxis[axispos].position) ? '1' : '0');
-
-        url2 += 'Y' + axispos;
-        url2 += (DP_yAxis[axispos].position === DP_yAxis_default[axispos].position) ? '' : '|P' + lText;
-        url2 += (DP_yAxis[axispos].type === DP_yAxis_default[axispos].type) ? '' : '|C' + DP_yAxis[axispos].type;
-        url2 += (DP_yAxis[axispos].limit === DP_yAxis_default[axispos].limit) ? '' : '|A' + DP_yAxis[axispos].limit;
-        url2 += (DP_yAxis[axispos].min === DP_yAxis_default[axispos].min) ? '' : '|L' + DP_yAxis[axispos].min;
-        url2 += (DP_yAxis[axispos].max === DP_yAxis_default[axispos].max) ? '' : '|H' + DP_yAxis[axispos].max;
-        url2 += (DP_yAxis[axispos].tick === DP_yAxis_default[axispos].tick) ? '' : '|G' + DP_yAxis[axispos].tick;
-        url2 += (DP_yAxis[axispos].color === DP_yAxis_default[axispos].color) ? '' : '|F' + DP_yAxis[axispos].color;
-        url2 += (DP_yAxis[axispos].text === DP_yAxis_default[axispos].text) ? '' : '|T' + DP_yAxis[axispos].text.replaceAll("%", "§").replaceAll('&', 'µ');
-        url2 += ',';
+      url2 += 'Y' + axispos;
+      url2 += '|P' + ((DP_yAxis[axispos].position) ? '1' : '0');
+      url2 += '|C' + DP_yAxis[axispos].type;
+      url2 += '|A' + DP_yAxis[axispos].limit;
+      url2 += '|L' + DP_yAxis[axispos].min;
+      url2 += '|H' + DP_yAxis[axispos].max;
+      url2 += '|G' + DP_yAxis[axispos].tick;
+      url2 += '|F' + DP_yAxis[axispos].color;
+      if (DP_yAxis[axispos].text) {
+        url2 += '|T' + DP_yAxis[axispos].text.replaceAll("%", "§").replaceAll('&', 'µ');
+      }else {
+        url2 += '|T';
       }
+      url2 += ',';
     }
   }
   return url2;
@@ -3331,6 +3369,131 @@ function getDialogSetting() {
 
 }
 
+// Show Dialog
+function showDialogFav() {
+
+  // set value on Popup
+  document.getElementsByClassName("modal-title4")[0].innerHTML = window.ChhLanguage.default.historian.favoritTitle;
+  document.getElementById("Line-Title4").value = '';
+
+  document.getElementById("Text-Title4").innerHTML = window.ChhLanguage.default.historian.favoritName;
+  document.getElementById("favAdd").innerHTML = window.ChhLanguage.default.historian.favoritNEW;
+
+// genearte Fav-List on Popup
+
+  if (DP_settings.Favorites) {
+    let favList = document.getElementById('favList');
+    if (favList.childNodes && favList.childNodes.length > 0) {
+      favList.removeChild(favList.childNodes[0]);
+    }
+
+    let mytable = document.createElement("table");
+    mytable.setAttribute("width","100%");
+    mytable.setAttribute("style","border: 0px; margin-top: 22px;");
+    let mytablebody = document.createElement("tbody");
+
+    for(let i = 0; i<DP_settings.Favorites.length;i++) {
+      let mycurrent_row = document.createElement("tr");
+
+      let mycurrent_cell1 = document.createElement("td");
+      mycurrent_cell1.setAttribute("style","border: 0px;");
+
+      let currenttext1 = document.createElement("button");
+      currenttext1.innerHTML = decodeURIComponent(DP_settings.Favorites[i].Name);
+      currenttext1.setAttribute("class","bnt btn-default");
+      currenttext1.setAttribute("onclick","executeFav("+i+");");
+      currenttext1.setAttribute("style","width: 90%;");
+
+      mycurrent_cell1.appendChild(currenttext1);
+      mycurrent_row.appendChild(mycurrent_cell1);
+
+      let mycurrent_cell2 = document.createElement("td");
+      mycurrent_cell2.setAttribute("style","border: 0px;");
+
+      let currenttext2 = document.createElement("button");
+      currenttext2.setAttribute("class","bnt btn-default");
+      currenttext2.setAttribute("onclick","deleteFav("+i+");");
+      currenttext2.setAttribute("style","font-size: 21px;");
+      currenttext2.textContent = 'x';
+
+      mycurrent_cell2.appendChild(currenttext2);
+      mycurrent_row.appendChild(mycurrent_cell2);
+
+      mytablebody.appendChild(mycurrent_row);
+    }
+
+    mytable.appendChild(mytablebody);
+    favList.appendChild(mytable);
+    mytable.setAttribute("border","2");
+  }
+
+  $("#FavPopup").modal();
+}
+
+// Close Dialog Settings
+$("#Dialog4BtnOK").click(function() {
+  $("#FavPopup").modal('hide');
+  document.getElementById("Line-Title4").value = '';
+  return true;
+});
+
+// Close Dialog Settings
+$("#favAdd").click(function() {
+  getDialogFav();
+  document.getElementById("Line-Title4").value = '';
+  return true;
+});
+
+// Close Dialog Settings
+$("#Dialog4BtnClose").click(function() {
+  document.getElementById("Line-Title4").value = '';
+  $("#FavPopup").modal('hide');
+  return true;
+});
+
+function deleteFav(favorit) {
+
+ $("#FavPopup").modal('hide');
+
+  if (DP_settings.Favorites[favorit]) {
+  // delete Favorite entry on position
+    DP_settings.Favorites.splice(favorit,1);
+
+  // Save to H2 database
+    saveSettingsH2();
+  }
+}
+
+function executeFav(favorit) {
+ $("#FavPopup").modal('hide');
+
+  if (DP_settings.Favorites[favorit]) {
+
+// execute Favorit
+    var url = location.pathname + "?" + decodeURIComponent(DP_settings.Favorites[favorit].Url);
+    window.open(url,"_self");
+
+  }
+}
+
+function getDialogFav() {
+
+  $("#FavPopup").modal('hide');
+
+  // Favorite Title
+  if (document.getElementById("Line-Title4").value) {
+
+    if (!DP_settings.Favorites) {
+      DP_settings.Favorites = [];
+    }
+    DP_settings.Favorites.push({ Name: encodeURIComponent(document.getElementById("Line-Title4").value).replace(/'/g, '%27'),
+                                 Url: encodeURIComponent(generateUrl()).replace(/'/g, '%27') });
+
+    saveSettingsH2();
+  }
+
+}
+
 // Close Dialog Settings
 $("#Dialog2BtnClose").click(function() {
   $("#SettingPopup").modal('hide');
@@ -3493,7 +3656,7 @@ function getDialogAxis() {
   $("#AxisPopup").modal('hide');
 
   // Update YAxis parameter
-  chart.yAxis[DP_PopupAxisPos].update({
+  let newOptions = {
     title: {
       text: document.getElementById("Line-Title3").value
     },
@@ -3505,10 +3668,19 @@ function getDialogAxis() {
     max: (document.getElementById("Select-Limit").value === '2') ? parseFloat(document.getElementById("Line-Max").value) : null,
     softMin: (document.getElementById("Select-Limit").value === '1') ? parseFloat(document.getElementById("Line-Min").value) : null,
     softMax: (document.getElementById("Select-Limit").value === '1') ? parseFloat(document.getElementById("Line-Max").value) : null,
-    startOnTick: (document.getElementById("Select-Limit").value === '2') ? true : false,
-    endOnTick: (document.getElementById("Select-Limit").value === '2') ? true : false,
+    startOnTick: (document.getElementById("Select-Limit").value === '2') ? false : true,
+    endOnTick: (document.getElementById("Select-Limit").value === '2') ? false : true,
     allowDecimals: true,
-  });
+    tickPositioner: null,
+  };
+  if (document.getElementById("Select-Limit").value === '2') {
+    newOptions.tickPositioner =  function () {
+      const axis = this;
+      return axis.tickPositions.map((pos) => tickPos(axis,pos));
+    };
+  }
+
+  chart.yAxis[DP_PopupAxisPos].update(newOptions);
 
   DP_yAxis[DP_PopupAxisPos].text = document.getElementById("Line-Title3").value;
   DP_yAxis[DP_PopupAxisPos].position = (parseInt(document.getElementById("Select-Position").value) === 0) ? false : true;
@@ -3537,7 +3709,6 @@ function getDialogAxis() {
 
 }
 
-
 // Close Dialog Settings
 $("#Dialog3BtnClose").click(function() {
   $("#AxisPopup").modal('hide');
@@ -3548,7 +3719,7 @@ $("#Dialog3BtnClose").click(function() {
 function defineYAxis() {
   var arr = [];
   for (var y = 0; y < DP_yAxis.length; y++) {
-    arr.push({
+    let newOptions = {
       id: 'AXISY' + y,
       className: 'axisy' + y,
       type: (DP_yAxis[y].type === 1) ? 'logarithmic' : 'linear',
@@ -3557,31 +3728,38 @@ function defineYAxis() {
       },
       lineWidth: 2,
       // showEmpty: false,
-      opposite: (DP_yAxis[y].position === 1) ? true : false,
+      opposite: DP_yAxis[y].position,
       tickAmount: DP_yAxis[y].tick,
       min: (DP_yAxis[y].limit === 2) ? DP_yAxis[y].min : null,
       max: (DP_yAxis[y].limit === 2) ? DP_yAxis[y].max : null,
       softMin: (DP_yAxis[y].limit === 1) ? DP_yAxis[y].min : null,
       softMax: (DP_yAxis[y].limit === 1) ? DP_yAxis[y].max : null,
-      startOnTick: (DP_yAxis[y].limit === 2) ? true : false,
-      endOnTick: (DP_yAxis[y].limit === 2) ? true : false,
+      startOnTick: (DP_yAxis[y].limit === 2) ? false : true,
+      endOnTick: (DP_yAxis[y].limit === 2) ? false : true,
       allowDecimals: true,
       visible: false,
-    });
+      tickPositioner: null,
+    };
+    if (DP_yAxis[y].limit === 2) {
+      newOptions.tickPositioner =  function () {
+        const axis = this;
+        return axis.tickPositions.map((pos) => tickPos(axis,pos));
+      };
+    }
+    arr.push(newOptions);
   }
   return arr;
 }
 
-// *** update background color on Field Select-Color
-$("#Select-Color").on("change", function() {
-  document.getElementById("Select-Color").style.backgroundColor = chart.options.colors[parseInt(document.getElementById("Select-Color").value.substr(1, 2))];
-});
-
-//*** update background color on Field Select-Color
-$("#Select-AxisColor").on("change", function() {
-  showDialogYAxisUpdatColor();
-});
-
+function tickPos(axis,pos) {
+  let l_pos = pos;
+  if (l_pos > axis.max) {
+    l_pos = axis.max;
+  } else if (l_pos < axis.min) {
+    l_pos = axis.min;
+  }
+  return l_pos;
+}
 
 function showDialogYAxisUpdatColor() {
   var colorPos = parseInt(document.getElementById("Select-AxisColor").value);
@@ -3613,7 +3791,12 @@ function getComparisionBackDay(str_compType) {
 
 function chartSetOptions() {
 
-  window.Highcharts.stockChart('container', {
+  let myText = '';
+  if (window.Highcharts.getOptions().navigation && window.Highcharts.getOptions().navigation.bindings && window.Highcharts.getOptions().navigation.bindings.labelAnnotation) {
+     myText = window.Highcharts.getOptions().navigation.bindings.labelAnnotation;
+  }
+
+  let options = {
     lang: window.ChhLanguage.default.highcharts,
     chart: {
       events: {
@@ -3853,20 +4036,14 @@ function chartSetOptions() {
         enabled: (DP_Navigator < 4) ? true : false,
       },
       bindings: {
-        myText: window.Highcharts.getOptions().navigation.bindings.labelAnnotation
+        myText: myText
       }
     },
     stockTools: {
       gui: {
         iconsURL: 'stock-tools/stock-icons/',
-//        buttons: ["indicators", "separator", "simpleShapes", "lines", "crookedLines", "measure", "advanced", "toggleAnnotations", "separator",
-//        "verticalLabels", "flags", "separator", "zoomChange", "fullScreen", "typeChange", "separator", "currentPriceIndicator", "saveChart"],
         buttons: ["indicators", "separator", "myText", "lines", "measure", "toggleAnnotations", "separator", "verticalLabels", "separator", "zoomChange", "fullScreen"],
         definitions: {
-//          simpleShapes: {
-//          items: ["label", "circle", "ellipse", "rectangle"]
-//            items: ["label"],
-//          },
           zoomChange: {
             items: ["zoomXY", "zoomY", "zoomX" ],
           },
@@ -3877,8 +4054,12 @@ function chartSetOptions() {
         },
       }
     }
-  });
+  };
 
+  chart = window.Highcharts.stockChart('container', options );
+  if (!chart) {
+    alert( 'HighChart Option error!');
+  }
 }
 
 function showAggrText() {
@@ -3930,8 +4111,6 @@ function showAggrText() {
 }
 
 function chartSetElements() {
-
-  chart = $('#container').highcharts();
 
   // dark themes need black borders, update to like chart background
   if ((typeof chart.options.chart.backgroundColor) === 'string') {
@@ -4065,6 +4244,38 @@ function chartSetElements() {
     return true;
   });
 
+  // *** set function for Favorit Button
+  $("#bntFavorit").click(function() {
+    showDialogFav();
+    return true;
+  });
+
+  // *** update background color on Field Select-Color
+  $("#Select-Color").on("change", function() {
+    document.getElementById("Select-Color").style.backgroundColor = chart.options.colors[parseInt(document.getElementById("Select-Color").value.substr(1, 2))];
+  });
+
+  //*** update background color on Field Select-Color
+  $("#Select-AxisColor").on("change", function() {
+    showDialogYAxisUpdatColor();
+  });
+
+// disable StockTools Button on hide Menue-Buttons
+  if (DP_Navigator < 4) {
+    $(".highcharts-stocktools-wrapper").css("display", "block");
+  } else {
+    $(".highcharts-stocktools-wrapper").css("display", "none");
+  }
+
+  $(window).resize(function() {
+
+    document.getElementById("container").setAttribute("style", "height:" + calcContSize().toString() + "px");
+
+    chart.legend.update(defineLegend());
+    chart.reflow();
+
+  });
+
 }
 
 function refreshClick() {
@@ -4076,14 +4287,16 @@ function refreshClick() {
 // save to Local Browser Storage
 function setLocalData(cname, cvalue) {
   try {
-    localStorage.setItem(cname, cvalue);
+    let storage_name = H2_server + '_'+ H2_port + '_' + H2_version + '_' + cname;
+    localStorage.setItem(storage_name, cvalue);
   } catch { }
 }
 
 // read Local Browser Storage to speed up 1 display
 function getLocalData(cname) {
   try {
-    return localStorage.getItem(cname);
+    let storage_name = H2_server + '_'+ H2_port + '_' + H2_version + '_' + cname;
+    return localStorage.getItem(storage_name);
   } catch {
     return "";
   }
@@ -4092,23 +4305,14 @@ function getLocalData(cname) {
 // check if new data should be loaded
 function checkZeitraum(rangInfo) {
   var datNew = new Date(Zeitraum_Ende - (new Date(rangInfo._range)));
-  if (Zeitraum_Start > datNew) {
+// Patch for remove zoom reset: if (Zeitraum_Start > datNew) {
     Zeitraum_Start = datNew;
     loadNewSerienData();
     DP_Button_Jump = true;
     return false;
-  }
-  return true;
+// Patch for remove zoom reset: }
+// Patch for remove zoom reset: return true;
 }
-
-$(window).resize(function() {
-
-  document.getElementById("container").setAttribute("style", "height:" + calcContSize().toString() + "px");
-
-  chart.legend.update(defineLegend());
-  chart.reflow();
-
-});
 
 function calcContSize() {
   let nav_height;
@@ -4312,6 +4516,7 @@ function chartSetFontSize() {
     $('.close').css('font-size', (DP_FontSize/2*3).toString() + "px");
     $('.navbar-brand').css('font-size', (DP_FontSize + 4).toString() + "px");
     $('.highcharts-button-box').css('height', (DP_FontSize + 4).toString() + "px");
+    $('#bntFavorit').css('width', 16 + (DP_FontSize * 6) + "px");
 
     let dStyle = document.querySelector('style');
 
