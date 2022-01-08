@@ -26,12 +26,13 @@ renderer.head={
 
 renderer.content={
 
-  div(id:'filter') {
-    select(id: "Select-Raum", class:"form-select-h2 btn")  { }
-    select(id: "Select-Gewerk", class:"form-select-h2 btn" )  { }
-    input id:"filterFeld", class:"form-select-h2 btn", type:"text", placeholder:"Suchen.."
-    button id:'refresh', class:'btn btn-default', 'Refresh'
-    button id:'createLink', class:'btn btn-default', 'Link erzeugen'
+   div(id:'filter') {
+      select(id: "Select-Raum", class:"form-select-h2 btn")  { }
+      select(id: "Select-Gewerk", class:"form-select-h2 btn" )  { }
+      input id:"filterFeld", class:"form-select-h2 btn", type:"text", placeholder:"Suchen.."
+      button id:'refresh', class:'btn btn-default', 'Refresh'
+      button id:'createLink', class:'btn btn-default', 'Link erzeugen'
+      button id:'bntFavorit', class:'btn btn-default', 'Favoriten'
    }
    div(id:'chart-container-outer') {
       style: "position:relative; flex-grow:1"
@@ -162,7 +163,7 @@ renderer.content={
                }
                div(id:"refreshSec") {
                    span id: "Text-Refresh", class:"LinePopup-text", "Refresh in Sec." 
-                   input(id: "Line-Refresh", type:"number", step: "0", class:"form-input-h2") 
+                   input(id: "Line-Refresh", type:"number", step: "any", class:"form-input-h2") 
                }
                div(id:"title") {
                    span id: "Text-Title", class:"LinePopup-text", "Title" 
@@ -218,12 +219,34 @@ renderer.content={
                }
                div(id:"tickamount") {
                   span id: "Text-TickAmount", class:"LinePopup-text", "Teilung" 
-                  input(id: "Line-TickAmount", type:"number", step: "0", class:"form-input-h2") 
+                  input(id: "Line-TickAmount", type:"number", step: "any", class:"form-input-h2") 
                }
             }
             div(class:"modal-footer") {
                button type:"button", class:"btn btn-default", id:"AxisDefault", "Default"
                button type:"button", class:"btn btn-default", id:"Dialog3BtnOK", "Ok"
+            }
+         }      
+      }
+   }
+   div(id:"FavPopup", class:"modal fade", role:"dialog") {
+      div(class:"modal-dialog") {
+         div(class:"modal-content") {
+            div(class:"modal-header") {
+               button type:"button", class:"close", id:"Dialog4BtnClose", "x"
+               h4 class:"modal-title4", "Modal Header"
+            }
+            div(class:"modal-body") {
+               div(id:"title4") {
+                   span id: "Text-Title4", class:"LinePopup-text", "Title" 
+                   input(id: "Line-Title4", class:"form-input-h2") 
+                   button id:'favAdd', class:'btn btn-default', 'Add'
+               }
+               div(id:"favList") {
+               }
+            }
+            div(class:"modal-footer") {
+               button type:"button", class:"btn btn-default", id:"Dialog4BtnOK", "Ok"
             }
          }      
       }
