@@ -1,0 +1,264 @@
+/*
+    CCU-Historian, a long term archive for the HomeMatic CCU
+    Copyright (C) 2011-2018 MDZ (info@ccu-historian.de)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+import java.util.logging.Logger
+import javax.servlet.http.HttpServletResponse
+import groovy.transform.Field
+import groovy.transform.CompileStatic
+import org.jfree.chart.JFreeChart
+import org.jfree.chart.ChartColor
+import org.jfree.data.xy.XYSeries
+import org.jfree.data.xy.XYSeriesCollection
+import org.jfree.chart.axis.DateAxis
+import org.jfree.chart.axis.NumberAxis
+import org.jfree.chart.encoders.ImageEncoderFactory
+import org.jfree.chart.renderer.xy.XYStepRenderer
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer
+import org.jfree.chart.plot.XYPlot
+import org.jfree.chart.plot.CombinedDomainXYPlot
+import org.jfree.chart.plot.PlotOrientation
+import org.jfree.graphics2d.svg.SVGGraphics2D;
+import org.jfree.graphics2d.svg.SVGUtils;
+import java.awt.Rectangle;
+import mdz.hc.timeseries.TimeSeries
+import mdz.hc.DataPoint
+import mdz.ccuhistorian.TrendDesign
+import mdz.ccuhistorian.eventprocessing.Preprocessor
+import mdz.ccuhistorian.webapp.TrendParameters
+
+@Field
+private final static log=Logger.getLogger('mdz.ccuhistorian.webapp.Trend')
+
+// helpers
+
+def applyDesign(obj, cl) {
+	if (cl) {
+		try { synchronized(cl) {
+			cl.delegate=obj
+			cl.resolveStrategy=Closure.DELEGATE_ONLY
+			cl()
+		}	} catch (Exception e) {
+			throw new Exception('Configuration option webServer.trendDesigns is invalid', e)
+} 	}	}
+
+def applyDesign(obj, cls, idx) {
+	if (cls) {
+		def cl;	try {
+			cl=cls[idx%cls.size()]
+		} catch (Exception e) {
+			throw new Exception('Configuration option webServer.trendDesigns is invalid', e)
+		}
+		applyDesign obj, cl
+}	}
+
+@CompileStatic
+static addToXYSeries(TimeSeries timeSeries, XYSeries xySeries) {
+	if (!timeSeries.isNumeric())
+		throw new IllegalStateException("Type of time series is not numeric");
+	final long[] timestamps=timeSeries.timestamps
+	final double[] values=(double[])timeSeries.values
+	final int size=timeSeries.size
+	for (int idx = 0; idx < size; ++idx)
+		xySeries.add(timestamps[idx], values[idx]);
+}
+
+// generate chart
+
+class PlotState {
+	int totalDataPointIdx=0
+	int totalAxisIdx=0
+}
+
+def createPlot(parameters, dataPoints, plotState) {
+	// generate plot
+	def plot=new XYPlot()
+	plot.backgroundPaint=new ChartColor(245, 245, 245)
+	applyDesign plot, parameters.trendDesign.plot
+	
+	// y-axis
+	// data points with same range and unit should use the same y-axis.
+	def rangeAxes=[:]
+	def rangeAxesDisplayIdx=[]
+	def visibleRangeAxesCnt=0
+	
+	
+	// create time series and y-axis
+	def actionSentinel=new Object()
+	dataPoints.eachWithIndex { dataPoint, dpIdx ->
+		
+		if (dataPoint.historyString)
+			throw new Exception("Data point $dataPoint.displayName is not numeric")
+		def isAction=(dataPoint.attributes.type=='ACTION') ||
+			(dataPoint.id.identifier=='PRESS_SHORT') || (dataPoint.id.identifier=='PRESS_LONG')
+		def isContinuous=dataPoint.continuous
+		def preprocType=Preprocessor.Type.ofDataPoint(dataPoint)
+
+		// generate axis key		
+		def axisKey
+		if (isAction) {
+			axisKey=actionSentinel
+		} else {
+			if (dataPoint.attributes.unit in [null, '']) {
+				axisKey=[dataPoint.attributes.minimum, dataPoint.attributes.maximum]
+			} else {
+				axisKey=dataPoint.attributes.unit
+			}
+		}
+
+		// create/select y-axis
+		def axisIdx=rangeAxes[axisKey]
+		if (axisIdx==null) {
+			axisIdx=rangeAxes.size()
+			def numberAxis=new NumberAxis(dataPoint.attributes.unit)
+			numberAxis.autoRangeIncludesZero=false
+			numberAxis.autoRangeStickyZero=false
+			numberAxis.autoRangeMinimumSize=0.2
+			numberAxis.upperMargin=0.02
+			numberAxis.lowerMargin=0.02
+			if (isAction) {
+				numberAxis.visible=false
+				rangeAxesDisplayIdx << 0
+			} else {
+				visibleRangeAxesCnt++
+				rangeAxesDisplayIdx << visibleRangeAxesCnt
+			}
+			applyDesign numberAxis, parameters.trendDesign.rangeAxes, plotState.totalAxisIdx
+			plot.setRangeAxis(axisIdx, numberAxis)
+			rangeAxes[axisKey]=axisIdx
+			plotState.totalAxisIdx++
+		}
+			
+		// request time series and convert
+		def timeSeries
+		if (isAction) timeSeries=database.getTimeSeriesRaw(dataPoint, parameters.timeRange.begin, parameters.timeRange.end)
+		else timeSeries=database.getTimeSeries(dataPoint, parameters.timeRange.begin, parameters.timeRange.end)
+		def dispIdx=rangeAxesDisplayIdx[axisIdx]
+		XYSeries xySeries=new XYSeries(dataPoint.displayName+(dispIdx>0?' ('+dispIdx+')':''))
+		addToXYSeries(timeSeries, xySeries)
+		applyDesign xySeries, parameters.trendDesign.series, plotState.totalDataPointIdx
+		def xySeriesCollection=new XYSeriesCollection(xySeries)
+		plot.setDataset(dpIdx, xySeriesCollection)
+		
+		// y-axis
+		plot.mapDatasetToRangeAxis(dpIdx, axisIdx)
+	
+		// create renderer
+		def renderer
+		if (isAction) {
+			renderer=new XYLineAndShapeRenderer()
+			renderer.baseShapesVisible=true
+			renderer.baseLinesVisible=false
+		} else if (isContinuous && !preprocType.clearsContinuous()) {
+			renderer=new XYLineAndShapeRenderer()
+			renderer.baseShapesVisible=false
+		} else { 
+			renderer=new XYStepRenderer()
+		}
+		
+		renderer.paint=TrendDesign.getDefaultColor(plotState.totalDataPointIdx)
+		applyDesign renderer, parameters.trendDesign.renderers, plotState.totalDataPointIdx
+		plot.setRenderer(dpIdx, renderer)
+		
+		plotState.totalDataPointIdx++
+	}
+	plot
+}
+
+def createCombinedPlot(parameters) {
+	// time axis
+	def timeAxis = new DateAxis()
+	timeAxis.lowerMargin=0.00 // keine Raender
+	timeAxis.upperMargin=0.00
+	timeAxis.setRange(parameters.timeRange.begin, parameters.timeRange.end)
+	applyDesign timeAxis, parameters.trendDesign.timeAxis
+
+	// create combined plot
+	def combinedPlot=new CombinedDomainXYPlot(timeAxis)
+	combinedPlot.setGap(10.0);
+	combinedPlot.setOrientation(PlotOrientation.VERTICAL);
+	
+	// create subplots
+	PlotState plotState=[]
+	parameters.groups.values().each { group ->
+		combinedPlot.add(createPlot(parameters, group.dataPoints, plotState), group.height)
+	}
+	combinedPlot
+}
+
+def createChart(parameters) {
+	// create chart
+	def chart=new JFreeChart(null, JFreeChart.DEFAULT_TITLE_FONT, createCombinedPlot(parameters), true)
+	chart.backgroundPaint=ChartColor.WHITE
+	applyDesign chart, parameters.trendDesign.chart
+	chart
+}
+
+// main function
+
+def ex=utils.catchToLog(log) {
+	def startTime=System.currentTimeMillis()
+	log.finer 'Web server: Generating trend'
+	
+	// check key
+	if (webServer.config.apiKeys)
+		if (!params.k || !webServer.config.apiKeys.contains(params.k))
+			throw new Exception('Access denied')
+			
+	// parse parameters
+	TrendParameters parameters=TrendParameters.from(request, database, webServer.trendDesigns)
+	log.finer "Web server: Parameters: $parameters"
+	if (!parameters.groups) {
+		throw new IllegalArgumentException('Parameter dp... (data point id/s) not set')
+	}
+	
+	// create chart
+	def chart=createChart(parameters)
+	
+	// create graphics
+	
+	//def image=chart.createBufferedImage(parameters.width, parameters.height)
+	//def encoder=ImageEncoderFactory.newInstance('png')
+	
+	def g2 = new SVGGraphics2D(parameters.width, parameters.height)
+	def r = new Rectangle(0, 0, parameters.width, parameters.height)
+	chart.draw(g2, r)
+	
+	// send graphics
+	// response.contentType='image/png'
+	response.contentType='image/svg+xml'
+	
+	try {
+		// encoder.encode(image, sout)
+	    print(g2.getSVGElement())
+	    
+	
+		
+	} catch (IndexOutOfBoundsException e) {
+		// this special exception occurs when the client closes the connection, wrap it
+		throw new org.eclipse.jetty.io.RuntimeIOException(e)
+	}
+	
+	log.finer "Web server: Trend generated in ${System.currentTimeMillis()-startTime}ms"
+}
+
+// signal error
+
+if (ex) {
+	utils.catchToLog(log) {
+		response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.message?:ex.class.name)
+	}
+}
