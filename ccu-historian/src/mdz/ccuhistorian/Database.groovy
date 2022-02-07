@@ -769,7 +769,7 @@ public class Database implements Storage {
 		log.fine 'Preparing database'
 
 		// create configuration table
-		db.execute 'CREATE TABLE IF NOT EXISTS CONFIG (NAME VARCHAR(128) NOT NULL, "VALUE" VARCHAR(8192))'
+		db.execute 'CREATE TABLE IF NOT EXISTS CONFIG (NAME VARCHAR(128) NOT NULL, "VALUE" CLOB(1M))'
 
 		// check database version
 		if (getConfig(CONFIG_DATABASE_VERSION)==null) {
@@ -801,11 +801,12 @@ public class Database implements Storage {
 			db.execute 'CREATE ALIAS UNIX_TO_TS DETERMINISTIC FOR "mdz.ccuhistorian.DatabaseExtensions.UNIX_TO_TS"'
 
 			// set current version (keep aligned with database migration)
-			setConfig(CONFIG_DATABASE_VERSION, '3')
+			setConfig(CONFIG_DATABASE_VERSION, '4')
 
 		} else {
 			// migrate database
-			// V3 of the CCU-Historian starts with a new database. Therefore no migration steps exist at the moment.
+			// config values up to 1M
+			migrateTo(4, '''ALTER TABLE CONFIG ALTER COLUMN "VALUE" CLOB(1M)''')
 		}
 	}
 
