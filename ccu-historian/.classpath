@@ -26,5 +26,6 @@
 	<classpathentry kind="lib" path="/external-libs/jetty-9.4.41/jetty-http-9.4.41.v20210516.jar"/>
 	<classpathentry kind="lib" path="/external-libs/jetty-9.4.41/jetty-xml-9.4.41.v20210516.jar"/>
 	<classpathentry kind="lib" path="/external-libs/jetty-9.4.41/jetty-servlets-9.4.41.v20210516.jar"/>
+	<classpathentry kind="lib" path="/external-libs/jfreesvg-3.4.2/jfreesvg-3.4.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

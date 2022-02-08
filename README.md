@@ -70,3 +70,4 @@ Copyright (c) 2011-2021
 * [Jens Maus](https://github.com/jens-maus) (CCU/RaspberryMatic-Distribution)
 * [hotroot](https://github.com/hotroot), Yannick Rocks, [Thomas Zahari](https://github.com/tzahari) (Synology-Distribution)
 * [wak](https://github.com/wakr70) (Erweiterung H2-Highcharts)
+* Wolfgang Schneiderhan (SVG-Trend)
