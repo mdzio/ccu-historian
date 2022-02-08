@@ -16,6 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 import java.util.logging.Logger
+import java.awt.Rectangle
 import javax.servlet.http.HttpServletResponse
 import groovy.transform.Field
 import groovy.transform.CompileStatic
@@ -31,6 +32,8 @@ import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer
 import org.jfree.chart.plot.XYPlot
 import org.jfree.chart.plot.CombinedDomainXYPlot
 import org.jfree.chart.plot.PlotOrientation
+import org.jfree.graphics2d.svg.SVGGraphics2D
+import org.jfree.graphics2d.svg.SVGUtils
 import mdz.hc.timeseries.TimeSeries
 import mdz.hc.DataPoint
 import mdz.ccuhistorian.TrendDesign
@@ -226,18 +229,33 @@ def ex=utils.catchToLog(log) {
 	def chart=createChart(parameters)
 	
 	// create graphics
-	def image=chart.createBufferedImage(parameters.width, parameters.height)
-	def encoder=ImageEncoderFactory.newInstance('png')
-	
-	// send graphics
-	response.contentType='image/png'
-	try {
-		encoder.encode(image, sout)
-	} catch (IndexOutOfBoundsException e) {
-		// this special exception occurs when the client closes the connection, wrap it
-		throw new org.eclipse.jetty.io.RuntimeIOException(e)
+	if (!webServer.config.trendSvg) {
+		// create PNG
+		def image=chart.createBufferedImage(parameters.width, parameters.height)
+		def encoder=ImageEncoderFactory.newInstance('png')
+		
+		// send graphics
+		response.contentType='image/png'
+		try {
+			encoder.encode(image, sout)
+		} catch (IndexOutOfBoundsException e) {
+			// this special exception occurs when the client closes the connection, wrap it
+			throw new org.eclipse.jetty.io.RuntimeIOException(e)
+		}
+	} else {
+		// creage SVG
+		def svg = new SVGGraphics2D(parameters.width, parameters.height)
+		chart.draw(svg, new Rectangle(0, 0, parameters.width, parameters.height))
+		
+		// send graphics
+		response.contentType='image/svg+xml'
+		try {
+			print(svg.getSVGElement())
+		} catch (IndexOutOfBoundsException e) {
+			// this special exception occurs when the client closes the connection, wrap it
+			throw new org.eclipse.jetty.io.RuntimeIOException(e)
+		}
 	}
-	
 	log.finer "Web server: Trend generated in ${System.currentTimeMillis()-startTime}ms"
 }
 
