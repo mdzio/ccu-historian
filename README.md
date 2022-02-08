@@ -64,9 +64,10 @@ Bei einer kommerziellen Verwendung des CCU-Historians muss also auf die Erweiter
 
 ## Autoren
 
-Copyright (c) 2011-2021
+Copyright (c) 2011-2022
 
 * [Mathias Dzionsko](https://github.com/mdzio)
 * [Jens Maus](https://github.com/jens-maus) (CCU/RaspberryMatic-Distribution)
 * [hotroot](https://github.com/hotroot), Yannick Rocks, [Thomas Zahari](https://github.com/tzahari) (Synology-Distribution)
 * [wak](https://github.com/wakr70) (Erweiterung H2-Highcharts)
+* Wolfgang Schneiderhan (SVG-Trend)

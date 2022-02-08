@@ -41,6 +41,7 @@ class WebServerConfig {
 	String[] apiKeys=[]
 	String corsOrigin="*"
 	boolean showLastValue=false
+	boolean trendSvg=false
 
 	void logDebug() {
 		log.fine "webServer.port=$port"
@@ -52,5 +53,6 @@ class WebServerConfig {
 		log.fine "webServer.menuLinks=[${menuLinks.values().collect { it.text }.join(', ')}]"
 		log.fine "webServer.corsOrigin='$corsOrigin'"
 		log.fine "webServer.showLastValue=$showLastValue"
+		log.fine "webServer.trendSvg=$trendSvg"
 	}
 }
