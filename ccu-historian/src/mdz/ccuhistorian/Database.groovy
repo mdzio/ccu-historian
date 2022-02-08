@@ -759,7 +759,7 @@ public class Database implements Storage {
 		log.fine 'Preparing database'
 
 		// create configuration table
-		db.execute 'CREATE TABLE IF NOT EXISTS CONFIG (NAME VARCHAR(128) NOT NULL, "VALUE" CLOB(1M))'
+		db.execute 'CREATE TABLE IF NOT EXISTS CONFIG (NAME VARCHAR(128) NOT NULL, "VALUE" VARCHAR(65536))'
 		
 		// check database version
 		if (getConfig(CONFIG_DATABASE_VERSION)==null) {
@@ -809,7 +809,7 @@ public class Database implements Storage {
 			migrateTo(3, '''UPDATE DATA_POINTS SET CUSTOM='{}' WHERE CUSTOM='null' OR CUSTOM IS NULL''')
 			
 			// config values up to 1M
-			migrateTo(4, '''ALTER TABLE CONFIG ALTER COLUMN "VALUE" CLOB(1M)''')
+			migrateTo(4, '''ALTER TABLE CONFIG ALTER COLUMN "VALUE" VARCHAR(65536)''')
 		}
 	}
 	
