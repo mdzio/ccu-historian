@@ -96,7 +96,7 @@ class ManagerConfigurator {
 	
 		// local address
 		String historianAddress=getOption(config, 'historianAddress', String, 'All devices: ', false)
-		if (historianAddress==null) {
+		if (historianAddress==null || historianAddress=='') {
 			historianAddress=InetAddress.localHost.hostAddress
 			log.info "Auto detected local address (please check): $historianAddress" 
 		}
