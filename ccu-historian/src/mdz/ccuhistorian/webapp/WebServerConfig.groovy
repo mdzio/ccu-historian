@@ -55,4 +55,11 @@ class WebServerConfig {
 		log.fine "webServer.showLastValue=$showLastValue"
 		log.fine "webServer.trendSvg=$trendSvg"
 	}
+	
+	public String getHistorianAddress() {
+		if (this.historianAddress=='') {
+			this.historianAddress=InetAddress.localHost.hostAddress
+		}
+		this.historianAddress
+	}
 }
