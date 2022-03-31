@@ -15,17 +15,17 @@
 	<classpathentry kind="lib" path="/external-libs/groovy-2.5.6/groovy-cli-commons-2.5.6.jar"/>
 	<classpathentry kind="lib" path="/external-libs/commons-cli-1.4/commons-cli-1.4.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="/external-libs/jetty-9.4.41/servlet-api-3.1.jar"/>
-	<classpathentry kind="lib" path="/external-libs/jetty-9.4.41/jetty-server-9.4.41.v20210516.jar"/>
-	<classpathentry kind="lib" path="/external-libs/jetty-9.4.41/jetty-io-9.4.41.v20210516.jar"/>
-	<classpathentry kind="lib" path="/external-libs/jetty-9.4.41/jetty-util-9.4.41.v20210516.jar"/>
-	<classpathentry kind="lib" path="/external-libs/jetty-9.4.41/jetty-webapp-9.4.41.v20210516.jar"/>
-	<classpathentry kind="lib" path="/external-libs/jetty-9.4.41/jetty-servlet-9.4.41.v20210516.jar"/>
-	<classpathentry kind="lib" path="/external-libs/jetty-9.4.41/jetty-security-9.4.41.v20210516.jar"/>
-	<classpathentry kind="lib" path="/external-libs/jetty-9.4.41/jetty-http-9.4.41.v20210516.jar"/>
-	<classpathentry kind="lib" path="/external-libs/jetty-9.4.41/jetty-xml-9.4.41.v20210516.jar"/>
-	<classpathentry kind="lib" path="/external-libs/jetty-9.4.41/jetty-servlets-9.4.41.v20210516.jar"/>
 	<classpathentry kind="lib" path="/external-libs/h2-2.1.210/h2-2.1.210.jar"/>
 	<classpathentry kind="lib" path="/external-libs/jfreesvg-3.4.2/jfreesvg-3.4.2.jar"/>
+	<classpathentry kind="lib" path="/external-libs/jetty-9.4.45/jetty-http-9.4.45.v20220203.jar"/>
+	<classpathentry kind="lib" path="/external-libs/jetty-9.4.45/jetty-io-9.4.45.v20220203.jar"/>
+	<classpathentry kind="lib" path="/external-libs/jetty-9.4.45/jetty-security-9.4.45.v20220203.jar"/>
+	<classpathentry kind="lib" path="/external-libs/jetty-9.4.45/jetty-server-9.4.45.v20220203.jar"/>
+	<classpathentry kind="lib" path="/external-libs/jetty-9.4.45/jetty-servlet-9.4.45.v20220203.jar"/>
+	<classpathentry kind="lib" path="/external-libs/jetty-9.4.45/jetty-servlets-9.4.45.v20220203.jar"/>
+	<classpathentry kind="lib" path="/external-libs/jetty-9.4.45/jetty-util-9.4.45.v20220203.jar"/>
+	<classpathentry kind="lib" path="/external-libs/jetty-9.4.45/jetty-webapp-9.4.45.v20220203.jar"/>
+	<classpathentry kind="lib" path="/external-libs/jetty-9.4.45/jetty-xml-9.4.45.v20220203.jar"/>
+	<classpathentry kind="lib" path="/external-libs/jetty-9.4.45/servlet-api-3.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
