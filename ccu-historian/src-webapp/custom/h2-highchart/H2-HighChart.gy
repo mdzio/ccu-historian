@@ -108,6 +108,10 @@ renderer.content={
                   span id: "Text-LineUnit", class:"LinePopup-text", "Einheit" 
                   input(id: "Line-Unit", class:"form-input-h2") 
                }
+               div(id:"shortname") {
+                  span id: "Text-ShortName", class:"LinePopup-text", "Kurzname" 
+                  input(id: "Line-ShortName", class:"form-input-h2") 
+               }
             }
             div(class:"modal-footer") {
                button type:"button", class:"btn btn-default", id:"LineDefault", "Default"
