@@ -3,7 +3,7 @@
  ************************************/
 
 // Version
-var H2_version = 'v5.7';
+var H2_version = 'v5.10';
 
 /* define SLINT globals do avoid issues */
 /* global ChhLanguage:false, DP_Themes:false */
@@ -283,6 +283,7 @@ function defaultAttrib(DP, colorNr, idx) {
     factor: 1,
     offset: 0,
     unit: '',
+    shortname: '',
     buffer_data: {
       timestamps: [],
       values: [],
@@ -404,6 +405,12 @@ function defaultAttrib(DP, colorNr, idx) {
             } catch (err) {
               attr.unit = l_text.substr(1, 20);
             }
+          } else if (l_text.substr(0, 1) === 'N') {
+            try {
+              attr.shortname = decodeURIComponent(l_text.substr(1, 40));
+            } catch (err) {
+              attr.shortname = l_text.substr(1, 40);
+            }
           } else if (l_text.substr(0, 1) === 'X') {
             attr.factor = parseFloat(l_text.substr(1, 10));
           } else if (l_text.substr(0, 1) === 'O') {
@@ -424,6 +431,7 @@ function defaultAttrib(DP, colorNr, idx) {
 function addSerie(DP, DP_type) {
 
   var unit;
+  var shortname;
   var yAxis;
   var dp_vis;
   var type;
@@ -457,6 +465,7 @@ function addSerie(DP, DP_type) {
   lineType = parseInt(DP_attribute[attr].line.substr(1, 2));
   dp_vis = DP_attribute[attr].visible;
   unit = DP_attribute[attr].unit;
+  shortname = DP_attribute[attr].shortname;
 
   stacking = DP_attribute[attr].stack;
 
@@ -616,7 +625,9 @@ function addSerie(DP, DP_type) {
 
   pointFormater = function() { return toolTipInfo(this); };
 
-  if (DP_type.substr(0, 1) === 'C') {
+  if (shortname !== '') {
+    serienName = shortname;
+  } else if (DP_type.substr(0, 1) === 'C') {
     serienName = (DP.id.interfaceId === "SysVar")
       ? (DP.attributes.displayName)
       : (DP.attributes.displayName + '.' + DP.id.identifier) + '(' + window.ChhLanguage.default.historian['comptype' + DP_type] + ')';
@@ -1802,7 +1813,7 @@ function parseDataPoints() {
   }
 
   // Sort on Rooms
-  DP_rooms.sort(function(a, b) { sortLowercase(a, b); });
+  DP_rooms.sort( sortLowercase );
 
   var text = '';
   var select = document.getElementById("Select-Raum");
@@ -1819,7 +1830,7 @@ function parseDataPoints() {
   }
 
   // Sort on Gewerk
-  DP_gewerk.sort(function(a, b) { sortLowercase(a, b); });
+  DP_gewerk.sort( sortLowercase );
 
   select = document.getElementById("Select-Gewerk");
   select.options[select.options.length] = new Option(window.ChhLanguage.default.historian.functionALL, 'ALLES');
@@ -1997,6 +2008,8 @@ function parseDataPointsDP(text,nv) {
           DP_attribute[attrpos].visible = parseInt(text2[k].substr(1, 1));
         } else if (text2[k].substr(0, 1) === 'U') {
           DP_attribute[attrpos].unit = decodeURIComponent(nv[1]).split(',')[j].split('|')[k].substr(1, 20).replaceAll("§", "%").replaceAll('µ', '&');
+        } else if (text2[k].substr(0, 1) === 'N') {
+          DP_attribute[attrpos].shortname = decodeURIComponent(nv[1]).split(',')[j].split('|')[k].substr(1, 40).replaceAll("§", "%").replaceAll('µ', '&');
         } else if (text2[k].substr(0, 1) === 'X') {
           DP_attribute[attrpos].factor = parseFloat(text2[k].substr(1, 10));
         } else if (text2[k].substr(0, 1) === 'O') {
@@ -2678,9 +2691,18 @@ function loadNewPlotBand() {
   var start;
   var id = 1;
 
+  // Define whole workarea ...
+  let minDate = chart.xAxis.reduce((a,b)=>a.min>b.min?a:b).min;
+  let maxDate = chart.xAxis.reduce((a,b)=>a.max>b.max?a:b).max;
+  if (!minDate || minDate > Zeitraum_Start.getTime()) {
+    minDate = Zeitraum_Start.getTime();
+  }
+  if (!maxDate || maxDate < Zeitraum_Ende.getTime()) {
+    maxDate = Zeitraum_Ende.getTime();
+  }
   // gray in night, day yellow
   if (DP_DayLight === 1) {
-    for (loopDate = Zeitraum_Start.getTime(); loopDate <= Zeitraum_Ende.getTime(); loopDate += 86400000) {
+    for (loopDate = minDate; loopDate <= maxDate; loopDate += 86400000) {
       start = new Date(loopDate);
       chart.xAxis[0].addPlotBand({
         color: 'rgba(239,232,231,0.5)',
@@ -2707,7 +2729,7 @@ function loadNewPlotBand() {
     }
     // only line at 06:00 and 20:00
   } else if (DP_DayLight === 2) {
-    for (loopDate = Zeitraum_Start.getTime(); loopDate <= Zeitraum_Ende.getTime(); loopDate += 86400000) {
+    for (loopDate = minDate; loopDate <= maxDate; loopDate += 86400000) {
       start = new Date(loopDate);
       chart.xAxis[0].addPlotLine({
         color: '#EFE8E7',
@@ -2725,7 +2747,7 @@ function loadNewPlotBand() {
     }
     // only line at 00:00
   } else if (DP_DayLight === 3) {
-    for (loopDate = Zeitraum_Start.getTime(); loopDate <= Zeitraum_Ende.getTime(); loopDate += 86400000) {
+    for (loopDate = minDate; loopDate <= maxDate; loopDate += 86400000) {
       start = new Date(loopDate);
       chart.xAxis[0].addPlotLine({
         color: '#EFE8E7',
@@ -2838,6 +2860,9 @@ function createUrlSerie() {
           }
           if (DP_pos === -1 || DP_point[DP_pos].attributes.unit !== DP_attribute[attr].unit) {
             url2 += '|U' + DP_attribute[attr].unit.replaceAll("%", "§").replaceAll('&', 'µ');
+          }
+          if (DP_attribute[attr].shortname !== '') {
+            url2 += '|N' + DP_attribute[attr].shortname.replaceAll("%", "§").replaceAll('&', 'µ');
           }
 
           url2 += '|V' + DP_attribute[attr].visible;
@@ -3019,6 +3044,7 @@ function showDialogLine(serieObj) {
     document.getElementById("Line-Factor").value = DP_attribute[attr].factor;
     document.getElementById("Line-OffSet").value = DP_attribute[attr].offset;
     document.getElementById("Line-Unit").value = DP_attribute[attr].unit;
+    document.getElementById("Line-ShortName").value = DP_attribute[attr].shortname;
 
     document.getElementById("Select-Color").style.backgroundColor = chart.options.colors[parseInt(document.getElementById("Select-Color").value.substr(1, 2))];
 
@@ -3060,6 +3086,7 @@ function saveLine() {
   strCustom += '|X' + DP_attribute[attr].factor;
   strCustom += '|O' + DP_attribute[attr].offset;
   strCustom += '|U' + encodeURIComponent(DP_attribute[attr].unit).replace(/'/g, '%27');
+  strCustom += '|N' + encodeURIComponent(DP_attribute[attr].shortname).replace(/'/g, '%27');
 
   var DP_pos = DP_point.findIndex(obj => obj.idx.toString() === DP_PopupID);
   var key = 'POINT' + DP_PopupID;
@@ -3147,6 +3174,7 @@ function getDialogLine() {
   DP_attribute[attr].factor = parseFloat(document.getElementById("Line-Factor").value);
   DP_attribute[attr].offset = parseFloat(document.getElementById("Line-OffSet").value);
   DP_attribute[attr].unit = document.getElementById("Line-Unit").value;
+  DP_attribute[attr].shortname = document.getElementById("Line-ShortName").value;
 
   // ignor 0 values for faktor
   if (isNaN(DP_attribute[attr].factor) || DP_attribute[attr].factor === 0.0) {
@@ -3911,6 +3939,11 @@ function chartSetOptions() {
           symbol: "menu",
           enabled: (DP_Navigator < 4) ? true : false,
           menuItems: [{
+            text: window.ChhLanguage.default.historian.favoritTxt,
+            onclick: function() {
+              showDialogFav();
+            }
+          }, {
             text: window.ChhLanguage.default.historian.settings,
             onclick: function() {
               showDialogSettings();
@@ -4353,8 +4386,8 @@ function ajaxErrorOutput(xhr, status, error) {
 }
 
 function sortLowercase(a, b) {
-  var x = a.toLowerCase();
-  var y = b.toLowerCase();
+  let x = a.toLowerCase();
+  let y = b.toLowerCase();
   if (x < y) {
     return -1;
   }
@@ -4580,6 +4613,11 @@ function chartSetFontSize() {
     dStyle.innerHTML += '.highcharts-reset-zoom rect.highcharts-button-box {\n'+
                         '  width: ' + (DP_FontSize + 135).toString() + 'px;\n'+
                         '  height: ' + (DP_FontSize + 20).toString() + 'px;\n'+
+                        '}\n';
+// Bug Menue Button hide footer
+    dStyle.innerHTML += 'div#container{\n'+
+                        '  z-index: auto !important;\n'+
+                        '  overflow: visible!important;\n'+
                         '}\n';
   }
 }

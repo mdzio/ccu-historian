@@ -17,85 +17,93 @@
 */
 /*** overwrite bootstrap CSS ***/
 .table>tbody>tr>td {
-	vertical-align: middle;
+  vertical-align: middle;
 }
 
 .table>thead>tr>th, .table>tbody>tr>th, .table>tfoot>tr>th, .table>thead>tr>td,
-	.table>tbody>tr>td, .table>tfoot>tr>td {
-	padding: 5px;
+.table>tbody>tr>td, .table>tfoot>tr>td {
+  padding: 5px;
 }
 
 .table-condensed>thead>tr>th, .table-condensed>tbody>tr>th,
-	.table-condensed>tfoot>tr>th, .table-condensed>thead>tr>td,
-	.table-condensed>tbody>tr>td, .table-condensed>tfoot>tr>td {
-	padding: 3px;
+.table-condensed>tfoot>tr>th, .table-condensed>thead>tr>td,
+.table-condensed>tbody>tr>td, .table-condensed>tfoot>tr>td {
+  padding: 3px;
 }
 
 .form-select-h2 {
-	padding: 6px;
-	border-color: #ccc;
-	border-width: 1px;
-	border-style: solid;
-	position: relative;
-	border-radius: 4px;
-	vertical-align: middle;
+  padding: 6px;
+  border-color: #ccc;
+  border-width: 1px;
+  border-style: solid;
+  position: relative;
+  border-radius: 4px;
+  vertical-align: middle;
 }
 
 .form-input-h2 {
-	padding: 6px;
-	border-color: #ccc;
-	border-width: 1px;
-	border-style: solid;
-	position: relative;
-	border-radius: 4px;
-	vertical-align: middle;
+  padding: 6px;
+  border-color: #ccc;
+  border-width: 1px;
+  border-style: solid;
+  position: relative;
+  border-radius: 4px;
+  vertical-align: middle;
 }
 
 .navbar {
-	margin-bottom: 7px;
-	display:none;
+  margin-bottom: 7px;
+  display:none;
 }
 
 .LinePopup-text {
-	float: left;
-	width: 150px;
+  float: left;
+  width: 150px;
 }
 
 #filter {
-	display: none;
+  display: none;
 }
 
 .highcharts-data-table table {
-    border-collapse: collapse;
-    border-spacing: 0;
-    background: white;
-    min-width: 100%;
-    margin-top: 10px;
-    font-family: sans-serif;
+  border-collapse: collapse;
+  border-spacing: 0;
+  background: white;
+  min-width: 100%;
+  margin-top: 10px;
+  font-family: sans-serif;
 }
 .highcharts-data-table td, .highcharts-data-table th, .highcharts-data-table caption {
-    border: 1px solid silver;
-    padding: 0.5em;
+  border: 1px solid silver;
+  padding: 0.5em;
 }
 .highcharts-data-table tr:nth-child(even), .highcharts-data-table thead tr {
-    background: #f8f8f8;
+  background: #f8f8f8;
 }
 .highcharts-data-table tr:hover {
-    background: #eff;
+  background: #eff;
 }
 .highcharts-data-table caption {
-    border-bottom: none;
-    font-weight: bold;
+  border-bottom: none;
+  font-weight: bold;
 }
 
 div.highcharts-popup {
-	width: 100%;
+  width: 100%;
 }
 
 div.highcharts-popup-lhs-col {
-	width: 40%;
+  width: 40%;
 }
 
 div.highcharts-popup-rhs-col {
-    width: 60%;
+  width: 60%;
+}
+
+#filterFeld {
+  -webkit-user-select: initial;
+  -khtml-user-select: initial;
+  -moz-user-select: initial;
+  -ms-user-select: initial;
+  user-select: initial;
 }
