@@ -275,7 +275,6 @@ renderer.end={
   script src:'stock-tools/trendline.js'
   script src:'stock-tools/drag-panes.js'
   script src:'stock-tools/annotations-advanced.js'
-  script src:'stock-tools/price-indicator.js'
   script src:'stock-tools/full-screen.js'
   script src:'stock-tools/stock-tools.js'
   script src:'language.js'

@@ -151,7 +151,6 @@ var DP_Themes = {
       itemStyle: {
         color: "#333333",
         cursor: "pointer",
-        font: null,
         fontSize: "12px",
         fontWeight: "bold",
         textOverflow: "ellipsis"
@@ -332,11 +331,11 @@ var DP_Themes = {
       backgroundColor: "rgba(0, 0, 0, 0.75)",
       style: { color: "#888" }
     },
-    toolbar: { itemStyle: { color: 'silver' } }, 
+    toolbar: { itemStyle: { color: 'silver' } },
     plotOptions: {
-      line: { 
+      line: {
         dataLabels: { color: '#CCC' },
-        marker: { lineColor: "#333" } 
+        marker: { lineColor: "#333" }
       },
       spline: { marker: { lineColor: "#333" } },
       scatter: { marker: { lineColor: "#333" } },
@@ -483,13 +482,15 @@ var DP_Themes = {
     title: {
       style: {
         color: '#C0C0C0',
-        font: 'bold 16px "Trebuchet MS", Verdana, sans-serif'
+        fontWeight: 'bold',
+        fontFamily: 'Trebuchet MS, Verdana, sans-serif'
       }
     },
     subtitle: {
       style: {
         color: '#666666',
-        font: 'bold 12px "Trebuchet MS", Verdana, sans-serif'
+        fontWeight: 'bold',
+        fontFamily: 'Trebuchet MS, Verdana, sans-serif'
       }
     },
     xAxis: {
@@ -505,7 +506,6 @@ var DP_Themes = {
         style: {
           color: '#CCC',
           fontWeight: 'bold',
-          fontSize: '12px',
           fontFamily: 'Trebuchet MS, Verdana, sans-serif'
 
         }
@@ -525,7 +525,6 @@ var DP_Themes = {
         style: {
           color: '#CCC',
           fontWeight: 'bold',
-          fontSize: '12px',
           fontFamily: 'Trebuchet MS, Verdana, sans-serif'
         }
       }
@@ -567,7 +566,7 @@ var DP_Themes = {
     legend: {
       backgroundColor: 'rgba(0,0,0,0.3)',
       itemStyle: {
-        font: '9pt Trebuchet MS, Verdana, sans-serif',
+        fontFamily: 'Trebuchet MS, Verdana, sans-serif',
         color: '#FFFFFF'
       },
       itemHoverStyle: {
@@ -739,13 +738,15 @@ var DP_Themes = {
     title: {
       style: {
         color: '#C0C0C0',
-        font: 'bold 16px "Trebuchet MS", Verdana, sans-serif'
+        fontWeight: 'bold',
+        fontFamily: 'Trebuchet MS, Verdana, sans-serif'
       }
     },
     subtitle: {
       style: {
         color: '#666666',
-        font: 'bold 12px "Trebuchet MS", Verdana, sans-serif'
+        fontWeight: 'bold',
+        fontFamily: 'Trebuchet MS, Verdana, sans-serif'
       }
     },
     xAxis: {
@@ -761,9 +762,7 @@ var DP_Themes = {
         style: {
           color: '#CCC',
           fontWeight: 'bold',
-          fontSize: '12px',
           fontFamily: 'Trebuchet MS, Verdana, sans-serif'
-
         }
       }
     },
@@ -781,7 +780,6 @@ var DP_Themes = {
         style: {
           color: '#CCC',
           fontWeight: 'bold',
-          fontSize: '12px',
           fontFamily: 'Trebuchet MS, Verdana, sans-serif'
         }
       }
@@ -823,8 +821,8 @@ var DP_Themes = {
     legend: {
       backgroundColor: 'rgba(0,0,0,0.3)',
       itemStyle: {
-        font: '9pt Trebuchet MS, Verdana, sans-serif',
-        color: '#FFF'
+        color: '#FFF',
+        fontFamily: 'Trebuchet MS, Verdana, sans-serif'
       },
       itemHoverStyle: {
         color: '#000000',
@@ -967,8 +965,7 @@ var DP_Themes = {
     title: {
       style: {
         color: '#E0E0E3',
-        textTransform: 'uppercase',
-        fontSize: '20px'
+        textTransform: 'uppercase'
       }
     },
     subtitle: {
@@ -1155,20 +1152,21 @@ var DP_Themes = {
       plotShadow: false,
       plotBorderWidth: 0
     },
+
     title: {
       style: {
         color: '#FFF',
-        font: '16px Lucida Grande, Lucida Sans Unicode,' +
-          ' Verdana, Arial, Helvetica, sans-serif'
+        fontFamily: 'Lucida Grande, Lucida Sans Unicode, Verdana, Arial, Helvetica, sans-serif'
       }
     },
+
     subtitle: {
       style: {
         color: '#DDD',
-        font: '12px Lucida Grande, Lucida Sans Unicode,' +
-          ' Verdana, Arial, Helvetica, sans-serif'
+        fontFamily: 'Lucida Grande, Lucida Sans Unicode, Verdana, Arial, Helvetica, sans-serif'
       }
     },
+
     xAxis: {
       lineColor: '#999',
       tickColor: '#999',
@@ -1181,11 +1179,12 @@ var DP_Themes = {
       title: {
         style: {
           color: '#AAA',
-          font: 'bold 12px Lucida Grande, Lucida Sans Unicode,' +
-            ' Verdana, Arial, Helvetica, sans-serif'
+          fontWeight: 'bold',
+          fontFamily: 'Lucida Grande, Lucida Sans Unicode, Verdana, Arial, Helvetica, sans-serif'
         }
       }
     },
+
     yAxis: {
       gridLineColor: 'rgba(255, 255, 255, .1)',
       minorGridLineColor: 'rgba(255,255,255,0.07)',
@@ -1200,11 +1199,12 @@ var DP_Themes = {
       title: {
         style: {
           color: '#AAA',
-          font: 'bold 12px Lucida Grande, Lucida Sans Unicode,' +
-            ' Verdana, Arial, Helvetica, sans-serif'
+          fontWeight: 'bold',
+          fontFamily: 'Lucida Grande, Lucida Sans Unicode, Verdana, Arial, Helvetica, sans-serif'
         }
       }
     },
+
     legend: {
       itemStyle: {
         color: '#808080'
@@ -1216,6 +1216,7 @@ var DP_Themes = {
         color: '#A0A0A0'
       }
     },
+
     labels: {
       style: {
         color: '#CCC'
@@ -1234,7 +1235,6 @@ var DP_Themes = {
         color: '#FFF'
       }
     },
-
 
     plotOptions: {
       series: {
@@ -1387,7 +1387,6 @@ var DP_Themes = {
     },
     title: {
       style: {
-        fontSize: '16px',
         fontWeight: 'bold',
         textTransform: 'uppercase'
       }
@@ -1399,26 +1398,13 @@ var DP_Themes = {
     },
     legend: {
       itemStyle: {
-        fontWeight: 'bold',
-        fontSize: '13px'
-      }
-    },
-    xAxis: {
-      labels: {
-        style: {
-          fontSize: '12px'
-        }
+        fontWeight: 'bold'
       }
     },
     yAxis: {
       title: {
         style: {
           textTransform: 'uppercase'
-        }
-      },
-      labels: {
-        style: {
-          fontSize: '12px'
         }
       }
     },
@@ -1451,13 +1437,15 @@ var DP_Themes = {
     title: {
       style: {
         color: '#000',
-        font: 'bold 16px "Trebuchet MS", Verdana, sans-serif'
+        fontWeight: 'bold',
+        fontFamily: 'Trebuchet MS, Verdana, sans-serif'
       }
     },
     subtitle: {
       style: {
         color: '#666666',
-        font: 'bold 12px "Trebuchet MS", Verdana, sans-serif'
+        fontWeight: 'bold',
+        fontFamily: 'Trebuchet MS, Verdana, sans-serif'
       }
     },
     xAxis: {
@@ -1466,16 +1454,14 @@ var DP_Themes = {
       labels: {
         style: {
           color: '#000',
-          font: '11px Trebuchet MS, Verdana, sans-serif'
+          fontFamily: 'Trebuchet MS, Verdana, sans-serif'
         }
       },
       title: {
         style: {
           color: '#333',
           fontWeight: 'bold',
-          fontSize: '12px',
           fontFamily: 'Trebuchet MS, Verdana, sans-serif'
-
         }
       }
     },
@@ -1487,23 +1473,21 @@ var DP_Themes = {
       labels: {
         style: {
           color: '#000',
-          font: '11px Trebuchet MS, Verdana, sans-serif'
+          fontFamily: 'Trebuchet MS, Verdana, sans-serif'
         }
       },
       title: {
         style: {
           color: '#333',
           fontWeight: 'bold',
-          fontSize: '12px',
           fontFamily: 'Trebuchet MS, Verdana, sans-serif'
         }
       }
     },
     legend: {
       itemStyle: {
-        font: '9pt Trebuchet MS, Verdana, sans-serif',
-        color: 'black'
-
+        color: 'black',
+        fontFamily: 'Trebuchet MS, Verdana, sans-serif'
       },
       itemHoverStyle: {
         color: '#039'
@@ -1545,15 +1529,13 @@ var DP_Themes = {
     title: {
       style: {
         color: '#3E576F',
-        font: '16px Lucida Grande, Lucida Sans Unicode,' +
-          ' Verdana, Arial, Helvetica, sans-serif'
+        fontFamily: 'Lucida Grande, Lucida Sans Unicode, Verdana, Arial, Helvetica, sans-serif'
       }
     },
     subtitle: {
       style: {
         color: '#6D869F',
-        font: '12px Lucida Grande, Lucida Sans Unicode,' +
-          ' Verdana, Arial, Helvetica, sans-serif'
+        fontFamily: 'Lucida Grande, Lucida Sans Unicode, Verdana, Arial, Helvetica, sans-serif'
       }
     },
     xAxis: {
@@ -1562,14 +1544,14 @@ var DP_Themes = {
       labels: {
         style: {
           color: '#666',
-          fontWeight: 'bold'
+          fontWeight: 'bold',
+          fontFamily: 'Lucida Grande, Lucida Sans Unicode, Verdana, Arial, Helvetica, sans-serif'
         }
       },
       title: {
         style: {
           color: '#666',
-          font: '12px Lucida Grande, Lucida Sans Unicode,' +
-            ' Verdana, Arial, Helvetica, sans-serif'
+          fontFamily: 'Lucida Grande, Lucida Sans Unicode, Verdana, Arial, Helvetica, sans-serif'
         }
       }
     },
@@ -1580,20 +1562,20 @@ var DP_Themes = {
       labels: {
         style: {
           color: '#666',
-          fontWeight: 'bold'
+          fontWeight: 'bold',
+          fontFamily: 'Lucida Grande, Lucida Sans Unicode, Verdana, Arial, Helvetica, sans-serif'
         }
       },
       title: {
         style: {
           color: '#666',
-          font: '12px Lucida Grande, Lucida Sans Unicode,' +
-            ' Verdana, Arial, Helvetica, sans-serif'
+          fontFamily: 'Lucida Grande, Lucida Sans Unicode, Verdana, Arial, Helvetica, sans-serif'
         }
       }
     },
     legend: {
       itemStyle: {
-        font: '9pt Trebuchet MS, Verdana, sans-serif',
+        fontFamily: 'Trebuchet MS, Verdana, sans-serif',
         color: '#3E576F'
       },
       itemHoverStyle: {
@@ -1683,7 +1665,6 @@ var DP_Themes = {
         style: {
           color: '#CCC',
           fontWeight: 'bold',
-          fontSize: '12px',
           fontFamily: 'Trebuchet MS, Verdana, sans-serif'
         }
       }
@@ -1702,7 +1683,6 @@ var DP_Themes = {
         style: {
           color: '#CCC',
           fontWeight: 'bold',
-          fontSize: '12px',
           fontFamily: 'Trebuchet MS, Verdana, sans-serif'
         }
       }

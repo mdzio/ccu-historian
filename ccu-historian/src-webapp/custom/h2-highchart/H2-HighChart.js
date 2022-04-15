@@ -1,9 +1,9 @@
 /* *********************************
- * HighChart javascripts by wak 2019-2021
+ * HighChart javascripts by wak 2019-2022
  ************************************/
 
 // Version
-var H2_version = 'v5.10';
+var H2_version = 'v6.0';
 
 /* define SLINT globals do avoid issues */
 /* global ChhLanguage:false, DP_Themes:false */
@@ -1015,11 +1015,13 @@ function setSerienDataAggr0(p_attr, datStart, datEnd, backSec) {
   let arrEnd;
   arrEnd = sortedIndex(buffer.timestamps, datEnd);
 
-  if (arrStart > 0 && datStart !== buffer.timestamps[arrStart]) {
-    arr.push([datStart - backSec, (buffer.values[arrStart - 1] * DP_attribute[p_attr].factor) + DP_attribute[p_attr].offset]);
-  }
-  for (let i = arrStart; i <= arrEnd; i++) {
-    arr.push([buffer.timestamps[i] - backSec, (buffer.values[i] * DP_attribute[p_attr].factor) + DP_attribute[p_attr].offset]);
+  if (datStart <= buffer.timestamps[arrEnd]) {
+    if (arrStart > 0 && datStart !== buffer.timestamps[arrStart]) {
+      arr.push([datStart - backSec, (buffer.values[arrStart - 1] * DP_attribute[p_attr].factor) + DP_attribute[p_attr].offset]);
+    }
+    for (let i = arrStart; i <= arrEnd; i++) {
+      arr.push([buffer.timestamps[i] - backSec, (buffer.values[i] * DP_attribute[p_attr].factor) + DP_attribute[p_attr].offset]);
+    }
   }
 
   return arr;
@@ -1189,11 +1191,14 @@ function setSerienDataAggr6(p_attr, datStart, datEnd, backSec) {
   let arrEnd;
   arrEnd = sortedIndex(buffer.timestamps, datEnd);
 
-  for (let i = arrStart; i <= arrEnd; i++) {
+  if (datStart <= buffer.timestamps[arrEnd]) {
 
-    let timestamprounded = Math.round((buffer.timestamps[i] - backSec) / 60000) * 60000;
-    arr.push([timestamprounded, (buffer.values[i] * DP_attribute[p_attr].factor) + DP_attribute[p_attr].offset]);
-
+    for (let i = arrStart; i <= arrEnd; i++) {
+  
+      let timestamprounded = Math.round((buffer.timestamps[i] - backSec) / 60000) * 60000;
+      arr.push([timestamprounded, (buffer.values[i] * DP_attribute[p_attr].factor) + DP_attribute[p_attr].offset]);
+  
+    }
   }
 
   return arr;
@@ -1766,87 +1771,17 @@ function requestData2(TXT_JSON) {
 
 
 function parseDataPoints() {
-  var DP_rooms = [];
-  var DP_gewerk = [];
-  var t;
   var i;
-  var c;
-  var text2;
-  var attr;
+  var text = '';
   DP_attribute = [];
 
+
   // Alle Serien aufbauen und Räume & Gewerke sammeln nur für anzeigbare
-  for (i = 0; i < DP_point.length; i++) {
-
-    // Räme sammeln
-    if (DP_point[i].attributes.room !== null) {
-      t = DP_point[i].attributes.room.split(',');
-      for (c = 0; c < t.length; c++) {
-        if (t[c] !== '') {
-          if (DP_rooms.indexOf(t[c].trim()) === -1) {
-            DP_rooms.push(t[c].trim());
-          }
-        }
-      }
-    }
-    // Gewerke sammeln
-    if (DP_point[i].attributes.function !== null) {
-      t = DP_point[i].attributes.function.split(',');
-      for (c = 0; c < t.length; c++) {
-        if (t[c] !== '') {
-          if (DP_gewerk.indexOf(t[c].trim()) === -1) {
-            DP_gewerk.push(t[c].trim());
-          }
-        }
-      }
-    }
-
-
-    // take default values from database
-    if (DP_point[i].attributes.custom && DP_point[i].attributes.custom.HighChart) {
-      text2 = DP_point[i].attributes.custom.HighChart.split('|');
-      if (text2.length > 0) {
-        attr = defaultAttrib(DP_point[i], i, DP_point[i].idx.toString());
-        DP_attribute.push(attr);
-      }
-    }
-  }
-
-  // Sort on Rooms
-  DP_rooms.sort( sortLowercase );
-
-  var text = '';
-  var select = document.getElementById("Select-Raum");
-
-  // add default all and sysvar
-  select.options[select.options.length] = new Option(window.ChhLanguage.default.historian.roomALL, 'ALLES');
-  select.options[select.options.length] = new Option(window.ChhLanguage.default.historian.sysvarALL, 'SYSVAR');
-  for (i = 0; i < DP_rooms.length; i++) {
-    text = DP_rooms[i];
-    if (window.ChhLanguage.default.historian[text]) {
-      text = window.ChhLanguage.default.historian[text];
-    }
-    select.options[select.options.length] = new Option(text, DP_rooms[i]);
-  }
-
-  // Sort on Gewerk
-  DP_gewerk.sort( sortLowercase );
-
-  select = document.getElementById("Select-Gewerk");
-  select.options[select.options.length] = new Option(window.ChhLanguage.default.historian.functionALL, 'ALLES');
-  for (i = 0; i < DP_gewerk.length; i++) {
-    text = DP_gewerk[i];
-    if (window.ChhLanguage.default.historian[text]) {
-      text = window.ChhLanguage.default.historian[text];
-    }
-    select.options[select.options.length] = new Option(text, DP_gewerk[i]);
-  }
-
-  // Set start parameter
-  document.getElementById("filterFeld").value = filter_feld;
+  parseDataPointFill();
 
   var nv;
   var parts;
+  var select;
   // check parameter from get-link
   if (location.search) {
     parts = decodeURIComponent(location.search.substring(1)).split('&');
@@ -1880,7 +1815,7 @@ function parseDataPoints() {
         var DP_start_func = decodeURIComponent(nv[1].toLowerCase());
         select = document.getElementById("Select-Gewerk");
         for (let l_opt of select.options) {
-          if (l_opt.label.toLowerCase() === DP_start_func.toLowerCase()) {
+          if (l_opt.label.toLowerCase() === DP_start_func.toLowerCase() || l_opt.value.toLowerCase() === DP_start_func.toLowerCase()) {
             select.value = l_opt.value;
             break;
           }
@@ -1936,6 +1871,93 @@ function parseDataPoints() {
   // check parameter Zoom from get-link
   parseDataPointsZoom();
 
+}
+
+function parseDataPointFill() {
+  var DP_rooms = [];
+  var DP_gewerk = [];
+  var t;
+  var text2;
+  var attr;
+
+  // reset DP attributes
+  DP_attribute = [];
+  DP_ColorNext = 0;
+
+  // Alle Serien aufbauen und Räume & Gewerke sammeln nur für anzeigbare
+  for (let dp of DP_point) {
+
+// nur valide DPs
+   if (checkFilter("ALLES", "ALLES", "", null, dp)) {
+
+      // Räme sammeln
+      if (dp.attributes.room !== null) {
+        t = dp.attributes.room.split(',');
+        for (let c of t) {
+          if (c !== '') {
+            if (DP_rooms.indexOf(c.trim()) === -1) {
+              DP_rooms.push(c.trim());
+            }
+          }
+        }
+      }
+
+      // Gewerke sammeln
+      if (dp.attributes.function !== null) {
+        t = dp.attributes.function.split(',');
+        for (let c of t) {
+          if (c !== '') {
+            if (DP_gewerk.indexOf(c.trim()) === -1) {
+              DP_gewerk.push(c.trim());
+            }
+          }
+        }
+      }
+
+      // take default values from database
+      if (dp.attributes.custom && dp.attributes.custom.HighChart) {
+        text2 = dp.attributes.custom.HighChart.split('|');
+        if (text2.length > 0) {
+          attr = defaultAttrib(dp, -1, dp.idx.toString());
+          DP_attribute.push(attr);
+        }
+      }
+    }
+  }
+
+  // Sort on Rooms
+  DP_rooms.sort( sortLowercase );
+
+  $("#Select-Raum").empty();
+  var select = document.getElementById("Select-Raum");
+
+  // add default all and sysvar
+  select.options[select.options.length] = new Option(window.ChhLanguage.default.historian.roomALL, 'ALLES');
+  select.options[select.options.length] = new Option(window.ChhLanguage.default.historian.sysvarALL, 'SYSVAR');
+  for (let c of DP_rooms) {
+    text2 = c;
+    if (window.ChhLanguage.default.historian[c]) {
+      text2 = window.ChhLanguage.default.historian[c];
+    }
+    select.options[select.options.length] = new Option(text2, c);
+  }
+
+  // Sort on Gewerk
+  DP_gewerk.sort( sortLowercase );
+
+  $("#Select-Gewerk").empty();
+  select = document.getElementById("Select-Gewerk");
+  select.options[select.options.length] = new Option(window.ChhLanguage.default.historian.functionALL, 'ALLES');
+  for (let c of DP_gewerk) {
+    text2 = c;
+    if (window.ChhLanguage.default.historian[c]) {
+      text2 = window.ChhLanguage.default.historian[c];
+    }
+    select.options[select.options.length] = new Option(text2, c);
+  }
+
+  // Set start parameter
+  document.getElementById("filterFeld").value = filter_feld;
 }
 
 /*****/
@@ -2437,7 +2459,7 @@ function changeEventRaumFilter() {
 
   // add new series which are in filter
   for (let dppoint of DP_point) {
-    if (checkFilter(filter_raum, filter_gewerk, dppoint)) {
+    if (checkFilter(filter_raum, filter_gewerk, filter_feld, DP_Limit, dppoint)) {
 
       addSerie(dppoint, '');
       series = chart.get(dppoint.idx.toString());
@@ -2515,7 +2537,7 @@ function changeEventRaumFilter() {
 }
 
 //*******
-function checkFilter(p_raum, p_gewerk, p_dp) {
+function checkFilter(p_raum, p_gewerk, p_textfilter, p_limit, p_dp) {
 
   // Generell Filter
   if (p_dp.historyDisabled && (DP_DataPointFilter === 0 || DP_DataPointFilter === 2)) {
@@ -2551,8 +2573,8 @@ function checkFilter(p_raum, p_gewerk, p_dp) {
   }
 
   // Description Filter
-  if (filter_feld !== '') {
-    var ft = filter_feld.split(' ');
+  if (p_textfilter !== '') {
+    var ft = p_textfilter.split(' ');
     for (let fi of ft) {
       if ((p_dp.displayName + "/" + p_dp.id.address + "/ID:" + p_dp.idx).toLowerCase().indexOf(fi) === -1) {
         return false;
@@ -2561,7 +2583,7 @@ function checkFilter(p_raum, p_gewerk, p_dp) {
   }
 
   // only marked series are needed ?
-  if (DP_Limit) {
+  if (p_limit) {
     var attr = DP_attribute.findIndex(obj => obj.id === p_dp.idx.toString());
     if (attr === -1) {
       return false;
@@ -2668,8 +2690,11 @@ function loadNewAxisInfo() {
   chart.redraw();
 
   // Reset Axis Click Event
-  $('.highcharts-axis').click(function() { clickShowDialogYAxis(this); });
-  $('.highcharts-axis-labels').click(function() { clickShowDialogYAxis(this); });
+  $('.highcharts-yaxis').off("click", function() { clickShowDialogYAxis(this); });
+  $('.highcharts-yaxis').on("click", function() { clickShowDialogYAxis(this); });
+
+  $('.highcharts-yaxis-labels').off("click", function() { clickShowDialogYAxis(this); });
+  $('.highcharts-yaxis-labels').on("click", function() { clickShowDialogYAxis(this); });
 
 }
 
@@ -3299,39 +3324,25 @@ function getDialogSetting() {
   // Legend
   if (DP_Legend.toString() !== document.getElementById("Select-Legend").value) {
     DP_Legend = parseInt(document.getElementById("Select-Legend").value);
-    chart.legend.update(defineLegend());
-    if (DP_Legend === 3 || DP_Legend === 4 || DP_Legend === 5 || DP_Legend === 6) {
-      if (!DP_Limit) {
-        DP_Limit = true;
-        filterrefresh = true;
-        $('.highcharts-contextmenu')[0].children[0].children[1].innerHTML = window.ChhLanguage.default.historian.limitactive;
-      }
-    }
+    chartrefresh = true;
   }
 
   // Navigator
   if (DP_Navigator.toString() !== document.getElementById("Select-Navigator").value) {
     DP_Navigator = parseInt(document.getElementById("Select-Navigator").value);
-
-    chartSetOptions();
-    chartSetElements();
-    filterrefresh = false;
+    chartrefresh = true;
   }
 
   // Title
   if (DP_Title !== document.getElementById("Line-Title").value) {
     DP_Title = document.getElementById("Line-Title").value;
-    chart.title.update({
-      text: DP_Title
-    });
+    chartrefresh = true;
   }
 
   // Subtitle
   if (DP_Subtitle !== document.getElementById("Line-Subtitle").value) {
     DP_Subtitle = document.getElementById("Line-Subtitle").value;
-    chart.subtitle.update({
-      text: DP_Subtitle
-    });
+    chartrefresh = true;
   }
 
   // Labels
@@ -3364,7 +3375,7 @@ function getDialogSetting() {
   // DataPointFilter
   if (DP_DataPointFilter.toString() !== document.getElementById("Select-DataPoint").value) {
     DP_DataPointFilter = parseInt(document.getElementById("Select-DataPoint").value);
-    filterrefresh = true;
+    chartrefresh = true;
   }
 
   // Theme
@@ -3574,7 +3585,7 @@ function defineLegend() {
       align: 'center',
       verticalAlign: 'top',
       floating: true,
-      y: 25,
+      y: 10 + (DP_Title === '' ? 0 : DP_FontSize + 20) + (DP_Subtitle === '' ? 0 : (DP_FontSize/6+5) + 15),
       maxHeight: 200
     };
   } else if (DP_Legend === 4) {
@@ -3584,7 +3595,7 @@ function defineLegend() {
       align: 'center',
       verticalAlign: 'bottom',
       floating: true,
-      y: (DP_Navigator === 1) ? -50 : -70,
+      y: -30 - DP_FontSize - ( DP_Navigator === 0 ? 20+DP_FontSize*4.5 : 0 ) - ( DP_Navigator === 1 ? 15+DP_FontSize*3.5 : 0 ) - ( DP_Navigator === 2 ? 11+DP_FontSize*2 : 0 )  ,
       maxHeight: 200
     };
   } else if (DP_Legend === 5) {
@@ -3952,10 +3963,10 @@ function chartSetOptions() {
             text: (DP_Limit) ? window.ChhLanguage.default.historian.limitactive : window.ChhLanguage.default.historian.limitdeactive,
             onclick: function() {
               if (DP_Limit) {
-                $('.highcharts-contextmenu')[0].children[0].children[1].innerHTML = window.ChhLanguage.default.historian.limitdeactive;
+                $('.highcharts-contextmenu')[0].children[0].children[2].innerHTML = window.ChhLanguage.default.historian.limitdeactive;
                 DP_Limit = false;
               } else {
-                $('.highcharts-contextmenu')[0].children[0].children[1].innerHTML = window.ChhLanguage.default.historian.limitactive;
+                $('.highcharts-contextmenu')[0].children[0].children[2].innerHTML = window.ChhLanguage.default.historian.limitactive;
                 DP_Limit = true;
               }
               changeEventRaumFilter();
@@ -4249,49 +4260,6 @@ function chartSetElements() {
     select.add(option);
   }
 
-  // *** set function for Filter_Feld
-  $("#filterFeld").on("keyup", function() {
-    filter_feld = $(this).val().toLowerCase();
-    changeEventRaumFilter();
-  });
-
-  // *** set function for Filter Room
-  $("#Select-Raum").on("change", function() {
-    changeEventRaumFilter();
-  });
-
-  // *** set function for Filter Room
-  $("#Select-Gewerk").on("change", function() {
-    changeEventRaumFilter();
-  });
-
-  // **********************
-  $('#refresh').click( function() {
-     refreshClick();
-     return true;
-  });
-
-  // **********************
-  $('#createLink').click(function() {
-    createUrl();
-    return true;
-  });
-
-  // *** set function for Favorit Button
-  $("#bntFavorit").click(function() {
-    showDialogFav();
-    return true;
-  });
-
-  // *** update background color on Field Select-Color
-  $("#Select-Color").on("change", function() {
-    document.getElementById("Select-Color").style.backgroundColor = chart.options.colors[parseInt(document.getElementById("Select-Color").value.substr(1, 2))];
-  });
-
-  //*** update background color on Field Select-Color
-  $("#Select-AxisColor").on("change", function() {
-    showDialogYAxisUpdatColor();
-  });
 
 // disable StockTools Button on hide Menue-Buttons
   if (DP_Navigator < 4) {
@@ -4310,6 +4278,61 @@ function chartSetElements() {
   });
 
 }
+
+// avoid double register same event
+function eventSingleRegister(el_name,ev_name,ev_func) {
+  if (undefined !== jQuery._data( $(el_name)[0], "events" )) {
+    if (undefined !== jQuery._data( $(el_name)[0], "events" )[ev_name]) {
+      return false;
+    }
+  }
+  $(el_name).on(ev_name, ev_func);
+  return true;
+}
+
+// *** set function for Filter_Feld
+eventSingleRegister("#filterFeld", "keyup", function() {
+  filter_feld = $(this).val().toLowerCase();
+  changeEventRaumFilter();
+});
+
+// *** set function for Filter Room
+eventSingleRegister("#Select-Raum", "change", function() {
+  changeEventRaumFilter();
+});
+
+// *** set function for Filter Room
+eventSingleRegister("#Select-Gewerk", "change", function() {
+  changeEventRaumFilter();
+});
+
+// **********************
+eventSingleRegister("#refresh", "click", function() {
+   refreshClick();
+   return true;
+});
+
+// **********************
+eventSingleRegister("#createLink", "click", function() {
+  createUrl();
+  return true;
+});
+
+// *** set function for Favorit Button
+eventSingleRegister("#bntFavorit", "click", function() {
+  showDialogFav();
+  return true;
+});
+
+// *** update background color on Field Select-Color
+eventSingleRegister("#Select-Color", "change", function() {
+  document.getElementById("Select-Color").style.backgroundColor = chart.options.colors[parseInt(document.getElementById("Select-Color").value.substr(1, 2))];
+});
+
+//*** update background color on Field Select-Color
+eventSingleRegister("#Select-AxisColor", "change", function() {
+  showDialogYAxisUpdatColor();
+});
 
 function refreshClick() {
   Zeitraum_Ende = new Date(Date.now());
