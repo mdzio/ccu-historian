@@ -30,7 +30,13 @@ public class DatabaseSystem extends BaseSystem {
 	
 	public DatabaseSystem(Configuration config) {
 		super(config)
-		internalDatabase=new Database(config.databaseConfig, base)
+		// set webExternalNames, if not specified
+		def dbConfig=config.databaseConfig
+		def webConfig=config.webServerConfig
+		if (!dbConfig.webExternalNames && webConfig.historianAddress) {
+			dbConfig.webExternalNames=webConfig.historianAddress
+		}
+		internalDatabase=new Database(dbConfig, base)
 		extendedStorage=new ExtendedStorage(storage:internalDatabase)
 	}
 

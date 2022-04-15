@@ -27,6 +27,7 @@ class DatabaseConfig {
 	
 	boolean webEnable=true, tcpEnable, pgEnable
 	boolean webAllowOthers, tcpAllowOthers, pgAllowOthers
+	String webExternalNames='' // comma separated list of host:port
 	int webPort=8082, tcpPort=9092, pgPort=5435
 	String backup=''
 
@@ -37,6 +38,7 @@ class DatabaseConfig {
 		log.fine "database.webEnable=$webEnable"
 		log.fine "database.webPort=$webPort"
 		log.fine "database.webAllowOthers=$webAllowOthers"
+		log.fine "database.webExternalNames=$webExternalNames"
 		log.fine "database.tcpEnable=$tcpEnable"
 		log.fine "database.tcpPort=$tcpPort"
 		log.fine "database.tcpAllowOthers=$tcpAllowOthers"

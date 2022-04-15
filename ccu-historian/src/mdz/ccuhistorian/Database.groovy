@@ -80,6 +80,10 @@ public class Database implements Storage {
 						config.password
 					]
 					if (config.webAllowOthers) args << '-webAllowOthers'
+					if (config.webExternalNames) {
+						args << '-webExternalNames'
+						args << config.webExternalNames
+					} 
 					webServer=Server.createWebServer(args as String[])
 					webServer.start()
 					log.fine "Database management URL: ${webServer.getURL()}"
