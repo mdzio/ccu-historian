@@ -57,10 +57,8 @@ public class PageRenderer {
 			if (e) {
 				// show error description
 				servlet.html.div(class:'alert alert-danger') {
-					h4 {
-						strong 'Fehler: '
-						mkp.yield translateError(e)
-					}
+					h4 'Fehler:'
+					translateError(e)
 					button class:'btn btn-default', type:'button', 'data-toggle':'collapse', 
 						'data-target':'#errdescr', 'Details'
 					div(class:'collapse', id:'errdescr') {
@@ -71,14 +69,21 @@ public class PageRenderer {
 		}
 	}
 	
-	private String translateError(Exception e) {
+	private translateError(Exception e) {
 		String msg=e.message?:e.class.name
 		switch (msg) {
 		case ~/(?s).*The write format 1 is smaller than the supported format 2.*/:
-		    return 'Die bestehende Datenbank muss für CCU-Historian V3 migriert werden! ' + 
-				'Datenpunkte können nicht aufgezeichnet werden!'
+		    servlet.html.p {
+				mkp.yield 'Die bestehende Datenbank muss für CCU-Historian Version 3 migriert werden! ' + 
+					'Datenpunkte werden nicht weiter aufgezeichnet! Durch ein Zurückgehen auf ' +
+					'die Version 2.9.0 kann die bestehende Datenbank unverändert weiter verwendet werden. '
+				a href:'https://github.com/mdzio/ccu-historian/wiki/Migration-V3', 
+					'Informationen zur Migration sind im Wiki zu finden.' 
+			}
+			return
 		default:
-			return msg
+			servlet.html.p msg
+			return
 		}
 	}
 	
