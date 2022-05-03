@@ -248,7 +248,7 @@ def ex=utils.catchToLog(log) {
 		chart.draw(svg, new Rectangle(0, 0, parameters.width, parameters.height))
 		
 		// send graphics
-		response.contentType='image/svg+xml'
+		response.contentType='image/svg+xml; charset=utf-8'
 		try {
 			print(svg.getSVGElement())
 		} catch (IndexOutOfBoundsException e) {
