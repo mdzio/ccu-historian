@@ -58,7 +58,7 @@ start() {
     fi
 
     # start process
-    JAVA_OPTIONS="-Xmx512m -Djava.util.prefs.userRoot=${ADDON_DIR} -Djava.util.prefs.systemRoot=${ADDON_DIR} -Duser.country=DE -Duser.language=de -jar ${ADDON_DIR}/ccu-historian/ccu-historian.jar -config ${ADDON_DIR}/ccu-historian.config -loglevel off"
+    JAVA_OPTIONS="-Xmx512m -Djava.util.prefs.userRoot=${ADDON_DIR} -Djava.util.prefs.systemRoot=${ADDON_DIR} -jar ${ADDON_DIR}/ccu-historian/ccu-historian.jar -config ${ADDON_DIR}/ccu-historian.config -loglevel off"
     start-stop-daemon -S -q -b -m -p /var/run/${ADDON_ID}.pid --exec ${JAVA_BIN} -- ${JAVA_OPTIONS}
     logger -t ${ADDON_ID} -p user.info "Started"
 }
