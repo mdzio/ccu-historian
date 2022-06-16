@@ -26,6 +26,6 @@
 	<classpathentry kind="lib" path="/external-libs/jetty-9.4.45/jetty-webapp-9.4.45.v20220203.jar"/>
 	<classpathentry kind="lib" path="/external-libs/jetty-9.4.45/jetty-xml-9.4.45.v20220203.jar"/>
 	<classpathentry kind="lib" path="/external-libs/jetty-9.4.45/servlet-api-3.1.jar"/>
-	<classpathentry kind="lib" path="/external-libs/h2-2.1.212/h2-2.1.212.jar"/>
+	<classpathentry kind="lib" path="/external-libs/h2-2.1.214/h2-2.1.214.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
