@@ -107,3 +107,11 @@ div.highcharts-popup-rhs-col {
   -ms-user-select: initial;
   user-select: initial;
 }
+
+g.highcharts-yaxis-labels text {
+  cursor: pointer !important;
+}
+
+g.highcharts-yaxis text {
+  cursor: pointer !important;
+}
