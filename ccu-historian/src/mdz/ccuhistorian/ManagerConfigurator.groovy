@@ -269,6 +269,10 @@ class ManagerConfigurator {
 					String address=getOption(cfg, 'address', String, "Device $idx: ")
 					String name=getOption(cfg, 'name', String, "Device $idx: ")
 					int port=getOption(cfg, 'port', Integer, "Device $idx: ")
+					String path=getOption(cfg, 'path', String, "Device $idx: ", false)
+					if (path==null) {
+						path=''
+					}
 					Long reinitTimeout=getOption(cfg, 'reinitTimeout', Long, "Device $idx: ", false)
 					Boolean writeAccess=getOption(cfg, 'writeAccess', Boolean, "Device $idx: ", false)
 					Integer timeout=getOption(cfg, 'timeout', Integer, "Device $idx: ", false)
@@ -276,16 +280,18 @@ class ManagerConfigurator {
 					String password=getOption(cfg, 'password', String, "Device $idx: ", false)
 
 					HmReinitTask reinitTask=new HmReinitTask(manager.executor)
-					if (reinitTimeout!=null)
+					if (reinitTimeout!=null) {
 						reinitTask.timeout=reinitTimeout
-
+					}
+					
 					HmXmlRpcInterface xmlRpcItf=new HmXmlRpcInterface(
-						name, null, address, port, "" /* path */,
+						name, null, address, port, path,
 						manager.xmlRpcServer, null, reinitTask, manager.executor,
 						username, password
 					)
-					if (writeAccess!=null)
+					if (writeAccess!=null) {
 						xmlRpcItf.writeAccess=writeAccess
+					}
 					manager.addInterface(xmlRpcItf)
 
 				} else if (type==DeviceTypes.SIMULATION) {
