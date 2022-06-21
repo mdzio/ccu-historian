@@ -81,6 +81,11 @@ public class Preprocessor extends BasicProducer<Event> implements Processor<Even
 		}
 	}
 	
+	public void purge() {
+		// close swinging door processors
+		swingingDoorProcessors.values().each { it.close() }
+	}
+	
 	public void stop() {
 		log.fine 'Stopping preprocessor'
 		// close swinging door processors
