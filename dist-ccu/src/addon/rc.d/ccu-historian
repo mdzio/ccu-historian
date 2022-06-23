@@ -21,40 +21,52 @@ stop() {
 
 start() {
     logger -t ${ADDON_ID} -p user.debug "Starting"
-
+   
     # generate configuration if it does not yet exist
     if [[ ! -e ${ADDON_DIR}/ccu-historian.config ]]; then
-      logger -t ccu-historian -p user.info "Generating configuration"
-      
-      cp -a ${ADDON_DIR}/ccu-historian-sample.config ${ADDON_DIR}/ccu-historian.config
+        logger -t ${ADDON_ID} -p user.info "Generating configuration"
+        cp -a ${ADDON_DIR}/ccu-historian-sample.config ${ADDON_DIR}/ccu-historian.config
 
-      # set devices.device1.plugin1.type if CUxD is installed
-      if [[ -x /usr/local/addons/cuxd/cuxd ]]; then
-        grep -q "devices.device1.plugin1.type=CUXD" ${ADDON_DIR}/ccu-historian.config
-        if [ $? -eq 1 ]; then
-          echo "devices.device1.plugin1.type=CUXD" >>${ADDON_DIR}/ccu-historian.config
+        # set devices.device1.plugin1.type if CUxD is installed
+        if [[ -x /usr/local/addons/cuxd/cuxd ]]; then
+            grep -q "devices.device1.plugin1.type=CUXD" ${ADDON_DIR}/ccu-historian.config
+            if [ $? -eq 1 ]; then
+                echo "devices.device1.plugin1.type=CUXD" >>${ADDON_DIR}/ccu-historian.config
+            fi
         fi
-      fi
+    fi
 
-      # set the own ip address
-      ipaddress=$(ip -4 route get 1 | head -1 | cut -d' ' -f8 | tr -d '\n')
-      if [[ -n "${ipaddress}" ]]; then
-        sed -i "s/webServer\.historianAddress=.*/webServer.historianAddress='${ipaddress}'/g" ${ADDON_DIR}/ccu-historian.config
-        sed -i "s/devices\.device1\.address=.*/devices.device1.address='${ipaddress}'/g" ${ADDON_DIR}/ccu-historian.config
-      fi
+    # detect own ip address
+    ipaddress=$(ip -4 route get 1 | head -1 | cut -d' ' -f8 | tr -d '\n')
+    
+    # update webServer.historianAddress
+    if [[ -n "${ipaddress}" ]]; then
+        webaddr=$(sed -n -e "s/webServer\.historianAddress='\([^']*\)'/\1/p" ${ADDON_DIR}/ccu-historian.config)
+        if [[ "${webaddr}" != "${ipaddress}" ]]; then
+            sed -i "s/webServer\.historianAddress=.*/webServer.historianAddress='${ipaddress}'/g" ${ADDON_DIR}/ccu-historian.config
+        fi
+    else
+        echo "ERROR: Detection of own IP address failed"
+        logger -t ${ADDON_ID} -p user.err "Detection of own IP address failed"
+    fi
+
+    # fix devices.device1.address
+    devaddr=$(sed -n -e "s/devices\.device1\.address='\([^']*\)'/\1/p" ${ADDON_DIR}/ccu-historian.config)
+    if [[ "${devaddr}" != '127.0.0.1' ]]; then
+        sed -i "s/devices\.device1\.address=.*/devices.device1.address='127.0.0.1'/g" ${ADDON_DIR}/ccu-historian.config
     fi
 
     # check which java version and heap size to use
     if [[ -x "/opt/java/bin/java" ]]; then
-      # CCU3/RaspberryMatic
-      JAVA_BIN=/opt/java/bin/java
+        # CCU3/RaspberryMatic
+        JAVA_BIN=/opt/java/bin/java
     elif which java > /dev/null; then
-      # java is on the search path 
-      JAVA_BIN=java      
+        # java is on the search path 
+        JAVA_BIN=java      
     else
-      echo "ERROR: Java binary not found"
-      logger -t homematic -p user.error "ERROR: Java binary not found for CCU-Historian startup"
-      exit 1
+        echo "ERROR: Java binary not found"
+        logger -t ${ADDON_ID} -p user.err "ERROR: Java binary not found for CCU-Historian startup"
+        exit 1
     fi
 
     # start process
@@ -65,7 +77,7 @@ start() {
 
 info() {
     echo "Info: <b>CCU-Historian Add-On</b><br>"
-    echo "Info: (c) 2011-2020 Mathias Dzionsko, u.a.<br>"
+    echo "Info: (c) 2011-2022 Mathias Dzionsko, u.a.<br>"
     echo "Info: <a href="https://github.com/mdzio/ccu-historian" target="_blank">https://github.com/mdzio/ccu-historian</a>"
     echo "Name: CCU-Historian"
     echo "Version: $(cat ${ADDON_DIR}/VERSION)"
@@ -99,27 +111,27 @@ uninstall() {
 }
 
 case "$1" in
-  ""|start)
-	  start
-	;;
-  stop)
-	  stop
-	;;
-  restart|reload)
-	  stop
-	  sleep 2
-	  start
-	;;
-  uninstall)
-    uninstall
-  ;;
-  info)
-    info
-  ;;
-  *)
-    echo "usage: ${ADDON_ID} {start|stop|restart|info|uninstall}" >&2
-    exit 1
-  ;;
+    ""|start)
+        start
+    ;;
+    stop)
+        stop
+    ;;
+    restart|reload)
+        stop
+        sleep 2
+        start
+    ;;
+    uninstall)
+        uninstall
+    ;;
+    info)
+        info
+    ;;
+    *)
+        echo "usage: ${ADDON_ID} {start|stop|restart|info|uninstall}" >&2
+        exit 1
+    ;;
 esac
 
 exit $?
