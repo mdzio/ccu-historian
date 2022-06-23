@@ -37,7 +37,6 @@
 				<include name="tool" />
 			</tarfileset>
 			<tarfileset dir="../dist-generic/src" prefix="ccu-historian" username="root" group="root">
-				<include name="trenddesigns.groovy" />
 				<include name="cleanup.sql" />
 			</tarfileset>
 			<tarfileset dir=".." prefix="ccu-historian" username="root" group="root">

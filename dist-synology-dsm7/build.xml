@@ -59,7 +59,7 @@
 			<package dir="src/package" />
 			<package dir="../ccu-historian/build" />
 			<package dir="${tmpdir}" includes="ccu-historian-sample.config,LICENSE.txt" />
-			<package dir="../dist-generic/src" includes="trenddesigns.groovy,cleanup.sql" />
+			<package dir="../dist-generic/src" includes="cleanup.sql" />
 			<package dir="../dist-generic/src" includes="tool" filemode="755" />
 		</syno:spk>
 	</target>
