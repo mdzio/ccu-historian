@@ -779,7 +779,7 @@ public class Database implements Storage {
 		if (getConfig(CONFIG_DATABASE_VERSION)==null) {
 
 			// new database detected
-			db.execute '''CREATE TABLE DATA_POINTS (
+			db.execute '''CREATE TABLE IF NOT EXISTS DATA_POINTS (
 				DP_ID INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 				TABLE_NAME VARCHAR NOT NULL,
 				STATE INT,
@@ -801,8 +801,8 @@ public class Database implements Storage {
 				ON DATA_POINTS (INTERFACE, ADDRESS, IDENTIFIER)'''
 
 			// add database functions
-			db.execute 'CREATE ALIAS TS_TO_UNIX DETERMINISTIC FOR "mdz.ccuhistorian.DatabaseExtensions.TS_TO_UNIX"'
-			db.execute 'CREATE ALIAS UNIX_TO_TS DETERMINISTIC FOR "mdz.ccuhistorian.DatabaseExtensions.UNIX_TO_TS"'
+			db.execute 'CREATE ALIAS IF NOT EXISTS TS_TO_UNIX DETERMINISTIC FOR "mdz.ccuhistorian.DatabaseExtensions.TS_TO_UNIX"'
+			db.execute 'CREATE ALIAS IF NOT EXISTS UNIX_TO_TS DETERMINISTIC FOR "mdz.ccuhistorian.DatabaseExtensions.UNIX_TO_TS"'
 
 			// set current version (keep aligned with database migration)
 			setConfig(CONFIG_DATABASE_VERSION, '4')
