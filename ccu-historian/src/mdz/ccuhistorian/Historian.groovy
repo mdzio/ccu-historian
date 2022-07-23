@@ -83,10 +83,7 @@ class Historian implements Runnable {
 		buffer.addConsumer dataPointStorageUpdater  
 		interfaceManager.addConsumer buffer 
 		
-		database.onReadListener << { 
-			buffer.purge()
-			preprocessor.purge()
-		}
+		database.onReadListener << { buffer.purge() }
 		
 		if (config.counters!=null)
 			overflowHandler.counters=config.counters
