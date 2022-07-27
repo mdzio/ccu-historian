@@ -19,6 +19,5 @@ package mdz.hc.persistence
 
 import groovy.lang.Closure;
 
-public interface Storage extends DataPointStorage, HistoryStorage, Transactional,
-	ConfigStorage {
+public interface Storage extends DataPointStorage, HistoryStorage, ConfigStorage {
 }

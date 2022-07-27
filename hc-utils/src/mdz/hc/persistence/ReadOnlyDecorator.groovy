@@ -112,13 +112,6 @@ public class ReadOnlyDecorator implements Storage {
 	}
 
 	@Override
-	public Object transactional(Closure cl) throws Exception {
-		cl=(Closure) cl.clone()
-		cl.delegate=this
-		storage.transactional cl
-	}
-
-	@Override
 	public String getConfig(String name) {
 		storage.getConfig(name)
 	}

@@ -83,6 +83,20 @@ class SimulationInterface extends BasicProducer<RawEvent> implements Interface, 
 			{ int it -> Math.sin((double)it/30.0*Math.PI)*10.0 }
 		),
 		new DataPointTemplate(
+			'SIN_RANDOM', 
+			DataPoint.ATTR_TYPE_FLOAT, 
+			-1.1, 1.1, '', 
+			true, 
+			{ int it -> Math.sin((double)it/30.0*Math.PI)+random.nextDouble()*0.2-0.1 }
+		),
+		new DataPointTemplate(
+			'SIN_SIN10', 
+			DataPoint.ATTR_TYPE_FLOAT, 
+			-1.1, 1.1, '', 
+			true, 
+			{ int it -> Math.sin((double)it/30.0*Math.PI)+0.1*Math.sin((double)it/3.0*Math.PI) }
+		),
+		new DataPointTemplate(
 			'TEXT', 
 			DataPoint.ATTR_TYPE_STRING, 
 			null, '', '', 

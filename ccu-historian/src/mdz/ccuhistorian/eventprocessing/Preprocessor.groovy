@@ -81,9 +81,12 @@ public class Preprocessor extends BasicProducer<Event> implements Processor<Even
 		}
 	}
 	
-	public void purge() {
-		// close swinging door processors
-		swingingDoorProcessors.values().each { it.close() }
+	public void flush(DataPointIdentifier id) {
+		// flush swinging door processor
+		def p=swingingDoorProcessors[id]
+		if (p!=null) {
+			p.flush()
+		}
 	}
 	
 	public void stop() {

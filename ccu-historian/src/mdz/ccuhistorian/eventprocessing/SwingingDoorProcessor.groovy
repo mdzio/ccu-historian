@@ -100,7 +100,18 @@ class SwingingDoorProcessor extends BasicProducer<Event> implements Processor<Ev
 		last=null
 		slopes=null
 	}
-	
+
+	public void flush() {
+		// store last, if present
+		if (last!=null) {
+			produce last
+			// restart
+			first=last
+		}
+		last=null
+		slopes=null
+	}
+		
 	private Slopes calculateSlopes(Event begin, Event end) {
 		double upper=((Number)end.pv.value-((Number)begin.pv.value+deviation))/(end.pv.timestamp.time-begin.pv.timestamp.time)
 		double lower=((Number)end.pv.value-((Number)begin.pv.value-deviation))/(end.pv.timestamp.time-begin.pv.timestamp.time)

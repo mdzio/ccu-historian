@@ -68,27 +68,28 @@ class Historian implements Runnable {
 		preprocessor=[]
 		overflowHandler=[]
 		overflowHandler.historyStorage=database
+		if (config.counters!=null) {
+			overflowHandler.counters=config.counters
+		}
 		historyDisabledFilter=[]
 		dataPointStorageUpdater=[]
 		dataPointStorageUpdater.storage=database
 		dataPointStorageUpdater.defaultDisabled=config.defaultDisabled
 		dataPointStorageUpdater.defaultHidden=config.defaultHidden
 		buffer=[]
-		
+		buffer.countLimit=config.bufferCount
+		buffer.timeLimit=config.bufferTime
+
 		firstArchived.addConsumer database
 		preprocessor.addConsumer firstArchived
+		database.onRequestFlushListener << { id -> preprocessor.flush(id) }
 		overflowHandler.addConsumer preprocessor
 		historyDisabledFilter.addConsumer overflowHandler
 		dataPointStorageUpdater.addConsumer historyDisabledFilter
 		buffer.addConsumer dataPointStorageUpdater  
+		database.onReadListener << { buffer.purge() }
 		interfaceManager.addConsumer buffer 
 		
-		database.onReadListener << { buffer.purge() }
-		
-		if (config.counters!=null)
-			overflowHandler.counters=config.counters
-		buffer.countLimit=config.bufferCount
-		buffer.timeLimit=config.bufferTime
 		base.executor.schedule this, DEFAULT_START_DELAY, TimeUnit.MILLISECONDS
 	}
 	

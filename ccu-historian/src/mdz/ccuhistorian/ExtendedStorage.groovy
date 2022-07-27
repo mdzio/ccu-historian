@@ -33,8 +33,13 @@ import mdz.hc.timeseries.TimeSeries
 class ExtendedStorage implements Storage {
 
 	Storage storage
+	
+	// The onReadListener's are called first.
 	HashSet<Closure> onReadListener=[]
-
+	
+	// The onRequestFlushListener's are called after the onReadListener's. 
+	HashSet<Closure> onRequestFlushListener=[]
+	
 	public void consume(Event t) throws Exception {
 		storage.consume(t)
 	}
@@ -82,6 +87,7 @@ class ExtendedStorage implements Storage {
 
 	public ProcessValue getLast(DataPoint dp) throws Exception {
 		fireOnRead()
+		fireOnRequestFlush(dp.id)
 		return storage.getLast(dp)
 	}
 
@@ -97,11 +103,13 @@ class ExtendedStorage implements Storage {
 
 	public TimeSeries getTimeSeriesRaw(DataPoint dp, Date begin, Date end) throws Exception {
 		fireOnRead()
+		fireOnRequestFlush(dp.id)
 		return storage.getTimeSeriesRaw(dp, begin, end)
 	}
 
 	public TimeSeries getTimeSeries(DataPoint dp, Date begin, Date end) throws Exception {
 		fireOnRead()
+		fireOnRequestFlush(dp.id)
 		return storage.getTimeSeries(dp, begin, end)
 	}
 
@@ -125,11 +133,6 @@ class ExtendedStorage implements Storage {
 		return storage.replaceTimeSeries(dstDp, srcSeries, startTime, endTime)
 	}
 	
-	public Object transactional(Closure cl) throws Exception {
-		fireOnRead()
-		return storage.with(cl)
-	}
-	
 	String getConfig(String name) {
 		return storage.getConfig(name)
 	}
@@ -149,5 +152,9 @@ class ExtendedStorage implements Storage {
 
 	private fireOnRead() {
 		onReadListener.each { Closure cl -> cl() }
+	}
+	
+	private fireOnRequestFlush(DataPointIdentifier id) {
+		onRequestFlushListener.each { Closure cl -> cl(id) }
 	}
 }

@@ -142,26 +142,6 @@ public class Database implements Storage {
 		}
 	}
 
-	public synchronized transactional(Closure cl) {
-		cl=(Closure) cl.clone()
-		cl.delegate=this
-		db.connection.autoCommit=false
-		try {
-			cl(this)
-			db.connection.commit()
-			db.connection.autoCommit=true
-		} catch(Exception e) {
-			try {
-				db.connection.rollback()
-				db.connection.autoCommit=true
-			} catch(Exception e2) {
-				// rollback failed
-				Exceptions.logTo(log, Level.SEVERE, e2)
-			}
-			throw e;
-		}
-	}
-
 	@Override
 	public synchronized Date getFirstTimestamp(DataPoint dp) {
 		connect()
