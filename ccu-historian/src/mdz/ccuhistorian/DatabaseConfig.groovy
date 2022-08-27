@@ -22,6 +22,13 @@ import groovy.util.logging.Log
 @Log
 class DatabaseConfig {
 
+	public static class Task {
+		String name
+		boolean enable=true
+		String cron
+		Closure script
+	}
+
 	String dir='./data', name='history'
 	String user='sa', password='ccu-historian'
 	
@@ -30,6 +37,9 @@ class DatabaseConfig {
 	String webExternalNames='' // comma separated list of host:port
 	int webPort=8082, tcpPort=9092, pgPort=5435
 	String backup=''
+
+	// schedule tasks
+	Map<String, Task> tasks=[:].withDefault { new Task(name: it) }
 
 	void logDebug() {
 		log.fine "database.dir='$dir'"
@@ -46,5 +56,6 @@ class DatabaseConfig {
 		log.fine "database.pgPort=$pgPort"
 		log.fine "database.pgAllowOthers=$pgAllowOthers"
 		log.fine "database.backup='$backup'"
+		log.fine "database.tasks=[${tasks.collect { it.key }.join(', ')}]"
 	}
 }

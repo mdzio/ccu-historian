@@ -18,6 +18,19 @@
 package mdz.ccuhistorian
 
 import groovy.util.logging.Log
+
+import static com.cronutils.model.CronType.QUARTZ
+
+import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
+import java.util.concurrent.TimeUnit
+import java.util.logging.Logger
+import mdz.Exceptions
+import com.cronutils.model.Cron
+import com.cronutils.model.definition.CronDefinitionBuilder
+import com.cronutils.model.time.ExecutionTime
+import com.cronutils.parser.CronParser
+
 import groovy.transform.CompileStatic
 
 @Log
@@ -38,6 +51,9 @@ public class DatabaseSystem extends BaseSystem {
 		}
 		internalDatabase=new Database(dbConfig, base)
 		extendedStorage=new ExtendedStorage(storage:internalDatabase)
+		
+		// tasks
+		startTasks()
 	}
 
 	public synchronized void stop()  {
@@ -46,4 +62,48 @@ public class DatabaseSystem extends BaseSystem {
 	}
 	
 	public ExtendedStorage getDatabase() { extendedStorage }
+	
+	private startTasks() {
+		def cparser=new CronParser(CronDefinitionBuilder.instanceDefinitionFor(QUARTZ))
+		config.databaseConfig.tasks.each { String name, DatabaseConfig.Task task ->
+			if (task.enable) {
+				log.fine "Initializing task: $name, $task.cron"
+				if (task.cron==null || task.cron.isEmpty()) {
+					throw new Exception("Task $name has no cron expression")
+				}
+				if (task.script==null) {
+					throw new Exception("Task $name has no script")
+				}
+				
+				def binding=new Binding()
+				binding.setVariable("log", Logger.getLogger("mdz.task.$name"))
+				binding.setVariable("database", extendedStorage)
+				
+				task.script.delegate=binding
+				task.script.resolveStrategy=Closure.DELEGATE_ONLY
+				
+				// setup cron scheduler
+				Cron cron=cparser.parse(task.cron)
+				ExecutionTime execTime=ExecutionTime.forCron(cron)
+				scheduleNext(execTime, task)
+			}
+		}
+	}
+	
+	private scheduleNext(ExecutionTime execTime, DatabaseConfig.Task task) {
+		def now=ZonedDateTime.now()
+		def nextExec=execTime.nextExecution(now).get()
+		log.fine "Next execution of task $task.name: ${nextExec.toLocalDateTime()}"
+		def delay=ChronoUnit.MILLIS.between(now, nextExec)
+		base.executor.schedule({
+			log.fine "Executing task: $task.name"
+			// execute script
+			Exceptions.catchToLog(log) {
+				task.script.call()
+			}
+			
+			// reschedule
+			scheduleNext(execTime, task)
+		} as Runnable, delay, TimeUnit.MILLISECONDS)
+	}
 }
