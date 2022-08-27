@@ -76,34 +76,42 @@ public class DatabaseSystem extends BaseSystem {
 				}
 				
 				def binding=new Binding()
-				binding.setVariable("log", Logger.getLogger("mdz.task.$name"))
+				def scriptLog=Logger.getLogger("mdz.task.$name")
+				binding.setVariable("log", scriptLog)
 				binding.setVariable("database", extendedStorage)
-				
 				task.script.delegate=binding
 				task.script.resolveStrategy=Closure.DELEGATE_ONLY
 				
-				// setup cron scheduler
-				Cron cron=cparser.parse(task.cron)
-				ExecutionTime execTime=ExecutionTime.forCron(cron)
-				scheduleNext(execTime, task)
+				// schedule task
+				if (task.cron=="@start") {
+					// run once
+					executeTask(task, 0, {})
+				} else {
+					// setup cron
+					Cron cron=cparser.parse(task.cron)
+					ExecutionTime execTime=ExecutionTime.forCron(cron)
+					executeCyclic(execTime, task)
+				}
 			}
 		}
 	}
-	
-	private scheduleNext(ExecutionTime execTime, DatabaseConfig.Task task) {
-		def now=ZonedDateTime.now()
-		def nextExec=execTime.nextExecution(now).get()
-		log.fine "Next execution of task $task.name: ${nextExec.toLocalDateTime()}"
-		def delay=ChronoUnit.MILLIS.between(now, nextExec)
+
+	private executeTask(DatabaseConfig.Task task, long delay, Closure onCompleted) {
 		base.executor.schedule({
 			log.fine "Executing task: $task.name"
 			// execute script
 			Exceptions.catchToLog(log) {
 				task.script.call()
 			}
-			
-			// reschedule
-			scheduleNext(execTime, task)
+			onCompleted()
 		} as Runnable, delay, TimeUnit.MILLISECONDS)
+	}
+
+	private executeCyclic(ExecutionTime execTime, DatabaseConfig.Task task) {
+		def now=ZonedDateTime.now()
+		def nextExec=execTime.nextExecution(now).get()
+		log.fine "Next execution of task $task.name: ${nextExec.toLocalDateTime()}"
+		def delay=ChronoUnit.MILLIS.between(now, nextExec)
+		executeTask(task, delay, { executeCyclic(execTime, task) })
 	}
 }

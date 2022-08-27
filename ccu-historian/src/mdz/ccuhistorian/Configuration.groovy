@@ -125,9 +125,13 @@ class Configuration {
 		}
 		
 		ImportCustomizer customizer=[]
+		customizer.addStaticStars 'java.lang.Math'
+		customizer.addImport 'PreprocType', 'mdz.ccuhistorian.eventprocessing.Preprocessor.Type'
 		customizer.addImports 'mdz.ccuhistorian.TrendDesign', 'java.util.logging.Level',
 			'java.awt.Color', 'org.jfree.chart.ChartColor', 'java.awt.BasicStroke',
-			'java.awt.GradientPaint', 'org.jfree.chart.title.TextTitle'
+			'java.awt.GradientPaint', 'org.jfree.chart.title.TextTitle',
+			'mdz.hc.DataPoint', 'mdz.hc.DataPointIdentifier', 'mdz.hc.Event',
+			'mdz.hc.ProcessValue', 'mdz.hc.RawEvent', 'mdz.hc.timeseries.TimeSeries'
 		customizer.addStaticStars 'mdz.ccuhistorian.ManagerConfigurator.DeviceTypes'
 		customizer.addStaticStars 'mdz.ccuhistorian.ManagerConfigurator.PlugInTypes'
 		CompilerConfiguration config=[]
