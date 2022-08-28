@@ -732,7 +732,7 @@ public class Database implements Storage {
 			}
 	}
 
-	private synchronized void createBackup(String fileName) {
+	public synchronized void createBackup(String fileName) {
 		connect()
 		log.info "Creating backup of database to file $fileName"
 		long start=System.currentTimeMillis()

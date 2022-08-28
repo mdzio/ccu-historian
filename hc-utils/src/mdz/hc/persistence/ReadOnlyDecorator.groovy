@@ -111,6 +111,10 @@ public class ReadOnlyDecorator implements Storage {
 		throw new Exception('Storage is read only')
 	}
 
+	@Override void createBackup(String fileName) {
+		storage.createBackup(fileName)
+	}
+	
 	@Override
 	public String getConfig(String name) {
 		storage.getConfig(name)

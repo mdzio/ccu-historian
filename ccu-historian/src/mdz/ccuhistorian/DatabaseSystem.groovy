@@ -37,6 +37,8 @@ import groovy.transform.CompileStatic
 @CompileStatic
 public class DatabaseSystem extends BaseSystem {
 
+	private final static long ATSTART_TASK_DELAY = 3000; // [ms]
+	
 	ExtendedStorage extendedStorage
 	
 	private Database internalDatabase
@@ -85,7 +87,7 @@ public class DatabaseSystem extends BaseSystem {
 				// schedule task
 				if (task.cron=="@start") {
 					// run once
-					executeTask(task, 0, {})
+					executeTask(task, ATSTART_TASK_DELAY, {})
 				} else {
 					// setup cron
 					Cron cron=cparser.parse(task.cron)

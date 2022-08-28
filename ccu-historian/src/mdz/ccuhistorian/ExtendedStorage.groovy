@@ -133,6 +133,11 @@ class ExtendedStorage implements Storage {
 		return storage.replaceTimeSeries(dstDp, srcSeries, startTime, endTime)
 	}
 	
+	public void createBackup(String fileName) {
+		fireOnRead()
+		storage.createBackup(fileName)
+	}
+		
 	String getConfig(String name) {
 		return storage.getConfig(name)
 	}
