@@ -70,8 +70,8 @@ class TrendParametersTest {
 		
 		def params=tp.parameters
 		assert params.size()==13
-		assert params.w==[320]
-		assert params.h==[240]
+		assert params.w==['320']
+		assert params.h==['240']
 		assert params.b==['2018']
 		assert params.e==['2019']
 		assert params.t==['design t42']
