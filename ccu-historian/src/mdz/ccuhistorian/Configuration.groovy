@@ -20,6 +20,7 @@ package mdz.ccuhistorian
 import groovy.transform.CompileStatic
 import groovy.util.ConfigObject;
 import groovy.util.logging.Log
+import mdz.LogWriter
 import mdz.ccuhistorian.webapp.WebServerConfig
 import groovy.cli.commons.CliBuilder
 import org.codehaus.groovy.control.CompilerConfiguration
@@ -115,6 +116,8 @@ class Configuration {
 		binding.devices=new ConfigObject()
 		binding.historian=new HistorianConfig()
 		binding.webServer=new WebServerConfig()
+		// redirect print... to log
+		binding.out=new PrintWriter(new LogWriter(log))
 		
 		String script
 		File file=new File(cmdLineConfig.configFileName)
