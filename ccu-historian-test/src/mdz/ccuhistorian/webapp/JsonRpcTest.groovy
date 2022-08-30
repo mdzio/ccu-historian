@@ -6,8 +6,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
-import groovy.json.JsonOutput
-
 import mdz.ccuhistorian.Main
 
 class JsonRpcTest {
@@ -15,8 +13,18 @@ class JsonRpcTest {
 	Main main;
 	
 	def post(params) {
+		HttpURLConnection post = new URL("http://localhost/query/jsonrpc.gy").openConnection();
 		// TODO
-		// HTTP-POST http://localhost/query/jsonrpc.gy
+		def message = '{"message":"this is a message"}'
+		post.setRequestMethod("POST")
+		post.setDoOutput(true)
+		post.setRequestProperty("Content-Type", "application/json")
+		post.getOutputStream().write(message.getBytes("UTF-8"));
+		def postRC = post.getResponseCode();
+		println(postRC);
+		if (postRC.equals(200)) {
+			println(post.getInputStream().getText());
+		}
 	}
 	
 	@Before
