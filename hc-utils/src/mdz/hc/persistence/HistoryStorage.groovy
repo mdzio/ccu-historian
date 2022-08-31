@@ -37,7 +37,7 @@ public interface HistoryStorage extends Consumer<Event> {
 	public int getCount(DataPoint dp, Date startTime, Date endTime) throws Exception
 
 	public int deleteTimeSeries(DataPoint dp, Date startTime, Date endTime) throws Exception
+	public int insertTimeSeries(TimeSeries ts) throws Exception
 	public int copyTimeSeries(DataPoint dstDp, DataPoint srcDp, Date startTime, Date endTime, Date newStartTime) throws Exception
-
 	public int replaceTimeSeries(DataPoint dstDp, Iterable<ProcessValue> srcSeries, Date startTime, Date endTime) throws Exception
 }

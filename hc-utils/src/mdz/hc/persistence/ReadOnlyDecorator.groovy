@@ -95,6 +95,11 @@ public class ReadOnlyDecorator implements Storage {
 	public int deleteTimeSeries(DataPoint dp, Date startTime, Date endTime) throws Exception {
 		throw new Exception('Storage is read only')
 	}
+	
+	@Override
+	public int insertTimeSeries(TimeSeries ts) throws Exception {
+		throw new Exception('Storage is read only')
+	}
 
 	@Override
 	public int copyTimeSeries(DataPoint dstDp, DataPoint srcDp, Date startTime, Date endTime, Date newStartTime) {

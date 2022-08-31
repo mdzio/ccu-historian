@@ -93,6 +93,8 @@ public class Manager extends BasicProducer<RawEvent> implements Consumer<RawEven
 	public void addInterface(Interface itf) {
 		if (interfaces.containsValue(itf) || interfaces[itf.name]!=null)
 			throw new Exception("Duplicate HM interface '$itf.name'")
+		if (itf.name=="User")
+			throw new Exception("Interface name 'User' is reserved")
 		interfaces[itf.name]=itf
 	}
 	

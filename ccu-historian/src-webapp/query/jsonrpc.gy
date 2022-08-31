@@ -16,8 +16,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 import mdz.hc.timeseries.TimeSeries.CompactTimeSeries
+import mdz.hc.timeseries.TimeSeries
 import mdz.hc.persistence.ReadOnlyDecorator
 import mdz.hc.DataPointIdentifier
+import mdz.hc.DataPoint
 import mdz.Exceptions
 import groovy.json.JsonSlurper
 import groovy.json.StreamingJsonBuilder
@@ -156,7 +158,7 @@ def executeScript(script, writeAccess) {
 	CompilerConfiguration config=[]
 	// default imports
 	ImportCustomizer importCustomizer=[]
-	importCustomizer.addStaticStars 'java.lang.Math'
+	importCustomizer.addStaticStars 'java.lang.Math', 'mdz.ccuhistorian.webapp.TextFormat'
 	importCustomizer.addImport 'PreprocType', 'mdz.ccuhistorian.eventprocessing.Preprocessor.Type'
 	importCustomizer.addImports 'mdz.hc.DataPoint',
 		'mdz.hc.DataPointIdentifier',
@@ -179,7 +181,8 @@ def executeScript(script, writeAccess) {
 		]
 		staticImportsWhitelist=[]
 		staticStarImportsWhitelist=[
-			'java.lang.Math'
+			'java.lang.Math',
+			'mdz.ccuhistorian.webapp.TextFormat'
 		]
 		receiversBlackList=['java.lang.System']
 	}
@@ -200,13 +203,29 @@ def executeScript(script, writeAccess) {
 @Field 
 private static rpcFunctions=[
 	getDataPoint:{ params ->
-		if (params.size()==0)
+		if (params.size()==0) {
+			// all data points
 			database.dataPoints
-		else if (params[0] instanceof List)
-			params[0].collect { utils.parseDataPoint(it as String, database) }
-		else
-			utils.parseDataPoint(params[0] as String, database)
+		} else if (params.size()==1) { 
+			if (params[0] instanceof List) {
+				// list of data points
+				params[0].collect { utils.parseDataPoint(it as String, database) }
+			} else if (params[0] instanceof Map) {
+				// single data point by ID object
+				def ident=new DataPointIdentifier(params[0]?.id?.interfaceId, params[0]?.id?.address, params[0]?.id?.identifier)
+				if (ident.interfaceId==null || ident.address==null || ident.identifier==null) {
+					throw new RpcException("Invalid field id (no interfaceId, address or identifier)", RpcException.INVALID_PARAMS)
+				}
+				database.getDataPoint(ident)
+			} else {
+				// single data point by ID string
+				utils.parseDataPoint(params[0] as String, database)
+			}
+		} else {
+			throw new RpcException("Invalid number of parameters for getDataPoint", RpcException.INVALID_PARAMS)
+		} 
 	},
+	
 	updateDataPoint:{ params ->
 		if (params.size()!=1) {
 			throw new RpcException("Invalid number of parameters for updateDataPoint", RpcException.INVALID_PARAMS)
@@ -220,7 +239,7 @@ private static rpcFunctions=[
 		if (dbDp==null) {
 			throw new RpcException("Data point not found: $ident", RpcException.INVALID_PARAMS)
 		}
-		// merge attributes
+		// merge custom attribute
 		def custom=updateDp.attributes?.custom
 		if (custom==null || !(custom instanceof Map) ) {
 			throw new RpcException("Invalid custom attribute (missing or not an object)", RpcException.INVALID_PARAMS)
@@ -232,8 +251,65 @@ private static rpcFunctions=[
 				dbDp.attributes.custom.remove(k)
 			}
 		}
+		// update only if present
+		if (updateDp.managementFlags!=null) {
+			dbDp.managementFlags=updateDp.managementFlags
+		}
+		if (updateDp.attributes?.displayName!=null) {
+			dbDp.attributes.displayName=updateDp.attributes.displayName
+		}
+		if (updateDp.attributes?.room!=null) {
+			dbDp.attributes.room=updateDp.attributes.room
+		}
+		if (updateDp.attributes?.function!=null) {
+			dbDp.attributes.function=updateDp.attributes.function
+		}
+		if (updateDp.attributes?.comment!=null) {
+			dbDp.attributes.comment=updateDp.attributes.comment
+		}
+		if (updateDp.attributes?.maximum!=null) {
+			dbDp.attributes.maximum=updateDp.attributes.maximum
+		}
+		if (updateDp.attributes?.unit!=null) {
+			dbDp.attributes.unit=updateDp.attributes.unit
+		}
+		if (updateDp.attributes?.minimum!=null) {
+			dbDp.attributes.minimum=updateDp.attributes.minimum
+		}
+		if (updateDp.attributes?.type!=null) {
+			dbDp.attributes.type=updateDp.attributes.type
+		}
 		database.updateDataPoint(dbDp)
 	},
+	
+	createDataPoint:{ params ->
+		if (params.size()!=1) {
+			throw new RpcException("Invalid number of parameters for createDataPoint", RpcException.INVALID_PARAMS)
+		}
+		def createDp=params[0]
+		def ident=new DataPointIdentifier(createDp?.id?.interfaceId, createDp?.id?.address, createDp?.id?.identifier)
+		if (ident.interfaceId==null || ident.address==null || ident.identifier==null) {
+			throw new RpcException("Invalid field id (no interfaceId, address or identifier)", RpcException.INVALID_PARAMS)
+		}
+		if (ident.interfaceId!="User") {
+			throw new RpcException("User defined data points must have 'User' as interface ID", RpcException.INVALID_PARAMS)
+		}
+		def dp=new DataPoint(id: ident)
+		dp.managementFlags=createDp.managementFlags?:0
+		dp.attributes.displayName=createDp.attributes?.displayName
+		dp.attributes.room=createDp.attributes?.room
+		dp.attributes.function=createDp.attributes?.function
+		dp.attributes.comment=createDp.attributes?.comment
+		dp.attributes.custom=createDp.attributes?.custom?:[:]
+		dp.attributes.paramSet="VALUES"
+		dp.attributes.maximum=createDp.attributes?.maximum
+		dp.attributes.unit=createDp.attributes?.unit
+		dp.attributes.minimum=createDp.attributes?.minimum
+		dp.attributes.type=createDp.attributes?.type?:"FLOAT"
+		database.createDataPoint(dp)
+		null
+	},
+	
 	getValue:{ params ->
 		if (params[0] instanceof List)
 			params[0].collect { convertValue(database.getLast(
@@ -244,6 +320,7 @@ private static rpcFunctions=[
 				utils.parseDataPoint(params[0] as String, database)
 			))
 	},
+	
 	getTimeSeriesRaw:{ params ->
 		new CompactTimeSeries(database.getTimeSeriesRaw(
 			utils.parseDataPoint(params[0] as String, database), 
@@ -251,6 +328,7 @@ private static rpcFunctions=[
 			new Date(params[2] as long)
 		))
 	},
+	
 	getTimeSeries:{ params ->
 		new CompactTimeSeries(database.getTimeSeries(
 			utils.parseDataPoint(params[0] as String, database), 
@@ -258,10 +336,45 @@ private static rpcFunctions=[
 			new Date(params[2] as long)
 		))
 	},
+	
+	insertTimeSeries:{ params ->
+		if (params.size()!=2) {
+			throw new RpcException("Invalid number of parameters for insertTimeSeries", RpcException.INVALID_PARAMS)
+		}
+		def timeSeries=new TimeSeries(utils.parseDataPoint(params[0] as String, database))
+		try {
+			def timestamps=params[1].timestamps
+			def values=params[1].values
+			def states=params[1].states
+			if (timestamps.size() != values.size() || timestamps.size()!=states.size()) {
+				throw new RpcException("Invalid array length in time series object", RpcException.INVALID_PARAMS)
+			}
+			timestamps.eachWithIndex { ts, idx ->
+				timeSeries.add((long)ts, values[idx], (int)states[idx])
+			}
+		} catch (Exception e){
+			throw new RpcException("Invalid time series object", RpcException.INVALID_PARAMS, e)
+		}
+		database.insertTimeSeries(timeSeries)
+	},
+	
+	deleteTimeSeries:{ params ->
+		if (params.size()!=3) {
+			throw new RpcException("Invalid number of parameters for deleteTimeSeries", RpcException.INVALID_PARAMS)
+		}
+		def dp=utils.parseDataPoint(params[0] as String, database)
+		database.deleteTimeSeries(
+			dp, 
+			new Date(params[1] as long),
+			new Date(params[2] as long)
+		)
+	},
+	
 	setValue:{ params ->
 		interfaceManager.writeValue(utils.parseDataPoint(params[0] as String, database), params[1])
 		null
 	},
+	
 	executeScript:{ params ->
 		if (params.size()==0) {
 			throw new RpcException("Missing parameter(s) for executeScript", RpcException.INVALID_PARAMS)
@@ -273,12 +386,14 @@ private static rpcFunctions=[
 		}
 		executeScript(script, writeAccess)
 	},
+	
 	getConfig:{ params ->
 		if (params.size()!=1) {
 			throw new RpcException("Invalid number of parameters for getConfig", RpcException.INVALID_PARAMS)
 		}
 		database.getConfig(params[0] as String)
 	},
+	
 	setConfig:{ params ->
 		if (params.size()!=2) {
 			throw new RpcException("Invalid number of parameters for setConfig", RpcException.INVALID_PARAMS)

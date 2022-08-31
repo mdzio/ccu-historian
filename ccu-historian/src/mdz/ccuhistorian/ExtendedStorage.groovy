@@ -123,6 +123,10 @@ class ExtendedStorage implements Storage {
 		return storage.deleteTimeSeries(dp, startTime, endTime)
 	}
 
+	public int insertTimeSeries(TimeSeries ts) throws Exception {
+		return storage.insertTimeSeries(ts)	
+	}
+	
 	public int copyTimeSeries(DataPoint dstDp, DataPoint srcDp, Date startTime, Date endTime, Date newStartTime) throws Exception {
 		fireOnRead()
 		return storage.copyTimeSeries(dstDp, srcDp, startTime, endTime, newStartTime)

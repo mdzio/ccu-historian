@@ -498,6 +498,20 @@ public class Database implements Storage {
 		log.fine "$counter entries inserted"
 		counter
 	}
+	
+	public synchronized int insertTimeSeries(TimeSeries ts) throws Exception {
+		connect()
+		log.fine "Database: Inserting timeseries for data point ${ts.dataPoint.id}"
+		int counter=0
+		String sql="INSERT INTO $ts.dataPoint.historyTableName (TS, \"VALUE\", STATE) VALUES (?, ?, ?)"
+		ts.each { ProcessValue pv ->
+			def value=TimeSeries.getNormalizedValue(pv.value)
+			db.executeInsert sql, [pv.timestamp, value, pv.state]
+			counter++
+		}
+		log.fine "$counter entries inserted"
+		counter
+	}
 
 	public void normalizeDataPoint(DataPoint dp) {
 		def a=dp.attributes
