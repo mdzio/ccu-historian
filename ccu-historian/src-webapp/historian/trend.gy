@@ -220,10 +220,11 @@ renderer.content={
 			mkp.yield " Es wurden zu viele Datenpunkte für den Trend ausgewählt (Max. Anzahl: $MAX_NUM_DATA_POINTS)!"
 		} 
 	} else if (dpCnt) {
+		// if required, use API key
+		def apiKey=webServer.config.apiKeys ? [k:webServer.config.apiKeys[0]] : [:]
+		
 		// show trend
 		p(class:'text-center', style:'margin-top: 0.5em') {
-			// if required, use API key
-			def apiKey=webServer.config.apiKeys ? [k:webServer.config.apiKeys[0]] : [:]
 			img alt:'Bitte warten: Die Trend-Darstellung wird generiert!', src:buildUrl('../query/trend', trendParams.parameters, apiKey),
 				width:trendParams.width, height:trendParams.height
 		}
@@ -238,7 +239,7 @@ renderer.content={
 				}
 				
 				// CSV export
-				a class:'btn btn-default', href:buildUrl('/query/csv.gy', trendParams.parameters, stringDpParams), 'CSV-Export'
+				a class:'btn btn-default', href:buildUrl('/query/csv.gy', trendParams.parameters, stringDpParams, apiKey), 'CSV-Export'
 				
 				// individual groups
 				button class:'btn btn-default', form:'individual-groups', type:'submit',

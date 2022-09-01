@@ -34,6 +34,16 @@ public class DataPointIdentifier {
 		this.address=address
 		this.identifier=identifier
 	}
+	
+	public DataPointIdentifier(String itfAddrIdent) {
+		String[] fields=itfAddrIdent.split("\\.", -1)
+		if (fields.length!=3) {
+			throw new Exception("Invalid number of components: " + fields.length)
+		}
+		this.interfaceId=fields[0]
+		this.address=fields[1]
+		this.identifier=fields[2]
+	}
 
 	@Override
 	public String toString() {
