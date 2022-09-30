@@ -206,23 +206,23 @@ class ImportServlet extends HttpServlet {
 
 	private void updateProperties(DataPoint dp, List<String> fields) {
 		dp.managementFlags=convert(fields[5], Integer)
-		dp.attributes[DataPoint.ATTR_PREPROC_TYPE]=convert(fields[6], Integer)
-		dp.attributes[DataPoint.ATTR_PREPROC_PARAM]=convert(fields[7], Double)
-		dp.attributes[DataPoint.ATTR_DISPLAY_NAME]=fields[8]?:null
-		dp.attributes[DataPoint.ATTR_ROOM]=fields[9]?:null
-		dp.attributes[DataPoint.ATTR_FUNCTION]=fields[10]?:null
-		dp.attributes[DataPoint.ATTR_COMMENT]=fields[11]?:null
-		dp.attributes[DataPoint.ATTR_CUSTOM]=fields[12]?new JsonSlurper().parseText(fields[12]):[:]
-		dp.attributes[DataPoint.ATTR_PARAM_SET]=fields[13]?:null
-		dp.attributes[DataPoint.ATTR_TAB_ORDER]=convert(fields[14], Integer)
-		dp.attributes[DataPoint.ATTR_MAXIMUM]=convert(fields[15], Double)
-		dp.attributes[DataPoint.ATTR_UNIT]=fields[16]?:null
-		dp.attributes[DataPoint.ATTR_MINIMUM]=convert(fields[17], Double)
-		dp.attributes[DataPoint.ATTR_CONTROL]=fields[18]?:null
-		dp.attributes[DataPoint.ATTR_OPERATIONS]=convert(fields[19], Integer)
-		dp.attributes[DataPoint.ATTR_FLAGS]=convert(fields[20], Integer)
-		dp.attributes[DataPoint.ATTR_TYPE]=fields[21]?:null
-		dp.attributes[DataPoint.ATTR_DEFAULT_VALUE]=convert(fields[22], Double)
+		dp.attributes.putAt(DataPoint.ATTR_PREPROC_TYPE, convert(fields[6], Integer))
+		dp.attributes.putAt(DataPoint.ATTR_PREPROC_PARAM, convert(fields[7], Double))
+		dp.attributes.putAt(DataPoint.ATTR_DISPLAY_NAME, fields[8]?:null)
+		dp.attributes.putAt(DataPoint.ATTR_ROOM, fields[9]?:null)
+		dp.attributes.putAt(DataPoint.ATTR_FUNCTION, fields[10]?:null)
+		dp.attributes.putAt(DataPoint.ATTR_COMMENT, fields[11]?:null)
+		dp.attributes.putAt(DataPoint.ATTR_CUSTOM, fields[12]?new JsonSlurper().parseText(fields[12]):[:])
+		dp.attributes.putAt(DataPoint.ATTR_PARAM_SET, fields[13]?:null)
+		dp.attributes.putAt(DataPoint.ATTR_TAB_ORDER, convert(fields[14], Integer))
+		dp.attributes.putAt(DataPoint.ATTR_MAXIMUM, convert(fields[15], Double))
+		dp.attributes.putAt(DataPoint.ATTR_UNIT, fields[16]?:null)
+		dp.attributes.putAt(DataPoint.ATTR_MINIMUM, convert(fields[17], Double))
+		dp.attributes.putAt(DataPoint.ATTR_CONTROL, fields[18]?:null)
+		dp.attributes.putAt(DataPoint.ATTR_OPERATIONS, convert(fields[19], Integer))
+		dp.attributes.putAt(DataPoint.ATTR_FLAGS, convert(fields[20], Integer))
+		dp.attributes.putAt(DataPoint.ATTR_TYPE, fields[21]?:null)
+		dp.attributes.putAt(DataPoint.ATTR_DEFAULT_VALUE, convert(fields[22], Double))
 	}
 
 	private <T> T convert(String str, Class<T> clazz) {
