@@ -1,4 +1,5 @@
 @startuml
+!theme silver
 left to right direction
 
 rectangle "CCU1/2/3\nRaspberryMatic\npiVCCU/YAHM\n(bis zu 10 Zentralen)" {
@@ -41,6 +42,9 @@ rectangle "CCU-Historian" {
 
   rectangle "Autom.\nBackup" as backup
   backup <- db
+
+  rectangle "Skript-\nUmgebung" as scriptenv
+  db <-> scriptenv
 
   rectangle "Vorverarbeitung" #line.dashed {
     queue "Puffer\nArb.Speicher" as puffer
