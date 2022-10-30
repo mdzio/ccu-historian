@@ -17,6 +17,8 @@
 */
 package mdz.hc;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class ProcessValue {
@@ -29,7 +31,14 @@ public class ProcessValue {
 
 	public final static int STATE_PREPROCESSED = 0x00000004;
 	public final static int STATE_FIRST_ARCHIVED = 0x00000008;
-	
+
+	/**
+	 * User specific states start at bit 16.
+	 */
+	public final static int STATE_USER_MASK = 0xffff0000;
+
+	private static final DateFormat timestampFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
 	private Date timestamp;
 	private Object value;
 	private int state;
@@ -60,8 +69,16 @@ public class ProcessValue {
 		return state;
 	}
 
+	public boolean hasState(int mask) {
+		return (state & mask) == mask;
+	}
+
 	public void setState(int state) {
 		this.state = state;
+	}
+
+	public void updateState(int setMask, int resetMask) {
+		state = (state | setMask) & ~resetMask;
 	}
 
 	@Override
@@ -100,6 +117,6 @@ public class ProcessValue {
 
 	@Override
 	public String toString() {
-		return timestamp + ", " + value + ", " + state;
+		return timestampFormat.format(timestamp) + ", " + value + ", " + state;
 	}
 }

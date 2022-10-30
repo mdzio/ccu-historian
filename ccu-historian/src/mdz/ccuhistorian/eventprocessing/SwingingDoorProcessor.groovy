@@ -37,6 +37,12 @@ class SwingingDoorProcessor extends BasicProducer<Event> implements Processor<Ev
 	private Event first, last
 	private Slopes slopes
 	
+	public void produce(Event e) {
+		// modify state
+		e.pv.state |= ProcessValue.STATE_PREPROCESSED
+		super.produce e
+	}
+	
 	public void consume(Event e) throws Exception {
 		if (first==null) {
 			// store first
@@ -48,8 +54,9 @@ class SwingingDoorProcessor extends BasicProducer<Event> implements Processor<Ev
 			log.warning "Swinging door compression: Discarding event with earlier timestamp: $e"
 			return
 		}
-		// quality changed?
-		if (e.pv.state!=first.pv.state) {
+		// quality changed? ignore preprocessed flag.
+		if ( (e.pv.state & ~ProcessValue.STATE_PREPROCESSED) != 
+			(first.pv.state & ~ProcessValue.STATE_PREPROCESSED) ) {
 			// store last, if present
 			if (last!=null) {
 				produce last

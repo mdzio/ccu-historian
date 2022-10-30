@@ -195,12 +195,14 @@ class SwingingDoorTest {
 			pp.stop()
 		}		
 		List<Event> got=c.get()
+		// expect preprocessed flag
+		expected.each { it.pv.state |= ProcessValue.STATE_PREPROCESSED }
 		if (logFailedToStdOut && expected!=got) {
 			println "Failed test:"
 			println "  Expected:"
-			expected.each { println "    $it.pv.timestamp.time, $it.pv.value" }
+			expected.each { println "    $it.pv.timestamp.time, $it.pv.value, $it.pv.state" }
 			println "  Got:"
-			got.each { println "    $it.pv.timestamp.time, $it.pv.value" }
+			got.each { println "    $it.pv.timestamp.time, $it.pv.value, $it.pv.state" }
 		}
 		assert expected==got
 	}
