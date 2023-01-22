@@ -20,7 +20,7 @@ class BinaryOperatorExpressionTest {
 	}
 
 	BinaryOperator<ProcessValue> adder = { ProcessValue pv1, ProcessValue pv2 ->
-		new ProcessValue(pv1.timestamp, pv1.value+pv2.value, combineStates(pv1, pv2))
+		new ProcessValue(pv1.timestamp, pv1.value+pv2.value, AggregateFunctions.combineStates(pv1, pv2))
 	}
 
 	@Test

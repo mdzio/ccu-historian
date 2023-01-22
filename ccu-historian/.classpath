@@ -26,13 +26,13 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/external-libs/cron-utils-9.2.0/cron-utils-9.2.0-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/external-libs/groovy-2.5.18/groovy-cli-commons-2.5.18.jar"/>
-	<classpathentry kind="lib" path="/external-libs/groovy-2.5.18/groovy-json-2.5.18.jar"/>
-	<classpathentry kind="lib" path="/external-libs/groovy-2.5.18/groovy-servlet-2.5.18.jar"/>
-	<classpathentry kind="lib" path="/external-libs/groovy-2.5.18/groovy-sql-2.5.18.jar"/>
-	<classpathentry kind="lib" path="/external-libs/groovy-2.5.18/groovy-templates-2.5.18.jar"/>
-	<classpathentry kind="lib" path="/external-libs/groovy-2.5.18/groovy-xml-2.5.18.jar"/>
 	<classpathentry kind="lib" path="/external-libs/slf4j-1.7.36/slf4j-api-1.7.36.jar" sourcepath="/external-libs/slf4j-1.7.36/slf4j-api-1.7.36-sources.jar"/>
 	<classpathentry kind="lib" path="/external-libs/slf4j-1.7.36/slf4j-jdk14-1.7.36.jar" sourcepath="/external-libs/slf4j-1.7.36/slf4j-jdk14-1.7.36-sources.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-2.5.21/groovy-json-2.5.21.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-2.5.21/groovy-xml-2.5.21.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-2.5.21/groovy-cli-commons-2.5.21.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-2.5.21/groovy-servlet-2.5.21.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-2.5.21/groovy-sql-2.5.21.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-2.5.21/groovy-templates-2.5.21.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

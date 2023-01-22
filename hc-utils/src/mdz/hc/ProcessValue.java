@@ -61,6 +61,13 @@ public class ProcessValue {
 		return value;
 	}
 
+	public double getDoubleValue() {
+		if (!(value instanceof Number)) {
+			throw new ClassCastException("Process value does not contain a numeric value");
+		}
+		return ((Number) value).doubleValue();
+	}
+
 	void setValue(Object value) {
 		this.value = value;
 	}

@@ -1,11 +1,30 @@
+/*
+    CCU-Historian, a long term archive for the HomeMatic CCU
+    Copyright (C) 2011-2022 MDZ (info@ccu-historian.de)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 package mdz.hc.timeseries.expr;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -27,7 +46,7 @@ public abstract class Expression implements Reader {
 	 * Wraps a constant value into an Expression. The time series has the
 	 * characteristic HOLD.
 	 */
-	public static Expression from(double value) {
+	public static Expression from(Number value) {
 		return new FromConstantExpression(value);
 	}
 
@@ -57,11 +76,11 @@ public abstract class Expression implements Reader {
 	 * Calls an unary operator on each time series entry.
 	 */
 	public Expression unaryOperator(UnaryOperator<ProcessValue> operator) {
-		return lift(source -> new UnaryOperatorIterator(source, operator));
+		return lift(source -> new MapIterator(source, operator));
 	}
 
 	public Expression negative() {
-		return unaryOperator(pv -> new ProcessValue(pv.getTimestamp(), -doubleValue(pv), pv.getState()));
+		return unaryOperator(pv -> new ProcessValue(pv.getTimestamp(), -pv.getDoubleValue(), pv.getState()));
 	}
 
 	public Expression positive() {
@@ -72,76 +91,246 @@ public abstract class Expression implements Reader {
 	 * Calls a binary operator to combine two time series. The two time series
 	 * should have the characteristic LINEAR. However, time series with the
 	 * characteristic HOLD are automatically converted with linear(). The new time
-	 * series has entries at time points from both time series. The characteristics
-	 * of the first time series are propagated with the characteristic LINEAR set
-	 * and HOLD reset.
+	 * series has entries at time points from both time series.
+	 * 
+	 * The characteristics of the first time series are propagated with the
+	 * characteristic LINEAR set and HOLD reset.
 	 */
 	public Expression binaryOperator(Expression other, BinaryOperator<ProcessValue> operator) {
 		return new BinaryOperatorExpression(linear(), other.linear(), operator);
 	}
 
 	public Expression plus(Expression other) {
-		return binaryOperator(other,
-				(a, b) -> new ProcessValue(a.getTimestamp(), doubleValue(a) + doubleValue(b), combineStates(a, b)));
+		return binaryOperator(other, (a, b) -> new ProcessValue(a.getTimestamp(),
+				a.getDoubleValue() + b.getDoubleValue(), AggregateFunctions.combineStates(a, b)));
 	}
 
 	public Expression plus(Number constant) {
-		return plus(from(constant.doubleValue()));
+		return plus(from(constant));
 	}
 
 	public Expression minus(Expression other) {
-		return binaryOperator(other,
-				(a, b) -> new ProcessValue(a.getTimestamp(), doubleValue(a) - doubleValue(b), combineStates(a, b)));
+		return binaryOperator(other, (a, b) -> new ProcessValue(a.getTimestamp(),
+				a.getDoubleValue() - b.getDoubleValue(), AggregateFunctions.combineStates(a, b)));
 	}
 
 	public Expression minus(Number constant) {
-		return minus(from(constant.doubleValue()));
+		return minus(from(constant));
 	}
 
 	public Expression multiply(Expression other) {
-		return binaryOperator(other,
-				(a, b) -> new ProcessValue(a.getTimestamp(), doubleValue(a) * doubleValue(b), combineStates(a, b)));
+		return binaryOperator(other, (a, b) -> new ProcessValue(a.getTimestamp(),
+				a.getDoubleValue() * b.getDoubleValue(), AggregateFunctions.combineStates(a, b)));
 	}
 
 	public Expression multiply(Number constant) {
-		return multiply(from(constant.doubleValue()));
+		return multiply(from(constant));
 	}
 
 	public Expression div(Expression other) {
 		return binaryOperator(other, (a, b) -> {
-			double result = doubleValue(a) / doubleValue(b);
+			double result = a.getDoubleValue() / b.getDoubleValue();
 			if (Double.isNaN(result) || Double.isInfinite(result)) {
 				return new ProcessValue(a.getTimestamp(), 0.0D, ProcessValue.STATE_QUALITY_BAD);
 			}
-			return new ProcessValue(a.getTimestamp(), result, combineStates(a, b));
+			return new ProcessValue(a.getTimestamp(), result, AggregateFunctions.combineStates(a, b));
 		});
 	}
 
 	public Expression div(Number constant) {
-		return div(from(constant.doubleValue()));
+		return div(from(constant));
 	}
 
 	/**
-	 * A function is called for each time series entry with a modifiable state. The
-	 * returned values form the new time series.
+	 * All negative values of the time series are clipped at zero.
+	 * 
+	 * The time series should have the characteristic LINEAR. However, time series
+	 * with the characteristic HOLD are automatically converted with linear(). The
+	 * characteristics of the time series are propagated with the characteristic
+	 * LINEAR set and HOLD reset.
 	 */
-	public <T> Expression scan(Supplier<T> stateFactory, BiFunction<T, ProcessValue, ProcessValue> function) {
-		return lift(srcIter -> {
-			T state = stateFactory.get();
-			return new ScanIterator<T>(srcIter, function, state);
+	public Expression clipZero() {
+		class State {
+			ProcessValue prevPV;
+		}
+		return linear().scanMany(State::new, (state, pv) -> {
+			ArrayList<ProcessValue> res = new ArrayList<>(2);
+			double v = pv.getDoubleValue();
+			// not the first entry?
+			if (state.prevPV != null) {
+				double vp = state.prevPV.getDoubleValue();
+				// crossing zero?
+				if ((vp > 0.0 && v < 0.0) || (vp < 0.0 && v > 0.0)) {
+					// add entry at zero
+					res.add(zeroCrossing(state.prevPV, pv));
+				}
+			}
+			// add clipped value
+			if (v < 0.0) {
+				res.add(new ProcessValue(pv.getTimestamp(), 0.0D, pv.getState()));
+			} else {
+				res.add(pv);
+			}
+			state.prevPV = pv;
+			return res.iterator();
 		});
 	}
 
 	/**
-	 * A function is called for each time series entry with a modifiable state. The
-	 * concatenation of the returned iterators form the new time series.
+	 * The values of the time series are limited to the specified range.
+	 * 
+	 * The time series should have the characteristic LINEAR. However, time series
+	 * with the characteristic HOLD are automatically converted with linear(). The
+	 * characteristics of the time series are propagated with the characteristic
+	 * LINEAR set and HOLD reset.
 	 */
-	public <T> Expression scanMany(Supplier<T> stateFactory,
-			BiFunction<T, ProcessValue, Iterator<ProcessValue>> function) {
-		return lift(srcIter -> {
-			T state = stateFactory.get();
-			return new ScanManyIterator<T>(srcIter, state, function);
+	public Expression clip(Number limitLow, Number limitHigh) {
+		return this.minus(limitLow).clipZero().plus(limitLow.doubleValue() - limitHigh.doubleValue()).negative()
+				.clipZero().negative().plus(limitHigh);
+	}
+
+	/**
+	 * The time series is divided into intervals. The time stamps for the intervals
+	 * are taken from the time series 'intervals'. For each interval, a function is
+	 * called that aggregates the time series within the interval to a process
+	 * value. Before processing, linear() is called on this time series. The
+	 * characteristic HOLD is set and LINEAR is unset on the resulting time series.
+	 */
+	public Expression aggregate(Expression intervals, Function<Interval, ProcessValue> function) {
+		return new AggregateExpression(this, intervals, function);
+	}
+
+	/**
+	 * Short cut for aggregate(intervals, AggregateFunctions.minimum()).
+	 */
+	public Expression minimum(Expression intervals) {
+		return new AggregateExpression(this, intervals, AggregateFunctions.minimum());
+	}
+
+	/**
+	 * Short cut for aggregate(intervals, AggregateFunctions.maximum()).
+	 */
+	public Expression maximum(Expression intervals) {
+		return new AggregateExpression(this, intervals, AggregateFunctions.maximum());
+	}
+
+	/**
+	 * Short cut for aggregate(intervals, AggregateFunctions.average()).
+	 */
+	public Expression average(Expression intervals) {
+		return new AggregateExpression(this, intervals, AggregateFunctions.average());
+	}
+
+	/**
+	 * Short cut for aggregate(intervals, AggregateFunctions.begin()).
+	 */
+	public Expression resample(Expression intervals) {
+		return new AggregateExpression(this, intervals, AggregateFunctions.begin());
+	}
+
+	/**
+	 * Returns the derivative of the time series. The time unit is one hour. The
+	 * returned time series has one entry less. Characteristic HOLD is set and
+	 * LINEAR is reset.
+	 */
+	public Expression differentiate() {
+		class State {
+			ProcessValue previous;
+		}
+		return scanMany(State::new, (state, pv) -> {
+			if (state.previous == null) {
+				state.previous = pv;
+				return Collections.emptyIterator();
+			}
+			long timeSpan = pv.getTimestamp().getTime() - state.previous.getTimestamp().getTime();
+			if (timeSpan <= 0) {
+				return Collections.singleton(new ProcessValue(pv.getTimestamp(), 0.0, ProcessValue.STATE_QUALITY_BAD))
+						.iterator();
+			}
+			ProcessValue result = new ProcessValue(state.previous.getTimestamp(),
+					(pv.getDoubleValue() - state.previous.getDoubleValue()) * TIME_UNIT / timeSpan,
+					AggregateFunctions.combineStates(pv, state.previous));
+			state.previous = pv;
+			return Collections.singleton(result).iterator();
+		}).characteristics(Characteristics.HOLD, Characteristics.LINEAR);
+	}
+
+	/**
+	 * Heating degree day (HDD) is a measurement designed to quantify the demand for
+	 * energy needed to heat a building. This function should be used with the
+	 * outside air temperature. A value is calculated for each day. The heating
+	 * limit must be specified (e.g. 15°C).
+	 */
+	public Expression hdd(Number heatingLimit) {
+		return average(IntervalExpressions.daily()).unaryOperator(pv -> {
+			double v = heatingLimit.doubleValue() - pv.getDoubleValue();
+			return v >= 0 ? new ProcessValue(pv.getTimestamp(), v, pv.getState())
+					: new ProcessValue(pv.getTimestamp(), 0.0D, pv.getState());
 		});
+	}
+
+	/**
+	 * Heating degree day (HDD) with a heating limit of 15°C.
+	 */
+	public Expression hdd() {
+		return hdd(15);
+	}
+
+	/**
+	 * Corrects counter resets on meters. The characteristic COUNTER is set.
+	 */
+	public Expression counter() {
+		class State {
+			boolean first = true;
+			double accu, base, previous;
+		}
+		return scan(State::new, (state, pv) -> {
+			double val = pv.getDoubleValue();
+			if (state.first) {
+				state.first = false;
+				state.base = val;
+				state.previous = val;
+				return new ProcessValue(pv.getTimestamp(), 0.0d, pv.getState());
+			}
+			// overflow?
+			if (val - state.previous < 0) {
+				state.accu += state.previous - state.base;
+				state.base = val;
+			}
+			state.previous = val;
+			return new ProcessValue(pv.getTimestamp(), val - state.base + state.accu, pv.getState());
+		}).characteristics(Characteristics.COUNTER, 0);
+	}
+
+	/**
+	 * Converts a time series with the characteristic HOLD (and only then) into a
+	 * linear interpolated one. Just before each value change an additional entry
+	 * with the value of the previous one is inserted. The characteristic LINEAR is
+	 * set and HOLD is reset.
+	 */
+	public Expression linear() {
+		if (!hasCharacteristics(Characteristics.HOLD)) {
+			return characteristics(Characteristics.LINEAR, 0);
+		}
+		class State {
+			ProcessValue previous;
+		}
+		return scanMany(State::new, (state, pv) -> {
+			Iterator<ProcessValue> result = null;
+			if (state.previous == null) {
+				result = Collections.singleton(pv).iterator();
+			} else {
+				long directlyBefore = pv.getTimestamp().getTime() - 1;
+				if (state.previous.getTimestamp().getTime() == directlyBefore) {
+					result = Collections.singleton(pv).iterator();
+				} else {
+					result = Arrays.asList(new ProcessValue(new Date(directlyBefore), state.previous.getValue(),
+							state.previous.getState()), pv).iterator();
+				}
+			}
+			state.previous = pv;
+			return result;
+		}).characteristics(Characteristics.LINEAR, Characteristics.HOLD);
 	}
 
 	/**
@@ -157,7 +346,7 @@ public abstract class Expression implements Reader {
 	 */
 	public Expression validate(Number minimum, Number maximum) {
 		return unaryOperator(pv -> {
-			double v = doubleValue(pv);
+			double v = pv.getDoubleValue();
 			if (v < minimum.doubleValue() || v > maximum.doubleValue()) {
 				return new ProcessValue(pv.getTimestamp(), pv.getValue(), ProcessValue.STATE_QUALITY_BAD);
 			} else {
@@ -199,91 +388,39 @@ public abstract class Expression implements Reader {
 	}
 
 	/**
-	 * Converts a time series with the characteristic HOLD (and only then) into a
-	 * linear interpolated one. Just before each value change an additional entry
-	 * with the value of the previous one is inserted. The characteristic LINEAR is
-	 * set and HOLD is reset.
+	 * A function is called for each time series entry with a modifiable state. The
+	 * returned values form the new time series.
 	 */
-	public Expression linear() {
-		if (!hasCharacteristics(Characteristics.HOLD)) {
-			return characteristics(Characteristics.LINEAR, 0);
-		}
-		class State {
-			ProcessValue previous;
-		}
-		return scanMany(State::new, (state, pv) -> {
-			if (state.previous == null) {
-				state.previous = pv;
-				return Collections.singleton(pv).iterator();
-			}
-			return Arrays.asList(new ProcessValue(new Date(pv.getTimestamp().getTime() - 1), state.previous.getValue(),
-					state.previous.getState()), pv).iterator();
-		}).characteristics(Characteristics.LINEAR, Characteristics.HOLD);
+	public <T> Expression scan(Supplier<T> stateFactory, BiFunction<T, ProcessValue, ProcessValue> function) {
+		return lift(srcIter -> {
+			T state = stateFactory.get();
+			return new ScanIterator<T>(srcIter, function, state);
+		});
 	}
 
 	/**
-	 * Corrects counter resets on meters. The characteristic COUNTER is set.
+	 * A function is called for each time series entry with a modifiable state. The
+	 * concatenation of the returned iterators form the new time series.
 	 */
-	public Expression counter() {
-		class State {
-			boolean first = true;
-			double accu, base, previous;
-		}
-		return scan(State::new, (state, pv) -> {
-			double val = doubleValue(pv);
-			if (state.first) {
-				state.first = false;
-				state.base = val;
-				state.previous = val;
-				return new ProcessValue(pv.getTimestamp(), 0.0d, pv.getState());
-			}
-			// overflow?
-			if (val - state.previous < 0) {
-				state.accu += state.previous - state.base;
-				state.base = val;
-			}
-			state.previous = val;
-			return new ProcessValue(pv.getTimestamp(), val - state.base + state.accu, pv.getState());
-		}).characteristics(Characteristics.COUNTER, 0);
+	public <T> Expression scanMany(Supplier<T> stateFactory,
+			BiFunction<T, ProcessValue, Iterator<ProcessValue>> mapFunc) {
+		return lift(srcIter -> {
+			T state = stateFactory.get();
+			return new MapManyIterator(srcIter, pv -> mapFunc.apply(state, pv), null);
+		});
 	}
 
 	/**
-	 * Returns the derivative of the time series. The time unit is one hour. The
-	 * returned time series has one entry less. Characteristic HOLD is set and
-	 * LINEAR is reset.
+	 * onEntry is called for each time series entry with a modifiable state. If
+	 * there are no more entries, endFunc is called. The concatenation of the
+	 * returned iterators form the new time series.
 	 */
-	public Expression differentiate() {
-		class State {
-			ProcessValue previous;
-		}
-		return scanMany(State::new, (state, pv) -> {
-			if (state.previous == null) {
-				state.previous = pv;
-				return Collections.emptyIterator();
-			}
-			long timeSpan = pv.getTimestamp().getTime() - state.previous.getTimestamp().getTime();
-			if (timeSpan <= 0) {
-				return Collections.singleton(new ProcessValue(pv.getTimestamp(), 0.0, ProcessValue.STATE_QUALITY_BAD))
-						.iterator();
-			}
-			ProcessValue result = new ProcessValue(state.previous.getTimestamp(),
-					(doubleValue(pv) - doubleValue(state.previous)) * TIME_UNIT / timeSpan,
-					combineStates(pv, state.previous));
-			state.previous = pv;
-			return Collections.singleton(result).iterator();
-		}).characteristics(Characteristics.HOLD, Characteristics.LINEAR);
-	}
-
-	static int combineStates(ProcessValue first, ProcessValue second) {
-		return Math.min(first.getState() & ProcessValue.STATE_QUALITY_MASK,
-				second.getState() & ProcessValue.STATE_QUALITY_MASK);
-	}
-
-	static double doubleValue(ProcessValue pv) {
-		if (!(pv.getValue() instanceof Number)) {
-			throw new ClassCastException("Process value does not contain a numeric value");
-		}
-		return ((Number) pv.getValue()).doubleValue();
+	public <T> Expression scanMany(Supplier<T> stateFactory,
+			BiFunction<T, ProcessValue, Iterator<ProcessValue>> mapFunc, Function<T, Iterator<ProcessValue>> endFunc) {
+		return lift(srcIter -> {
+			T state = stateFactory.get();
+			return new MapManyIterator(srcIter, pv -> mapFunc.apply(state, pv), () -> endFunc.apply(state));
+		});
 	}
 
 	static ProcessValue interpolate(ProcessValue pv1, ProcessValue pv2, Date at) {
@@ -296,10 +433,26 @@ public abstract class Expression implements Reader {
 		if (t1 == t2) {
 			return pv1;
 		}
-		double v1 = doubleValue(pv1);
-		double v2 = doubleValue(pv2);
+		double v1 = pv1.getDoubleValue();
+		double v2 = pv2.getDoubleValue();
 		double value = (v2 - v1) * ((double) (t - t1) / (t2 - t1)) + v1;
-		int state = combineStates(pv1, pv2);
+		int state = AggregateFunctions.combineStates(pv1, pv2);
 		return new ProcessValue(at, value, state);
+	}
+
+	static ProcessValue zeroCrossing(ProcessValue pv1, ProcessValue pv2) {
+		long t1 = pv1.getTimestamp().getTime();
+		long t2 = pv2.getTimestamp().getTime();
+		double v1 = pv1.getDoubleValue();
+		double v2 = pv2.getDoubleValue();
+		double t_ = t1 - v1 * (t2 - t1) / (v2 - v1);
+		if (!Double.isFinite(t_)) {
+			throw new IllegalArgumentException("No zero crossing");
+		}
+		long t = (long) t_;
+		if (t < t1 || t > t2) {
+			throw new IllegalArgumentException("Timestamp of zero crossing out of range");
+		}
+		return new ProcessValue(new Date(t), 0.0D, AggregateFunctions.combineStates(pv1, pv2));
 	}
 }

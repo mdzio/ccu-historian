@@ -17,36 +17,49 @@
 */
 package mdz.hc.timeseries.expr;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.function.Predicate;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import mdz.hc.ProcessValue;
 
-class FilterIterator implements Iterator<ProcessValue> {
-	private final Predicate<ProcessValue> predicate;
-	private final Iterator<ProcessValue> srcIter;
-	private ProcessValue next;
+class MapManyIterator implements Iterator<ProcessValue> {
 
-	public FilterIterator(Predicate<ProcessValue> predicate, Iterator<ProcessValue> srcIter) {
-		this.predicate = predicate;
+	private final Iterator<ProcessValue> srcIter;
+	private final Function<ProcessValue, Iterator<ProcessValue>> mapFunc;
+	private Supplier<Iterator<ProcessValue>> endFunc;
+	private Iterator<ProcessValue> resultIter = Collections.emptyIterator();
+
+	public MapManyIterator(Iterator<ProcessValue> srcIter, Function<ProcessValue, Iterator<ProcessValue>> mapFunc,
+			Supplier<Iterator<ProcessValue>> endFunc) {
 		this.srcIter = srcIter;
+		this.mapFunc = mapFunc;
+		this.endFunc = endFunc;
 	}
 
 	@Override
 	public boolean hasNext() {
-		if (next == null) {
-			while (srcIter.hasNext()) {
-				ProcessValue v = srcIter.next();
-				if (predicate.test(v)) {
-					next = v;
-					return true;
+		// current iterator depleted?
+		while (!resultIter.hasNext()) {
+			// more iterators available?
+			if (srcIter.hasNext()) {
+				// get next iterator
+				resultIter = mapFunc.apply(srcIter.next());
+			} else {
+				// endFunc available?
+				if (endFunc != null) {
+					// get end iterator
+					resultIter = endFunc.get();
+					endFunc = null;
+				} else {
+					// no more iterators
+					return false;
 				}
 			}
-			return false;
-		} else {
-			return true;
 		}
+		return true;
 	}
 
 	@Override
@@ -54,8 +67,6 @@ class FilterIterator implements Iterator<ProcessValue> {
 		if (!hasNext()) {
 			throw new NoSuchElementException();
 		}
-		ProcessValue v = next;
-		next = null;
-		return v;
+		return resultIter.next();
 	}
 }

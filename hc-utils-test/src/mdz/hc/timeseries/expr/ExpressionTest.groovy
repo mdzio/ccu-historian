@@ -12,15 +12,15 @@ import org.junit.Test
 
 class ExpressionTest {
 
-	private pv(ts, v) {
+	static pv(ts, v) {
 		new ProcessValue(new Date(ts), v as Double, STATE_QUALITY_GOOD)
 	}
 
-	private pv(ts, v, st) {
+	static pv(ts, v, st) {
 		new ProcessValue(new Date(ts), v as Double, st)
 	}
 
-	private pvp(first, second) {
+	static pvp(first, second) {
 		def r=new ProcessValuePair()
 		r.first=first
 		r.second=second
@@ -38,7 +38,7 @@ class ExpressionTest {
 		def ts=e.read(new Date(1000), new Date(3000))
 		assert ts.collect()==[
 			pv(1000, 123.456, STATE_QUALITY_GOOD),
-			pv(2999, 123.456, STATE_QUALITY_GOOD),
+			pv(3000, 123.456, STATE_QUALITY_GOOD),
 		]
 	}
 
@@ -95,6 +95,22 @@ class ExpressionTest {
 	}
 
 	@Test
+	public void testScanMany2() {
+		def tsin=[
+			pv(1000, 10),
+			pv(5000, 5)
+		]
+		def tsout=[
+			pv(1000, 10),
+			pv(5000, 5)
+		]
+		def e=from(tsin, 0).scanMany({ [] }, { s, pv -> s << pv; [].iterator() }, { s -> s.iterator() })
+		assert e.read(new Date(0), new Date(10000)).collect()==tsout
+		// 2nd try because of state
+		assert e.read(new Date(0), new Date(10000)).collect()==tsout
+	}
+
+	@Test
 	public void testSanitize() {
 		def tsin=[
 			pv(1000, 10),
@@ -125,6 +141,22 @@ class ExpressionTest {
 			pv(2000, 11)
 		]
 		def e=from(tsin, HOLD).linear()
+		assert e.read(new Date(0), new Date(10000)).collect()==tsout
+
+		tsin=[
+			pv(1000, 10),
+			pv(1001, 11),
+			pv(1002, 12),
+			pv(1010, 13),
+		]
+		tsout=[
+			pv(1000, 10),
+			pv(1001, 11),
+			pv(1002, 12),
+			pv(1009, 12),
+			pv(1010, 13),
+		]
+		e=from(tsin, HOLD).linear()
 		assert e.read(new Date(0), new Date(10000)).collect()==tsout
 	}
 
@@ -185,13 +217,33 @@ class ExpressionTest {
 			pv(10, 10),
 		], LINEAR)
 		def expr=expr1.binaryOperator(expr2, { ProcessValue pv1, ProcessValue pv2 ->
-			new ProcessValue(pv1.timestamp, pv1.value+pv2.value, combineStates(pv1, pv2))
+			new ProcessValue(pv1.timestamp, pv1.value+pv2.value, AggregateFunctions.combineStates(pv1, pv2))
 		})
 		def ts=expr.read(new Date(0), new Date(10))
 		assert ts.toList()==[
 			pv(0, 5),
 			pv(9, 14),
 			pv(10, 20),
+		]
+	}
+
+	@Test
+	public void testAdd() {
+		def expr1=from([
+			pv(2, 2),
+			pv(10, 10),
+		], LINEAR)
+		def expr2=from([
+			pv(0, 0),
+			pv(8, 8),
+		], LINEAR)
+		def expr=expr1+expr2
+		def ts=expr.read(new Date(0), new Date(10))
+		assert ts.toList()==[
+			pv(0, 0, STATE_QUALITY_BAD),
+			pv(2, 4),
+			pv(8, 16),
+			pv(10, 0, STATE_QUALITY_BAD),
 		]
 	}
 
@@ -214,7 +266,7 @@ class ExpressionTest {
 			pv(5, 0),
 		], LINEAR)
 		def expr=((-a*b)*2-c-3.0)/b/2.0+2.0+a
-		def r=expr.read(new Date(0), new Date(6)).toList()
+		def r=expr.read(new Date(0), new Date(5)).toList()
 		def w=[
 			pv(0, 0),
 			pv(1, -1.5),
@@ -224,5 +276,102 @@ class ExpressionTest {
 			pv(5, 0.5),
 		]
 		assert r==w
+	}
+
+	@Test
+	public void testAggregate() {
+		def src=from([
+			pv(1000, 1.0),
+			pv(3000, 3.0),
+			pv(8000, 3.0),
+			pv(10000, 5.0),
+		], LINEAR)
+
+		def r=src.aggregate(from([], 0), null).read(new Date(0), new Date(10000)).toList()
+		assert r.isEmpty()
+
+		r=src.aggregate(from([pv(5000, 0.0)], 0), null).read(new Date(0), new Date(10000)).toList()
+		assert r.isEmpty()
+
+		def ts=from([
+			pv(2000, 0.0),
+			pv(5000, 0.0),
+		], 0)
+		r=src.aggregate(ts, AggregateFunctions.minimum()).read(new Date(0), new Date(10000)).toList()
+		assert r==[pv(2000, 2.0),]
+
+		ts=from([
+			pv(0, 0.0),
+			pv(500, 0.0),
+			pv(1000, 0.0),
+			pv(2000, 0.0),
+			pv(3000, 0.0),
+			pv(4000, 0.0),
+			pv(7000, 0.0),
+			pv(8000, 0.0),
+			pv(9000, 0.0),
+			pv(10000, 0.0),
+			pv(11000, 0.0),
+		], 0)
+		r=src.aggregate(ts, AggregateFunctions.maximum()).read(new Date(0), new Date(12000)).toList()
+		assert r==[
+			pv(0, 0.0, STATE_QUALITY_BAD),
+			pv(500, 1.0, STATE_QUALITY_QUESTIONABLE),
+			pv(1000, 2.0),
+			pv(2000, 3.0),
+			pv(3000, 3.0),
+			pv(4000, 3.0),
+			pv(7000, 3.0),
+			pv(8000, 4.0),
+			pv(9000, 5.0),
+			pv(10000, 5.0, STATE_QUALITY_QUESTIONABLE),
+		]
+	}
+
+	@Test
+	public void testClipZero() {
+		def ts=from([
+			pv(0, -1.0),
+			pv(2000, 1.0),
+			pv(4000, -1.0),
+			pv(5000, 0.0),
+			pv(6000, 1.0),
+			pv(8000, -1.0),
+			pv(10000, 0.0),
+		], 0)
+		def r=ts.clipZero().read(new Date(0), new Date(10000)).toList()
+		assert r==[
+			pv(0, 0.0),
+			pv(1000, 0.0),
+			pv(2000, 1.0),
+			pv(3000, 0.0),
+			pv(4000, 0.0),
+			pv(5000, 0.0),
+			pv(6000, 1.0),
+			pv(7000, 0.0),
+			pv(8000, 0.0),
+			pv(10000, 0.0)
+		]
+	}
+
+	@Test
+	public void testClip() {
+		def ts=from([
+			pv(0, 10.0),
+			pv(20000, -10.0),
+			pv(30000, -10.0),
+			pv(50000, 10.0),
+		], 0)
+		def r=ts.clip(1, 5).read(new Date(0), new Date(50000)).toList()
+		assert r==[
+			pv(0, 5.0),
+			pv(5000, 5.0),
+			pv(9000, 1.0),
+			pv(20000, 1.0),
+			pv(30000, 1.0),
+			pv(41000, 1.0),
+			pv(45000, 5.0),
+			pv(50000, 5.0),
+		]
 	}
 }

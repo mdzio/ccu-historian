@@ -15,6 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+import mdz.ccuhistorian.DatabaseExpressionAdapter
 import mdz.hc.timeseries.TimeSeries.CompactTimeSeries
 import mdz.hc.timeseries.TimeSeries
 import mdz.hc.persistence.ReadOnlyDecorator
@@ -158,14 +159,17 @@ def executeScript(script, writeAccess) {
 	CompilerConfiguration config=[]
 	// default imports
 	ImportCustomizer importCustomizer=[]
-	importCustomizer.addStaticStars 'java.lang.Math', 'mdz.ccuhistorian.webapp.TextFormat'
+	importCustomizer.addStaticStars 'java.lang.Math',
+		'mdz.ccuhistorian.webapp.TextFormat',
+		'mdz.hc.timeseries.expr.IntervalExpressions'
 	importCustomizer.addImport 'PreprocType', 'mdz.ccuhistorian.eventprocessing.Preprocessor.Type'
 	importCustomizer.addImports 'mdz.hc.DataPoint',
 		'mdz.hc.DataPointIdentifier',
 		'mdz.hc.Event',
 		'mdz.hc.ProcessValue',
 		'mdz.hc.RawEvent',
-		'mdz.hc.timeseries.TimeSeries'
+		'mdz.hc.timeseries.TimeSeries',
+		'mdz.hc.timeseries.expr.Expression'
 	config.addCompilationCustomizers importCustomizer
 	// security
 	SecureASTCustomizer secureCustomizer=[]
@@ -177,12 +181,14 @@ def executeScript(script, writeAccess) {
 			'mdz.hc.Event',
 			'mdz.hc.ProcessValue',
 			'mdz.hc.RawEvent',
-			'mdz.hc.timeseries.TimeSeries'
+			'mdz.hc.timeseries.TimeSeries',
+			'mdz.hc.timeseries.expr.Expression'
 		]
 		staticImportsWhitelist=[]
 		staticStarImportsWhitelist=[
 			'java.lang.Math',
-			'mdz.ccuhistorian.webapp.TextFormat'
+			'mdz.ccuhistorian.webapp.TextFormat',
+			'mdz.hc.timeseries.expr.IntervalExpressions'
 		]
 		receiversBlackList=['java.lang.System']
 	}
@@ -190,13 +196,31 @@ def executeScript(script, writeAccess) {
 	
 	// configure binding	
 	Binding binding=[]
-	output=new StringWriter()
-	binding.out=new PrintWriter(output)
+	def output=new StringWriter()
+	def writer=new PrintWriter(output)
+	binding.out=writer
 	binding.database=writeAccess ? database : new ReadOnlyDecorator(database)
+	def exprAdapter=new DatabaseExpressionAdapter(storage: database)
+	binding.dataPoint=exprAdapter.&dataPoint 
 	
 	// create shell and execute script
 	GroovyShell shell=[binding, config]
-	shell.evaluate script, 'UserScript'
+	def result=shell.evaluate(script, 'UserScript')
+	
+	// no script output and result available?
+	if (output.buffer.length()==0 && result!=null) {
+		// print result object
+		if (result instanceof Iterable) {
+			result=result.iterator()
+		}
+		if (result instanceof Iterator) { 
+			result.each {
+				writer.println it	
+			}
+		} else {
+			writer.print result
+		}
+	}
 	output.toString()
 }
 
