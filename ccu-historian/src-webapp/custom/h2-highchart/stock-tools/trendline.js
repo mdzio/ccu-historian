@@ -1,5 +1,5 @@
 /*
- Highstock JS v10.0.0 (2022-03-07)
+ Highstock JS v10.3.3 (2023-01-20)
 
  Indicator series type for Highcharts Stock
 

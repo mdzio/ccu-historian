@@ -165,6 +165,18 @@ renderer.content={
                   span id: "Font-Size", class:"LinePopup-text", "Font-Size"
                   select(id: "Select-FontSize", class:"form-select-h2")  { }
                }
+               div(id:"crosshair") {
+                  span id: "CrossHair", class:"LinePopup-text", "CrossHair"
+                  select(id: "Select-CrossHair", class:"form-select-h2")  { }
+               }
+               div(id:"tooltip") {
+                  span id: "ToolTip", class:"LinePopup-text", "ToolTip"
+                  select(id: "Select-ToolTip", class:"form-select-h2")  { }
+               }
+               div(id:"highlight") {
+                  span id: "Highlight", class:"LinePopup-text", "Highlight"
+                  select(id: "Select-HighLight", class:"form-select-h2")  { }
+               }
                div(id:"refreshSec") {
                    span id: "Text-Refresh", class:"LinePopup-text", "Refresh in Sec." 
                    input(id: "Line-Refresh", type:"number", step: "any", class:"form-input-h2") 
