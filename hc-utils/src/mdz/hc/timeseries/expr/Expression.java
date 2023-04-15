@@ -201,24 +201,51 @@ public abstract class Expression implements Reader {
 	}
 
 	/**
-	 * Short cut for aggregate(intervals, AggregateFunctions.minimum()).
+	 * Calculates the minimum of each interval. Short cut for aggregate(intervals,
+	 * AggregateFunctions.minimum()).
 	 */
 	public Expression minimum(Expression intervals) {
 		return new AggregateExpression(this, intervals, AggregateFunctions.minimum());
 	}
 
 	/**
-	 * Short cut for aggregate(intervals, AggregateFunctions.maximum()).
+	 * Calculates the minimum over the entire requested time range. Short cut for
+	 * minimum(IntervalExpressions.entire()).
+	 */
+	public Expression minimum() {
+		return new AggregateExpression(this, IntervalExpressions.entire(), AggregateFunctions.minimum());
+	}
+
+	/**
+	 * Calculates the maximum of each interval. Short cut for aggregate(intervals,
+	 * AggregateFunctions.maximum()).
 	 */
 	public Expression maximum(Expression intervals) {
 		return new AggregateExpression(this, intervals, AggregateFunctions.maximum());
 	}
 
 	/**
-	 * Short cut for aggregate(intervals, AggregateFunctions.average()).
+	 * Calculates the maximum over the entire requested time range. Short cut for
+	 * maximum(IntervalExpressions.entire()).
+	 */
+	public Expression maximum() {
+		return new AggregateExpression(this, IntervalExpressions.entire(), AggregateFunctions.maximum());
+	}
+
+	/**
+	 * Calculates the average of each interval. Short cut for aggregate(intervals,
+	 * AggregateFunctions.average()).
 	 */
 	public Expression average(Expression intervals) {
 		return new AggregateExpression(this, intervals, AggregateFunctions.average());
+	}
+
+	/**
+	 * Calculates the average over the entire requested time range. Short cut for
+	 * average(IntervalExpressions.entire()).
+	 */
+	public Expression average() {
+		return new AggregateExpression(this, IntervalExpressions.entire(), AggregateFunctions.average());
 	}
 
 	/**

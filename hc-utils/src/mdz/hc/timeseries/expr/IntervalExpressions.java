@@ -19,6 +19,7 @@ package mdz.hc.timeseries.expr;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -113,6 +114,21 @@ public class IntervalExpressions {
 						present = true;
 					}
 				};
+			}
+
+			@Override
+			public int getCharacteristics() {
+				return Characteristics.EVENT;
+			}
+		};
+	}
+
+	public static Expression entire() {
+		return new Expression() {
+			@Override
+			public Iterator<ProcessValue> read(Date begin, Date end) {
+				return Arrays.asList(new ProcessValue(begin, 1.0, ProcessValue.STATE_QUALITY_GOOD),
+						new ProcessValue(end, 1.0, ProcessValue.STATE_QUALITY_GOOD)).iterator();
 			}
 
 			@Override
