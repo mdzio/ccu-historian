@@ -116,6 +116,7 @@ class Configuration {
 		binding.devices=new ConfigObject()
 		binding.historian=new HistorianConfig()
 		binding.webServer=new WebServerConfig()
+		binding.version=Main.version
 		// redirect print... to log
 		binding.out=new PrintWriter(new LogWriter(log))
 		
