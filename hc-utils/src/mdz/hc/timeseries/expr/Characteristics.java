@@ -23,7 +23,7 @@ package mdz.hc.timeseries.expr;
 public final class Characteristics {
 	/**
 	 * The last value is hold until the next sample. This should be used for
-	 * discrete sensors (e.g. switches).
+	 * binary sensors (e.g. switches).
 	 */
 	public static final int HOLD = 0x0001;
 

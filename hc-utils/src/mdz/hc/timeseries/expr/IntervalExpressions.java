@@ -61,6 +61,10 @@ public class IntervalExpressions {
 		return from(CronBuilder.hourly(cronDef));
 	}
 
+	public static Expression everyMinute() {
+		return from(cronParser.parse("0 * * * * ?"));
+	}
+
 	public static Expression cron(String cronText) {
 		return from(cronParser.parse(cronText));
 	}

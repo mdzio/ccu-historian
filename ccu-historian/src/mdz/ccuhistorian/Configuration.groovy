@@ -131,7 +131,8 @@ class Configuration {
 		ImportCustomizer customizer=[]
 		customizer.addStaticStars 'java.lang.Math', 'mdz.ccuhistorian.webapp.TextFormat',
 			'mdz.hc.ProcessValue', 'mdz.hc.timeseries.expr.Characteristics',
-			'mdz.hc.timeseries.expr.IntervalExpressions'
+			'mdz.hc.timeseries.expr.IntervalExpressions',
+			'mdz.hc.timeseries.expr.Expressions'
 		customizer.addImport 'PreprocType', 'mdz.ccuhistorian.eventprocessing.Preprocessor.Type'
 		customizer.addImports 'mdz.ccuhistorian.TrendDesign', 'java.util.logging.Level',
 			'java.awt.Color', 'org.jfree.chart.ChartColor', 'java.awt.BasicStroke',

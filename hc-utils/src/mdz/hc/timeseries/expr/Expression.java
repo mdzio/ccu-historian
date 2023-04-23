@@ -79,6 +79,19 @@ public abstract class Expression implements Reader {
 		return lift(source -> new MapIterator(source, operator));
 	}
 
+	/**
+	 * Simplification of unaryOperator() to generate a time series via a function
+	 * that calculates a process value depending on the timestamp.
+	 * 
+	 * Example of a sine wave over a period of one day:
+	 * IntervalExpressions.hourly().generate(t -> Math.sin(2 * Math.PI * t.time /
+	 * 1000 / 60 / 60 / 24))
+	 */
+	public Expression generate(Function<Date, Double> operator) {
+		return unaryOperator(pv -> new ProcessValue(pv.getTimestamp(), operator.apply(pv.getTimestamp()),
+				ProcessValue.STATE_QUALITY_GOOD));
+	}
+
 	public Expression negative() {
 		return unaryOperator(pv -> new ProcessValue(pv.getTimestamp(), -pv.getDoubleValue(), pv.getState()));
 	}
@@ -106,7 +119,8 @@ public abstract class Expression implements Reader {
 	}
 
 	public Expression plus(Number constant) {
-		return plus(from(constant));
+		return unaryOperator(
+				pv -> new ProcessValue(pv.getTimestamp(), pv.getDoubleValue() + constant.doubleValue(), pv.getState()));
 	}
 
 	public Expression minus(Expression other) {
@@ -115,7 +129,8 @@ public abstract class Expression implements Reader {
 	}
 
 	public Expression minus(Number constant) {
-		return minus(from(constant));
+		return unaryOperator(
+				pv -> new ProcessValue(pv.getTimestamp(), pv.getDoubleValue() - constant.doubleValue(), pv.getState()));
 	}
 
 	public Expression multiply(Expression other) {
@@ -124,7 +139,8 @@ public abstract class Expression implements Reader {
 	}
 
 	public Expression multiply(Number constant) {
-		return multiply(from(constant));
+		return unaryOperator(
+				pv -> new ProcessValue(pv.getTimestamp(), pv.getDoubleValue() * constant.doubleValue(), pv.getState()));
 	}
 
 	public Expression div(Expression other) {
@@ -138,7 +154,13 @@ public abstract class Expression implements Reader {
 	}
 
 	public Expression div(Number constant) {
-		return div(from(constant));
+		return unaryOperator(pv -> {
+			double result = pv.getDoubleValue() / constant.doubleValue();
+			if (Double.isNaN(result) || Double.isInfinite(result)) {
+				return new ProcessValue(pv.getTimestamp(), 0.0D, ProcessValue.STATE_QUALITY_BAD);
+			}
+			return new ProcessValue(pv.getTimestamp(), result, pv.getState());
+		});
 	}
 
 	/**
@@ -280,6 +302,37 @@ public abstract class Expression implements Reader {
 			state.previous = pv;
 			return Collections.singleton(result).iterator();
 		}).characteristics(Characteristics.HOLD, Characteristics.LINEAR);
+	}
+
+	/**
+	 * Returns the integral of the time series. The time unit is one hour. The time
+	 * series should have the characteristic LINEAR. However, a time series with the
+	 * characteristic HOLD is automatically converted with linear(). Characteristic
+	 * LINEAR is set and HOLD is reset.
+	 */
+	public Expression integrate() {
+		class State {
+			ProcessValue prev;
+			double sumVal;
+			int sumStat;
+		}
+		return linear().scan(State::new, (st, pv) -> {
+			if (st.prev == null) {
+				st.sumVal = 0.0;
+				st.sumStat = pv.getState();
+			} else {
+				st.sumStat = AggregateFunctions.combineStates(st.sumStat, pv.getState());
+				// Once the status is BAD, it will remain BAD!
+				if ((st.sumStat & ProcessValue.STATE_QUALITY_MASK) == ProcessValue.STATE_QUALITY_BAD) {
+					st.sumVal = 0.0;
+				} else {
+					long timeSpan = pv.getTimestamp().getTime() - st.prev.getTimestamp().getTime();
+					st.sumVal += (st.prev.getDoubleValue() + pv.getDoubleValue()) / 2.0 * timeSpan / TIME_UNIT;
+				}
+			}
+			st.prev = pv;
+			return new ProcessValue(pv.getTimestamp(), st.sumVal, st.sumStat);
+		});
 	}
 
 	/**

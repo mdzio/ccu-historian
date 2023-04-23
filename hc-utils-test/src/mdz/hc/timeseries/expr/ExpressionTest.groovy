@@ -374,4 +374,26 @@ class ExpressionTest {
 			pv(50000, 5.0),
 		]
 	}
+
+	@Test
+	public void testIntegrate() {
+		def TU=Expression.TIME_UNIT
+		def ts=from([
+			pv(0, 10.0),
+			pv(1*TU, 11.0),
+			pv(2*TU, 10.0),
+			pv(3*TU, 9.0),
+			pv(4*TU, 0.0),
+			pv(5*TU, -9.0),
+		], 0)
+		def r=ts.integrate().read(new Date(0), new Date(10000)).toList()
+		assert r==[
+			pv(0, 0.0),
+			pv(1*TU, 10.5),
+			pv(2*TU, 21.0),
+			pv(3*TU, 30.5),
+			pv(4*TU, 35.0),
+			pv(5*TU, 30.5)
+		]
+	}
 }
