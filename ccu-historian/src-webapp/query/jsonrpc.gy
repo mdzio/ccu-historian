@@ -162,6 +162,8 @@ def executeScript(script, writeAccess) {
 	ImportCustomizer importCustomizer=[]
 	importCustomizer.addStaticStars 'java.lang.Math',
 		'mdz.ccuhistorian.webapp.TextFormat',
+		'mdz.hc.ProcessValue',
+		'mdz.hc.timeseries.expr.Characteristics',
 		'mdz.hc.timeseries.expr.IntervalExpressions'
 	importCustomizer.addImport 'PreprocType', 'mdz.ccuhistorian.eventprocessing.Preprocessor.Type'
 	importCustomizer.addImports 'mdz.hc.DataPoint',
@@ -189,6 +191,8 @@ def executeScript(script, writeAccess) {
 		staticStarImportsWhitelist=[
 			'java.lang.Math',
 			'mdz.ccuhistorian.webapp.TextFormat',
+			'mdz.hc.ProcessValue',
+			'mdz.hc.timeseries.expr.Characteristics',
 			'mdz.hc.timeseries.expr.IntervalExpressions'
 		]
 		receiversBlackList=['java.lang.System']
