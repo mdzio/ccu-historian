@@ -1,7 +1,7 @@
 package mdz.hc.timeseries.expr
 
 import static mdz.hc.ProcessValue.*
-import static mdz.hc.timeseries.expr.Expression.*
+import static mdz.hc.timeseries.expr.Expressions.*
 
 import java.util.function.BinaryOperator
 

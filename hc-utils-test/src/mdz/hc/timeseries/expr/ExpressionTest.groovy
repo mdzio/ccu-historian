@@ -6,7 +6,7 @@ import mdz.hc.ProcessValue
 import mdz.hc.ProcessValuePair
 
 import static mdz.hc.ProcessValue.*
-import static mdz.hc.timeseries.expr.Expression.*
+import static mdz.hc.timeseries.expr.Expressions.*
 import static mdz.hc.timeseries.expr.Characteristics.*
 import org.junit.Test
 
@@ -184,7 +184,7 @@ class ExpressionTest {
 
 	@Test
 	public void testDifferentiate() {
-		def tu=TIME_UNIT
+		def tu=Expression.TIME_UNIT
 		def tsin=[
 			pv(0*tu, 1),
 			pv(3*tu, 4),

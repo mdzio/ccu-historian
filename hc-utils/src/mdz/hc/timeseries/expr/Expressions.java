@@ -9,6 +9,29 @@ import mdz.hc.ProcessValue;
 
 public class Expressions {
 
+	/**
+	 * Wraps a Reader into an Expression.
+	 */
+	public static Expression from(Reader reader) {
+		return new FromReaderExpression(reader);
+	}
+
+	/**
+	 * Wraps a constant value into an Expression. The time series has the
+	 * characteristic HOLD.
+	 */
+	public static Expression from(Number value) {
+		return new FromConstantExpression(value);
+	}
+
+	/**
+	 * Wraps an Iterable into an Expression. Begin and end of reads are ignored. Use
+	 * sanitize() to remove out of range timestamps.
+	 */
+	public static Expression from(Iterable<ProcessValue> iterable, int characteristics) {
+		return new FromIterableExpression(iterable, characteristics);
+	}
+
 	public static Expression step(Number firstValue, Number secondValue, Date stepTimestamp) {
 		return new Expression() {
 			@Override

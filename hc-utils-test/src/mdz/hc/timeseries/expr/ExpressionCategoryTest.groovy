@@ -2,7 +2,7 @@ package mdz.hc.timeseries.expr
 
 import static org.junit.Assert.*
 import static mdz.hc.timeseries.expr.ExpressionTest.*
-import static mdz.hc.timeseries.expr.Expression.*
+import static mdz.hc.timeseries.expr.Expressions.*
 import org.junit.Test
 
 class ExpressionCategoryTest {

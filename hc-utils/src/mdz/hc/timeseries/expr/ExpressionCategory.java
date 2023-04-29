@@ -20,18 +20,18 @@ package mdz.hc.timeseries.expr;
 public class ExpressionCategory {
 
 	public static Expression plus(Number n, Expression e) {
-		return Expression.from(n.doubleValue()).plus(e);
+		return Expressions.from(n.doubleValue()).plus(e);
 	}
-	
+
 	public static Expression minus(Number n, Expression e) {
-		return Expression.from(n.doubleValue()).minus(e);
+		return Expressions.from(n.doubleValue()).minus(e);
 	}
-	
+
 	public static Expression multiply(Number n, Expression e) {
-		return Expression.from(n.doubleValue()).multiply(e);
+		return Expressions.from(n.doubleValue()).multiply(e);
 	}
-	
+
 	public static Expression div(Number n, Expression e) {
-		return Expression.from(n.doubleValue()).div(e);
+		return Expressions.from(n.doubleValue()).div(e);
 	}
 }
