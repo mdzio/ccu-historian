@@ -23,6 +23,7 @@ import mdz.hc.DataPointIdentifier
 import mdz.hc.ProcessValue
 import mdz.hc.persistence.Storage
 import mdz.hc.timeseries.expr.Expression
+import mdz.hc.timeseries.expr.Expressions
 import mdz.hc.timeseries.expr.Reader
 import mdz.hc.timeseries.expr.Characteristics
 
@@ -34,7 +35,7 @@ public class DatabaseExpressionAdapter {
 		if (dp.historyString) {
 			throw new Exception("Data point $dp.displayName is not numeric")
 		}
-		
+
 		// determine characteristics
 		def action=(dp.attributes.type=='ACTION') || (dp.id.identifier=='PRESS_SHORT') || (dp.id.identifier=='PRESS_LONG')
 		def continuous=dp.continuous
@@ -47,9 +48,9 @@ public class DatabaseExpressionAdapter {
 		} else {
 			characteristics=Characteristics.HOLD
 		}
-		
+
 		// wrap database.getTimeSeries
-		Expression.from(new Reader() {
+		Expressions.from(new Reader() {
 			public int getCharacteristics() {
 				characteristics
 			}

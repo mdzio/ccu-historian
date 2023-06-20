@@ -138,7 +138,8 @@ class ExpressionTest {
 		def tsout=[
 			pv(1000, 10, STATE_QUALITY_QUESTIONABLE),
 			pv(1999, 10, STATE_QUALITY_QUESTIONABLE),
-			pv(2000, 11)
+			pv(2000, 11),
+			pv(10000, 11),
 		]
 		def e=from(tsin, HOLD).linear()
 		assert e.read(new Date(0), new Date(10000)).collect()==tsout
@@ -155,6 +156,23 @@ class ExpressionTest {
 			pv(1002, 12),
 			pv(1009, 12),
 			pv(1010, 13),
+			pv(10000, 13),
+		]
+		e=from(tsin, HOLD).linear()
+		assert e.read(new Date(0), new Date(10000)).collect()==tsout
+
+		tsin=[pv(10000, 10),]
+		tsout=[pv(10000, 10),]
+		e=from(tsin, HOLD).linear()
+		assert e.read(new Date(0), new Date(10000)).collect()==tsout
+
+		tsin=[
+			pv(9999, 3),
+			pv(10000, 3),
+		]
+		tsout=[
+			pv(9999, 3),
+			pv(10000, 3),
 		]
 		e=from(tsin, HOLD).linear()
 		assert e.read(new Date(0), new Date(10000)).collect()==tsout
@@ -394,6 +412,57 @@ class ExpressionTest {
 			pv(3*TU, 30.5),
 			pv(4*TU, 35.0),
 			pv(5*TU, 30.5)
+		]
+	}
+
+	@Test
+	public void testGreaterThan() {
+		def TU=Expression.TIME_UNIT
+
+		def ts=from([
+			pv(0, 0.0),
+			pv(1*TU, 1.0),
+			pv(2*TU, 11.0),
+			pv(3*TU, 9.0),
+			pv(4*TU, 20.0),
+			pv(5*TU, -9.0),
+		], Characteristics.HOLD)
+		def r=ts.greaterThan(10).read(new Date(0), new Date(10*TU)).toList()
+		assert r==[
+			pv(0, 0.0),
+			pv(1*TU, 0.0),
+			pv(2*TU, 1.0),
+			pv(3*TU, 0.0),
+			pv(4*TU, 1.0),
+			pv(5*TU, 0.0)
+		]
+
+		def ts1=from([
+			pv(0, 0.0),
+			pv(2*TU, 3.0),
+			pv(6*TU, 3.0),
+			pv(10*TU, 7.0),
+			pv(11*TU, 6.5),
+			pv(12*TU, 7.0),
+			pv(14*TU, 9.0),
+		], Characteristics.LINEAR)
+		def ts2=from([
+			pv(0, 1.0),
+			pv(14*TU, 8.0),
+		], Characteristics.LINEAR)
+		r=ts1.greaterThan(ts2).read(new Date(0), new Date(14*TU)).toList()
+		assert r==[
+			pv(0, 0.0),
+			pv(1*TU, 1.0),
+			pv(2*TU, 1.0),
+			pv(4*TU, 0.0),
+			pv(6*TU, 0.0),
+			pv(8*TU, 1.0),
+			pv(10*TU, 1.0),
+			pv(11*TU, 0.0),
+			pv(12*TU, 0.0),
+			pv(12*TU+1, 1.0),
+			pv(14*TU, 1.0)
 		]
 	}
 }

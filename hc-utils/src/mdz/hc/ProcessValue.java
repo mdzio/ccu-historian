@@ -68,7 +68,7 @@ public class ProcessValue {
 		return ((Number) value).doubleValue();
 	}
 
-	void setValue(Object value) {
+	public void setValue(Object value) {
 		this.value = value;
 	}
 

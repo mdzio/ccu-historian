@@ -18,7 +18,6 @@
 package mdz.hc.timeseries.expr;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
@@ -141,6 +140,71 @@ public abstract class Expression implements Reader {
 	}
 
 	/**
+	 * The result time series has the value 1.0 if the value of this time series is
+	 * greater than zero, otherwise the value 0.0. The status is copied.
+	 */
+	public Expression greaterThanZero() {
+		if (hasCharacteristics(Characteristics.HOLD)) {
+			return unaryOperator(pv -> {
+				if ((pv.getState() & ProcessValue.STATE_QUALITY_MASK) == ProcessValue.STATE_QUALITY_BAD) {
+					return new ProcessValue(pv.getTimestamp(), 0.0D, ProcessValue.STATE_QUALITY_BAD);
+				}
+				return new ProcessValue(pv.getTimestamp(), pv.getDoubleValue() > 0.0 ? 1.0D : 0.0D, pv.getState());
+			});
+		} else {
+			class State {
+				ProcessValue prevPV;
+			}
+			return linear().scanMany(State::new, (state, pv) -> {
+				ArrayList<ProcessValue> res = new ArrayList<>(2);
+				double v = pv.getDoubleValue();
+				// not the first entry?
+				if (state.prevPV != null) {
+					double vp = state.prevPV.getDoubleValue();
+					if ((vp > 0.0 && v < 0.0) || (vp < 0.0 && v > 0.0)) {
+						// zero crossing
+						ProcessValue zpv = zeroCrossing(state.prevPV, pv);
+						if (zpv != null) {
+							zpv.setValue(v > 0.0 ? 1.0D : 0.0D);
+							res.add(zpv);
+						}
+					} else if (vp == 0.0 && v > 0.0) {
+						// special case: increasing from zero
+						Date ti = new Date(state.prevPV.getTimestamp().getTime() + 1);
+						if (ti.before(pv.getTimestamp())) {
+							ProcessValue zpv = new ProcessValue(ti, 1.0D,
+									AggregateFunctions.combineStates(state.prevPV, pv));
+							res.add(zpv);
+						}
+					}
+				}
+				// add always entry for current PV
+				res.add(new ProcessValue(pv.getTimestamp(), v > 0.0 ? 1.0D : 0.0D, pv.getState()));
+				state.prevPV = pv;
+				return res.iterator();
+			}).characteristics(Characteristics.HOLD, Characteristics.LINEAR);
+		}
+	}
+
+	/**
+	 * The result time series has the value 1.0 if the value of this time series is
+	 * greater than the value of the specified time series, otherwise the value 0.0.
+	 * The status is combined.
+	 */
+	public Expression greaterThan(Expression other) {
+		return minus(other).greaterThanZero();
+	}
+
+	/**
+	 * The result time series has the value 1.0 if the value of this time series is
+	 * greater than the specified constant value, otherwise the value 0.0. The
+	 * status is combined.
+	 */
+	public Expression greaterThan(Number constant) {
+		return minus(constant).greaterThanZero();
+	}
+
+	/**
 	 * All negative values of the time series are clipped at zero.
 	 * 
 	 * The time series should have the characteristic LINEAR. However, time series
@@ -161,7 +225,10 @@ public abstract class Expression implements Reader {
 				// crossing zero?
 				if ((vp > 0.0 && v < 0.0) || (vp < 0.0 && v > 0.0)) {
 					// add entry at zero
-					res.add(zeroCrossing(state.prevPV, pv));
+					ProcessValue zpv = zeroCrossing(state.prevPV, pv);
+					if (zpv != null) {
+						res.add(zpv);
+					}
 				}
 			}
 			// add clipped value
@@ -248,10 +315,27 @@ public abstract class Expression implements Reader {
 	}
 
 	/**
-	 * Short cut for aggregate(intervals, AggregateFunctions.begin()).
+	 * Calculates the value at the beginning of each interval. Short cut for
+	 * aggregate(intervals, AggregateFunctions.begin()).
 	 */
 	public Expression resample(Expression intervals) {
 		return new AggregateExpression(this, intervals, AggregateFunctions.begin());
+	}
+
+	/**
+	 * Calculates the number of time series entries within each interval. Short cut
+	 * for aggregate(intervals, AggregateFunctions.count()).
+	 */
+	public Expression count(Expression intervals) {
+		return new AggregateExpression(this, intervals, AggregateFunctions.count());
+	}
+
+	/**
+	 * Calculates the number of time series entries within the entire requested time
+	 * range. Short cut for count(IntervalExpressions.entire()).
+	 */
+	public Expression count() {
+		return new AggregateExpression(this, IntervalExpressions.entire(), AggregateFunctions.count());
 	}
 
 	/**
@@ -361,33 +445,15 @@ public abstract class Expression implements Reader {
 
 	/**
 	 * Converts a time series with the characteristic HOLD (and only then) into a
-	 * linear interpolated one. Just before each value change an additional entry
-	 * with the value of the previous one is inserted. The characteristic LINEAR is
-	 * set and HOLD is reset.
+	 * linear interpolated one. Just before each value change and at the end of the
+	 * requested time range an additional entry with the value of the previous one
+	 * is inserted. The characteristic LINEAR is set and HOLD is reset.
 	 */
 	public Expression linear() {
 		if (!hasCharacteristics(Characteristics.HOLD)) {
 			return characteristics(Characteristics.LINEAR, 0);
 		}
-		class State {
-			ProcessValue previous;
-		}
-		return scanMany(State::new, (state, pv) -> {
-			Iterator<ProcessValue> result = null;
-			if (state.previous == null) {
-				result = Collections.singleton(pv).iterator();
-			} else {
-				long directlyBefore = pv.getTimestamp().getTime() - 1;
-				if (state.previous.getTimestamp().getTime() == directlyBefore) {
-					result = Collections.singleton(pv).iterator();
-				} else {
-					result = Arrays.asList(new ProcessValue(new Date(directlyBefore), state.previous.getValue(),
-							state.previous.getState()), pv).iterator();
-				}
-			}
-			state.previous = pv;
-			return result;
-		}).characteristics(Characteristics.LINEAR, Characteristics.HOLD);
+		return new LinearExpression(this);
 	}
 
 	/**
@@ -502,13 +568,15 @@ public abstract class Expression implements Reader {
 		long t2 = pv2.getTimestamp().getTime();
 		double v1 = pv1.getDoubleValue();
 		double v2 = pv2.getDoubleValue();
-		double t_ = t1 - v1 * (t2 - t1) / (v2 - v1);
-		if (!Double.isFinite(t_)) {
-			throw new IllegalArgumentException("No zero crossing");
+		double _t = t1 - v1 * (t2 - t1) / (v2 - v1);
+		// no zero crossing?
+		if (!Double.isFinite(_t)) {
+			return null;
 		}
-		long t = (long) t_;
-		if (t < t1 || t > t2) {
-			throw new IllegalArgumentException("Timestamp of zero crossing out of range");
+		long t = (long) _t;
+		// timestamp not between pv1 and pv2?
+		if (t <= t1 || t >= t2) {
+			return null;
 		}
 		return new ProcessValue(new Date(t), 0.0D, AggregateFunctions.combineStates(pv1, pv2));
 	}

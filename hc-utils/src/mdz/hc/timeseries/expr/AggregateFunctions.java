@@ -152,4 +152,18 @@ public class AggregateFunctions {
 					combineStates(pv.getState(), ProcessValue.STATE_QUALITY_QUESTIONABLE));
 		};
 	}
+
+	/**
+	 * Counts the number of entries in the interval.
+	 */
+	public static Function<Interval, ProcessValue> count() {
+		return interval -> {
+			int cnt = 0;
+			for (@SuppressWarnings("unused")
+			ProcessValue pv : interval) {
+				cnt++;
+			}
+			return new ProcessValue(interval.getBegin(), (double) cnt, ProcessValue.STATE_QUALITY_GOOD);
+		};
+	}
 }
