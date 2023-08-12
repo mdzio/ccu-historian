@@ -8,7 +8,11 @@
 	<classpathentry kind="lib" path="/external-libs/jcommon-1.0.23/jcommon-1.0.23.jar"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
 	<classpathentry kind="lib" path="/external-libs/commons-cli-1.4/commons-cli-1.4.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="/external-libs/jfreesvg-3.4.2/jfreesvg-3.4.2.jar"/>
 	<classpathentry kind="lib" path="/external-libs/h2-2.1.214/h2-2.1.214.jar"/>
 	<classpathentry kind="lib" path="/external-libs/cron-utils-9.2.0/cron-utils-9.2.0.jar" sourcepath="/external-libs/cron-utils-9.2.0/cron-utils-9.2.0-sources.jar">

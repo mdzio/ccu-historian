@@ -146,14 +146,16 @@ renderer.content={
 			buildHiddenInputs(html, forwardParams, stringDpParams)
 
 			div(class:'col-sm-2') {
-				// presets
-				button(type:'button', class:'btn btn-default btn-block dropdown-toggle', 'data-toggle':'dropdown') {
-					mkp.yield 'Zeitbereiche'
-					span class:'caret'
-				}
-				ul(class:'dropdown-menu') {
-					presetRanges.each { rng -> 
-						li { a href:'#', id:rng.id, rng.text }
+				div(class:'btn-group') {
+					// presets
+					button(type:'button', class:'btn btn-default btn-block dropdown-toggle', 'data-toggle':'dropdown') {
+						mkp.yield 'Zeitbereiche'
+						span class:'caret'
+					}
+					ul(class:'dropdown-menu') {
+						presetRanges.each { rng -> 
+							li { a href:'#', id:rng.id, rng.text }
+						}
 					}
 				}
 			}

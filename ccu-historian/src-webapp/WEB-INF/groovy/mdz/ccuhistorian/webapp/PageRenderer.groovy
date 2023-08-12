@@ -230,10 +230,6 @@ public class PageRenderer {
 								li { a href:'/historian/dpconfig.gy', 'Datenpunktkonfiguration' }
 								li { a href:'/historian/config.gy', 'Historian Konfiguration' }
 								li { a href:'/historian/script.gy', 'Skriptumgebung' }
-								// TODO
-								/*
-								li { a href:'diagnosis.html', 'Diagnose' }
-								*/
 								// database web access
 								def port
 								servlet.utils.catchToLog(log) { 
@@ -243,6 +239,7 @@ public class PageRenderer {
 									li { a href:"http://$servlet.webServer.historianAddress:$port", target:'_blank', 'Datenbank' }
 								}
 								li { a href:'/historian/expimp.gy', 'Datenbankexport/-import' }
+								li { a href:'/historian/exprtrend.gy', 'Zeitreihenberechnung' }
 							}
 						}
 						

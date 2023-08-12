@@ -1,0 +1,463 @@
+/*
+    CCU-Historian, a long term archive for the HomeMatic CCU
+    Copyright (C) 2024-2024 MDZ (info@ccu-historian.de)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+// get API URL
+def API_URL='/query/jsonrpc.gy'
+if (webServer.config.apiKeys) {
+	API_URL+='?k='+webServer.config.apiKeys[0]
+}
+
+// *** javascript ***
+def js=$/
+// import luxon
+const { DateTime, Interval } = luxon
+
+// API URL (transfer from groovy variable)
+const API_URL = '$API_URL'
+
+// timestamp format for output
+const DATETIME_FORMAT = 'dd.MM.yyyy HH:mm:ss'
+
+// supported timestamp formats for input
+const DATETIME_PARSE_FORMATS = [
+  'd.M.yyyy H:m:s',
+  'd.M.yyyy H:m',
+  'd.M.yyyy H',
+  'd.M.yyyy',
+  'yyyy-M-d H:m:s',
+  'yyyy-M-d H:m',
+  'yyyy-M-d H',
+  'yyyy-M-d',
+  'yyyy-M',
+  'yyyy',
+]
+
+// time series characteristics
+const CHARACTERISTICS_HOLD = 0x0001
+const LINEAR = 0x0002
+const EVENT = 0x0004
+const COUNTER = 0x0008
+const USER_MASK = 0xffff0000
+
+// value states
+const STATE_MASK = 0x00000003
+const STATE_BAD = 0x00000000
+const STATE_QUESTIONABLE = 0x00000001
+const STATE_NOT_SUPPORTED = 0x00000002
+const STATE_GOOD = 0x00000003
+
+// dash styles
+const DASH_BAD = [3, 12]
+const DASH_QUESTIONABLE = [10, 5]
+
+// chart configuration
+const ChartConfig = {
+  type: 'line',
+  data: {
+    // property datasets will be created later
+  },
+  options: {
+    maintainAspectRatio: false,
+    animation: {
+      duration: 0,
+    },
+    plugins: {
+      legend: {
+        display: false,
+      },
+    },
+    elements: {
+      line: {
+        borderWidth: 1.5,
+      },
+      point: {
+        pointStyle: false,
+      },
+    },
+    scales: {
+      x: {
+        type: 'time',
+        border: {
+          width: 1.5,
+        },
+      },
+      y: {
+        type: 'linear',
+        position: 'left',
+        border: {
+          width: 1.5,
+        },
+      },
+    },
+  },
+}
+
+// chart instance (will be created later)
+let ChartInstance
+
+// current time range, start with last 24 hours
+let TimeRange = Interval.before(DateTime.now(), { hours: 24 })
+
+// Expression class
+class Expression {
+  index
+  formula = ''
+  errorMessage = ''
+  timeSeries = {}
+  color
+
+  constructor(index, color) {
+    this.index = index
+    this.color = color
+  }
+  clearTimeSeries() {
+    this.timeSeries = {
+      timestamps: [],
+      values: [],
+      states: [],
+      characteristics: 0,
+    }
+  }
+  updateChartData() {
+    const ts = this.timeSeries
+    const ds = ChartConfig.data.datasets[this.index]
+    // hold values?
+    ds.stepped = (ts.characteristics & CHARACTERISTICS_HOLD) !== 0
+    // transform time series
+    ds.data = ts.timestamps.map((t, idx) => ({ x: t, y: ts.values[idx] }))
+    // use state for segment style
+    const states=ts.states
+    let styleFunc
+    if (ds.stepped) {
+      // hold interpolation
+      styleFunc = (ctx) => {
+        const s0 = states[ctx.p0DataIndex] & STATE_MASK
+        switch (s0) {
+          case STATE_BAD: return DASH_BAD
+          case STATE_QUESTIONABLE: return DASH_QUESTIONABLE
+          default: return undefined
+        }
+      }
+    } else {
+      // linear interpolation
+      styleFunc = (ctx) => {
+        const s0 = states[ctx.p0DataIndex] & STATE_MASK
+        const s1 = states[ctx.p1DataIndex] & STATE_MASK
+        const s = Math.min(s0, s1)
+        switch (s) {
+          case STATE_BAD: return DASH_BAD
+          case STATE_QUESTIONABLE: return DASH_QUESTIONABLE
+          default: return undefined
+        }
+      }
+    }
+    ds.segment = {
+      borderDash: styleFunc,
+    }
+  }
+  async updateTimeSeries() {
+    // empty formula?
+    if (!this.formula) {
+      this.clearTimeSeries()
+      this.errorMessage = ''
+      this.updateChartData()
+      return
+    }
+    try {
+      // request time series
+      const resp = await m.request({
+        method: 'POST',
+        url: API_URL,
+        body: {
+          method: 'calculateTimeSeries',
+          params: [
+            this.formula,
+            TimeRange.start.toMillis(),
+            TimeRange.end.toMillis(),
+          ],
+        },
+      })
+      // error response?
+      if (resp.error != null) {
+        throw new Error(resp.error.message)
+      }
+      // store time series
+      this.timeSeries = resp.result
+      this.errorMessage = ''
+
+    } catch (err) {
+      // handle error
+      this.clearTimeSeries()
+      this.errorMessage = err.message
+    }
+    this.updateChartData()
+  }
+  updateOptions() {
+    // update chart options
+    const ds = ChartConfig.data.datasets[this.index]
+    ds.borderColor = this.color
+  }
+}
+
+// expression list
+
+class ExpressionList extends Array {
+  async updateAllTimeSeries() {
+    return Promise.all(this.map(expr => expr.updateTimeSeries()))
+  }
+  updateAllOptions() {
+    this.forEach(expr => expr.updateOptions())
+  }
+}
+
+const Expressions = new ExpressionList()
+Expressions.push(new Expression(0, 'red'))
+Expressions.push(new Expression(1, 'green'))
+Expressions.push(new Expression(2, 'blue'))
+
+// mithril components
+
+// DateTimeInput
+// attrs: name, label, value, onchange
+function DateTimeInput() {
+  let onchange
+  let lastValue
+  let textValue = ''
+  let parsedValue
+
+  function onInput(e) {
+    textValue = e.target.value
+    // try to parse timestamp
+    parsedValue = null
+    for (const f of DATETIME_PARSE_FORMATS) {
+      const dt = DateTime.fromFormat(textValue, f)
+      if (dt.isValid) {
+        parsedValue = dt
+      }
+    }
+  }
+  function onChange() {
+    if (onchange != null && parsedValue != null) {
+      onchange(parsedValue)
+    }
+  }
+  return {
+    oninit: function (vnode) {
+      onchange = vnode.attrs.onchange
+    },
+    view: function (vnode) {
+      let value = vnode.attrs.value
+      if (value !== lastValue) {
+        textValue = value.toFormat(DATETIME_FORMAT),
+          lastValue = value
+        parsedValue = value
+      }
+      return m('.input-group',
+        (parsedValue == null) ? { class: 'has-error' } : null,
+        m('span.input-group-addon', vnode.attrs.label),
+        m('input.form-control[type=text]',
+          {
+            name: vnode.attrs.name,
+            value: textValue,
+            oninput: onInput,
+            onchange: onChange,
+          },
+        ),
+      )
+    }
+  }
+}
+
+function TimeNavigation() {
+  async function update() {
+    await Expressions.updateAllTimeSeries()
+    // no auto fit for time range
+    const sx = ChartConfig.options.scales.x
+    sx.min = TimeRange.start.toMillis()
+    sx.max = TimeRange.end.toMillis()
+    ChartInstance.update()
+  }
+  function modify(b, e) {
+    return () => {
+      const d = TimeRange.length() // ms
+      TimeRange = Interval.fromDateTimes(TimeRange.start.plus(b * d), TimeRange.end.plus(e * d))
+      update()
+    }
+  }
+  function last(d) {
+    return () => {
+      TimeRange = Interval.before(DateTime.now(), d)
+      update()
+    }
+  }
+  return {
+    view: function () {
+      return m('.row',
+        m('.col-md-4',
+          m('.btn-group', { style: 'margin-right: 0.5em' },
+            m('.btn.btn-default.dropdown-toggle[type=button][data-toggle=dropdown]',
+              'Zeitbereiche ',
+              m('span.caret'),
+            ),
+            m('ul.dropdown-menu',
+              m('li', m('a[href=#]', { onclick: last({ hours: 1 }) }, 'Letzte Stunde')),
+              m('li', m('a[href=#]', { onclick: last({ days: 1 }) }, 'Letzter Tag')),
+              m('li', m('a[href=#]', { onclick: last({ weeks: 1 }) }, 'Letzte Woche')),
+              m('li', m('a[href=#]', { onclick: last({ months: 1 }) }, 'Letzter Monat')),
+              m('li', m('a[href=#]', { onclick: last({ months: 6 }) }, 'Letzten 6 Monate')),
+            )
+          ),
+          m('.btn-group[role=group]',
+            m('button.btn.btn-default',
+              { onclick: modify(-1, -1) },
+              m('span.glyphicon.glyphicon-backward'),
+            ),
+            m('button.btn.btn-default',
+              { onclick: modify(-0.33, -0.33) },
+              m('span.glyphicon.glyphicon-triangle-left'),
+            ),
+            m('button.btn.btn-default',
+              { onclick: modify(0.33, -0.33) },
+              m('span.glyphicon.glyphicon-zoom-in'),
+            ),
+            m('button.btn.btn-default',
+              { onclick: modify(-1, 1) },
+              m('span.glyphicon.glyphicon-zoom-out'),
+            ),
+            m('button.btn.btn-default',
+              { onclick: modify(0.33, 0.33) },
+              m('span.glyphicon.glyphicon-triangle-right'),
+            ),
+            m('button.btn.btn-default',
+              { onclick: modify(1, 1) },
+              m('span.glyphicon.glyphicon-forward'),
+            ),
+          ),
+        ),
+        m('.col-md-4',
+          m(DateTimeInput,
+            {
+              name: 'tr-begin',
+              label: 'Start',
+              value: TimeRange.start,
+              onchange: (dt) => { TimeRange = TimeRange.set({ start: dt }); update() },
+            },
+          ),
+        ),
+        m('.col-md-4',
+          m(DateTimeInput,
+            {
+              name: 'tr-end',
+              label: 'Ende',
+              value: TimeRange.end,
+              onchange: (dt) => { TimeRange = TimeRange.set({ end: dt }); update() },
+            },
+          ),
+        ),
+      )
+    }
+  }
+}
+
+function ExpressionInput() {
+  let idx;
+  let expr;
+
+  function onFormulaInput(e) {
+    expr.formula = e.target.value
+  }
+  async function onFormulaChange() {
+    await expr.updateTimeSeries()
+    ChartInstance.update()
+  }
+  return {
+    oninit: function (vnode) {
+      idx = vnode.attrs.key
+      expr = vnode.attrs.expr
+    },
+    view: function (vnode) {
+      return m('.input-group',
+        expr.errorMessage ? { class: 'has-error' } : null,
+        m('span.input-group-addon',
+          m('strong', m('em', 'f')), m('sub', idx + 1),
+        ),
+        m('span.input-group-addon',
+          m('span.glyphicon.glyphicon-bookmark', { style: { color: expr.color } }),
+        ),
+        m('input.form-control[type=text]', {
+          name: 'formula' + idx,
+          oninput: onFormulaInput,
+          onchange: onFormulaChange,
+          value: expr.formula,
+        }),
+        m('span.input-group-addon',
+          expr.errorMessage && {
+            style: { color: 'red' },
+            'data-toggle': 'tooltip',
+            title: 'Fehlerinformationen:\n' + expr.errorMessage,
+          },
+          m('span.glyphicon.glyphicon-warning-sign'),
+        ),
+      )
+    }
+  }
+}
+
+// mount chart first
+ChartConfig.data.datasets = new Array(Expressions.length).fill().map(() => ({}))
+Expressions.updateAllOptions()
+ChartInstance = new Chart(document.getElementById('chartCanvas'), ChartConfig)
+
+// mount mithril components
+m.mount(document.getElementById('timeNavigation'), TimeNavigation)
+m.mount(document.getElementById('expressions'), {
+  view: function () {
+    return Expressions.map((expr, key) => m(ExpressionInput, { key, expr }))
+  },
+})
+/$
+// *** javascript ends ***
+
+// setup page
+def renderer=new mdz.ccuhistorian.webapp.PageRenderer(servlet: this)
+
+renderer.head={
+	title 'CCU-Historian: Zeitreihenberechnung'
+}
+
+renderer.content={
+	// content is rendered by mithril
+	div(id:'timeNavigation')
+	// content is rendered by chartjs
+	div(style:'position: relative; height:70vh; width:96vw') {
+		canvas id:'chartCanvas'
+	}
+	// content is rendered by mithril
+	div(id:'expressions')
+}
+
+renderer.end={
+	script src:'/external/mithril/mithril.js'
+	script src:'/external/chartjs/chart.umd.js'
+	script src:'/external/luxon/luxon.min.js'
+	script src:'/external/chartjs/chartjs-adapter-luxon.min.js'
+    script { mkp.yieldUnescaped js }
+}
+
+// render page
+renderer.render()

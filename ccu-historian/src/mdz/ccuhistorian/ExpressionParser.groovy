@@ -54,13 +54,17 @@ public class ExpressionParser {
 		// create binding
 		Binding binding=[]
 		binding.dataPoint=exprAdapter.&dataPoint
-
+		binding.DP=exprAdapter.&dataPoint
+		
 		// create script and execute with category
 		def script=shell.parse(expr)
 		script.binding=binding
 		def result=use(ExpressionCategory) { script.run() }
 
 		// check result
+		if (result==null) {
+			throw new Exception("No result")
+		}
 		if (!(result instanceof Reader)) {
 			throw new Exception("Invalid expression result: ${result.class.name}")
 		}

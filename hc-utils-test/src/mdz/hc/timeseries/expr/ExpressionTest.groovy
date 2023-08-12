@@ -520,4 +520,33 @@ class ExpressionTest {
 			pv(4*TU, 3.0),
 		]
 	}
+
+	@Test
+	public void testHoldLast() {
+		def TU=Expression.TIME_UNIT
+		def ts=from([
+			pv(0, 0.0),
+			pv(3*TU, 3.0),
+		], 0)
+		def r=ts.holdLast().read(new Date(0*TU), new Date(4*TU)).toList()
+		assert r==[
+			pv(0, 0.0),
+			pv(3*TU, 3.0),
+			pv(4*TU, 3.0),
+		]
+
+		ts=from([
+			pv(0, 0.0),
+			pv(3*TU, 3.0),
+		], 0)
+		r=ts.holdLast().read(new Date(0*TU), new Date(3*TU)).toList()
+		assert r==[
+			pv(0, 0.0),
+			pv(3*TU, 3.0),
+		]
+
+		ts=from([], 0)
+		r=ts.holdLast().read(new Date(0*TU), new Date(3*TU)).toList()
+		assert r==[]
+	}
 }

@@ -520,6 +520,13 @@ public abstract class Expression implements Reader {
 	}
 
 	/**
+	 * The last process value is repeated at the end of the query interval.
+	 */
+	public Expression holdLast() {
+		return new HoldLastExpression(this);
+	}
+
+	/**
 	 * Cleans invalid timestamps. The timestamps must be within the queried time
 	 * range and strictly monotonically ascending. All others are removed.
 	 */

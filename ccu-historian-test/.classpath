@@ -7,7 +7,11 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/mdz-utils"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hc-utils"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="/external-libs/groovy-4.0.15/groovy-json-4.0.15.jar"/>
 	<classpathentry kind="lib" path="/external-libs/groovy-4.0.15/groovy-xml-4.0.15.jar"/>
 	<classpathentry kind="lib" path="/external-libs/jetty-9.4.53/servlet-api-3.1.jar"/>

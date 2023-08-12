@@ -73,7 +73,7 @@ function ScriptPane(initialVnode) {
 		m.request({
 			method:"POST",
 			url: "/query/jsonrpc.gy"+apiKey,
-			data: {
+			body: {
 				method: 'executeScript',
 				params: [script, writeAccess],
 			},
