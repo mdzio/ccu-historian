@@ -17,6 +17,7 @@
 */
 import mdz.ccuhistorian.DatabaseExpressionAdapter
 import mdz.ccuhistorian.Main
+import mdz.ccuhistorian.ExpressionParser
 import mdz.hc.timeseries.TimeSeries.CompactTimeSeries
 import mdz.hc.timeseries.TimeSeries
 import mdz.hc.persistence.ReadOnlyDecorator
@@ -401,7 +402,36 @@ private static rpcFunctions=[
 			new Date(params[2] as long)
 		)
 	},
-	
+
+	calculateTimeSeries: { params ->
+		// get parameters
+		if (params.size()!=3) {
+			throw new RpcException("Invalid number of parameters for calculateTimeSeries", RpcException.INVALID_PARAMS)
+		}
+		if (!(params[0] instanceof String && params[1] instanceof Number && params[2] instanceof Number)) {
+			throw new RpcException("Invalid parameter type(s) for calculateTimeSeries", RpcException.INVALID_PARAMS)
+		}
+		def exprTxt=params[0] as String
+		def begin=new Date(params[1] as long)
+		def end=new Date(params[2] as long)
+		
+		// parse expression and calculate time series
+		def parser=new ExpressionParser(database)
+		def expr=parser.parse(exprTxt)
+		def ts=expr.read(begin, end)
+		
+		// convert result
+		def timestamps=[]
+		def values=[]
+		def states=[]
+		ts.each { pv -> 
+			timestamps << pv.timestamp.time
+			values << pv.value
+			states << pv.state
+		}
+		[timestamps: timestamps, values: values, states: states, characteristics:expr.characteristics]
+	},
+
 	setValue:{ params ->
 		interfaceManager.writeValue(utils.parseDataPoint(params[0] as String, database), params[1])
 		null
@@ -418,7 +448,7 @@ private static rpcFunctions=[
 		}
 		executeScript(script, writeAccess)
 	},
-	
+
 	getConfig:{ params ->
 		if (params.size()!=1) {
 			throw new RpcException("Invalid number of parameters for getConfig", RpcException.INVALID_PARAMS)

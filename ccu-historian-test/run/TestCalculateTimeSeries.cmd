@@ -1,0 +1,1 @@
+curl -X POST -H "Content-Type: application/json" -d "{""id"": 123, ""method"":""calculateTimeSeries"", ""params"":[""1+dataPoint(21)"", 1533852000000, 1534284000000]}" "http://localhost/query/jsonrpc.gy?k=abc"
