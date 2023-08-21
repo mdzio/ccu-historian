@@ -198,10 +198,36 @@ public abstract class Expression implements Reader {
 	/**
 	 * The result time series has the value 1.0 if the value of this time series is
 	 * greater than the specified constant value, otherwise the value 0.0. The
-	 * status is combined.
+	 * status is copied.
 	 */
 	public Expression greaterThan(Number constant) {
 		return minus(constant).greaterThanZero();
+	}
+
+	/**
+	 * The result time series has the value 1.0 if the value of this time series is
+	 * less than zero, otherwise the value 0.0. The status is copied.
+	 */
+	public Expression lessThanZero() {
+		return negative().greaterThanZero();
+	}
+
+	/**
+	 * The result time series has the value 1.0 if the value of this time series is
+	 * less than the value of the specified time series, otherwise the value 0.0.
+	 * The status is combined.
+	 */
+	public Expression lessThan(Expression other) {
+		return minus(other).lessThanZero();
+	}
+
+	/**
+	 * The result time series has the value 1.0 if the value of this time series is
+	 * less than the specified constant value, otherwise the value 0.0. The status
+	 * is copied.
+	 */
+	public Expression lessThan(Number constant) {
+		return minus(constant).lessThanZero();
 	}
 
 	/**
