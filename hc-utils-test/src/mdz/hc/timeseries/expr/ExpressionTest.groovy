@@ -465,4 +465,45 @@ class ExpressionTest {
 			pv(14*TU, 1.0)
 		]
 	}
+
+	@Test
+	public void testLessThan() {
+		def TU=Expression.TIME_UNIT
+		def ts1=from([
+			pv(0, 0.0),
+			pv(2*TU, 2.0),
+		], Characteristics.LINEAR)
+		def ts2=from([
+			pv(0, 2.0),
+			pv(2*TU, 0.0),
+		], Characteristics.LINEAR)
+		def r=ts1.lessThan(ts2).read(new Date(0), new Date(2*TU)).toList()
+		assert r==[
+			pv(0, 1.0),
+			pv(1*TU, 0.0),
+			pv(2*TU, 0.0),
+		]
+	}
+
+	@Test
+	public void testBadIf() {
+		def TU=Expression.TIME_UNIT
+		def ts1=from([
+			pv(0, 0.0),
+			pv(3*TU, 3.0),
+		], Characteristics.LINEAR)
+		def ts2=from([
+			pv(0, 0.0),
+			pv(1*TU, 1.0),
+			pv(2*TU, 0.0, ProcessValue.STATE_QUALITY_BAD),
+			pv(3*TU, 0.0),
+		], Characteristics.LINEAR)
+		def r=ts1.badIf(ts2).read(new Date(0), new Date(3*TU)).toList()
+		assert r==[
+			pv(0, 0.0),
+			pv(1*TU, 0.0, ProcessValue.STATE_QUALITY_BAD),
+			pv(2*TU, 0.0, ProcessValue.STATE_QUALITY_BAD),
+			pv(3*TU, 3.0),
+		]
+	}
 }

@@ -505,6 +505,25 @@ public abstract class Expression implements Reader {
 	}
 
 	/**
+	 * The state of the time series is set to BAD depending on a second time series.
+	 * If the second time series has the state BAD or a value greater than 0, then
+	 * the state in the original time series is also set to BAD. The value is
+	 * changed to 0.0, if the resulting state is BAD.
+	 */
+	public Expression badIf(Expression condition) {
+		return binaryOperator(condition, (src, cond) -> {
+			int state = src.getState();
+			Object value = src.getValue();
+			if ((cond.getState() & ProcessValue.STATE_QUALITY_MASK) == ProcessValue.STATE_QUALITY_BAD
+					|| cond.getDoubleValue() > 0.0) {
+				state = (state & ~ProcessValue.STATE_QUALITY_MASK) | ProcessValue.STATE_QUALITY_BAD;
+				value = 0.0D;
+			}
+			return new ProcessValue(src.getTimestamp(), value, state);
+		});
+	}
+
+	/**
 	 * Replaces process values with quality BAD to the specified replacement value
 	 * and quality QUESTIONABLE.
 	 */
