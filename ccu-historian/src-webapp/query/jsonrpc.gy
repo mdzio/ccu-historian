@@ -165,7 +165,6 @@ def executeScript(script, writeAccess) {
 		'mdz.ccuhistorian.webapp.TextFormat',
 		'mdz.hc.ProcessValue',
 		'mdz.hc.timeseries.expr.Characteristics',
-		'mdz.hc.timeseries.expr.IntervalExpressions',
 		'mdz.hc.timeseries.expr.Expressions'
 	importCustomizer.addImport 'PreprocType', 'mdz.ccuhistorian.eventprocessing.Preprocessor.Type'
 	importCustomizer.addImports 'mdz.hc.DataPoint',
@@ -195,7 +194,6 @@ def executeScript(script, writeAccess) {
 			'mdz.ccuhistorian.webapp.TextFormat',
 			'mdz.hc.ProcessValue',
 			'mdz.hc.timeseries.expr.Characteristics',
-			'mdz.hc.timeseries.expr.IntervalExpressions',
 			'mdz.hc.timeseries.expr.Expressions'
 		]
 		receiversBlackList=['java.lang.System']

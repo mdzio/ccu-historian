@@ -60,8 +60,8 @@ public abstract class Expression implements Reader {
 	 * that calculates a process value depending on the timestamp.
 	 * 
 	 * Example of a sine wave over a period of one day:
-	 * IntervalExpressions.hourly().generate(t -> Math.sin(2 * Math.PI * t.time /
-	 * 1000 / 60 / 60 / 24))
+	 * Expressions.hourly().generate(t -> Math.sin(2 * Math.PI * t.time / 1000 / 60
+	 * / 60 / 24))
 	 */
 	public Expression generate(Function<Date, Double> operator) {
 		return unaryOperator(pv -> new ProcessValue(pv.getTimestamp(), operator.apply(pv.getTimestamp()),
@@ -302,10 +302,10 @@ public abstract class Expression implements Reader {
 
 	/**
 	 * Calculates the minimum over the entire requested time range. Short cut for
-	 * minimum(IntervalExpressions.entire()).
+	 * minimum(Expressions.entire()).
 	 */
 	public Expression minimum() {
-		return new AggregateExpression(this, IntervalExpressions.entire(), AggregateFunctions.minimum());
+		return new AggregateExpression(this, Expressions.entire(), AggregateFunctions.minimum());
 	}
 
 	/**
@@ -318,10 +318,10 @@ public abstract class Expression implements Reader {
 
 	/**
 	 * Calculates the maximum over the entire requested time range. Short cut for
-	 * maximum(IntervalExpressions.entire()).
+	 * maximum(Expressions.entire()).
 	 */
 	public Expression maximum() {
-		return new AggregateExpression(this, IntervalExpressions.entire(), AggregateFunctions.maximum());
+		return new AggregateExpression(this, Expressions.entire(), AggregateFunctions.maximum());
 	}
 
 	/**
@@ -334,10 +334,10 @@ public abstract class Expression implements Reader {
 
 	/**
 	 * Calculates the average over the entire requested time range. Short cut for
-	 * average(IntervalExpressions.entire()).
+	 * average(Expressions.entire()).
 	 */
 	public Expression average() {
-		return new AggregateExpression(this, IntervalExpressions.entire(), AggregateFunctions.average());
+		return new AggregateExpression(this, Expressions.entire(), AggregateFunctions.average());
 	}
 
 	/**
@@ -358,10 +358,10 @@ public abstract class Expression implements Reader {
 
 	/**
 	 * Calculates the number of time series entries within the entire requested time
-	 * range. Short cut for count(IntervalExpressions.entire()).
+	 * range. Short cut for count(Expressions.entire()).
 	 */
 	public Expression count() {
-		return new AggregateExpression(this, IntervalExpressions.entire(), AggregateFunctions.count());
+		return new AggregateExpression(this, Expressions.entire(), AggregateFunctions.count());
 	}
 
 	/**
@@ -429,7 +429,7 @@ public abstract class Expression implements Reader {
 	 * limit must be specified (e.g. 15°C).
 	 */
 	public Expression hdd(Number heatingLimit) {
-		return average(IntervalExpressions.daily()).unaryOperator(pv -> {
+		return average(Expressions.daily()).unaryOperator(pv -> {
 			double v = heatingLimit.doubleValue() - pv.getDoubleValue();
 			return v >= 0 ? new ProcessValue(pv.getTimestamp(), v, pv.getState())
 					: new ProcessValue(pv.getTimestamp(), 0.0D, pv.getState());

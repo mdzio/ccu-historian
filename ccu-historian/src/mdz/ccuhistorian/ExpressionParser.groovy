@@ -25,7 +25,6 @@ public class ExpressionParser {
 		importCustomizer.addStaticStars 'java.lang.Math',
 				'mdz.hc.ProcessValue',
 				'mdz.hc.timeseries.expr.Characteristics',
-				'mdz.hc.timeseries.expr.IntervalExpressions',
 				'mdz.hc.timeseries.expr.Expressions'
 		importCustomizer.addImports 'mdz.hc.ProcessValue'
 		config.addCompilationCustomizers importCustomizer
@@ -37,7 +36,6 @@ public class ExpressionParser {
 				'java.lang.Math',
 				'mdz.hc.ProcessValue',
 				'mdz.hc.timeseries.expr.Characteristics',
-				'mdz.hc.timeseries.expr.IntervalExpressions',
 				'mdz.hc.timeseries.expr.Expressions'
 			]
 			importsWhitelist=[
