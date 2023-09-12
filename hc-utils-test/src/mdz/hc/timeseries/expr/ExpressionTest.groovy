@@ -506,4 +506,18 @@ class ExpressionTest {
 			pv(3*TU, 3.0),
 		]
 	}
+
+	@Test
+	public void testShift() {
+		def TU=Expression.TIME_UNIT
+		def ts=from([
+			pv(0, 0.0),
+			pv(3*TU, 3.0),
+		], Characteristics.LINEAR)
+		def r=ts.shift(1).read(new Date(1*TU), new Date(4*TU)).toList()
+		assert r==[
+			pv(1*TU, 0.0),
+			pv(4*TU, 3.0),
+		]
+	}
 }

@@ -423,6 +423,43 @@ public abstract class Expression implements Reader {
 	}
 
 	/**
+	 * The time series is shifted in time. If the time duration is positive, an
+	 * older time range is requested and the timestamps are shifted to the current
+	 * time range. (The curve is shifted to the right in a trend display, for
+	 * example). The time duration is indicated in hours.
+	 */
+	public Expression shift(Number duration) {
+		Expression src = this;
+		return new Expression() {
+			@Override
+			public Iterator<ProcessValue> read(Date begin, Date end) {
+				long durationMs = (long) (duration.doubleValue() * 60.0 * 60.0 * 1000.0);
+				Iterator<ProcessValue> srcIt = src.read(new Date(begin.getTime() - durationMs),
+						new Date(end.getTime() - durationMs));
+
+				return new Iterator<ProcessValue>() {
+					@Override
+					public boolean hasNext() {
+						return srcIt.hasNext();
+					}
+
+					@Override
+					public ProcessValue next() {
+						ProcessValue pv = srcIt.next();
+						return new ProcessValue(new Date(pv.getTimestamp().getTime() + durationMs), pv.getValue(),
+								pv.getState());
+					}
+				};
+			}
+
+			@Override
+			public int getCharacteristics() {
+				return src.getCharacteristics();
+			}
+		};
+	}
+
+	/**
 	 * Heating degree day (HDD) is a measurement designed to quantify the demand for
 	 * energy needed to heat a building. This function should be used with the
 	 * outside air temperature. A value is calculated for each day. The heating
