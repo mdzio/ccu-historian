@@ -221,7 +221,7 @@ renderer.content={
 		} 
 	} else if (dpCnt) {
 		// if required, use API key
-		def apiKey=webServer.config.apiKeys ? [k:webServer.config.apiKeys[0]] : [:]
+		def apiKey=webServer.config.apiKeys ? ([k:webServer.config.apiKeys[0]]) : ([:])
 		
 		// show trend
 		p(class:'text-center', style:'margin-top: 0.5em') {
@@ -300,7 +300,7 @@ renderer.content={
 												td {
 													select(class:'form-control', name:'g'+dpIdx) {
 														(1..NUM_OF_GROUPS).each { optIdx ->
-															def selected=(grpIdx==optIdx)?[selected:'selected']:[:]
+															def selected=(grpIdx==optIdx)?([selected:'selected']):([:])
 															option(value:optIdx, *:selected, optIdx)
 														}
 													}
@@ -328,7 +328,7 @@ renderer.content={
 											td {
 												select(class:'form-control', name:'gh'+grpIdx) {
 													groupHeights.each { grpHeight ->
-														def selected=(height==grpHeight.height)?[selected:'selected']:[:]
+														def selected=(height==grpHeight.height)?([selected:'selected']):([:])
 														option(value:grpHeight.height, *:selected, grpHeight.text)
 													}
 												}

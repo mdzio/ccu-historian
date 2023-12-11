@@ -274,12 +274,12 @@ renderer.content={
                         td class:'hidden-xs hidden-sm hidden-md text-right', dp.idx
 						td {
 							// history disabled?
-							def checked=dp.historyDisabled?[checked:'checked']:[:]
+							def checked=dp.historyDisabled?([checked:'checked']):([:])
 							input(type:'checkbox', class:'form-control', name:'disabled-'+dp.idx, value:1, *:checked)
 						}
 						td {
 							// history hidden?
-							def checked=dp.historyHidden?[checked:'checked']:[:]
+							def checked=dp.historyHidden?([checked:'checked']):([:])
 							input(type:'checkbox', class:'form-control', name:'hidden-'+dp.idx, value:1, *:checked)
 						}
 						def total=database.getCount(dp, null, null)
@@ -290,7 +290,7 @@ renderer.content={
 						td {
 							select(class:'form-control', name:'ptype-'+dp.idx, size:1) {
 								preprocTypes.each { idx, name ->
-									def selected=(idx==dp.attributes.preprocType)?[selected:'selected']:[:]
+									def selected=(idx==dp.attributes.preprocType)?([selected:'selected']):([:])
 									option(value: idx, *:selected, name)
 								}	
 							}

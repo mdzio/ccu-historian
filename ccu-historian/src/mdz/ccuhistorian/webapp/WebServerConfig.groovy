@@ -37,7 +37,7 @@ class WebServerConfig {
 	String dir='./webapp'
 	String historianAddress=''
 	Map<String, TrendDesign> trendDesigns=[:].withDefault { new TrendDesign(identifier: (String)it, displayName: (String)it) }
-	Map<String, Link> menuLinks=new TreeMap().withDefault { new Link() }
+	Map<String, Link> menuLinks=new TreeMap<String, Link>().withDefault { new Link() }
 	String[] apiKeys=[]
 	String corsOrigin="*"
 	boolean showLastValue=false

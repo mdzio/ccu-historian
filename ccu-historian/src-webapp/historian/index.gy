@@ -134,7 +134,7 @@ renderer.content={
                 database.dataPoints.findAll { !it.historyHidden }.eachWithIndex { dp, idx ->
                     tr {
 						td { 
-							def checked=dpToGroup.containsKey(dp.idx)?['checked':'checked']:[:]
+							def checked=dpToGroup.containsKey(dp.idx)?(['checked':'checked']):([:])
 							def group=dpToGroup[dp.idx]
 							
 							input(class:'form-control', type:'checkbox', name:'dp'+(idx+1), 

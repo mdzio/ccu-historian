@@ -284,7 +284,7 @@ renderer.content={
 							div(class:'col-sm-9') {
 								select(class:'form-control', name:'dp1') {
 									dataPoints.eachWithIndex { dp, idx ->
-										def selected=(idx==0)?[selected:'selected']:[:]
+										def selected=(idx==0)?([selected:'selected']):([:])
 										option(value:dp.idx, *:selected, dpInfo(dp))
 									}
 								}
@@ -295,7 +295,7 @@ renderer.content={
 							div(class:'col-sm-9') {
 								select(class:'form-control', name:'dp2') {
 									dataPoints.eachWithIndex { dp, idx ->
-										def selected=(idx==1)?[selected:'selected']:[:]
+										def selected=(idx==1)?([selected:'selected']):([:])
 										option(value:dp.idx, *:selected, dpInfo(dp))
 									}
 								}

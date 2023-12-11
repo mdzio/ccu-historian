@@ -31,6 +31,8 @@ fi
 if [ -f $RCD_DIR/ccu-historian ]; then
   echo "Previous installation detected"
   $RCD_DIR/ccu-historian stop
+  # remove old lib files
+  rm -f $ADDON_DIR/ccu-historian/lib/*
 fi
 
 # create directories

@@ -11,6 +11,6 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/external-libs/cron-utils-9.2.0/cron-utils-9.2.0-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/external-libs/groovy-2.5.21/groovy-dateutil-2.5.21.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-4.0.15/groovy-dateutil-4.0.15.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

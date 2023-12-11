@@ -28,11 +28,11 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="/external-libs/slf4j-1.7.36/slf4j-api-1.7.36.jar" sourcepath="/external-libs/slf4j-1.7.36/slf4j-api-1.7.36-sources.jar"/>
 	<classpathentry kind="lib" path="/external-libs/slf4j-1.7.36/slf4j-jdk14-1.7.36.jar" sourcepath="/external-libs/slf4j-1.7.36/slf4j-jdk14-1.7.36-sources.jar"/>
-	<classpathentry kind="lib" path="/external-libs/groovy-2.5.21/groovy-json-2.5.21.jar"/>
-	<classpathentry kind="lib" path="/external-libs/groovy-2.5.21/groovy-xml-2.5.21.jar"/>
-	<classpathentry kind="lib" path="/external-libs/groovy-2.5.21/groovy-cli-commons-2.5.21.jar"/>
-	<classpathentry kind="lib" path="/external-libs/groovy-2.5.21/groovy-servlet-2.5.21.jar"/>
-	<classpathentry kind="lib" path="/external-libs/groovy-2.5.21/groovy-sql-2.5.21.jar"/>
-	<classpathentry kind="lib" path="/external-libs/groovy-2.5.21/groovy-templates-2.5.21.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-4.0.15/groovy-cli-commons-4.0.15.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-4.0.15/groovy-json-4.0.15.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-4.0.15/groovy-servlet-4.0.15.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-4.0.15/groovy-sql-4.0.15.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-4.0.15/groovy-templates-4.0.15.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-4.0.15/groovy-xml-4.0.15.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

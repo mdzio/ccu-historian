@@ -28,7 +28,7 @@ renderer.head={
 }
 
 renderer.content={
-	def apiKey=webServer.config.apiKeys ? [k:webServer.config.apiKeys[0]] : [:]
+	def apiKey=webServer.config.apiKeys ? ([k:webServer.config.apiKeys[0]]) : ([:])
 	// backup warning
 	div(class:'alert alert-warning', role:'alert') {
 		span class:'glyphicon glyphicon-exclamation-sign'

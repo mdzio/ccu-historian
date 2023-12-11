@@ -60,7 +60,7 @@ renderer.content={
 			}
 		
 			// display form
-			def disabledPassword=ctx.prefs.get('password_admin', '') ? [:] : [disabled:'disabled']
+			def disabledPassword=ctx.prefs.get('password_admin', '') ? ([:]) : ([disabled:'disabled'])
 	
 			form(method:'post') {
 				div(class:'form-group') {

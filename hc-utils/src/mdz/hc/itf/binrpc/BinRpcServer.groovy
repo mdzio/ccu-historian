@@ -51,7 +51,7 @@ public class BinRpcServer {
 	
 	private ExecutorService pool
 	private ServerSocket serverSocket
-	private Set<Socket> clientSockets=new HashSet().asSynchronized()
+	private Set<Socket> clientSockets=new HashSet<Socket>().asSynchronized()
 	private Thread acceptThread
 	
 	BinRpcServer() {
