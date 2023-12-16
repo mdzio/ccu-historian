@@ -40,7 +40,7 @@ renderer.content={
 		div(class:'row', style:'margin-bottom: 0.5em') {
 			
 			// filter input
-			div(class:'col-sm-4') {
+			div(class:'col-md-4') {
 				div(class:'input-group') {
 					String descr='Es wird nach allen Teilen des Filterausdrucks in allen Eigenschaften des ' +
 						'Datenpunktes gesucht. Wird ein Suchbegriff in | (Verkettungszeichen) eingeschlossen, ' +
@@ -54,7 +54,7 @@ renderer.content={
 				}
 			}
 			
-			div(class:'col-sm-3') {
+			div(class:'col-md-4') {
 				div(class:'btn-group', role:'group') {
 					// reset filters
 					button(id:'reset-filter-btn', class:'btn btn-default', type:'button', 'data-toggle':'tooltip',
@@ -78,10 +78,31 @@ renderer.content={
 						span class:'glyphicon glyphicon-check'
 					}
 				}
+
+                // sorting
+                div(class:'btn-group') {
+                    button(type:'button', class:'btn btn-default dropdown-toggle', 'data-toggle':'dropdown') {
+                        span class:'glyphicon glyphicon-sort'
+                        mkp.yield ' Sortierung'
+                        span class:'caret'
+                    }
+                    ul(class:'dropdown-menu') {
+                        li { a href:'#', id:'select-sorting-default', 'Standard' } 
+                        li { a href:'#', id:'select-sorting-parameter', 'Parameter' } 
+                        li { a href:'#', id:'select-sorting-room', 'Raum' } 
+                        li { a href:'#', id:'select-sorting-function', 'Gewerk' } 
+                        li { a href:'#', id:'select-sorting-address', 'Adresse' } 
+                        li { a href:'#', id:'select-sorting-id', 'ID' } 
+                        if (webServer.config.showLastValue) {
+                            li { a href:'#', id:'select-sorting-timestamp', 'Letzter Eintrag' } 
+                        }
+                        li { a (href:'#', id:'select-sorting-reverse', { i 'Umkehren' }) } 
+                    }
+                }
 			}
 			
 			// data point actions
-			div(class:'col-sm-5 text-right') {
+			div(class:'col-md-4 text-right') {
 				div(class:'btn-group') {
 					button class:'btn btn-default', id:'button-dpdetails', 'data-toggle':'tooltip', 
 						title:'Details zu den Datenpunkten anzeigen.', 'Details'
@@ -123,8 +144,8 @@ renderer.content={
                     th class:'hidden-xs hidden-sm hidden-md', 'ID',
 						'data-toggle':'tooltip', title:'Eindeutige Historian-ID für URL-Parameter bzw. JSON-RPC.'
 					if (webServer.config.showLastValue) {
-						th class:'hidden-xs hidden-sm', 'Kommunikation',
-							'data-toggle':'tooltip', title:'Letzte erfolgreiche Kommunikation'
+						th class:'hidden-xs hidden-sm', 'Letzter Eintrag',
+							'data-toggle':'tooltip', title:'Letzter Zeitreiheneintrag'
 						th class:'hidden-xs hidden-sm', 
 							'Wert', 'data-toggle':'tooltip', title:'Letzter Wert'
 					}
@@ -225,25 +246,64 @@ renderer.end={
 			});
 		});
 		
-		// show data point details
-		$('#button-dpdetails').on('click', function(e) {
-			var f=$('#dp-form');
-			f.attr('action', 'dpdetails.gy');
-			f.submit();
-		});
-		// show data point tools
-		$('#button-dptools').on('click', function(e) {
-			var f=$('#dp-form');
-			f.attr('action', 'dptools.gy');
-			f.submit();
-		});
-		// show trend
-		$('#button-trend').on('click', function(e) {
-			var f=$('#dp-form');
-			f.attr('action', 'trend.gy');
-			f.submit();
-		});
-	/$) }
+        // sorting
+        const showLastValue=${webServer.config.showLastValue};
+        const defaultSorting=$('#dp-table > tbody > tr');
+        $('#select-sorting-default').on('click', function(e) {
+            $('#dp-table > tbody').append(defaultSorting);
+        });
+        function addSorting(id, cidx, cmp) {
+            $(id).on('click', function(e) {
+                var tbody=$('#dp-table > tbody')
+                var rows=tbody.children().toArray().sort(function (rowA, rowB) {
+                    var valA=$(rowA).children().eq(cidx).text();
+                    var valB=$(rowB).children().eq(cidx).text();
+                    return cmp(valA, valB);
+                });
+                tbody.append(rows);
+            });
+        }
+        function numericCompare(a, b) { return Number(a)-Number(b); }
+        function textCompare(a, b) { return a.localeCompare(b); }
+        const dateRegEx=/(\d+)\D(\d+)\D(\d+)\D(\d+)\D(\d+)\D(\d+)/;
+        function timestampCompare(a, b) { 
+            var valA=a.replace(dateRegEx, '$3$2$1$4$5$6');
+            var valB=b.replace(dateRegEx, '$3$2$1$4$5$6');
+            return valA>valB?-1:(valA<valB?1:0);
+        }
+        addSorting('#select-sorting-parameter', 3, textCompare);
+        addSorting('#select-sorting-room', 4, textCompare);
+        addSorting('#select-sorting-function', 5, textCompare);
+        addSorting('#select-sorting-address', 6, textCompare);
+        addSorting('#select-sorting-id', 7, numericCompare);
+        if (showLastValue) {
+            addSorting('#select-sorting-timestamp', 8, timestampCompare);
+        }
+        $('#select-sorting-reverse').on('click', function(e) {
+            var tbody=$('#dp-table > tbody')
+            var rows=tbody.children().toArray().reverse();
+            tbody.append(rows);
+        });
+        
+        // show data point details
+        $('#button-dpdetails').on('click', function(e) {
+            var f=$('#dp-form');
+            f.attr('action', 'dpdetails.gy');
+            f.submit();
+        });
+        // show data point tools
+        $('#button-dptools').on('click', function(e) {
+            var f=$('#dp-form');
+            f.attr('action', 'dptools.gy');
+            f.submit();
+        });
+        // show trend
+        $('#button-trend').on('click', function(e) {
+            var f=$('#dp-form');
+            f.attr('action', 'trend.gy');
+            f.submit();
+        });
+    /$) }
 }
 
 // render page

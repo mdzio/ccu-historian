@@ -162,36 +162,32 @@ renderer.content={
 			// bulk settings
 			div(class:'col-sm-7') {
 				div(class:'form-inline') {
-					div(class:'form-group') {
-						div(class:'input-group') {
-							div(class:'input-group-addon', 'Inaktiv')
-							span(class:'input-group-btn') {
-								button(type:'button', class:'btn btn-default', id:'button-check-inactive', 'data-toggle':'tooltip',
-									title:'Alle sichtbaren Datenpunkte werden inaktiv gesetzt.') {
-									span class:'glyphicon glyphicon-check'
-								}
-								button(type:'button', class:'btn btn-default', id:'button-uncheck-inactive', 'data-toggle':'tooltip',
-									title:'Alle sichtbaren Datenpunkte werden aktiv gesetzt.') {
-									span class:'glyphicon glyphicon-unchecked'
-								}
-							}
-						}
+          div(class:'input-group') {
+            div(class:'input-group-addon', 'Inaktiv')
+            span(class:'input-group-btn') {
+              button(type:'button', class:'btn btn-default', id:'button-check-inactive', 'data-toggle':'tooltip',
+                title:'Alle sichtbaren Datenpunkte werden inaktiv gesetzt.') {
+                span class:'glyphicon glyphicon-check'
+              }
+              button(type:'button', class:'btn btn-default', id:'button-uncheck-inactive', 'data-toggle':'tooltip',
+                title:'Alle sichtbaren Datenpunkte werden aktiv gesetzt.') {
+                span class:'glyphicon glyphicon-unchecked'
+              }
+            }
 					}
-					div(class:'form-group') {
-						div(class:'input-group') {
-							div(class:'input-group-addon', 'Versteckt')
-							span(class:'input-group-btn') {
-								button(type:'button', class:'btn btn-default', id:'button-check-hidden', 'data-toggle':'tooltip',
-									title:'Alle sichtbaren Datenpunkte werden versteckt.') {
-									span class:'glyphicon glyphicon-check'
-								}
-								button(type:'button', class:'btn btn-default', id:'button-uncheck-hidden', 'data-toggle':'tooltip',
-									title:'Alle sichtbaren Datenpunkte werden nicht mehr versteckt.') {
-									span class:'glyphicon glyphicon-unchecked'
-								}
-							}
-						}
-					}
+          div(class:'input-group') {
+            div(class:'input-group-addon', 'Versteckt')
+            span(class:'input-group-btn') {
+              button(type:'button', class:'btn btn-default', id:'button-check-hidden', 'data-toggle':'tooltip',
+                title:'Alle sichtbaren Datenpunkte werden versteckt.') {
+                span class:'glyphicon glyphicon-check'
+              }
+              button(type:'button', class:'btn btn-default', id:'button-uncheck-hidden', 'data-toggle':'tooltip',
+                title:'Alle sichtbaren Datenpunkte werden nicht mehr versteckt.') {
+                span class:'glyphicon glyphicon-unchecked'
+              }
+            }
+          }
 					div(class:'btn-group') {
 						button(type:'button', class:'btn btn-default dropdown-toggle', 'data-toggle':'dropdown') {
 							mkp.yield 'Vorverarb.'
@@ -217,8 +213,29 @@ renderer.content={
 							}
 						} 
 					}
+                    
+                    // sorting
+                    div(class:'btn-group') {
+                        button(type:'button', class:'btn btn-default dropdown-toggle', 'data-toggle':'dropdown') {
+                            span class:'glyphicon glyphicon-sort'
+                            mkp.yield ' Sortierung'
+                            span class:'caret'
+                        }
+                        ul(class:'dropdown-menu') {
+                            li { a href:'#', id:'select-sorting-default', 'Standard' } 
+                            li { a href:'#', id:'select-sorting-parameter', 'Parameter' } 
+                            li { a href:'#', id:'select-sorting-room', 'Raum' } 
+                            li { a href:'#', id:'select-sorting-function', 'Gewerk' } 
+                            li { a href:'#', id:'select-sorting-address', 'Adresse' } 
+                            li { a href:'#', id:'select-sorting-id', 'ID' } 
+                            li { a href:'#', id:'select-sorting-num-entries', 'Anz. Einträge' } 
+                            li { a href:'#', id:'select-sorting-num-entries-24', 'Anz. Einträge 24h' } 
+                            li { a (href:'#', id:'select-sorting-reverse', { i 'Umkehren' }) } 
+                        }
+                    }
 				}
 			}
+      
 			// data point actions
 			div(class:'col-sm-2') {
 				button class:'btn btn-primary btn-block', type:'submit', name:'update-datapoints', value:1, 'Übernehmen',
@@ -365,7 +382,45 @@ renderer.end={
 		$('#input-param').on('keydown', function(e) {
 			if (e.keyCode===13) { e.preventDefault(); setparam(); }
 		})
-	/$) }
+    
+        // sorting
+        var defaultSorting=$('#dp-table > tbody > tr');
+        $('#select-sorting-default').on('click', function(e) {
+            $('#dp-table > tbody').append(defaultSorting);
+        });
+        function addSorting(id, cidx, cmp) {
+            $(id).on('click', function(e) {
+                var tbody=$('#dp-table > tbody')
+                var rows=tbody.children().toArray().sort(function (rowA, rowB) {
+                    var valA=$(rowA).children().eq(cidx).text();
+                    var valB=$(rowB).children().eq(cidx).text();
+                    return cmp(valA, valB);
+                });
+                tbody.append(rows);
+            });
+        }
+        function numericCompare(a, b) { return Number(a)-Number(b); }
+        function textCompare(a, b) { return a.localeCompare(b); }
+        function numEntriesCompare(part) {
+            return function(a, b) {
+                var valA=a.split('/')[part].replaceAll('.', '');
+                var valB=b.split('/')[part].replaceAll('.', '');
+                return -numericCompare(valA, valB);
+            }
+        }
+        addSorting('#select-sorting-parameter', 2, textCompare);
+        addSorting('#select-sorting-room', 3, textCompare);
+        addSorting('#select-sorting-function', 4, textCompare);
+        addSorting('#select-sorting-address', 5, textCompare);
+        addSorting('#select-sorting-id', 6, numericCompare);
+        addSorting('#select-sorting-num-entries', 9, numEntriesCompare(0));
+        addSorting('#select-sorting-num-entries-24', 9, numEntriesCompare(1));
+        $('#select-sorting-reverse').on('click', function(e) {
+            var tbody=$('#dp-table > tbody')
+            var rows=tbody.children().toArray().reverse();
+            tbody.append(rows);
+        });
+    /$) }
 }
 
 // render page
