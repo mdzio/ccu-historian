@@ -1,14 +1,9 @@
-/*
- Highstock JS v10.3.3 (2023-01-20)
-
- Indicator series type for Highcharts Stock
-
- (c) 2010-2021 Sebastian Bochan
-
- License: www.highcharts.com/license
-*/
-(function(b){"object"===typeof module&&module.exports?(b["default"]=b,module.exports=b):"function"===typeof define&&define.amd?define("highcharts/indicators/trendline",["highcharts","highcharts/modules/stock"],function(c){b(c);b.Highcharts=c;return b}):b("undefined"!==typeof Highcharts?Highcharts:void 0)})(function(b){function c(b,a,c,g){b.hasOwnProperty(a)||(b[a]=g.apply(null,c),"function"===typeof CustomEvent&&window.dispatchEvent(new CustomEvent("HighchartsModuleLoaded",{detail:{path:a,module:b[a]}})))}
-b=b?b._modules:{};c(b,"Stock/Indicators/TrendLine/TrendLineIndicator.js",[b["Core/Series/SeriesRegistry.js"],b["Core/Utilities.js"]],function(b,a){var c=this&&this.__extends||function(){var b=function(a,d){b=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(b,d){b.__proto__=d}||function(b,d){for(var e in d)d.hasOwnProperty(e)&&(b[e]=d[e])};return b(a,d)};return function(a,d){function e(){this.constructor=a}b(a,d);a.prototype=null===d?Object.create(d):(e.prototype=d.prototype,new e)}}(),
-g=b.seriesTypes.sma,m=a.extend,r=a.merge,t=a.isArray;a=function(b){function a(){var a=null!==b&&b.apply(this,arguments)||this;a.data=void 0;a.options=void 0;a.points=void 0;return a}c(a,b);a.prototype.getValues=function(b,a){var d=b.xData,c=b.yData;b=[];var e=[],g=[],h=0,n=0,p=0,q=0,k=d.length,m=a.index;for(a=0;a<k;a++){var f=d[a];var l=t(c[a])?c[a][m]:c[a];h+=f;n+=l;p+=f*l;q+=f*f}c=(k*p-h*n)/(k*q-h*h);isNaN(c)&&(c=0);h=(n-c*h)/k;for(a=0;a<k;a++)f=d[a],l=c*f+h,b[a]=[f,l],e[a]=f,g[a]=l;return{xData:e,
-yData:g,values:b}};a.defaultOptions=r(g.defaultOptions,{params:{period:void 0,index:3}});return a}(g);m(a.prototype,{nameBase:"Trendline",nameComponents:!1});b.registerSeriesType("trendline",a);"";return a});c(b,"masters/indicators/trendline.src.js",[],function(){})});
-//# sourceMappingURL=trendline.js.map
+/**
+ * Highstock JS v11.2.0 (2023-10-30)
+ *
+ * Indicator series type for Highcharts Stock
+ *
+ * (c) 2010-2021 Sebastian Bochan
+ *
+ * License: www.highcharts.com/license
+ */!function(e){"object"==typeof module&&module.exports?(e.default=e,module.exports=e):"function"==typeof define&&define.amd?define("highcharts/indicators/trendline",["highcharts","highcharts/modules/stock"],function(t){return e(t),e.Highcharts=t,e}):e("undefined"!=typeof Highcharts?Highcharts:void 0)}(function(e){"use strict";var t=e?e._modules:{};function i(e,t,i,n){e.hasOwnProperty(t)||(e[t]=n.apply(null,i),"function"==typeof CustomEvent&&window.dispatchEvent(new CustomEvent("HighchartsModuleLoaded",{detail:{path:t,module:e[t]}})))}i(t,"Stock/Indicators/TrendLine/TrendLineIndicator.js",[t["Core/Series/SeriesRegistry.js"],t["Core/Utilities.js"]],function(e,t){let{sma:i}=e.seriesTypes,{extend:n,merge:s,isArray:o}=t;class r extends i{constructor(){super(...arguments),this.data=void 0,this.options=void 0,this.points=void 0,this.updateAllPoints=!0}getValues(e,t){let i=e.xData,n=e.yData,s=[],r=[],a=[],d=i.length,u=t.index,c=(d-1)*d/2,l=0,h=0,p,f,m;for(f=0;f<d;f++)l+=m=o(n[f])?n[f][u]:n[f],h+=f*m;isNaN(p=(d*h-c*l)/(d*((d-1)*d*(2*d-1)/6)-c*c))&&(p=0);let y=(l-p*c)/d;for(f=0;f<d;f++)m=p*f+y,s[f]=[i[f],m],r[f]=i[f],a[f]=m;return{xData:r,yData:a,values:s}}}return r.defaultOptions=s(i.defaultOptions,{params:{period:void 0,index:3}}),n(r.prototype,{nameBase:"Trendline",nameComponents:!1}),e.registerSeriesType("trendline",r),r}),i(t,"masters/indicators/trendline.src.js",[],function(){})});//# sourceMappingURL=trendline.js.map

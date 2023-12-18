@@ -275,8 +275,6 @@ renderer.end={
   script src:'exporting.js'
   script src:'offline-exporting.js'
   script src:'modules/export-data.js'
-  script src:'modules/debugger.js'
-  script src:'modules/boost.js'
   script src:'stock-tools/indicators.js'
   script src:'stock-tools/acceleration-bands.js'
   script src:'stock-tools/bollinger-bands.js'
