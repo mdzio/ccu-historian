@@ -2,7 +2,7 @@
 set infoUrl https://api.github.com/repos/mdzio/ccu-historian/releases/latest
 set infoError [catch {
   set info [exec wget -q -O- --no-check-certificate $infoUrl]
-  set found [regexp {\"tag_name\"\s*:\s*\"([^\"]*)\"} $info -> version]
+  set found [regexp {\"tag_name\"\s*:\s*\"v([^\"]*)\"} $info -> version]
   if {!$found} error
   set found [regexp {\"browser_download_url\"\s*:\s*\"([^\"]*/ccu-historian-addon-[^\"]+\.tar\.gz)\"} $info -> downloadUrl]
   if {!$found} error
