@@ -430,11 +430,6 @@ private static rpcFunctions=[
 		[timestamps: timestamps, values: values, states: states, characteristics:expr.characteristics]
 	},
 
-	setValue:{ params ->
-		interfaceManager.writeValue(utils.parseDataPoint(params[0] as String, database), params[1])
-		null
-	},
-	
 	executeScript:{ params ->
 		if (params.size()==0) {
 			throw new RpcException("Missing parameter(s) for executeScript", RpcException.INVALID_PARAMS)
