@@ -111,7 +111,11 @@ const ChartConfig = {
 let ChartInstance
 
 // current time range, start with last 24 hours
-let TimeRange = Interval.before(DateTime.now(), { hours: 24 })
+let TimeRangeEnd = DateTime.now()
+let TimeRangeBegin = TimeRangeEnd.minus({ hours: 24 })
+
+// update is currently in progress
+let UpdateRunning = false
 
 // Expression class
 class Expression {
@@ -171,8 +175,8 @@ class Expression {
     }
   }
   async updateTimeSeries() {
-    // empty formula?
-    if (!this.formula) {
+    // empty formula or reversed time range?
+    if (!this.formula || TimeRangeBegin > TimeRangeEnd) {
       this.clearTimeSeries()
       this.errorMessage = ''
       this.updateChartData()
@@ -187,8 +191,8 @@ class Expression {
           method: 'calculateTimeSeries',
           params: [
             this.formula,
-            TimeRange.start.toMillis(),
-            TimeRange.end.toMillis(),
+            TimeRangeBegin.toMillis(),
+            TimeRangeEnd.toMillis(),
           ],
         },
       })
@@ -233,7 +237,7 @@ Expressions.push(new Expression(2, 'blue'))
 // mithril components
 
 // DateTimeInput
-// attrs: name, label, value, onchange
+// attrs: name, label, value, onchange, disabled, invalid
 function DateTimeInput() {
   let onchange
   let lastValue
@@ -268,7 +272,7 @@ function DateTimeInput() {
         parsedValue = value
       }
       return m('.input-group',
-        (parsedValue == null) ? { class: 'has-error' } : null,
+        (parsedValue == null || vnode.attrs.invalid) ? { class: 'has-error' } : null,
         m('span.input-group-addon', vnode.attrs.label),
         m('input.form-control[type=text]',
           {
@@ -276,6 +280,7 @@ function DateTimeInput() {
             value: textValue,
             oninput: onInput,
             onchange: onChange,
+            disabled: vnode.attrs.disabled,
           },
         ),
       )
@@ -285,23 +290,27 @@ function DateTimeInput() {
 
 function TimeNavigation() {
   async function update() {
+    UpdateRunning=true
     await Expressions.updateAllTimeSeries()
     // no auto fit for time range
     const sx = ChartConfig.options.scales.x
-    sx.min = TimeRange.start.toMillis()
-    sx.max = TimeRange.end.toMillis()
+    sx.min = TimeRangeBegin.toMillis()
+    sx.max = TimeRangeEnd.toMillis()
     ChartInstance.update()
+    UpdateRunning=false
   }
   function modify(b, e) {
     return () => {
-      const d = TimeRange.length() // ms
-      TimeRange = Interval.fromDateTimes(TimeRange.start.plus(b * d), TimeRange.end.plus(e * d))
+      const d = TimeRangeEnd.diff(TimeRangeBegin).toMillis()
+      TimeRangeBegin = TimeRangeBegin.plus(b * d)
+      TimeRangeEnd = TimeRangeEnd.plus(e * d)
       update()
     }
   }
   function last(d) {
     return () => {
-      TimeRange = Interval.before(DateTime.now(), d)
+      TimeRangeEnd = DateTime.now()
+      TimeRangeBegin = TimeRangeEnd.minus(d)
       update()
     }
   }
@@ -324,27 +333,27 @@ function TimeNavigation() {
           ),
           m('.btn-group[role=group]',
             m('button.btn.btn-default',
-              { onclick: modify(-1, -1) },
+              { onclick: modify(-1, -1), disabled: UpdateRunning },
               m('span.glyphicon.glyphicon-backward'),
             ),
             m('button.btn.btn-default',
-              { onclick: modify(-0.33, -0.33) },
+              { onclick: modify(-0.33, -0.33), disabled: UpdateRunning },
               m('span.glyphicon.glyphicon-triangle-left'),
             ),
             m('button.btn.btn-default',
-              { onclick: modify(0.33, -0.33) },
+              { onclick: modify(0.33, -0.33), disabled: UpdateRunning },
               m('span.glyphicon.glyphicon-zoom-in'),
             ),
             m('button.btn.btn-default',
-              { onclick: modify(-1, 1) },
+              { onclick: modify(-1, 1), disabled: UpdateRunning },
               m('span.glyphicon.glyphicon-zoom-out'),
             ),
             m('button.btn.btn-default',
-              { onclick: modify(0.33, 0.33) },
+              { onclick: modify(0.33, 0.33), disabled: UpdateRunning },
               m('span.glyphicon.glyphicon-triangle-right'),
             ),
             m('button.btn.btn-default',
-              { onclick: modify(1, 1) },
+              { onclick: modify(1, 1), disabled: UpdateRunning },
               m('span.glyphicon.glyphicon-forward'),
             ),
           ),
@@ -354,8 +363,10 @@ function TimeNavigation() {
             {
               name: 'tr-begin',
               label: 'Start',
-              value: TimeRange.start,
-              onchange: (dt) => { TimeRange = TimeRange.set({ start: dt }); update() },
+              value: TimeRangeBegin,
+              onchange: (dt) => { TimeRangeBegin = dt; update() },
+              invalid: TimeRangeBegin > TimeRangeEnd,
+              disabled: UpdateRunning,
             },
           ),
         ),
@@ -364,8 +375,10 @@ function TimeNavigation() {
             {
               name: 'tr-end',
               label: 'Ende',
-              value: TimeRange.end,
-              onchange: (dt) => { TimeRange = TimeRange.set({ end: dt }); update() },
+              value: TimeRangeEnd,
+              onchange: (dt) => { TimeRangeEnd = dt; update() },
+              invalid: TimeRangeBegin > TimeRangeEnd,
+              disabled: UpdateRunning,
             },
           ),
         ),
@@ -382,8 +395,10 @@ function ExpressionInput() {
     expr.formula = e.target.value
   }
   async function onFormulaChange() {
+    UpdateRunning=true
     await expr.updateTimeSeries()
     ChartInstance.update()
+    UpdateRunning=false
   }
   return {
     oninit: function (vnode) {
@@ -400,6 +415,7 @@ function ExpressionInput() {
           m('span.glyphicon.glyphicon-bookmark', { style: { color: expr.color } }),
         ),
         m('input.form-control[type=text]', {
+          disabled: UpdateRunning,
           name: 'formula' + idx,
           oninput: onFormulaInput,
           onchange: onFormulaChange,
