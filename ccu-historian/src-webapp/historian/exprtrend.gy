@@ -73,12 +73,16 @@ const ChartConfig = {
   },
   options: {
     maintainAspectRatio: false,
-    animation: {
-      duration: 0,
-    },
+    animation: false,
+    parsing: false,
+    normalized: true,
     plugins: {
       legend: {
         display: false,
+      },
+      decimation: {
+        enabled: true,
+        algorithm: 'min-max',
       },
     },
     elements: {
@@ -129,6 +133,7 @@ class Expression {
     this.index = index
     this.color = color
   }
+  
   clearTimeSeries() {
     this.timeSeries = {
       timestamps: [],
@@ -137,6 +142,7 @@ class Expression {
       characteristics: 0,
     }
   }
+  
   updateChartData() {
     const ts = this.timeSeries
     const ds = ChartConfig.data.datasets[this.index]
@@ -174,6 +180,7 @@ class Expression {
       borderDash: styleFunc,
     }
   }
+  
   async updateTimeSeries() {
     // empty formula or reversed time range?
     if (!this.formula || TimeRangeBegin > TimeRangeEnd) {
@@ -211,6 +218,7 @@ class Expression {
     }
     this.updateChartData()
   }
+  
   updateOptions() {
     // update chart options
     const ds = ChartConfig.data.datasets[this.index]
@@ -221,9 +229,11 @@ class Expression {
 // expression list
 
 class ExpressionList extends Array {
+  
   async updateAllTimeSeries() {
     return Promise.all(this.map(expr => expr.updateTimeSeries()))
   }
+  
   updateAllOptions() {
     this.forEach(expr => expr.updateOptions())
   }
@@ -255,11 +265,13 @@ function DateTimeInput() {
       }
     }
   }
+  
   function onChange() {
     if (onchange != null && parsedValue != null) {
       onchange(parsedValue)
     }
   }
+  
   return {
     oninit: function (vnode) {
       onchange = vnode.attrs.onchange
@@ -289,6 +301,7 @@ function DateTimeInput() {
 }
 
 function TimeNavigation() {
+  
   async function update() {
     UpdateRunning=true
     await Expressions.updateAllTimeSeries()
@@ -299,6 +312,7 @@ function TimeNavigation() {
     ChartInstance.update()
     UpdateRunning=false
   }
+  
   function modify(b, e) {
     return () => {
       const d = TimeRangeEnd.diff(TimeRangeBegin).toMillis()
@@ -307,6 +321,7 @@ function TimeNavigation() {
       update()
     }
   }
+  
   function last(d) {
     return () => {
       TimeRangeEnd = DateTime.now()
@@ -314,6 +329,7 @@ function TimeNavigation() {
       update()
     }
   }
+  
   return {
     view: function () {
       return m('.row',
@@ -394,12 +410,14 @@ function ExpressionInput() {
   function onFormulaInput(e) {
     expr.formula = e.target.value
   }
+  
   async function onFormulaChange() {
     UpdateRunning=true
     await expr.updateTimeSeries()
     ChartInstance.update()
     UpdateRunning=false
   }
+  
   return {
     oninit: function (vnode) {
       idx = vnode.attrs.key
