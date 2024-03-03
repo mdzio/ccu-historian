@@ -23,6 +23,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
+import java.util.function.DoubleBinaryOperator;
+import java.util.function.DoubleUnaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -53,6 +55,25 @@ public abstract class Expression implements Reader {
 	 */
 	public Expression unaryOperator(UnaryOperator<ProcessValue> operator) {
 		return lift(source -> new MapIterator(source, operator));
+	}
+
+	/**
+	 * This is a convenience function for unaryOperator. The passed function works
+	 * directly on the double value. NaN, Infinity and exceptions are automatically
+	 * converted into a ProcessValue with status BAD.
+	 */
+	public Expression map(DoubleUnaryOperator operator) {
+		return unaryOperator((ProcessValue pv) -> {
+			try {
+				double rv = operator.applyAsDouble(pv.getDoubleValue());
+				if (Double.isNaN(rv) || Double.isInfinite(rv)) {
+					throw new Exception("Invalid double value");
+				}
+				return new ProcessValue(pv.getTimestamp(), rv, pv.getState());
+			} catch (Exception e) {
+				return new ProcessValue(pv.getTimestamp(), 0.0D, ProcessValue.STATE_QUALITY_BAD);
+			}
+		});
 	}
 
 	/**
@@ -87,6 +108,25 @@ public abstract class Expression implements Reader {
 	 */
 	public Expression binaryOperator(Expression other, BinaryOperator<ProcessValue> operator) {
 		return new BinaryOperatorExpression(linear(), other.linear(), operator);
+	}
+
+	/**
+	 * This is a convenience function for binaryOperator. The passed function works
+	 * directly on the double values. NaN, Infinity and exceptions are automatically
+	 * converted into a ProcessValue with status BAD.
+	 */
+	public Expression combine(Expression other, DoubleBinaryOperator operator) {
+		return binaryOperator(other, (a, b) -> {
+			try {
+				double rv = operator.applyAsDouble(a.getDoubleValue(), b.getDoubleValue());
+				if (Double.isNaN(rv) || Double.isInfinite(rv)) {
+					throw new Exception("Invalid double value");
+				}
+				return new ProcessValue(a.getTimestamp(), rv, a.getState());
+			} catch (Exception e) {
+				return new ProcessValue(a.getTimestamp(), 0.0D, ProcessValue.STATE_QUALITY_BAD);
+			}
+		});
 	}
 
 	public Expression plus(Expression other) {
