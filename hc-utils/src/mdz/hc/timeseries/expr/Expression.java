@@ -122,7 +122,7 @@ public abstract class Expression implements Reader {
 				if (Double.isNaN(rv) || Double.isInfinite(rv)) {
 					throw new Exception("Invalid double value");
 				}
-				return new ProcessValue(a.getTimestamp(), rv, a.getState());
+				return new ProcessValue(a.getTimestamp(), rv, AggregateFunctions.combineStates(a, b));
 			} catch (Exception e) {
 				return new ProcessValue(a.getTimestamp(), 0.0D, ProcessValue.STATE_QUALITY_BAD);
 			}
