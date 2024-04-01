@@ -208,6 +208,7 @@ def executeScript(script, writeAccess) {
 	binding.database=writeAccess ? database : new ReadOnlyDecorator(database)
 	def exprAdapter=new DatabaseExpressionAdapter(storage: database)
 	binding.dataPoint=exprAdapter.&dataPoint
+	binding.DP=exprAdapter.&dataPoint
 	binding.version=Main.version 
 	
 	// create shell and execute script

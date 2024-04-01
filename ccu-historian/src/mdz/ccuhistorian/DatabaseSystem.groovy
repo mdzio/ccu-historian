@@ -65,6 +65,15 @@ public class DatabaseSystem extends BaseSystem {
 	
 	public ExtendedStorage getDatabase() { extendedStorage }
 	
+	// Unfortunately, the Binding class cannot be used. Function calls to properties that
+	// contain Closure's can only be forwarded with a separate class.
+	private static class Delegate {
+		def log
+		def database
+		def DP
+		def dataPoint
+	}
+	
 	private startTasks() {
 		def cparser=new CronParser(CronDefinitionBuilder.instanceDefinitionFor(QUARTZ))
 		config.databaseConfig.tasks.each { String name, DatabaseConfig.Task task ->
@@ -77,11 +86,15 @@ public class DatabaseSystem extends BaseSystem {
 					throw new Exception("Task $name has no script")
 				}
 				
-				def binding=new Binding()
+				def delegate=new Delegate()
 				def scriptLog=Logger.getLogger("mdz.task.$name")
-				binding.setVariable("log", scriptLog)
-				binding.setVariable("database", extendedStorage)
-				task.script.delegate=binding
+				def exprAdapter=new DatabaseExpressionAdapter(storage: extendedStorage)
+				delegate.log=scriptLog
+				delegate.database=extendedStorage
+				// dataPoint() has several overloads that will be resolved dynamically!
+				delegate.dataPoint=exprAdapter.&dataPoint
+				delegate.DP=exprAdapter.&dataPoint
+				task.script.delegate=delegate
 				task.script.resolveStrategy=Closure.DELEGATE_ONLY
 				
 				// schedule task
