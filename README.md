@@ -50,9 +50,7 @@ Die Installation und Konfiguration ist im [Handbuch](https://github.com/mdzio/cc
 
 ## Entwicklungsumgebung
 
-Der CCU-Historian ist größtenteils in der [Programmiersprache Apache Groovy](http://groovy-lang.org) geschrieben. Weitere Programmiersprachen sind Java und JavaScript. Als Entwicklungsumgebung wird die [Eclipse IDE](http://www.eclipse.org) ab der V2022-09 in der Variante für Java-Entwickler verwendet. Das Paket ist auf der [Download-Seite](https://www.eclipse.org/downloads/packages/) zu finden. Des Weiteren wird das [Groovy-Eclipse-Plugin](https://github.com/groovy/groovy-eclipse/wiki) ab der V4.24 benötigt. Dieses Plugin ist im Eclipse Marketplace (*Help* → *Eclipse Marketplace*) zu finden und sollte automatisch zur Installation angeboten werden, wenn das CCU-Historian-Projekt importiert wird. Über *File* → *Import* → *Projects from Git* kann direkt das Repository geklont werden. Die Zielplattform ist Java Version 8.
-
-Für die Distribution als CCU-Add-On muss unter *Window* → *Preferences* → *Groovy* → *Compiler* die V2.5.19 eingestellt werden. Für die anderen Distributionen V3.0.13.
+Der CCU-Historian ist größtenteils in der [Programmiersprache Apache Groovy](http://groovy-lang.org) geschrieben. Weitere Programmiersprachen sind Java und JavaScript. Als Entwicklungsumgebung wird die [Eclipse IDE](http://www.eclipse.org) ab der V2024-03 in der Variante für Java-Entwickler verwendet. Das Paket ist auf der [Download-Seite](https://www.eclipse.org/downloads/packages/) zu finden. Des Weiteren wird das [Groovy-Eclipse-Plugin](https://github.com/groovy/groovy-eclipse/wiki) ab der V5.30 benötigt. Dieses Plugin ist im Eclipse Marketplace (*Help* → *Eclipse Marketplace*) zu finden und sollte automatisch zur Installation angeboten werden, wenn das CCU-Historian-Projekt importiert wird. Über *File* → *Import* → *Projects from Git* kann direkt das Repository geklont werden. Die Zielplattform ist Java Version 11.
 
 Alle Beiträge zum Projekt müssen unter die [GNU General Public License V3](LICENSE.txt) gestellt werden. Die Lizenzen von verwendeten Bibliotheken müssen mit dieser kompatibel sein.
 
