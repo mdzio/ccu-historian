@@ -88,10 +88,10 @@ try {
 
             ## Distributionen
 
-            Plattformunabhängige Distribution (Windows, Linux, MacOS): **[ccu-historian-${v}-bin.zip](https://github.com/mdzio/ccu-historian/releases/download/v${v}/ccu-historian-${v}-bin.zip)**\\
-            CCU3/RaspberryMatic/YAHM/piVCCU-Distribution: **[ccu-historian-addon-${v}.tar.gz](https://github.com/mdzio/ccu-historian/releases/download/v${v}/ccu-historian-addon-${v}.tar.gz)**\\
-            Synology-Distribution DSM 6: **[ccu-historian-${cv}.spk](https://github.com/mdzio/ccu-historian/releases/download/v${v}/ccu-historian-${cv}.spk)**
-            Synology-Distribution DSM 7: **[ccu-historian-dsm7-${cv}-noarch.spk](https://github.com/mdzio/ccu-historian/releases/download/v${v}/ccu-historian-dsm7-${cv}-noarch.spk)**
+            Plattformunabhängige Distribution (Windows, Linux, MacOS): **[ccu-historian-${v}-bin.zip](https://github.com/mdzio/ccu-historian/releases/download/${v}/ccu-historian-${v}-bin.zip)**\\
+            CCU3/RaspberryMatic/YAHM/piVCCU-Distribution: **[ccu-historian-addon-${v}.tar.gz](https://github.com/mdzio/ccu-historian/releases/download/${v}/ccu-historian-addon-${v}.tar.gz)**\\
+            Synology-Distribution DSM 6: **[ccu-historian-${cv}.spk](https://github.com/mdzio/ccu-historian/releases/download/${v}/ccu-historian-${cv}.spk)**
+            Synology-Distribution DSM 7: **[ccu-historian-dsm7-${cv}-noarch.spk](https://github.com/mdzio/ccu-historian/releases/download/${v}/ccu-historian-dsm7-${cv}-noarch.spk)**
 
             ## Fehlerbehebungen / Verbesserungen
 
@@ -110,7 +110,7 @@ def request(apiUrl) {
         .uri(URI.create(repoUrl + apiUrl))
         .header('Authorization', token)
         .build()
-    def resp=client.send(req, HttpResponse.BodyHandlers.ofString(Charset.forName('ISO-8859-1')))
+    def resp=client.send(req, HttpResponse.BodyHandlers.ofString(Charset.forName('UTF-8')))
     if (resp.statusCode()!=200) {
         throw new Exception("Request failed: HTTP status code=" + resp.statusCode())
     }
