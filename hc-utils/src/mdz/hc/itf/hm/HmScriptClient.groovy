@@ -37,24 +37,24 @@ public class HmScriptClient {
 	private final static long DEFAULT_SCRIPT_PAUSE = 200 // ms
 
 	final String address
-		
+
 	private final URL url
 	private long lastScriptExec
 	private HmModel model
 	private long modelLastScan
 	private Object modelMutex=[]
 	private String auth
-	
+
 	public HmScriptClient(String address, String username, String password) {
 		this.address=address
 		if (username) {
-			auth='Basic '+(username+':'+password?:'').bytes.encodeBase64() 
+			auth='Basic '+(username+':'+password?:'').bytes.encodeBase64()
 		}
 		String host="http://$address:8181/tclrega.exe"
 		log.info "Creating HM script client for $host"
 		url=[host]
 	}
-	
+
 	public List<DataPoint> getSystemVariables(String interfaceIdFiller) {
 		log.finer 'Getting list of system variables'
 		List<String> response=execute('''string id; foreach(id, dom.GetObject(ID_SYSTEM_VARIABLES).EnumIDs()) {
@@ -75,24 +75,24 @@ public class HmScriptClient {
 			if (items.length==7) {
 				def min, max
 				switch (items[6]) {
-				case 'BOOL': min=0.0; max=1.0; break
-				case 'ALARM': min=0.0; max=1.0; break
-				case 'FLOAT': 
-					Exceptions.catchToLog(log) { max=items[2].toDouble() }
-					Exceptions.catchToLog(log) { min=items[4].toDouble() }
-					break
+					case 'BOOL': min=0.0; max=1.0; break
+					case 'ALARM': min=0.0; max=1.0; break
+					case 'FLOAT':
+						Exceptions.catchToLog(log) { max=items[2].toDouble() }
+						Exceptions.catchToLog(log) { min=items[4].toDouble() }
+						break
 				}
 				dataPoints << new DataPoint(
-					id: new DataPointIdentifier(interfaceIdFiller, items[0], DEFAULT_IDENTIFIER),
-					attributes: [
-						displayName: items[1],
-						maximum: max,
-						unit: items[3],
-						minimum: min,
-						operations: items[5].toInteger(),
-						type: items[6]
-					] as Map<String, Object>
-				)
+						id: new DataPointIdentifier(interfaceIdFiller, items[0], DEFAULT_IDENTIFIER),
+						attributes: [
+							displayName: items[1],
+							maximum: max,
+							unit: items[3],
+							minimum: min,
+							operations: items[5].toInteger(),
+							type: items[6]
+						] as Map<String, Object>
+						)
 			} else
 				log.warning "Invalid response: $line"
 		}
@@ -135,24 +135,26 @@ public class HmScriptClient {
 					log.fine "Can't parse $strval as timestamp"
 				}
 				strval=response[lineIdx++]
-				while (!strval.endsWith(VALUE_TERMINATOR)) { strval+='\n'+response[lineIdx++] }
+				while (!strval.endsWith(VALUE_TERMINATOR)) {
+					strval+='\n'+response[lineIdx++]
+				}
 				strval=strval.substring(0, strval.length()-1)
 				def value
 				try {
 					switch (dp.attributes.type) {
-					case 'BOOL': case 'ALARM': value=strval.toBoolean(); break
-					case 'ENUM': value=strval.toInteger(); break
-					case 'FLOAT': value=strval.toDouble(); break
-					case 'STRING': value=strval; break
-					default:
-						log.warning "Unknown data type: $dp.attributes.type"
+						case 'BOOL': case 'ALARM': value=strval.toBoolean(); break
+						case 'ENUM': value=strval.toInteger(); break
+						case 'FLOAT': value=strval.toDouble(); break
+						case 'STRING': value=strval; break
+						default:
+							log.warning "Unknown data type: $dp.attributes.type"
 					}
 				} catch (NumberFormatException e) {
 					log.warning "Value $strval is not valid for data type $dp.attributes.type of data point $dp.id"
 				}
 				if (value!=null) new RawEvent(
-					id: dp.id, 
-					pv: new ProcessValue(timestamp, value, ProcessValue.STATE_QUALITY_NOT_SUPPORTED)
+				id: dp.id,
+				pv: new ProcessValue(timestamp, value, ProcessValue.STATE_QUALITY_NOT_SUPPORTED)
 				)
 				else null
 			} else {
@@ -161,7 +163,7 @@ public class HmScriptClient {
 			}
 		}
 	}
-	
+
 	public void setSystemVariableValue(DataPoint dp, value) {
 		if (value instanceof String) {
 			// Attention: The characters " or \ in a string are not handled correctly by the CCU!
@@ -180,7 +182,7 @@ public class HmScriptClient {
 		if (response.size()!=1 || response[0]!='0')
 			throw new Exception("HM script client: Setting data point $dp.id to value $value failed")
 	}
-	
+
 	private void retrieveChannels(HmModel.Device dev) {
 		List<String> res=execute('''var dev=dom.GetObject(''' + dev.iseId + ''');
 			if (dev && dev.Type()==OT_DEVICE) {
@@ -206,12 +208,12 @@ public class HmScriptClient {
 					if (!it[0].isInteger())
 						throw new Exception("HM script client: Invalid response line (invalid ISE ID): $line");
 					ch.dataPoints << new HmModel.DataPoint(iseId:it[0] as int, address:it[1], channel:ch)
-				}	
+				}
 			}
 			dev.channels << ch
 		}
 	}
-	
+
 	private void retrieveDevices(HmModel model) {
 		List<String> res=execute('''string id; foreach(id, root.Devices().EnumIDs()) {
 			var device=dom.GetObject(id);
@@ -230,7 +232,7 @@ public class HmScriptClient {
 			model.add dev
 		}
 	}
-	
+
 	private void retrieveRooms(HmModel model) {
 		List<String> res=execute('''string roomId; foreach(roomId, dom.GetObject(ID_ROOMS).EnumUsedIDs()) {
 		    var room = dom.GetObject(roomId);
@@ -311,7 +313,7 @@ public class HmScriptClient {
 			model
 		}
 	}
-	
+
 	public Date getSystemDate() {
 		List<String> res=execute('WriteLine(system.Date("%F %T"));')
 		if (res.size()!=1)
@@ -324,16 +326,16 @@ public class HmScriptClient {
 		}
 		t
 	}
-	
+
 	public void executeProgram(String program) {
 		List<String> res=execute($/
 			var prg=dom.GetObject(ID_PROGRAMS).Get("$program");
 			if (prg) { prg.ProgramExecute(); WriteLine("0"); } 
 			else { WriteLine("1"); }/$)
-		if (res.size()!=1 || res[0]!='0') 
+		if (res.size()!=1 || res[0]!='0')
 			throw new Exception("Execution of HM program failed: $program")
 	}
-	
+
 	public synchronized List<String> execute(String script) {
 		log.finer "Executing script: $script"
 		// pause
@@ -347,22 +349,29 @@ public class HmScriptClient {
 		}
 		// request
 		lastScriptExec=System.currentTimeMillis()
+		List<String> response
 		HttpURLConnection con=(HttpURLConnection)url.openConnection()
-		con.connectTimeout=DEFAULT_CONNECT_TIMEOUT
-		con.requestMethod='POST'
-		con.doOutput=true
-		if (auth) {
-			con.setRequestProperty("Authorization", auth);
-		}
-		con.outputStream.write script.getBytes('ISO-8859-1')
-		con.outputStream.close()
-		List<String> response=[]
-		con.inputStream.withReader('ISO-8859-1') { Reader reader ->
-			reader.eachLine { String line ->
-				if (!line.startsWith('<xml><exec>')) response << line
+		try {
+			con.connectTimeout=DEFAULT_CONNECT_TIMEOUT
+			con.requestMethod='POST'
+			con.doOutput=true
+			if (auth) {
+				con.setRequestProperty("Authorization", auth);
 			}
+			con.outputStream.withCloseable { outputStream ->
+				outputStream.write script.getBytes('ISO-8859-1')
+			}
+			response=[]
+			con.inputStream.withCloseable { inputStream ->
+				inputStream.withReader('ISO-8859-1') { Reader reader ->
+					reader.eachLine { String line ->
+						if (!line.startsWith('<xml><exec>')) response << line
+					}
+				}
+			}
+		} finally {
+			con.disconnect()
 		}
-		con.disconnect()
 		log.finer "Response: ${response.join('\n')}"
 		response
 	}
