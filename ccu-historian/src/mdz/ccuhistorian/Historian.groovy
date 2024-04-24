@@ -43,6 +43,7 @@ import mdz.ccuhistorian.eventprocessing.Preprocessor
 class Historian implements Runnable {
 
 	private static final long DEFAULT_START_DELAY = 2000 // ms
+	private static final long DEFAULT_RETRY_DELAY = 30000 // ms
 	
 	HistorianConfig config
 	Base base
@@ -100,15 +101,9 @@ class Historian implements Runnable {
 
 	@Override
 	public void run() {
-		Exceptions.catchToLog(log) {
-			updateDataPointMeta();
-		}
-		base.executor.schedule this, config.metaCycle, TimeUnit.MILLISECONDS
-	}
-
-	private void updateDataPointMeta() {
+		def err=false
 		interfaceManager.interfaces.each { name, itf ->
-			Exceptions.catchToLog(log) {
+			def ex=Exceptions.catchToLog(log) {
 				if (itf instanceof BrowseSupport) {
 					browse itf
 				}
@@ -117,9 +112,13 @@ class Historian implements Runnable {
 					subscribe itf
 				}
 			}
+			if (ex!=null) {
+				err=true
+			}
 		}
+		base.executor.schedule this, err?DEFAULT_RETRY_DELAY:config.metaCycle, TimeUnit.MILLISECONDS
 	}
-	
+
 	private void browse(Interface itf) {
 		log.finer "Historian: Browsing interface: $itf.name"
 		List<DataPoint> itfDps=((BrowseSupport)itf).getAllDataPoints(config.metaCycle-1).collect {	new DataPoint(id: it) }
