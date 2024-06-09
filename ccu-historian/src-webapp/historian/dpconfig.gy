@@ -320,7 +320,7 @@ renderer.content={
 				}
 			}
 		}
-		p "Anzahl Datenpunkt: $dpCount, Gesamtanzahl aller Einträge: ${utils.format(sumTotal)}, " +
+		p "Anzahl Datenpunkte: $dpCount, Gesamtanzahl aller Einträge: ${utils.format(sumTotal)}, " +
 			"Anzahl aller Einträge in den letzten 24 Stunden: ${utils.format(sumLast24h)}"
 	}
 }
