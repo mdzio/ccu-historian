@@ -190,7 +190,7 @@ renderer.end={
 	    if ($('#dp-form > input[name="w"]').length==0) {
 			const vw=Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
 			const vh=Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-			const tw=Math.max(640, vw-64);
+			const tw=Math.max(240, vw-64);
 			const th=Math.max(240, vh-240);
 			$('#dp-form').prepend('<input type="hidden" name="w" value="'+tw+'"/><input type="hidden" name="h" value="'+th+'"/>');
 	    }
