@@ -24,7 +24,7 @@ import mdz.hc.persistence.Storage
 
 class Main {
 
-	public static String version='4.0.1'
+	public static String version='v4.0.1'
 	
 	private static final Logger log=Logger.getLogger(Main.class.name)
 	private static Main main
@@ -55,7 +55,7 @@ class Main {
 			logSystem.config.consoleLevel=config.cmdLineConfig.logLevel
 			logSystem.restart()
 		}
-		log.info 'CCU-Historian V'+version
+		log.info 'CCU-Historian '+version
 		log.info '(C)MDZ (info@ccu-historian.de)'
 		log.fine 'Command line options:'
 		config.cmdLineConfig.logDebug()
