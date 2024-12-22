@@ -36,26 +36,30 @@ start() {
         fi
     fi
 
-    # detect own ip address
-    ipaddress=$(ip -4 route get 1 | head -1 | cut -d' ' -f8 | tr -d '\n')
+	# only update config if the file DISABLE_CONFIG_UPDATE does not exist
+    if [[ ! -e ${ADDON_DIR}/DISABLE_CONFIG_UPDATE ]]; then
     
-    # update webServer.historianAddress
-    if [[ -n "${ipaddress}" ]]; then
-        webaddr=$(sed -n -e "s/webServer\.historianAddress='\([^']*\)'/\1/p" ${ADDON_DIR}/ccu-historian.config)
-        if [[ "${webaddr}" != "${ipaddress}" ]]; then
-            sed -i "s/webServer\.historianAddress=.*/webServer.historianAddress='${ipaddress}'/g" ${ADDON_DIR}/ccu-historian.config
-        fi
-    else
-        echo "ERROR: Detection of own IP address failed"
-        logger -t ${ADDON_ID} -p user.err "Detection of own IP address failed"
-    fi
-
-    # fix devices.device1.address
-    devaddr=$(sed -n -e "s/devices\.device1\.address='\([^']*\)'/\1/p" ${ADDON_DIR}/ccu-historian.config)
-    if [[ "${devaddr}" != '127.0.0.1' ]]; then
-        sed -i "s/devices\.device1\.address=.*/devices.device1.address='127.0.0.1'/g" ${ADDON_DIR}/ccu-historian.config
-    fi
-
+	    # detect own ip address
+	    ipaddress=$(ip -4 route get 1 | head -1 | cut -d' ' -f8 | tr -d '\n')
+	    
+	    # update webServer.historianAddress
+	    if [[ -n "${ipaddress}" ]]; then
+	        webaddr=$(sed -n -e "s/webServer\.historianAddress='\([^']*\)'/\1/p" ${ADDON_DIR}/ccu-historian.config)
+	        if [[ "${webaddr}" != "${ipaddress}" ]]; then
+	            sed -i "s/webServer\.historianAddress=.*/webServer.historianAddress='${ipaddress}'/g" ${ADDON_DIR}/ccu-historian.config
+	        fi
+	    else
+	        echo "ERROR: Detection of own IP address failed"
+	        logger -t ${ADDON_ID} -p user.err "Detection of own IP address failed"
+	    fi
+	
+	    # fix devices.device1.address
+	    devaddr=$(sed -n -e "s/devices\.device1\.address='\([^']*\)'/\1/p" ${ADDON_DIR}/ccu-historian.config)
+	    if [[ "${devaddr}" != '127.0.0.1' ]]; then
+	        sed -i "s/devices\.device1\.address=.*/devices.device1.address='127.0.0.1'/g" ${ADDON_DIR}/ccu-historian.config
+	    fi
+	fi
+	
     # check which java version and heap size to use
     if [[ -x "/opt/java/bin/java" ]]; then
         # CCU3/RaspberryMatic
