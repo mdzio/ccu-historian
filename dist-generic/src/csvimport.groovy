@@ -9,7 +9,7 @@ catchToLog {
 
     // start message
     log "*** CSV-Import v1.0  ***"
-    log "(C)2018 info@ccu-historian.de"
+    log "(C)2018-2025 info@ccu-historian.de"
 
     // define command line options
     CliBuilder cli=new CliBuilder(usage:"csvimport [options] <csv file>")
@@ -134,6 +134,7 @@ catchToLog {
 
 // *** helpers ***
 import groovy.sql.Sql
+import groovy.cli.commons.CliBuilder
 import java.text.SimpleDateFormat
 import org.codehaus.groovy.runtime.StackTraceUtils
 
