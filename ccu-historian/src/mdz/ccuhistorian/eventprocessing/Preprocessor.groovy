@@ -69,7 +69,7 @@ public class Preprocessor extends BasicProducer<Event> implements Processor<Even
 					case Type.AVG_COMPR:
 					case Type.MIN_COMPR:
 					case Type.MAX_COMPR: applyIntervalProcessor(event, type, param); break
-					case Type.SWD_COMPR: applySwingingDoor(event, type, param/2.0); break
+					case Type.SWD_COMPR: applySwingingDoor(event, type, param); break
 				}
 			} else {
 				// forward unmodified
