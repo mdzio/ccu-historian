@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="dist-docker" default="build">
+	<property file="../ccu-historian/build.properties" />
+	<property name="namespace" value="mdzio" />
+	
+	<target name="build">
+		<echo>building docker image ${version}</echo>
+		<exec executable="docker">
+			<arg value="build"/>
+			<arg value=".."/>
+			<arg value="--file"/>
+			<arg value="src/Dockerfile"/>
+			<arg value="--tag"/>
+			<arg value="${namespace}/ccu-historian:${version}"/>
+			<arg value="--tag"/>
+			<arg value="${namespace}/ccu-historian:latest"/>
+			<arg value="--platform"/>
+			<arg value="linux/amd64,linux/arm64/v8,linux/arm/v7,linux/riscv64"/>
+		</exec>
+	</target>
+
+	<target name="prune">
+		<echo>pruning docker build cache</echo>
+		<exec executable="docker">
+			<arg value="builder"/>
+			<arg value="prune"/>
+			<arg value="--force"/>
+		</exec>
+	</target>
+	
+	<target name="publish" depends="build">
+		<echo>publishing docker image ${version}</echo>
+		<exec executable="docker">
+			<arg value="push"/>
+			<arg value="${namespace}/ccu-historian"/>
+			<arg value="--all-tags"/>
+		</exec>
+	</target>
+</project>
