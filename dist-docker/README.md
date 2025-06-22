@@ -1,3 +1,5 @@
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=SF4BR9ZE2JUBS)
+
 # CCU-Historian
 
 Dies ist das offizielle Docker-Image für den [CCU-Historian](https://github.com/mdzio/ccu-historian). Der CCU-Historian erfasst die Betriebsdaten der Zentrale CCU3 des Hausautomations-Systems HomeMatic. 
