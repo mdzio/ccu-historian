@@ -31,7 +31,7 @@ class SwingingDoorProcessor extends BasicProducer<Event> implements Processor<Ev
 	double deviation
 	
 	private static class Slopes {
-		double upper, lower	
+		double upper, lower, direct
 	}
 	
 	private Event first, last
@@ -72,15 +72,22 @@ class SwingingDoorProcessor extends BasicProducer<Event> implements Processor<Ev
 		// check slopes?
 		if (slopes!=null) {
 			Slopes slopesTmp=calculateSlopes(first, e)
-			// open swinging door
-			if (slopesTmp.upper>slopes.upper) {
-				slopes.upper=slopesTmp.upper
+			if (slopesTmp.direct <= slopes.upper && slopesTmp.direct >= slopes.lower) {
+				// Punkt ist innerhalb der Swinging Door, alten Punkt verwerfen
+
+				// Swinging Door weiter schließen
+				if (slopesTmp.upper < slopes.upper) {
+					slopes.upper = slopesTmp.upper
+				}
+				if (slopesTmp.lower > slopes.lower) {
+					slopes.lower = slopesTmp.lower
+				}
+
+				last = e
+				return
 			}
-			if (slopesTmp.lower<slopes.lower) {
-				slopes.lower=slopesTmp.lower
-			} 
-			// overwind?
-			if (slopes.upper>slopes.lower) {
+			else {
+				// Punkt ist außerhalb der Swinging Door
 				// store last
 				produce last
 				// restart
@@ -88,14 +95,13 @@ class SwingingDoorProcessor extends BasicProducer<Event> implements Processor<Ev
 				last=e
 				slopes=calculateSlopes(first, e)
 				return
-			} 
-			// value is within slopes
-			last=e
-			return
+			}
 		}
-		// second event, calculate initial slopes
-		last=e
-		slopes=calculateSlopes(first, e)
+		else {
+			// second event, calculate initial slopes
+			last=e
+			slopes=calculateSlopes(first, e)
+		}
 	}
 	
 	public void close() {
@@ -120,8 +126,9 @@ class SwingingDoorProcessor extends BasicProducer<Event> implements Processor<Ev
 	}
 		
 	private Slopes calculateSlopes(Event begin, Event end) {
-		double upper=((Number)end.pv.value-((Number)begin.pv.value+deviation))/(end.pv.timestamp.time-begin.pv.timestamp.time)
-		double lower=((Number)end.pv.value-((Number)begin.pv.value-deviation))/(end.pv.timestamp.time-begin.pv.timestamp.time)
-		new Slopes(upper: upper, lower: lower)
+		double upper = ((Number)end.pv.value + deviation - (Number)begin.pv.value) / (end.pv.timestamp.time - begin.pv.timestamp.time)
+		double lower = ((Number)end.pv.value - deviation - (Number)begin.pv.value) / (end.pv.timestamp.time - begin.pv.timestamp.time)
+		double direct  = ((Number) end.pv.value - (Number) begin.pv.value) / (end.pv.timestamp.time - begin.pv.timestamp.time)
+		new Slopes(upper: upper, lower: lower, direct: direct)
 	}
 }
