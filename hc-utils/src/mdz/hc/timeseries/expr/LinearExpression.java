@@ -41,7 +41,7 @@ class LinearExpression extends Expression {
 			state.previous = pv;
 			return result;
 		}, state -> {
-			if (state.previous.getTimestamp().before(end)) {
+			if (state.previous != null && state.previous.getTimestamp().before(end)) {
 				return Collections
 						.singleton(new ProcessValue(end, state.previous.getValue(), state.previous.getState()))
 						.iterator();

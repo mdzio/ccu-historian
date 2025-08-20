@@ -131,6 +131,8 @@ class ExpressionTest {
 
 	@Test
 	public void testLinear() {
+		assert from([], HOLD).linear().read(new Date(0), new Date(10000)).collect().empty
+		
 		def tsin=[
 			pv(1000, 10, STATE_QUALITY_QUESTIONABLE),
 			pv(2000, 11),
