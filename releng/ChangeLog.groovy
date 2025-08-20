@@ -90,8 +90,9 @@ try {
 
             Plattformunabhängige Distribution (Windows, Linux, MacOS): **[ccu-historian-${v}-bin.zip](https://github.com/mdzio/ccu-historian/releases/download/${v}/ccu-historian-${v}-bin.zip)**\\
             CCU3/RaspberryMatic/YAHM/piVCCU-Distribution: **[ccu-historian-addon-${v}.tar.gz](https://github.com/mdzio/ccu-historian/releases/download/${v}/ccu-historian-addon-${v}.tar.gz)**\\
-            Synology-Distribution DSM 6: **[ccu-historian-${cv}.spk](https://github.com/mdzio/ccu-historian/releases/download/${v}/ccu-historian-${cv}.spk)**
-            Synology-Distribution DSM 7: **[ccu-historian-dsm7-${cv}-noarch.spk](https://github.com/mdzio/ccu-historian/releases/download/${v}/ccu-historian-dsm7-${cv}-noarch.spk)**
+            Synology-Distribution DSM 6: **[ccu-historian-${cv}.spk](https://github.com/mdzio/ccu-historian/releases/download/${v}/ccu-historian-${cv}.spk)**\\
+            Synology-Distribution DSM 7: **[ccu-historian-dsm7-${cv}-noarch.spk](https://github.com/mdzio/ccu-historian/releases/download/${v}/ccu-historian-dsm7-${cv}-noarch.spk)**\\
+            Docker-Image (linux: amd64, arm64, arm/v7, riscv64): https://hub.docker.com/r/mdzio/ccu-historian
 
             ## Fehlerbehebungen / Verbesserungen
 
