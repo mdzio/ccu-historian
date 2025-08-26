@@ -16,6 +16,12 @@ Mit vielen tausend Installationen erfreut sich der CCU-Historian bei den HomeMat
 
 **[Viele weitere Informationen sind im umfangreichen Handbuch zu finden.](https://github.com/mdzio/ccu-historian/wiki)**
 
+## Interessantes aus der Community
+
+In diesem Abschnitt will ich immer Neues und Interessantes aus der CCU-Historian Community vorstellen. Dieses Mal bin ich auf die batteriebetriebene ePaper-Anzeige **inki** aufmerksam geworden, die als Datenquelle für Trendkurven den CCU-Historian verwendet. Das Projekt liegt ebenfalls auf [GitHub](https://github.com/c0de111/inki) und wird auch auf [Hackaday.io](https://hackaday.io/project/203726-inki-low-power-wireless-epaper-device) vorgestellt.
+
+![Trenddaten auf inki](doc/inki.jpg)
+
 ## Übersicht
 
 Das folgende Diagramm zeigt die einzelnen Komponenten des CCU-Historians:
