@@ -24,7 +24,7 @@ import mdz.hc.persistence.Storage
 
 class Main {
 
-	public static String version='4.1.2'
+	public static String version='4.1.3'
 	
 	private static final Logger log=Logger.getLogger(Main.class.name)
 	private static Main main

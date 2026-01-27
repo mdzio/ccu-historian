@@ -22,12 +22,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="/external-libs/slf4j-1.7.36/slf4j-api-1.7.36.jar" sourcepath="/external-libs/slf4j-1.7.36/slf4j-api-1.7.36-sources.jar"/>
 	<classpathentry kind="lib" path="/external-libs/slf4j-1.7.36/slf4j-jdk14-1.7.36.jar" sourcepath="/external-libs/slf4j-1.7.36/slf4j-jdk14-1.7.36-sources.jar"/>
-	<classpathentry kind="lib" path="/external-libs/groovy-4.0.15/groovy-cli-commons-4.0.15.jar"/>
-	<classpathentry kind="lib" path="/external-libs/groovy-4.0.15/groovy-json-4.0.15.jar"/>
-	<classpathentry kind="lib" path="/external-libs/groovy-4.0.15/groovy-servlet-4.0.15.jar"/>
-	<classpathentry kind="lib" path="/external-libs/groovy-4.0.15/groovy-sql-4.0.15.jar"/>
-	<classpathentry kind="lib" path="/external-libs/groovy-4.0.15/groovy-templates-4.0.15.jar"/>
-	<classpathentry kind="lib" path="/external-libs/groovy-4.0.15/groovy-xml-4.0.15.jar"/>
 	<classpathentry kind="lib" path="/external-libs/jetty-9.4.53/jetty-http-9.4.53.v20231009.jar"/>
 	<classpathentry kind="lib" path="/external-libs/jetty-9.4.53/jetty-io-9.4.53.v20231009.jar"/>
 	<classpathentry kind="lib" path="/external-libs/jetty-9.4.53/jetty-security-9.4.53.v20231009.jar"/>
@@ -38,5 +32,12 @@
 	<classpathentry kind="lib" path="/external-libs/jetty-9.4.53/jetty-webapp-9.4.53.v20231009.jar"/>
 	<classpathentry kind="lib" path="/external-libs/jetty-9.4.53/jetty-xml-9.4.53.v20231009.jar"/>
 	<classpathentry kind="lib" path="/external-libs/jetty-9.4.53/servlet-api-3.1.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-4.0.29/groovy-cli-commons-4.0.29.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-4.0.29/groovy-dateutil-4.0.29.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-4.0.29/groovy-json-4.0.29.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-4.0.29/groovy-servlet-4.0.29.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-4.0.29/groovy-sql-4.0.29.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-4.0.29/groovy-templates-4.0.29.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-4.0.29/groovy-xml-4.0.29.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
