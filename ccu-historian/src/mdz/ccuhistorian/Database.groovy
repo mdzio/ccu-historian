@@ -723,11 +723,12 @@ public class Database implements Storage {
 	public static String formatTimestamp(String pattern, Date timestamp) {
 		Calendar cal=Calendar.instance
 		cal.time=timestamp
-		pattern.replaceAll(~/%([%YMWDhV])/, { List<String> captures ->
+		pattern.replaceAll(~/%([%YMWXDhV])/, { List<String> captures ->
 			switch (captures[1]) {
 				case 'Y': cal[Calendar.YEAR]; break
 				case 'M': ((cal[Calendar.MONTH]-Calendar.JANUARY+1) as String).padLeft(2, '0'); break
 				case 'W': (cal[Calendar.WEEK_OF_YEAR] as String).padLeft(2, '0'); break
+				case 'X': cal.getWeekYear(); break
 				case 'D': (cal[Calendar.DAY_OF_MONTH] as String).padLeft(2, '0'); break
 				case 'h': (cal[Calendar.HOUR_OF_DAY] as String).padLeft(2, '0'); break
 				case 'V': Main.version; break
