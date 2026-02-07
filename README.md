@@ -16,6 +16,18 @@ Mit vielen tausend Installationen erfreut sich der CCU-Historian bei den HomeMat
 
 **[Viele weitere Informationen sind im umfangreichen Handbuch zu finden.](https://github.com/mdzio/ccu-historian/wiki)**
 
+## Historie und Projektstatus
+
+Am 23.01.2011 wurde mit einem [Beitrag im HomeMatic-Forum](https://homematic-forum.de/forum/viewtopic.php?f=38&t=6021#p39548) der CCU-Historian der HomeMatic-Community vorgestellt. Dies ist inzwischen **15 Jahre** her. Seitdem wurde er kontinuierlich gepflegt und weiter entwickelt. Ursprünglich für die CCU1 entwickelt, folgten über die Jahre die Unterstützung für die CCU2, CCU3 und [RaspberryMatic bzw. OpenCCU](https://openccu.de) auf verschiedenen Plattformen.
+
+Zudem wurde stetig die Funktionalität erweitert. Angefangen hat alles mit einer einfachen Trend-Darstellung, dann folgten die Vorverarbeitung von Messwerten, die Meldungsanalyse, eine Skript-Umgebung, umfangreiche Import- und Export-Funktionen und zuletzt die Zeitreihenberechnungen. Immer wurde darauf geachtet, dass die bestehende Datenbank von Version zu Version migriert werden kann. Auch durch die Export-Funktionen sind die gesammelten Zeitreihen nie verloren und können in andere Datenbanken importiert werden.
+
+Der CCU-Historian hat inzwischen eine umfangreiche Code-Basis, sodass das Einbauen neuer Funktionalität immer aufwendiger wird. Am Anfang war die Entwicklungsrichtung nicht abzusehen, sodass damalige Entscheidungen nicht optimal waren. Eine Weiterentwicklung würde eine komplette Neuentwicklung für die Version 5 bedeuten.
+
+**Daher wird auf absehbare Zeit der CCU-Historian funktional nicht erweitert. Er wird weiterhin gepflegt, sodass er mit allen CCU-Zentralen, auch den kommenden auf OpenCCU-Basis, kompatibel bleibt.**
+
+**Die Homematic IP Home Control Unit (HCU) besitzt eine komplett andere Programmierschnittstelle und wird auch zukünftig nicht unterstützt.**
+
 ## Interessantes aus der Community
 
 In diesem Abschnitt will ich immer Neues und Interessantes aus der CCU-Historian Community vorstellen. Dieses Mal bin ich auf die batteriebetriebene ePaper-Anzeige **inki** aufmerksam geworden, die als Datenquelle für Trendkurven den CCU-Historian verwendet. Das Projekt liegt ebenfalls auf [GitHub](https://github.com/c0de111/inki) und wird auch auf [Hackaday.io](https://hackaday.io/project/203726-inki-low-power-wireless-epaper-device) vorgestellt.
