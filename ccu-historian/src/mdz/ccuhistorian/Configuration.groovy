@@ -26,6 +26,7 @@ import groovy.cli.commons.CliBuilder
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.customizers.ImportCustomizer
 import java.util.logging.Level
+import java.util.Calendar
 
 @Log
 class Configuration {
@@ -54,7 +55,7 @@ class Configuration {
 			'finer, finest) before the configuration file is read')
 		cli.recalc('recalculates compressed data points and then shuts down')
 		cli.compact('compacts the database and then shuts down')
-		cli.clean(args:1, argName:'date', 'deletes all time series entries before the specified date (format is DD.MM.YYYY or YYYY-MM-DD) and then shuts down')
+		cli.clean(args:1, argName:'date', 'deletes all time series entries before the specified date (format: DD.MM.YYYY, YYYY-MM-DD, or 6M/12M/24M for X months ago) and then shuts down')
 		cli.runscript(args:1, argName:'file', 'runs an SQL script from file and then shuts down')
 		cli.createscript(args:1, argName:'file', 'dumps the database to a file as SQL scipt and then shuts down')
 		
@@ -86,11 +87,25 @@ class Configuration {
 		if (options.runscript)
 			cmdLineConfig.runScriptFileName=options.runscript
 		if (options.clean) {
-			cmdLineConfig.clean=['yyyy-MM-dd', 'dd.MM.yyyy'].findResult {
-				try { Date.parse(it, options.clean)	} catch(Exception e) { null }
+			def cleanValue=options.clean.trim()
+			// Relative format: 6M, 12M, 24M (number + M = months from today)
+			def monthsMatch=cleanValue==~ /^(\d+)M$/i
+			if (monthsMatch) {
+				int months=(cleanValue.replaceAll(/[^\d]/, '') as int)
+				Calendar cal=Calendar.instance
+				cal.add(Calendar.MONTH, -months)
+				cal[Calendar.HOUR_OF_DAY]=0
+				cal[Calendar.MINUTE]=0
+				cal[Calendar.SECOND]=0
+				cal[Calendar.MILLISECOND]=0
+				cmdLineConfig.clean=cal.time
+			} else {
+				cmdLineConfig.clean=['yyyy-MM-dd', 'dd.MM.yyyy'].findResult {
+					try { Date.parse(it, cleanValue) } catch(Exception e) { null }
+				}
+				if (cmdLineConfig.clean==null)
+					throw new Exception('Invalid command line option -clean')
 			}
-			if (cmdLineConfig.clean==null)
-				throw new Exception('Invalid command line option -clean')
 		}
 	}
 
