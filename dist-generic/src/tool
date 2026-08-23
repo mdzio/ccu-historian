@@ -3,7 +3,7 @@
 
 # check which java version to use
 if [ -x "/opt/java/bin/java" ]; then
-  # we are on CCU3/RaspberryMatic
+  # we are on CCU3/OpenCCU
   JAVA_BIN=/opt/java/bin/java
 elif which java > /dev/null; then
   # java is on the search path 

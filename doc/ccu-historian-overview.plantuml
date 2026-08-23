@@ -2,7 +2,7 @@
 !theme silver
 left to right direction
 
-rectangle "CCU1/2/3\nRaspberryMatic\npiVCCU/YAHM\n(bis zu 10 Zentralen)" {
+rectangle "CCU1/2/3\nOpenCCU\npiVCCU/YAHM\n(bis zu 10 Zentralen)" {
   rectangle "Schnittstellen" as ccuitf #line.dashed {
     rectangle "RegaHss" as regahss
     rectangle "BidCos-RF" as bidcosrf

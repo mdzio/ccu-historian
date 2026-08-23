@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" height="875px" preserveAspectRatio="none" style="width:1296px;height:875px;" version="1.1" viewBox="0 0 1296 875" width="1296.875px" zoomAndPan="magnify"><defs><linearGradient id="gsrgmt9c7z6h70" x1="50%" x2="50%" y1="0%" y2="100%"><stop offset="0%" stop-color="#EEEEEE"/><stop offset="100%" stop-color="#BEBEBE"/></linearGradient></defs><g><!--MD5=[299658d29366e6ed68acf4b9767b164d]
-cluster CCU1/2/3\nRaspberryMatic\npiVCCU/YAHM\n(bis zu 10 Zentralen)--><g id="cluster_CCU1/2/3\nRaspberryMatic\npiVCCU/YAHM\n(bis zu 10 Zentralen)"><rect fill="url(#gsrgmt9c7z6h70)" height="688.5417" rx="7.8125" ry="7.8125" style="stroke:#F1F1F1;stroke-width:2.0833333333333335;" width="207.2917" x="17.7083" y="43.75"/><text fill="#336699" font-family="&quot;Verdana&quot;" font-size="12.5" font-weight="bold" lengthAdjust="spacing" textLength="61.4583" x="90.625" y="65.7694">CCU1/2/3</text><text fill="#336699" font-family="&quot;Verdana&quot;" font-size="12.5" font-weight="bold" lengthAdjust="spacing" textLength="119.7917" x="61.4583" y="80.3202">RaspberryMatic</text><text fill="#336699" font-family="&quot;Verdana&quot;" font-size="12.5" font-weight="bold" lengthAdjust="spacing" textLength="95.8333" x="73.4375" y="94.871">piVCCU/YAHM</text><text fill="#336699" font-family="&quot;Verdana&quot;" font-size="12.5" font-weight="bold" lengthAdjust="spacing" textLength="156.25" x="43.2292" y="109.4218">(bis zu 10 Zentralen)</text></g><!--MD5=[3108c5d473bcd81446df1be59e66e87f]
+cluster CCU1/2/3\nOpenCCU\npiVCCU/YAHM\n(bis zu 10 Zentralen)--><g id="cluster_CCU1/2/3\nOpenCCU\npiVCCU/YAHM\n(bis zu 10 Zentralen)"><rect fill="url(#gsrgmt9c7z6h70)" height="688.5417" rx="7.8125" ry="7.8125" style="stroke:#F1F1F1;stroke-width:2.0833333333333335;" width="207.2917" x="17.7083" y="43.75"/><text fill="#336699" font-family="&quot;Verdana&quot;" font-size="12.5" font-weight="bold" lengthAdjust="spacing" textLength="61.4583" x="90.625" y="65.7694">CCU1/2/3</text><text fill="#336699" font-family="&quot;Verdana&quot;" font-size="12.5" font-weight="bold" lengthAdjust="spacing" textLength="119.7917" x="61.4583" y="80.3202">OpenCCU</text><text fill="#336699" font-family="&quot;Verdana&quot;" font-size="12.5" font-weight="bold" lengthAdjust="spacing" textLength="95.8333" x="73.4375" y="94.871">piVCCU/YAHM</text><text fill="#336699" font-family="&quot;Verdana&quot;" font-size="12.5" font-weight="bold" lengthAdjust="spacing" textLength="156.25" x="43.2292" y="109.4218">(bis zu 10 Zentralen)</text></g><!--MD5=[3108c5d473bcd81446df1be59e66e87f]
 cluster ccuitf--><g id="cluster_ccuitf"><rect fill="url(#gsrgmt9c7z6h70)" height="561.4583" rx="7.8125" ry="7.8125" style="stroke:#F1F1F1;stroke-width:1.0416666666666667;stroke-dasharray:7.0,7.0;" width="157.2917" x="42.7083" y="145.8333"/><text fill="#336699" font-family="&quot;Verdana&quot;" font-size="12.5" font-weight="bold" lengthAdjust="spacing" textLength="107.2917" x="67.7083" y="167.8528">Schnittstellen</text></g><!--MD5=[18ee56f209bb6d46451459bbc73e3377]
 cluster CCU-Historian--><g id="cluster_CCU-Historian"><rect fill="url(#gsrgmt9c7z6h70)" height="758.3333" rx="7.8125" ry="7.8125" style="stroke:#F1F1F1;stroke-width:2.0833333333333335;" width="816.6667" x="250" y="105.2083"/><text fill="#336699" font-family="&quot;Verdana&quot;" font-size="12.5" font-weight="bold" lengthAdjust="spacing" textLength="104.1667" x="606.25" y="127.2278">CCU-Historian</text></g><!--MD5=[d7e2ef49d16c5507541bd87de5d7abca]
 cluster Schnittstellen--><g id="cluster_Schnittstellen"><rect fill="url(#gsrgmt9c7z6h70)" height="295.8333" rx="7.8125" ry="7.8125" style="stroke:#F1F1F1;stroke-width:1.0416666666666667;stroke-dasharray:7.0,7.0;" width="140.625" x="275" y="257.2917"/><text fill="#336699" font-family="&quot;Verdana&quot;" font-size="12.5" font-weight="bold" lengthAdjust="spacing" textLength="107.2917" x="291.6667" y="279.3111">Schnittstellen</text></g><!--MD5=[41ce6d77439ddc42127a452471eb0a2f]
@@ -75,7 +75,7 @@ link jsonrpc to itfjsonrpc--><g id="link_jsonrpc_itfjsonrpc"><path d="M1002.6313
 !theme silver
 left to right direction
 
-rectangle "CCU1/2/3\nRaspberryMatic\npiVCCU/YAHM\n(bis zu 10 Zentralen)" {
+rectangle "CCU1/2/3\nOpenCCU\npiVCCU/YAHM\n(bis zu 10 Zentralen)" {
   rectangle "Schnittstellen" as ccuitf #line.dashed {
     rectangle "RegaHss" as regahss
     rectangle "BidCos-RF" as bidcosrf
@@ -649,7 +649,7 @@ skinparam stack {
 
 left to right direction
 
-rectangle "CCU1/2/3\nRaspberryMatic\npiVCCU/YAHM\n(bis zu 10 Zentralen)" {
+rectangle "CCU1/2/3\nOpenCCU\npiVCCU/YAHM\n(bis zu 10 Zentralen)" {
   rectangle "Schnittstellen" as ccuitf #line.dashed {
     rectangle "RegaHss" as regahss
     rectangle "BidCos-RF" as bidcosrf
