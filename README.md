@@ -80,7 +80,7 @@ Dieses Projekt steht unter der [GNU General Public License V3](LICENSE.txt) mit 
 
 Bei einer kommerziellen Verwendung des CCU-Historians muss also auf die Erweiterung H2-Highcharts verzichtet werden, oder eine entsprechende Lizenz erworben werden.
 
-Die Lizenzen von allen Abhängigkeiten sind im Ordner [dist-generic/src/third-party-licenses](https://github.com/mdzio/ccu-historian/tree/master/dist-generic/src/third-party-licenses) zu finden.
+Die Lizenzen von allen Abhängigkeiten sind im Ordner [dist-generic/src/third-party-licenses](https://github.com/mdzio/ccu-historian/tree/master/dist-generic/src/third-party-licenses) zu finden. Abgeleitete Werke dürfen nicht unter einer permissiveren Lizenz (z.B. MIT) veröffentlicht werden. Insbesondere darf der Quelltext nicht als Eingabe (z.B. Prompt, Trainingsdaten) für eine KI (z.B. LLM) verwendet werden, wenn die Ziellizenz nicht mit der GPLv3 kompatibel ist.
 
 ## Autoren
 
