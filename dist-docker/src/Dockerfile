@@ -1,6 +1,8 @@
-# The latest usable version of the base image Eclipse Temurin (Java Runtime Environment) is 17.
-# The following conditions must be met: Support for arm32v7 and LTS (Long-Term Support).
-FROM eclipse-temurin:17-jre
+# Base image Eclipse Temurin (Java Runtime Environment), pinned to the Ubuntu Noble
+# (24.04 LTS) variant. Requirements: LTS support, arm32v7 and riscv64. The unsuffixed
+# tag switches the Ubuntu base with every LTS release and loses riscv64 since
+# Ubuntu Resolute (26.04, requires the not yet existing RVA23 hardware profile).
+FROM eclipse-temurin:17-jre-noble
 
 ENV TZ=Europe/Berlin
 ENV CONFIG_JAVA_OPTS="-Duser.timezone=Europe/Berlin -Duser.language=de -Duser.country=DE"
