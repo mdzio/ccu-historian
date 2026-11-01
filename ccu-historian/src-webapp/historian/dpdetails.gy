@@ -19,11 +19,15 @@ import mdz.ccuhistorian.webapp.TrendParameters
 import mdz.hc.DataPoint
 import groovy.transform.Field
 import groovy.json.JsonOutput
+import java.util.logging.Logger
 import static mdz.ccuhistorian.webapp.TextFormat.*
 import static mdz.ccuhistorian.webapp.WebUtilities.*
 
 @Field
 private static final int NUM_STRING_ENTRIES = 50
+
+@Field
+private final static Logger log = Logger.getLogger('mdz.ccuhistorian.webapp.DataPointDetails')
 
 // setup page
 def renderer=new mdz.ccuhistorian.webapp.PageRenderer(servlet: this)
@@ -145,9 +149,15 @@ renderer.content={
 								}
 								tr { 
 									th 'Anzahl Einträge'
-									def total=database.getCount(dp, null, null)
-									def last24h=database.getCount(dp, new Date(System.currentTimeMillis()-24*3600*1000), null)
-									td  "$total gesamt, aktuell $last24h pro Tag"
+									def total, last24h
+									if (utils.catchToLog(log) {
+										total=database.getCount(dp, null, null)
+										last24h=database.getCount(dp, new Date(System.currentTimeMillis()-24*3600*1000), null)
+									}) {
+										td class:'text-danger', 'Fehler: Datenbankzugriff ist fehlgeschlagen.'
+									} else {
+										td  "$total gesamt, aktuell $last24h pro Tag"
+									}
 								}
 							}
 						}

@@ -70,6 +70,7 @@ public class Database implements Storage {
 				log.info 'Connecting to database'
 				db=Sql.newInstance(getUrl(config), config.user, config.password, 'org.h2.Driver')
 				prepareDatabase()
+				repairMissingDataPointTables()
 				if (config.webEnable) {
 					log.info 'Starting database web server'
 					def args=[
@@ -362,25 +363,32 @@ public class Database implements Storage {
 		connect()
 		normalizeDataPoint(dp)
 		dp.historyTableName=getDataPointTableName(dp)
-		createDataPointTable(dp)
-		createDataPointEntry(dp)
+		// table first, then entry: H2 commits DDL immediately, so a failure can
+		// only leave an unused table behind, never an entry without a table
+		db.withTransaction {
+			createDataPointTable(dp)
+			createDataPointEntry(dp)
+		}
 	}
 
 	@Override
 	public synchronized void updateDataPoint(DataPoint dp) {
 		connect()
 		normalizeDataPoint(dp)
-		if (isStringTable(dp.historyTableName)!=dp.historyString) {
-			log.fine "Database: Data point $dp.id has changed value type"
-			dp.historyTableName=getDataPointTableName(dp)
-			createDataPointTable(dp)
-		}
 		log.fine "Database: Updating data point description: $dp"
 
 		// create JSON for custom attribute
 		String custom=JsonOutput.toJson(dp.attributes.custom)
 
-		if (db.executeUpdate("""UPDATE DATA_POINTS SET
+		db.withTransaction {
+			// table first, then entry: H2 commits DDL immediately, so a failure can
+			// only leave an unused table behind, never an entry without a table
+			if (isStringTable(dp.historyTableName)!=dp.historyString) {
+				log.fine "Database: Data point $dp.id has changed value type"
+				dp.historyTableName=getDataPointTableName(dp)
+				createDataPointTable(dp)
+			}
+			if (db.executeUpdate("""UPDATE DATA_POINTS SET
 			TABLE_NAME=$dp.historyTableName, STATE=$dp.managementFlags,
 			
 			INTERFACE=$dp.id.interfaceId, ADDRESS=$dp.id.address,
@@ -399,7 +407,8 @@ public class Database implements Storage {
 			TYPE=$dp.attributes.type, DEFAULT_VALUE=$dp.attributes.defaultValue
 							
 			WHERE DP_ID=$dp.idx""")!=1)
-			throw new Exception("Update of data point ${dp.id} failed")
+				throw new Exception("Update of data point ${dp.id} failed")
+		}
 	}
 
 	@Override
@@ -532,11 +541,10 @@ public class Database implements Storage {
 		if (dataPointDb) {
 			// changed the data type?
 			if (isStringTable(dataPointDb.historyTableName)!=valueIsString) {
-				// update table name
-				dataPointDb.historyTableName=getDataPointTableName(dataPointDb)
+				// set type flag and update entry; updateDataPoint() creates the
+				// new table before the entry refers to it
+				dataPointDb.historyString=valueIsString
 				updateDataPoint(dataPointDb)
-				// if necessary, create a table
-				createDataPointTable(dataPointDb)
 			}
 			dataPoint=dataPointDb
 		} else {
@@ -656,6 +664,20 @@ public class Database implements Storage {
 					type:row.TYPE, defaultValue:row.DEFAULT_VALUE
 				]
 				)
+	}
+
+	// recreates history tables that are referenced by DATA_POINTS, but do not exist
+	private void repairMissingDataPointTables() {
+		def missing=db.rows('''SELECT D.DP_ID, D.TABLE_NAME FROM DATA_POINTS D
+			WHERE D.TABLE_NAME IS NOT NULL AND NOT EXISTS (
+				SELECT 1 FROM INFORMATION_SCHEMA.TABLES T
+				WHERE T.TABLE_SCHEMA='PUBLIC' AND T.TABLE_NAME=D.TABLE_NAME)''')
+		missing.each { row ->
+			log.severe "Database: History table $row.TABLE_NAME of data point $row.DP_ID does not exist and is recreated"
+			DataPoint dp=new DataPoint(historyTableName:row.TABLE_NAME)
+			dp.historyString=isStringTable(row.TABLE_NAME)
+			createDataPointTable(dp)
+		}
 	}
 
 	private void createDataPointTable(DataPoint dp) {
