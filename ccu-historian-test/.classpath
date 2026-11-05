@@ -13,8 +13,8 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="/external-libs/jetty-9.4.58/servlet-api-3.1.jar"/>
-	<classpathentry kind="lib" path="/external-libs/groovy-4.0.29/groovy-json-4.0.29.jar"/>
-	<classpathentry kind="lib" path="/external-libs/groovy-4.0.29/groovy-xml-4.0.29.jar"/>
-	<classpathentry kind="lib" path="/external-libs/groovy-4.0.29/groovy-sql-4.0.29.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-4.0.33/groovy-json-4.0.33.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-4.0.33/groovy-xml-4.0.33.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-4.0.33/groovy-sql-4.0.33.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

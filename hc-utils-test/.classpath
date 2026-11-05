@@ -12,9 +12,9 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/external-libs/cron-utils-9.2.0/cron-utils-9.2.0.jar" sourcepath="/external-libs/cron-utils-9.2.0/cron-utils-9.2.0-sources.jar">
+	<classpathentry kind="lib" path="/external-libs/cron-utils-9.2.1/cron-utils-9.2.1.jar" sourcepath="/external-libs/cron-utils-9.2.1/cron-utils-9.2.1-sources.jar">
 		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/external-libs/cron-utils-9.2.0/cron-utils-9.2.0-javadoc.jar!/"/>
+			<attribute name="javadoc_location" value="jar:platform:/resource/external-libs/cron-utils-9.2.1/cron-utils-9.2.1-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="output" path="bin"/>

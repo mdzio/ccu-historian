@@ -5,19 +5,19 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/hc-utils"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/mdz-utils"/>
 	<classpathentry kind="lib" path="/external-libs/jfreechart-1.0.19/lib/jfreechart-1.0.19.jar"/>
-	<classpathentry kind="lib" path="/external-libs/jcommon-1.0.23/jcommon-1.0.23.jar"/>
+	<classpathentry kind="lib" path="/external-libs/jcommon-1.0.24/jcommon-1.0.24.jar"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
-	<classpathentry kind="lib" path="/external-libs/commons-cli-1.4/commons-cli-1.4.jar"/>
+	<classpathentry kind="lib" path="/external-libs/commons-cli-1.11.0/commons-cli-1.11.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/external-libs/jfreesvg-3.4.2/jfreesvg-3.4.2.jar"/>
+	<classpathentry kind="lib" path="/external-libs/jfreesvg-3.4.4/jfreesvg-3.4.4.jar"/>
 	<classpathentry kind="lib" path="/external-libs/h2-2.1.214/h2-2.1.214.jar"/>
-	<classpathentry kind="lib" path="/external-libs/cron-utils-9.2.0/cron-utils-9.2.0.jar" sourcepath="/external-libs/cron-utils-9.2.0/cron-utils-9.2.0-sources.jar">
+	<classpathentry kind="lib" path="/external-libs/cron-utils-9.2.1/cron-utils-9.2.1.jar" sourcepath="/external-libs/cron-utils-9.2.1/cron-utils-9.2.1-sources.jar">
 		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/external-libs/cron-utils-9.2.0/cron-utils-9.2.0-javadoc.jar!/"/>
+			<attribute name="javadoc_location" value="jar:platform:/resource/external-libs/cron-utils-9.2.1/cron-utils-9.2.1-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="/external-libs/slf4j-1.7.36/slf4j-api-1.7.36.jar" sourcepath="/external-libs/slf4j-1.7.36/slf4j-api-1.7.36-sources.jar"/>
@@ -32,12 +32,12 @@
 	<classpathentry kind="lib" path="/external-libs/jetty-9.4.58/jetty-webapp-9.4.58.v20250814.jar"/>
 	<classpathentry kind="lib" path="/external-libs/jetty-9.4.58/jetty-xml-9.4.58.v20250814.jar"/>
 	<classpathentry kind="lib" path="/external-libs/jetty-9.4.58/servlet-api-3.1.jar"/>
-	<classpathentry kind="lib" path="/external-libs/groovy-4.0.29/groovy-cli-commons-4.0.29.jar"/>
-	<classpathentry kind="lib" path="/external-libs/groovy-4.0.29/groovy-dateutil-4.0.29.jar"/>
-	<classpathentry kind="lib" path="/external-libs/groovy-4.0.29/groovy-json-4.0.29.jar"/>
-	<classpathentry kind="lib" path="/external-libs/groovy-4.0.29/groovy-servlet-4.0.29.jar"/>
-	<classpathentry kind="lib" path="/external-libs/groovy-4.0.29/groovy-sql-4.0.29.jar"/>
-	<classpathentry kind="lib" path="/external-libs/groovy-4.0.29/groovy-templates-4.0.29.jar"/>
-	<classpathentry kind="lib" path="/external-libs/groovy-4.0.29/groovy-xml-4.0.29.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-4.0.33/groovy-cli-commons-4.0.33.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-4.0.33/groovy-dateutil-4.0.33.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-4.0.33/groovy-json-4.0.33.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-4.0.33/groovy-servlet-4.0.33.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-4.0.33/groovy-sql-4.0.33.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-4.0.33/groovy-templates-4.0.33.jar"/>
+	<classpathentry kind="lib" path="/external-libs/groovy-4.0.33/groovy-xml-4.0.33.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
